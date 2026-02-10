@@ -17,7 +17,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   oppositeName,
 }) => {
   const form = useFormContext();
-  const { setContent } = useModal();
+  const setContent = useModal((s) => s.setContent);
   const { data: metadata, isLoading } = useMetadata(types);
 
   const { control } = form;

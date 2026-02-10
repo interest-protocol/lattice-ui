@@ -15,8 +15,8 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
   oppositeName,
   name: fieldName,
 }) => {
-  const { balances } = useAppState();
-  const { handleClose } = useModal();
+  const balances = useAppState((s) => s.balances);
+  const handleClose = useModal((s) => s.handleClose);
   const { control, setValue } = useFormContext();
   const [search, setSearch] = useState('');
 

@@ -86,9 +86,6 @@ importers:
       swr:
         specifier: ^2.3.2
         version: 2.3.4(react@18.3.1)
-      unikey:
-        specifier: ^1.1.0
-        version: 1.1.0
       usehooks-ts:
         specifier: ^3.1.1
         version: 3.1.1(react@18.3.1)
@@ -3502,9 +3499,6 @@ packages:
   unicorn-magic@0.1.0:
     resolution: {integrity: sha512-lRfVq8fE8gz6QMBuDM6a+LO3IAzTi05H6gCVaUpir2E1Rwpo4ZUog45KpNXKC/Mn3Yb9UDuHumeFTo9iV/D9FQ==}
     engines: {node: '>=18'}
-
-  unikey@1.1.0:
-    resolution: {integrity: sha512-0tHzBzhHrqDmW0ArsYW7QpH5HptvdU+3HsL2wXRDGNxmePiV6KZxXc2FgBgjiOE+UQolTQj/XNb7oWkr4gnZ5g==}
 
   unstorage@1.17.4:
     resolution: {integrity: sha512-fHK0yNg38tBiJKp/Vgsq4j0JEsCmgqH58HAn707S7zGkArbZsVr/CwINoi+nh3h98BRCwKvx1K3Xg9u3VV83sw==}
@@ -9071,8 +9065,6 @@ snapshots:
   undici-types@7.20.0: {}
 
   unicorn-magic@0.1.0: {}
-
-  unikey@1.1.0: {}
 
   unstorage@1.17.4(idb-keyval@6.2.2):
     dependencies:

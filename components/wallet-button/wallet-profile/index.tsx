@@ -9,6 +9,8 @@ import { ChevronDownSVG } from '@/components/svg';
 import useClickOutsideListenerRef from '@/hooks/use-click-outside-listener-ref';
 import { useModal } from '@/hooks/use-modal';
 
+import { useShallow } from 'zustand/react/shallow';
+
 import WalletProfileDropdown from './wallet-profile-dropdown';
 import WalletProfileModal from './wallet-profile-modal';
 
@@ -17,7 +19,9 @@ const formatDisplay = (address: string) =>
 
 const WalletProfile: FC = () => {
   const { user, logout } = usePrivy();
-  const { setContent, handleClose } = useModal();
+  const { setContent, handleClose } = useModal(
+    useShallow((s) => ({ setContent: s.setContent, handleClose: s.handleClose }))
+  );
   const [isOpen, setOpen] = useState(false);
   const menuRef = useClickOutsideListenerRef<HTMLDivElement>(() =>
     setOpen(false)

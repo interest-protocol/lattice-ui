@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const useEventListener = (
   eventType: keyof WindowEventMap,
@@ -6,12 +6,17 @@ const useEventListener = (
   runOnInit = false,
   target?: Element
 ): void => {
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only effect
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: stable ref pattern
   useEffect(() => {
-    runOnInit && callback();
-    (target ?? window).addEventListener(eventType, callback);
-    return () => (target ?? window).removeEventListener(eventType, callback);
-  }, []);
+    const handler = (event?: Event) => callbackRef.current(event);
+    if (runOnInit) handler();
+    const el = target ?? window;
+    el.addEventListener(eventType, handler as EventListener);
+    return () => el.removeEventListener(eventType, handler as EventListener);
+  }, [eventType, target, runOnInit]);
 };
 
 export default useEventListener;

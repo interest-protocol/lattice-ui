@@ -1,7 +1,6 @@
 import { Button, Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import unikey from 'unikey';
 
 import {
   PizzaPart25PercentSVG,
@@ -22,7 +21,7 @@ const PIZZA_ICONS: Record<0.25 | 0.5 | 1, FC<SVGProps>> = {
 };
 
 const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
-  const { balances } = useAppState();
+  const balances = useAppState((s) => s.balances);
   const { control, setValue } = useFormContext();
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
@@ -39,7 +38,7 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
             all="unset"
             gap="0.5rem"
             display="flex"
-            key={unikey()}
+            key={factor}
             cursor="pointer"
             nHover={{ color: '#A78BFA' }}
             onClick={() => {

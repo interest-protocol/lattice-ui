@@ -1,12 +1,19 @@
 import { Div, P, Span } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
-import type { FC } from 'react';
+import { type FC, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import useEventListener from '@/hooks/use-event-listener';
 import { useModal } from '@/hooks/use-modal';
 import { useSafeHeight } from '@/hooks/use-safe-height';
 
 const Motion = motion.create(Div);
+
+const OVERLAY_EXIT = { opacity: 0 };
+const OVERLAY_ANIMATE = { opacity: [0, 1] };
+const OVERLAY_TRANSITION = { duration: 0.5 };
+const CONTAINER_TRANSITION = { duration: 0.5, delay: 0.2 };
+const CONTAINER_ANIMATE = { y: ['200vh', '0vh'], scale: [0.5, 1] };
 
 const ModalProvider: FC = () => {
   const {
@@ -17,15 +24,25 @@ const ModalProvider: FC = () => {
     handleClose,
     overlayProps,
     containerProps,
-  } = useModal();
+  } = useModal(
+    useShallow((s) => ({
+      title: s.title,
+      content: s.content,
+      onClose: s.onClose,
+      allowClose: s.allowClose,
+      handleClose: s.handleClose,
+      overlayProps: s.overlayProps,
+      containerProps: s.containerProps,
+    }))
+  );
   const safeHeight = useSafeHeight();
 
-  const onHandleClose = () => {
+  const onHandleClose = useCallback(() => {
     if (!allowClose) return;
 
     handleClose();
     onClose?.();
-  };
+  }, [allowClose, handleClose, onClose]);
 
   useEventListener(
     'keydown',
@@ -48,12 +65,12 @@ const ModalProvider: FC = () => {
           display="flex"
           position="fixed"
           height={safeHeight}
-          exit={{ opacity: 0 }}
+          exit={OVERLAY_EXIT}
           justifyContent="center"
           onClick={onHandleClose}
           backdropFilter="blur(10px)"
-          animate={{ opacity: [0, 1] }}
-          transition={{ duration: 0.5 }}
+          animate={OVERLAY_ANIMATE}
+          transition={OVERLAY_TRANSITION}
           pt={`calc(100vh - ${safeHeight}px)`}
           alignItems={['flex-end', 'flex-end', 'center']}
           {...overlayProps}
@@ -61,8 +78,8 @@ const ModalProvider: FC = () => {
           <Motion
             display="flex"
             maxWidth={['100vw', '100vw', '95vw']}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            animate={{ y: ['200vh', '0vh'], scale: [0.5, 1] }}
+            transition={CONTAINER_TRANSITION}
+            animate={CONTAINER_ANIMATE}
             maxHeight={[safeHeight * 0.9, safeHeight * 0.9, '90vh']}
             {...containerProps}
             onClick={(e) => {
