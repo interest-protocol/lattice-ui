@@ -1,10 +1,10 @@
 import { SuiClient } from '@mysten/sui/client';
 import { messageWithIntent } from '@mysten/sui/cryptography';
+import { toSerializedSignature } from '@mysten/sui/cryptography';
 import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
-import { toSerializedSignature } from '@mysten/sui/cryptography';
 import { PrivyClient } from '@privy-io/node';
-import { NextApiHandler } from 'next';
+import type { NextApiHandler } from 'next';
 
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
 const appSecret = process.env.PRIVY_APP_SECRET ?? '';

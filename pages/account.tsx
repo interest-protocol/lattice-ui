@@ -1,4 +1,4 @@
-import { NextPage } from 'next';
+import type { NextPage } from 'next';
 
 import { SEO } from '@/components';
 import Account from '@/views/account';

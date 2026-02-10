@@ -9,7 +9,7 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
-import { NextApiHandler } from 'next';
+import type { NextApiHandler } from 'next';
 
 import { SOLANA_RPC_URL } from '@/constants';
 

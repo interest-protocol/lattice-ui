@@ -1,5 +1,5 @@
 import { PrivyClient } from '@privy-io/node';
-import { NextApiHandler } from 'next';
+import type { NextApiHandler } from 'next';
 
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
 const appSecret = process.env.PRIVY_APP_SECRET ?? '';
