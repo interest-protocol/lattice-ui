@@ -12,9 +12,11 @@ const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const value = useWatch({ control, name: `${name}.value` }) as string;
   const type = useWatch({ control, name: `${name}.type` }) as string;
 
+  const price = getPrice(type);
+
   return (
     <span className="font-mono">
-      {formatDollars(getPrice(type) * Number(value), 2)}
+      {price != null ? formatDollars(price * Number(value), 2) : '—'}
     </span>
   );
 };

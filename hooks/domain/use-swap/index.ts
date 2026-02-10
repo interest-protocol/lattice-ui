@@ -163,16 +163,18 @@ export const useSwap = () => {
         const inputPriceUsd = getPriceRef.current(fromType);
         const outputPriceUsd = getPriceRef.current(toType);
 
-        let minDestinationAmount = '1';
-        if (inputPriceUsd > 0 && outputPriceUsd > 0) {
-          const trade = Trade.fromOraclePrices({
-            inputAmount: CurrencyAmount.fromRawAmount(inputToken, fromAmount),
-            outputToken,
-            inputPriceUsd,
-            outputPriceUsd,
-          });
-          minDestinationAmount = trade.minimumReceived.raw.toString();
-        }
+        invariant(
+          inputPriceUsd && outputPriceUsd,
+          'Token prices unavailable — cannot calculate safe minimum amount'
+        );
+
+        const trade = Trade.fromOraclePrices({
+          inputAmount: CurrencyAmount.fromRawAmount(inputToken, fromAmount),
+          outputToken,
+          inputPriceUsd,
+          outputPriceUsd,
+        });
+        const minDestinationAmount = trade.minimumReceived.raw.toString();
 
         await createSwapRequest({
           userId: user.id,

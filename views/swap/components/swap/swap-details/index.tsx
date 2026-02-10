@@ -9,7 +9,8 @@ const SwapDetails: FC = () => {
 
   const suiPrice = getPrice(Token.SUI.type);
   const solPrice = getPrice(SOL_TYPE);
-  const hasRates = suiPrice > 0 && solPrice > 0;
+  const hasRates =
+    suiPrice != null && solPrice != null && suiPrice > 0 && solPrice > 0;
   const rate = hasRates ? (suiPrice / solPrice).toFixed(6) : '...';
 
   return (

@@ -41,7 +41,7 @@ const Footer: FC = () => {
                   <Skeleton width="2.5rem" height="0.75rem" />
                 ) : (
                   <span className="text-xs text-text-muted">
-                    {formatDollars(price, 2)}
+                    {price != null ? formatDollars(price, 2) : '—'}
                   </span>
                 )}
               </div>

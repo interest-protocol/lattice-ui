@@ -5,8 +5,8 @@ import { SOL_TYPE } from '@/constants/coins';
 import { fetchCoinPrices } from '@/lib/external/client';
 
 interface TokenPrices {
-  [SUI_TYPE_ARG]: number;
-  [SOL_TYPE]: number;
+  [SUI_TYPE_ARG]: number | undefined;
+  [SOL_TYPE]: number | undefined;
 }
 
 const useTokenPrices = () => {
@@ -19,8 +19,8 @@ const useTokenPrices = () => {
       );
 
       return {
-        [SUI_TYPE_ARG]: byNormalized.sui ?? 0,
-        [SOL_TYPE]: byNormalized.sol ?? 0,
+        [SUI_TYPE_ARG]: byNormalized.sui || undefined,
+        [SOL_TYPE]: byNormalized.sol || undefined,
       } as TokenPrices;
     },
     refetchInterval: 60_000,
@@ -28,8 +28,8 @@ const useTokenPrices = () => {
     staleTime: 5_000,
   });
 
-  const getPrice = (tokenType: string): number =>
-    data?.[tokenType as keyof TokenPrices] ?? 0;
+  const getPrice = (tokenType: string): number | undefined =>
+    data?.[tokenType as keyof TokenPrices];
 
   return { prices: data, getPrice, isLoading, error };
 };
