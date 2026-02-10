@@ -9,7 +9,7 @@ const LoadingWallet: FC = () => (
     all="unset"
     gap="0.5rem"
     display="flex"
-    bg="#99EFE41A"
+    bg="#A78BFA1A"
     color="#F1F1F1"
     cursor="pointer"
     alignItems="center"

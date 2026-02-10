@@ -88,7 +88,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
               borderRadius="1rem"
               border="1px solid #FFFFFF1A"
               gridTemplateColumns="2fr 1fr 1fr"
-              nHover={{ borderColor: '#99EFE44D', bg: '#99EFE433' }}
+              nHover={{ borderColor: '#A78BFA4D', bg: '#A78BFA33' }}
               onClick={() => {
                 redirecting &&
                   push(

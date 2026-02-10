@@ -1,26 +1,22 @@
-import '@mysten/dapp-kit/dist/index.css';
+'use client';
 
-import { useCurrentAccount, useCurrentWallet } from '@mysten/dapp-kit';
+import { usePrivy } from '@privy-io/react-auth';
 import { Button, ButtonProps } from '@stylin.js/elements';
 import { FC } from 'react';
 
-import { useConnectWalletModal } from '../connect-wallet/connect-wallet.hook';
-
 const WalletGuardButton: FC<ButtonProps> = ({ children, ...props }) => {
-  const currentAccount = useCurrentAccount();
-  const { connectionStatus } = useCurrentWallet();
-  const connectWalletModal = useConnectWalletModal();
+  const { ready, authenticated, login } = usePrivy();
 
-  if (connectionStatus === 'connecting')
+  if (!ready)
     return (
       <Button {...props} onClick={undefined} disabled>
         Connecting...
       </Button>
     );
 
-  if (!currentAccount)
+  if (!authenticated)
     return (
-      <Button {...props} onClick={connectWalletModal}>
+      <Button {...props} onClick={login}>
         Connect Wallet
       </Button>
     );

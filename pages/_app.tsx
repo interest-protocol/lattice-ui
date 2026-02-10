@@ -13,12 +13,13 @@ import ModalProvider from '@/components/modal-provider';
 import { TOAST_DURATION } from '@/constants/toast';
 import { GlobalStyles } from '@/styles';
 
-const Web3Provider = dynamic(import('@/components/web3-provider'), {
-  ssr: false,
-});
+const PrivyProviderWrapper = dynamic(
+  import('@/components/privy-provider').then((m) => m.default),
+  { ssr: false }
+);
 
 const App = ({ Component, pageProps }: AppProps) => (
-  <Web3Provider>
+  <PrivyProviderWrapper>
     <Global styles={GlobalStyles} />
     <ModalProvider />
     <Toaster
@@ -42,7 +43,7 @@ const App = ({ Component, pageProps }: AppProps) => (
       <Component {...pageProps} />
       <Analytics />
     </SkeletonTheme>
-  </Web3Provider>
+  </PrivyProviderWrapper>
 );
 
 export default App;

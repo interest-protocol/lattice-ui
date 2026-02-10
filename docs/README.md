@@ -1,4 +1,4 @@
-# WinterWalrus.com DeFi Operations Guide
+# Lattice DeFi Operations Guide
 
 This guide provides precise, actionable instructions for performing DeFi operations in your project, referencing only the components, hooks, and architecture present in your codebase.
 

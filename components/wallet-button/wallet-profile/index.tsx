@@ -1,9 +1,10 @@
-import { useCurrentAccount, useCurrentWallet } from '@mysten/dapp-kit';
-import { formatAddress } from '@mysten/sui/utils';
-import { Button, Div, DivElementProps, Img, Span } from '@stylin.js/elements';
+'use client';
+
+import { usePrivy } from '@privy-io/react-auth';
+import { Button, Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { not } from 'ramda';
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 
 import { ChevronDownSVG } from '@/components/svg';
 import useClickOutsideListenerRef from '@/hooks/use-click-outside-listener-ref';
@@ -12,19 +13,46 @@ import { useModal } from '@/hooks/use-modal';
 import WalletProfileDropdown from './wallet-profile-dropdown';
 import WalletProfileModal from './wallet-profile-modal';
 
-const WalletProfile: FC = () => {
-  const { setContent } = useModal();
-  const currentWallet = useCurrentWallet();
-  const [isOpen, setOpen] = useState(false);
-  const currentAccount = useCurrentAccount();
+const formatDisplay = (address: string) =>
+  `${address.slice(0, 6)}...${address.slice(-4)}`;
 
-  const menuRef = useClickOutsideListenerRef<DivElementProps>(() =>
+const WalletProfile: FC = () => {
+  const { user, logout } = usePrivy();
+  const { setContent, handleClose } = useModal();
+  const [isOpen, setOpen] = useState(false);
+  const menuRef = useClickOutsideListenerRef<HTMLDivElement>(() =>
     setOpen(false)
   );
 
+  const displayAddress = useMemo(() => {
+    if (!user) return '';
+    const wallet = user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
+    const addr = wallet && 'address' in wallet ? wallet.address : null;
+    if (addr) return formatDisplay(addr);
+    const email = user.email?.address ?? user.google?.email;
+    return email ?? 'Logged in';
+  }, [user]);
+
+  const fullAddress = useMemo(() => {
+    if (!user) return '';
+    const wallet = user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
+    return wallet && 'address' in wallet ? wallet.address : '';
+  }, [user]);
+
   const handleOpenProfileDropdown = () => setOpen(not);
   const handleOpenProfileModal = () =>
-    setContent(<WalletProfileModal />, { title: 'Wallet' });
+    setContent(
+      <WalletProfileModal
+        displayAddress={displayAddress}
+        fullAddress={fullAddress}
+        onLogout={() => {
+          logout();
+          handleClose();
+        }}
+        onClose={handleClose}
+      />,
+      { title: 'Account' }
+    );
 
   return (
     <>
@@ -39,25 +67,23 @@ const WalletProfile: FC = () => {
           py="0.75rem"
           gap="0.5rem"
           display="flex"
-          bg="#99EFE41A"
+          bg="#A78BFA1A"
           color="#F1F1F1"
           cursor="pointer"
           alignItems="center"
           borderRadius="0.5rem"
           px={['0.75rem', '1rem']}
-          nHover={{ bg: '#99EFE433' }}
+          nHover={{ bg: '#A78BFA33' }}
           onClick={handleOpenProfileDropdown}
         >
           <Img
-            alt="Wallet"
+            alt="Account"
             width="1.5rem"
             height="1.5rem"
             borderRadius="50%"
-            src={currentWallet.currentWallet?.icon}
+            src="/icon.svg"
           />
-          <Span whiteSpace="nowrap">
-            {formatAddress(currentAccount!.address)}
-          </Span>
+          <Span whiteSpace="nowrap">{displayAddress}</Span>
           <Span display={['none', 'flex']} alignItems="center" ml="0.25rem">
             <ChevronDownSVG
               width="100%"
@@ -67,13 +93,20 @@ const WalletProfile: FC = () => {
           </Span>
         </Button>
         <AnimatePresence>
-          {isOpen && <WalletProfileDropdown close={close} />}
+          {isOpen && (
+            <WalletProfileDropdown
+              close={() => setOpen(false)}
+              displayAddress={displayAddress}
+              fullAddress={fullAddress}
+              onLogout={logout}
+            />
+          )}
         </AnimatePresence>
       </Div>
       <Button
         all="unset"
         gap="0.25rem"
-        bg="#99EFE41A"
+        bg="#A78BFA1A"
         color="#F1F1F1"
         cursor="pointer"
         alignItems="center"
@@ -85,14 +118,14 @@ const WalletProfile: FC = () => {
         display={['flex', 'flex', 'none']}
       >
         <Img
-          alt="Wallet"
+          alt="Account"
           width="1rem"
           height="1rem"
           borderRadius="50%"
-          src={currentWallet.currentWallet?.icon}
+          src="/icon.svg"
+          style={{ padding: 2 }}
         />
-        {currentAccount!.address.slice(0, 4)}...
-        {currentAccount!.address.slice(-4)}
+        {displayAddress}
         <Span display={['none', 'inline']}>
           <ChevronDownSVG maxWidth="0.65rem" maxHeight="0.65rem" width="100%" />
         </Span>

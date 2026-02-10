@@ -1,46 +1,11 @@
-import { useConnectWallet, useWallets } from '@mysten/dapp-kit';
-import { Div, Img } from '@stylin.js/elements';
+import { Div, P } from '@stylin.js/elements';
 import { FC } from 'react';
-import unikey from 'unikey';
 
-import { useModal } from '@/hooks/use-modal';
-
-const ConnectWalletModal: FC = () => {
-  const wallets = useWallets();
-  const connect = useConnectWallet();
-  const { handleClose } = useModal();
-
-  return (
-    <Div display="flex" flexDirection="column" gap="0.5rem">
-      {wallets.map((wallet) => (
-        <Div
-          p="1rem"
-          gap="1rem"
-          key={unikey()}
-          display="flex"
-          cursor="pointer"
-          border="1px solid"
-          alignItems="center"
-          borderRadius="1rem"
-          borderColor="#FFFFFF1A"
-          nHover={{ borderColor: '#99EFE44D' }}
-          onClick={() => {
-            connect.mutateAsync({ wallet });
-            handleClose();
-          }}
-        >
-          <Img
-            width="2.5rem"
-            height="2.5rem"
-            src={wallet.icon}
-            alt={wallet.name}
-            borderRadius="0.625rem"
-          />
-          {wallet.name}
-        </Div>
-      ))}
-    </Div>
-  );
-};
+/** Unused when Privy is used; Connect button opens Privy modal. */
+const ConnectWalletModal: FC = () => (
+  <Div display="flex" flexDirection="column" gap="0.5rem">
+    <P color="#FFFFFF80">Use the Connect Wallet button to sign in with Privy.</P>
+  </Div>
+);
 
 export default ConnectWalletModal;

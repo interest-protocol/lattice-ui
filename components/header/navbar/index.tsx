@@ -1,38 +1,30 @@
 import { Div, Nav, Span } from '@stylin.js/elements';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { map } from 'ramda';
 import { FC } from 'react';
 
 import { ExternalLinkSVG } from '@/components/svg';
-import { NAV_ITEMS, NAV_ITEMS_TITLE, Routes, RoutesEnum } from '@/constants';
+import { NAV_ITEMS, NAV_ITEMS_TITLE, Routes } from '@/constants/routes';
 
 const Navbar: FC = () => {
   const { pathname } = useRouter();
 
-  const links = map(
-    (key) => ({
-      href: Routes[key],
-      label: NAV_ITEMS_TITLE[key],
-      active:
-        (key === RoutesEnum.Stake && pathname === Routes[RoutesEnum.Stake]) ||
-        (key !== RoutesEnum.Stake && pathname.includes(Routes[key])),
-    }),
-    NAV_ITEMS
-  );
-
   return (
     <Nav display={['none', 'none', 'none', 'flex']} gap="2.5rem">
-      {links.map(({ href, label, active }) => (
-        <Link key={label} href={href} shallow>
-          <Span
-            nHover={{ color: '#99EFE480' }}
-            color={active ? '#99EFE4' : '#FFFFFF80'}
-          >
-            {label}
-          </Span>
-        </Link>
-      ))}
+      {NAV_ITEMS.map((item) => {
+        const isActive = pathname === Routes[item];
+        return (
+          <Link key={item} href={Routes[item]}>
+            <Span
+              color={isActive ? '#A78BFA' : '#FFFFFF80'}
+              cursor="pointer"
+              nHover={{ color: '#A78BFA' }}
+            >
+              {NAV_ITEMS_TITLE[item]}
+            </Span>
+          </Link>
+        );
+      })}
       <Link
         target="_blank"
         href="https://interest-protocol.gitbook.io/winter-walrus"
@@ -42,7 +34,7 @@ const Navbar: FC = () => {
           display="flex"
           color="#FFFFFF80"
           alignItems="center"
-          nHover={{ color: '#99EFE4' }}
+          nHover={{ color: '#A78BFA' }}
         >
           <Span>Docs</Span>
           <ExternalLinkSVG maxWidth="1rem" width="100%" />

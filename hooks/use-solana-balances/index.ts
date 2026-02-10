@@ -1,0 +1,47 @@
+import { PublicKey } from '@solana/web3.js';
+import BigNumber from 'bignumber.js';
+import useSWR from 'swr';
+
+import { WSUI_SOLANA_MINT } from '@/constants';
+import useSolanaConnection from '@/hooks/use-solana-connection';
+
+const REFRESH_INTERVAL = 30_000;
+
+const useSolanaBalances = (address: string | null) => {
+  const connection = useSolanaConnection();
+
+  const { data, isLoading, mutate } = useSWR(
+    address ? [useSolanaBalances.name, address] : null,
+    async () => {
+      const pubkey = new PublicKey(address!);
+      const wsuiMint = new PublicKey(WSUI_SOLANA_MINT);
+
+      const [solLamports, tokenAccounts] = await Promise.all([
+        connection.getBalance(pubkey),
+        connection.getParsedTokenAccountsByOwner(pubkey, { mint: wsuiMint }),
+      ]);
+
+      let wsuiRaw = new BigNumber(0);
+      for (const { account } of tokenAccounts.value) {
+        const parsed = account.data.parsed;
+        if (parsed?.info?.tokenAmount?.amount) {
+          wsuiRaw = wsuiRaw.plus(parsed.info.tokenAmount.amount);
+        }
+      }
+
+      return {
+        sol: new BigNumber(solLamports),
+        wsui: wsuiRaw,
+      };
+    },
+    { refreshInterval: REFRESH_INTERVAL }
+  );
+
+  return {
+    balances: data ?? { sol: new BigNumber(0), wsui: new BigNumber(0) },
+    isLoading,
+    mutate,
+  };
+};
+
+export default useSolanaBalances;

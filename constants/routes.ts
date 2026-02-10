@@ -1,23 +1,19 @@
 export enum RoutesEnum {
-  Stake = 'stake',
-  DeFi = 'defi',
-  Portfolio = 'portfolio',
+  Swap = 'swap',
+  Account = 'account',
 }
 
 export const Routes: Record<RoutesEnum, string> = {
-  [RoutesEnum.Stake]: '/',
-  [RoutesEnum.DeFi]: '/defi',
-  [RoutesEnum.Portfolio]: '/portfolio',
+  [RoutesEnum.Swap]: '/',
+  [RoutesEnum.Account]: '/account',
 };
 
 export const NAV_ITEMS: ReadonlyArray<RoutesEnum> = [
-  RoutesEnum.Stake,
-  RoutesEnum.DeFi,
-  RoutesEnum.Portfolio,
+  RoutesEnum.Swap,
+  RoutesEnum.Account,
 ];
 
 export const NAV_ITEMS_TITLE: Record<RoutesEnum, string> = {
-  [RoutesEnum.Stake]: 'Stake',
-  [RoutesEnum.DeFi]: 'DeFi',
-  [RoutesEnum.Portfolio]: 'Portfolio',
+  [RoutesEnum.Swap]: 'Trade',
+  [RoutesEnum.Account]: 'Account',
 };

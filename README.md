@@ -21,6 +21,12 @@ Install the project dependencies with yarn
   pnpm i
 ```
 
+Set your Privy App ID (create an app at [privy.io](https://privy.io)):
+
+```bash
+  echo "NEXT_PUBLIC_PRIVY_APP_ID=your-app-id" >> .env.local
+```
+
 Initialize the application
 
 ```bash

@@ -6,9 +6,6 @@ interface AppState {
   loadingCoins: boolean;
   loadingObjects: boolean;
   balances: Record<string, BigNumber>;
-  stakingObjectIds: ReadonlyArray<string>;
-  objectsActivation: Record<string, number>;
-  principalsByType: Record<string, BigNumber>;
   update: {
     (
       partial:
@@ -26,8 +23,5 @@ export const useAppState = create<AppState>((set) => ({
   balances: {},
   mutate: () => {},
   loadingCoins: true,
-  principalsByType: {},
-  stakingObjectIds: [],
   loadingObjects: true,
-  objectsActivation: {},
 }));

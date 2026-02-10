@@ -34,9 +34,9 @@ const Settings: FC = () => {
         width={['2rem', 'unset']}
         height={['2rem', 'unset']}
         onClick={() => setShow(not)}
-        border="1px solid #99EFE44D"
+        border="1px solid #A78BFA4D"
         borderRadius={['0.5rem', '0.75rem']}
-        nHover={{ bg: '#99EFE480', borderColor: '#99EFE44D' }}
+        nHover={{ bg: '#A78BFA80', borderColor: '#A78BFA4D' }}
       >
         <Span
           p="0.25rem"

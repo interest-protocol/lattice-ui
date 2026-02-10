@@ -1,4 +1,3 @@
-import { TYPES } from '@interest-protocol/blizzard-sdk';
 import { Button, Div, Span } from '@stylin.js/elements';
 import { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -10,7 +9,6 @@ import {
   PizzaPart100PercentSVG,
 } from '@/components/svg';
 import { useAppState } from '@/hooks/use-app-state';
-import useEpochData from '@/hooks/use-epoch-data';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { ZERO_BIG_NUMBER } from '@/utils';
 
@@ -25,19 +23,11 @@ const PIZZA_ICONS: Record<0.25 | 0.5 | 1, FC<SVGProps>> = {
 
 const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
   const { balances } = useAppState();
-  const { data: epoch } = useEpochData();
   const { control, setValue } = useFormContext();
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
 
-  const isSnowOutAfterVote =
-    name === 'out' &&
-    epoch &&
-    epoch.msUntilNextEpoch / epoch.epochDurationMs < 0.5 &&
-    type !== TYPES.WAL;
-
-  const balance =
-    balances[isSnowOutAfterVote ? TYPES.BLIZZARD_STAKE_NFT : type];
+  const balance = balances[type];
 
   return (
     <Div display="flex" gap="0.5rem">
@@ -51,7 +41,7 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
             display="flex"
             key={unikey()}
             cursor="pointer"
-            nHover={{ color: '#99EFE4' }}
+            nHover={{ color: '#A78BFA' }}
             onClick={() => {
               setValue(
                 `${name}.value`,

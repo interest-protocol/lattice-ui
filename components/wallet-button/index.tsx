@@ -1,6 +1,6 @@
-import '@mysten/dapp-kit/dist/index.css';
+'use client';
 
-import { useCurrentAccount, useCurrentWallet } from '@mysten/dapp-kit';
+import { usePrivy } from '@privy-io/react-auth';
 import { FC } from 'react';
 
 import ConnectWallet from './connect-wallet';
@@ -8,14 +8,15 @@ import LoadingWallet from './loading-wallet';
 import WalletProfile from './wallet-profile';
 
 const WalletButton: FC = () => {
-  const currentAccount = useCurrentAccount();
-  const { connectionStatus } = useCurrentWallet();
+  const { ready, authenticated, login } = usePrivy();
 
-  if (connectionStatus === 'connecting') return <LoadingWallet />;
-
-  if (currentAccount) return <WalletProfile />;
-
-  return <ConnectWallet />;
+  if (!ready) return <LoadingWallet />;
+  if (authenticated) return <WalletProfile />;
+  return (
+    <ConnectWallet
+      onConnect={() => login({ walletChainType: 'solana-only' })}
+    />
+  );
 };
 
 export default WalletButton;

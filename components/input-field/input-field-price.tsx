@@ -1,29 +1,20 @@
-import { TYPES } from '@interest-protocol/blizzard-sdk';
-import { normalizeStructTag } from '@mysten/sui/utils';
 import { Span } from '@stylin.js/elements';
 import { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-import { useQuotes } from '@/hooks/use-quotes';
-import { useWalPrice } from '@/hooks/use-wal-price';
+import { useSuiPrice } from '@/hooks/use-sui-price';
 import { formatDollars } from '@/utils';
 
 import { InputFieldGenericProps } from './input-field.types';
 
 const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const { control } = useFormContext();
-  const { data: quotes } = useQuotes();
-  const { data: suiPrice } = useWalPrice();
-  const type = useWatch({ control, name: `${name}.type` }) as string;
+  const { data: suiPrice } = useSuiPrice();
   const value = useWatch({ control, name: `${name}.value` }) as string;
 
-  const price =
-    suiPrice && quotes
-      ? suiPrice *
-        (type && normalizeStructTag(type) === TYPES.WAL
-          ? 1
-          : quotes?.quoteLst ?? 1)
-      : 0;
+  // For now, we only support SUI price
+  // TODO: Add SOL price support when implementing cross-chain swap
+  const price = suiPrice ?? 0;
 
   return (
     <Span fontFamily="JetBrains Mono">

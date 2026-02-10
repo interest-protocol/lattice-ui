@@ -16,10 +16,10 @@ const HeaderTVL: FC = () => {
       gap="0.25rem"
       display="flex"
       p={['0.625rem', '0.825rem']}
-      border="1px solid #99EFE44D"
+      border="1px solid #A78BFA4D"
       borderRadius={['0.5rem', '0.75rem']}
       fontSize={['0.625rem', '0.75rem', '0.875rem']}
-      nHover={{ bg: '#99EFE480', borderColor: '#99EFE44D' }}
+      nHover={{ bg: '#A78BFA80', borderColor: '#A78BFA4D' }}
     >
       <P color="#FFFFFF80">TVL</P>
       <Div textAlign="right" display="flex" gap="0.25rem">

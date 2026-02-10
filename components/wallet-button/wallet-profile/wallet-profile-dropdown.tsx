@@ -1,14 +1,25 @@
-import { useAccounts } from '@mysten/dapp-kit';
-import { AnimatePresence } from 'motion/react';
+import { Div, Span } from '@stylin.js/elements';
 import { FC } from 'react';
 
 import Motion from '@/components/motion';
+import { CopySVG, LogoutSVG } from '@/components/svg';
+import { toasting } from '@/components/toast';
 
 import { WalletProfileDropdownProps } from './wallet-profile.types';
-import WalletProfileItem from './wallet-profile-item';
 
-const WalletProfileDropdown: FC<WalletProfileDropdownProps> = ({ close }) => {
-  const accounts = useAccounts();
+const WalletProfileDropdown: FC<
+  WalletProfileDropdownProps & {
+    displayAddress: string;
+    fullAddress: string;
+    onLogout: () => void;
+  }
+> = ({ close, displayAddress, fullAddress, onLogout }) => {
+  const copyAddress = () => {
+    if (fullAddress) {
+      window.navigator.clipboard.writeText(fullAddress);
+      toasting.success({ action: 'Copy', message: 'Address copied' });
+    }
+  };
 
   return (
     <Motion
@@ -32,15 +43,37 @@ const WalletProfileDropdown: FC<WalletProfileDropdownProps> = ({ close }) => {
       display={['none', 'none', 'flex']}
       onClick={(e) => e.stopPropagation()}
     >
-      <AnimatePresence>
-        {accounts.map((account) => (
-          <WalletProfileItem
-            close={close}
-            account={account}
-            key={account.address}
-          />
-        ))}
-      </AnimatePresence>
+      <Div px="1rem" py="0.5rem" display="flex" flexDirection="column" gap="0.5rem">
+        <Div display="flex" alignItems="center" justifyContent="space-between">
+          <Span fontFamily="JetBrains Mono">{displayAddress}</Span>
+          {fullAddress && (
+            <Span
+              cursor="pointer"
+              onClick={copyAddress}
+              nHover={{ color: '#A78BFA' }}
+            >
+              <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
+            </Span>
+          )}
+        </Div>
+        <Div
+          p="1rem"
+          display="flex"
+          color="#E53E3E"
+          cursor="pointer"
+          alignItems="center"
+          justifyContent="space-between"
+          borderTop="1px solid #FFFFFF33"
+          onClick={() => {
+            onLogout();
+            close();
+          }}
+          nHover={{ opacity: 0.9 }}
+        >
+          <Span>Disconnect</Span>
+          <LogoutSVG width="100%" maxWidth="1rem" maxHeight="1rem" />
+        </Div>
+      </Div>
     </Motion>
   );
 };
