@@ -4,46 +4,87 @@
 
 **Winter Walrus** is a DeFi application that provides cross-chain swap functionality between SUI and SOL tokens. Users can seamlessly exchange assets across the Sui and Solana blockchains.
 
-- **Tech Stack**: Next.js 14 (Pages Router), TypeScript, React 18, Framer Motion, Stylin.js
+- **Tech Stack**: Next.js 14 (App Router), TypeScript (strict), React 18, Framer Motion, Stylin.js
 - **Blockchains**: Sui Network & Solana
 - **Wallet**: Privy integration for wallet connection
-- **State**: Zustand for global state, TanStack Query for server state
-- **Styling**: Stylin.js (CSS-in-JS with styled components)
+- **State**: Zustand for global state, SWR for server state, React Hook Form for forms
+- **Styling**: Stylin.js (CSS-in-JS with prop-based styling)
+- **Linting**: Biome (not ESLint/Prettier)
 
 ## Project Structure
 
 ```
 lattice-ui/
-├── components/          # Reusable UI components
-│   ├── app-state-provider/   # Zustand store hydration
-│   ├── background/            # Animated backgrounds (blur, particles)
-│   ├── header/                # App header with TVL, navbar
-│   ├── input-field/           # Token input components with asset selection
-│   ├── privy-provider/        # Privy wallet provider (SSR disabled)
-│   ├── settings/              # Settings menu (validator, RPC, explorer)
-│   ├── svg/                   # SVG icon components (27 icons)
-│   ├── tabs/                  # Tab navigation component
-│   └── wallet-button/         # Wallet connection UI
-├── constants/           # App-wide constants
-│   ├── colors.ts              # Color palette (ACCENT variants)
-│   ├── index.ts               # Main constants export
-│   ├── routes.ts              # Route definitions
-│   └── storage-keys.ts        # LocalStorage keys
-├── hooks/               # Custom React hooks
-│   ├── use-app-state/         # Zustand global state
-│   ├── use-blizzard-sdk/      # Blizzard SDK integration
-│   ├── use-coins/             # Coin data fetching
-│   ├── use-fees/              # Transaction fee calculations
-│   ├── use-solana-*/          # Solana blockchain hooks
-│   ├── use-sui-*/             # Sui blockchain hooks
-│   └── use-network/           # Network configuration
-├── pages/               # Next.js pages (routing)
-│   ├── _app.tsx               # App wrapper with providers
-│   ├── index.tsx              # Home page → Swap view
-│   └── [lst].tsx              # Dynamic LST page → Swap view
-├── public/              # Static assets
-└── views/               # Page-level view components
-    └── swap/            # Main swap interface (ONLY active view)
+├── app/                        # Next.js App Router
+│   ├── layout.tsx              # Root layout (fonts, providers)
+│   ├── page.tsx                # Home → SwapView
+│   ├── providers.tsx           # Provider composition tree
+│   ├── registry.tsx            # styled-components SSR registry
+│   ├── account/page.tsx        # Account → AccountView
+│   └── api/                    # API routes (18 endpoints)
+│       ├── enclave/            # TEE enclave proxy
+│       ├── solver/             # Solver API proxy (fulfill, metadata, prices, status)
+│       ├── xswap/              # Cross-chain swap
+│       ├── xbridge/            # Bridge operations (create-mint, set-digest, vote, execute)
+│       ├── wallet/             # Wallet management (create-sui, create-solana, link, send)
+│       ├── health/             # Health checks (enclave, solver)
+│       └── external/           # External API proxy (prices)
+│
+├── components/                 # React components (4 layers)
+│   ├── composed/               # Feature-rich components (header, input-field, settings, wallet-button)
+│   ├── layout/                 # Page structure (layout, background)
+│   ├── providers/              # Context/state providers (privy, error-boundary, modal, app-state)
+│   └── ui/                     # Atomic primitives (icons, tabs, toast, toggle, tooltip, motion)
+│
+├── hooks/                      # Custom React hooks (4 layers)
+│   ├── store/                  # Zustand stores (use-app-state, use-modal, use-network)
+│   ├── blockchain/             # Chain data fetching (use-sui-*, use-solana-*, use-token-prices)
+│   ├── domain/                 # Business logic (use-swap, use-bridge, use-wallet-*, use-health)
+│   └── ui/                     # Component utilities (use-event-listener, use-click-outside, etc.)
+│
+├── lib/                        # Core business logic
+│   ├── config.ts               # Environment variables
+│   ├── api/                    # API utilities + Zod validation
+│   ├── chain-adapters/         # Chain abstraction (ChainAdapter interface, sui-adapter, solana-adapter)
+│   ├── entities/               # DeFi domain models (Token, CurrencyAmount, Fraction, Percent, Trade)
+│   ├── enclave/                # Enclave SDK wrapper
+│   ├── solver/                 # Solver API client
+│   ├── xswap/                  # Cross-chain swap SDK
+│   ├── xbridge/                # Bridge SDK
+│   ├── privy/                  # Privy server-side (signing, wallet creation)
+│   ├── registry/               # On-chain registry SDK
+│   ├── wallet/                 # Wallet operations
+│   ├── solana/                 # Solana helpers (server client, tx confirmation)
+│   ├── sui/                    # Sui helpers (server client)
+│   ├── swr/                    # SWR shared configs
+│   └── external/               # External API clients (Pyth prices)
+│
+├── views/                      # Page-level view components
+│   ├── swap/                   # Swap + Bridge tabs
+│   └── account/                # Balances + Deposit + Withdraw tabs
+│
+├── constants/                  # App-wide constants
+│   ├── colors.ts               # ACCENT color palette
+│   ├── coins.ts                # Token metadata (ASSET_METADATA)
+│   ├── chains/                 # Chain registry (CHAIN_REGISTRY)
+│   ├── routes.ts               # Route definitions
+│   ├── storage-keys.ts         # localStorage keys
+│   ├── rpc.ts                  # RPC provider config
+│   ├── explorer.ts             # Block explorer URLs
+│   └── bridged-tokens.ts       # XBridge token metadata
+│
+├── utils/                      # Pure utility functions
+│   ├── bn.ts                   # BigNumber helpers
+│   ├── money.ts                # Number formatting (Intl)
+│   ├── number.ts               # Input parsing
+│   ├── format-address.ts       # Address truncation
+│   ├── extract-error-message.ts # Error message extraction
+│   └── gas-validation.ts       # Gas + alpha limit validation
+│
+├── interface/                  # Shared TypeScript types
+│   └── index.ts                # BigNumberish, AssetMetadata, Node, SdkPool
+│
+└── public/                     # Static assets
 ```
 
 ---
@@ -76,7 +117,7 @@ Always prefer composition over prop drilling:
 Extract business logic into custom hooks:
 
 ```typescript
-// hooks/use-swap/index.ts
+// hooks/domain/use-swap/index.ts
 export const useSwap = () => {
   const { balances } = useAppState();
   const [amount, setAmount] = useState('');
@@ -140,7 +181,7 @@ Always handle loading and error states:
 
 ```typescript
 const Component = () => {
-  const { data, isLoading, error } = useQuery(...);
+  const { data, isLoading, error } = useSWR(...);
 
   if (isLoading) return <Skeleton />;
   if (error) return <ErrorMessage error={error} />;
@@ -152,67 +193,101 @@ const Component = () => {
 
 ---
 
-## Next.js 14 Patterns (Pages Router)
+## Next.js 14 Patterns (App Router)
 
-### 1. Dynamic Imports for Client Components
+### 1. Client Components
+
+Use `'use client'` directive for components with hooks, event handlers, or browser APIs:
+
+```typescript
+'use client';
+
+import { useState } from 'react';
+
+const InteractiveComponent = () => {
+  const [value, setValue] = useState('');
+  return <Input value={value} onChange={(e) => setValue(e.target.value)} />;
+};
+```
+
+### 2. Dynamic Imports (SSR Disabled)
 
 Disable SSR for wallet/web3 components:
 
 ```typescript
-// components/privy-provider/index.tsx pattern
+// app/providers.tsx pattern
 import dynamic from 'next/dynamic';
 
 const PrivyProviderWrapper = dynamic(
-  () => import('@/components/privy-provider').then((m) => m.default),
+  import('@/components/providers/privy-provider').then((m) => m.default),
   { ssr: false }
 );
 ```
 
-### 2. Path Aliases
+### 3. Path Aliases
 
 Use `@/` prefix (configured in tsconfig.json):
 
 ```typescript
 // GOOD
-import { useAppState } from '@/hooks/use-app-state';
+import { useAppState } from '@/hooks/store/use-app-state';
 import { ACCENT } from '@/constants/colors';
 
 // AVOID relative paths for deep imports
-import { useAppState } from '../../../hooks/use-app-state';
+import { useAppState } from '../../../hooks/store/use-app-state';
 ```
 
-### 3. Page Component Pattern
+### 4. Page Component Pattern
 
 Keep pages thin, delegate to views:
 
 ```typescript
-// pages/index.tsx
-import { Layout } from '@/components/layout';
+// app/page.tsx
 import SwapView from '@/views/swap';
 
-const HomePage = () => (
-  <Layout>
-    <SwapView />
-  </Layout>
-);
+const HomePage = () => <SwapView />;
 
 export default HomePage;
 ```
 
-### 4. SEO with next/head
+Layout wrapping is handled by `app/layout.tsx` (not in page components).
+
+### 5. Metadata (instead of next/head)
 
 ```typescript
-import Head from 'next/head';
+// app/layout.tsx
+import type { Metadata } from 'next';
 
-const Page = () => (
-  <>
-    <Head>
-      <title>Swap | Winter Walrus</title>
-      <meta name="description" content="Cross-chain SUI/SOL swap" />
-    </Head>
-    <Content />
-  </>
-);
+export const metadata: Metadata = {
+  title: 'Lattice',
+  icons: { icon: '/icon.svg' },
+};
+```
+
+### 6. API Route Handlers
+
+All API routes use Route Handlers with Zod validation:
+
+```typescript
+// app/api/{service}/{action}/route.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { validateParams } from '@/lib/api/validate-params';
+
+const schema = z.object({ /* request shape */ });
+
+export const POST = async (req: NextRequest) => {
+  try {
+    const body = await req.json();
+    const params = validateParams(schema, body);
+    const result = await backendService(params);
+    return NextResponse.json({ data: result });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+};
 ```
 
 ---
@@ -221,10 +296,10 @@ const Page = () => (
 
 ### Zustand (Global State)
 
-This project uses Zustand for global state:
+This project uses Zustand for global state with `useShallow` selectors:
 
 ```typescript
-// hooks/use-app-state/index.ts
+// hooks/store/use-app-state/index.ts
 import { create } from 'zustand';
 
 interface AppState {
@@ -247,46 +322,130 @@ export const useAppState = create<AppState>((set) => ({
 **Usage patterns:**
 
 ```typescript
-// Read state
-const { balances, loadingCoins } = useAppState();
+// REQUIRED: Use useShallow selectors (prevents unnecessary re-renders)
+import { useShallow } from 'zustand/shallow';
 
-// Update state
-const { update } = useAppState();
-update({ loadingCoins: false });
+const { update, loadingCoins } = useAppState(
+  useShallow((s) => ({ update: s.update, loadingCoins: s.loadingCoins }))
+);
 
-// Selector pattern (prevents unnecessary re-renders)
+// Simple selector (also fine)
 const balances = useAppState((state) => state.balances);
+
+// AVOID: Destructuring without selector (re-renders on any state change)
+const { balances } = useAppState(); // Bad!
 ```
 
-### TanStack Query (Server State)
+### SWR (Server State)
 
-For data fetching with caching:
-
-```typescript
-import { useQuery } from '@tanstack/react-query';
-
-const useTokenPrice = (symbol: string) => {
-  return useQuery({
-    queryKey: ['price', symbol],
-    queryFn: () => fetchPrice(symbol),
-    staleTime: 30_000, // 30 seconds
-    refetchInterval: 60_000, // 1 minute
-  });
-};
-```
-
-### SWR (Alternative Pattern)
-
-Also available in this project:
+Primary data fetching library with caching and revalidation:
 
 ```typescript
 import useSWR from 'swr';
 
 const { data, error, isLoading, mutate } = useSWR(
-  '/api/prices',
-  fetcher,
-  { refreshInterval: 30000 }
+  address ? [useSuiBalances.name, address] : null,  // null = skip
+  async ([, addr]) => {
+    // fetch logic
+  },
+  balanceSwrConfig  // from @/lib/swr/config
 );
+```
+
+Shared configs in `lib/swr/config.ts` provide standard refresh intervals (30s for balances, 60s for prices).
+
+---
+
+## DeFi Entities (lib/entities/)
+
+### Token
+
+```typescript
+import { Token } from '@/lib/entities';
+
+// Pre-defined singletons
+Token.SUI
+Token.SOL
+
+// From coin type string
+const token = Token.fromType(coinType);
+
+// Properties
+token.symbol    // 'SUI'
+token.decimals  // 9
+token.isSui()   // true
+```
+
+### CurrencyAmount
+
+```typescript
+import { CurrencyAmount, Token } from '@/lib/entities';
+
+// Create from raw blockchain amount
+const amount = CurrencyAmount.fromRawAmount(Token.SUI, rawBigNumber);
+
+// Create from human-readable input
+const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '1.5');
+
+// Zero amount
+const zero = CurrencyAmount.zero(Token.SUI);
+
+// Arithmetic
+amount.add(other)
+amount.subtract(other)
+amount.multiply(factor)
+
+// Display
+amount.toExact()         // Full precision string
+amount.toFixed(4)        // "1.5000"
+amount.toSignificant(4)  // "1.500"
+
+// Comparisons
+amount.greaterThan(other)
+amount.exceedsBalance(balance)
+amount.isZero()
+```
+
+### FixedPointMath
+
+```typescript
+import { FixedPointMath } from '@/lib/entities';
+
+// Human → raw (for transactions)
+const raw = FixedPointMath.toBigNumber(1.5, 9);  // 1500000000
+
+// Raw → human (for display)
+const human = FixedPointMath.toNumber(rawBN, 9);  // 1.5
+```
+
+---
+
+## Chain Configuration
+
+### CHAIN_REGISTRY
+
+Single source of truth for chain-specific values:
+
+```typescript
+import { CHAIN_REGISTRY } from '@/constants/chains';
+
+CHAIN_REGISTRY.sui.displayName   // 'Sui'
+CHAIN_REGISTRY.sui.alphaMax      // 0.1 (SUI transaction cap)
+CHAIN_REGISTRY.sui.minGas        // 0.005
+CHAIN_REGISTRY.solana.alphaMax   // 0.001 (SOL transaction cap)
+```
+
+### Chain Adapters
+
+Abstraction layer for chain-specific operations:
+
+```typescript
+import { createSuiAdapter, createSolanaAdapter } from '@/lib/chain-adapters';
+
+const adapter = createSuiAdapter(suiClient, mutateSuiBalances);
+await adapter.deposit(params);        // Chain-specific deposit
+await adapter.refetchBalance();       // Refresh balances
+adapter.encodeAddress(address);       // Encode for cross-chain
 ```
 
 ---
@@ -305,7 +464,7 @@ component-name/
 
 ```typescript
 // component-name.types.ts
-import { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
 export interface ComponentProps {
   children?: ReactNode;
@@ -315,7 +474,7 @@ export interface ComponentProps {
 }
 
 // index.tsx
-import { ComponentProps } from './component-name.types';
+import type { ComponentProps } from './component-name.types';
 
 const Component: FC<ComponentProps> = ({
   children,
@@ -334,7 +493,6 @@ type SwapState =
   | { status: 'success'; txHash: string }
   | { status: 'error'; error: Error };
 
-// Usage with exhaustive checking
 switch (state.status) {
   case 'idle': return <IdleView />;
   case 'loading': return <LoadingView />;
@@ -391,7 +549,7 @@ import { Div, Span, Button, Input, A } from '@stylin.js/elements';
   maxWidth="400px"
   height="auto"
 
-  // Colors
+  // Colors — prefer constants from @/constants/colors
   bg="#FFFFFF0D"     // background
   color="#FFFFFF"    // text color
 
@@ -441,13 +599,12 @@ import { ACCENT, ACCENT_HOVER, ACCENT_80, ACCENT_4D } from '@/constants/colors';
 
 ## Framer Motion Animations
 
-### Basic Animation
+### Motion Component
+
+Use the project's `Motion` wrapper that combines Stylin.js + Framer Motion:
 
 ```typescript
-import { motion } from 'motion/react';
-import { Div } from '@stylin.js/elements';
-
-const Motion = motion.create(Div);
+import Motion from '@/components/ui/motion';
 
 <Motion
   initial={{ opacity: 0, y: 20 }}
@@ -459,37 +616,31 @@ const Motion = motion.create(Div);
 </Motion>
 ```
 
-### Stagger Children
+### Creating Custom Motion Components
 
 ```typescript
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
+import { motion } from 'motion/react';
+import { Div } from '@stylin.js/elements';
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
-
-<Motion variants={container} initial="hidden" animate="show">
-  {items.map((item) => (
-    <Motion key={item.id} variants={item}>
-      {item.name}
-    </Motion>
-  ))}
-</Motion>
+const Motion = motion.create(Div);
 ```
 
-### Layout Animations
+### AnimatePresence for Mount/Unmount
 
 ```typescript
-<Motion layout layoutId={`token-${token.id}`}>
-  <TokenCard token={token} />
-</Motion>
+import { AnimatePresence } from 'motion/react';
+
+<AnimatePresence>
+  {isOpen && (
+    <Motion
+      initial={{ scaleY: 0 }}
+      animate={{ scaleY: 1 }}
+      exit={{ scaleY: 0 }}
+    >
+      Dropdown Content
+    </Motion>
+  )}
+</AnimatePresence>
 ```
 
 ---
@@ -503,21 +654,10 @@ Always use BigNumber for token amounts:
 ```typescript
 import BigNumber from 'bignumber.js';
 
-// Configure for crypto precision
-BigNumber.config({ DECIMAL_PLACES: 18 });
-
-// Convert from user input
 const amount = new BigNumber(inputValue);
 
-// Format for display
-const display = amount.toFormat(4); // "1,234.5678"
+if (amount.isNaN() || amount.lte(0)) return;
 
-// Check validity
-if (amount.isNaN() || amount.lte(0)) {
-  return; // Invalid input
-}
-
-// Compare with balance
 if (amount.gt(balance)) {
   setError('Insufficient balance');
 }
@@ -525,48 +665,62 @@ if (amount.gt(balance)) {
 
 ### Token Amount Formatting
 
-```typescript
-// utils/format.ts
-export const formatTokenAmount = (
-  amount: BigNumber | string,
-  decimals: number = 9,
-  displayDecimals: number = 4
-): string => {
-  const bn = new BigNumber(amount);
-  const normalized = bn.dividedBy(10 ** decimals);
-  return normalized.toFormat(displayDecimals);
-};
+Use the entity classes instead of raw BigNumber math:
 
-// Usage
-const display = formatTokenAmount(rawBalance, 9, 4); // "1.2345"
+```typescript
+import { CurrencyAmount, Token } from '@/lib/entities';
+
+const amount = CurrencyAmount.fromHumanAmount(Token.SUI, inputValue);
+const display = amount.toFixed(4); // "1.5000"
+
+if (amount.exceedsBalance(balance)) {
+  setError('Insufficient balance');
+}
 ```
 
-### Transaction Handling Pattern
+### Transaction Status Pattern
 
 ```typescript
-const useTransaction = () => {
-  const [status, setStatus] = useState<'idle' | 'signing' | 'confirming' | 'success' | 'error'>('idle');
+type SwapStatus = 'idle' | 'depositing' | 'verifying' | 'creating' | 'waiting' | 'success' | 'error';
 
-  const execute = async (tx: Transaction) => {
-    try {
-      setStatus('signing');
-      const signed = await wallet.signTransaction(tx);
+const [status, setStatus] = useState<SwapStatus>('idle');
 
-      setStatus('confirming');
-      const result = await client.executeTransaction(signed);
-
-      setStatus('success');
-      toast.success('Transaction confirmed!');
-      return result;
-    } catch (error) {
-      setStatus('error');
-      toast.error(error.message);
-      throw error;
-    }
-  };
-
-  return { status, execute };
+const execute = async () => {
+  try {
+    setStatus('depositing');
+    // ... deposit
+    setStatus('verifying');
+    // ... verify
+    setStatus('success');
+    toasting.success({ action: 'Swap', message: 'Transaction confirmed!' });
+  } catch (err) {
+    setStatus('error');
+    const message = extractErrorMessage(err, 'Swap failed');
+    toasting.error({ action: 'Swap', message });
+  }
 };
+```
+
+---
+
+## Toast Notifications
+
+Use the custom `toasting` factory (not raw `toast` from react-hot-toast):
+
+```typescript
+import { toasting } from '@/components/ui/toast';
+
+// Success with link
+toasting.success({ action: 'Swap', message: 'Confirmed!', link: explorerUrl });
+
+// Error
+toasting.error({ action: 'Bridge', message: 'Insufficient balance' });
+
+// Loading (returns toast ID for later update)
+toasting.loading({ message: 'Confirming transaction...' }, toastId);
+
+// Dismiss
+toasting.dismiss(toastId);
 ```
 
 ---
@@ -578,229 +732,102 @@ const useTransaction = () => {
 ```typescript
 import { usePrivy } from '@privy-io/react-auth';
 
-const WalletButton = () => {
-  const { login, logout, authenticated, user, ready } = usePrivy();
-
-  if (!ready) return <Skeleton />;
-
-  if (!authenticated) {
-    return <Button onClick={login}>Connect Wallet</Button>;
-  }
-
-  return (
-    <Button onClick={logout}>
-      {formatAddress(user.wallet?.address)}
-    </Button>
-  );
-};
+const { login, logout, authenticated, user, ready } = usePrivy();
 ```
 
-### Getting Wallet Address
+### Getting Wallet Addresses
+
+Use the project's custom hook (not raw Privy parsing):
 
 ```typescript
-const { user } = usePrivy();
+import { useWalletAddresses } from '@/hooks/domain/use-wallet-addresses';
 
-// Sui address
-const suiWallet = user?.linkedAccounts.find(
-  (account) => account.type === 'wallet' && account.chainType === 'sui'
-);
-const suiAddress = suiWallet?.address;
+const { addresses, hasWallet, getAddress } = useWalletAddresses();
 
-// Solana address
-const solanaWallet = user?.linkedAccounts.find(
-  (account) => account.type === 'wallet' && account.chainType === 'solana'
-);
-const solanaAddress = solanaWallet?.address;
-```
+const suiAddress = getAddress('sui');
+const solAddress = getAddress('solana');
 
----
-
-## Performance Optimization
-
-### 1. Lazy Loading Components
-
-```typescript
-import dynamic from 'next/dynamic';
-
-const HeavyChart = dynamic(() => import('@/components/chart'), {
-  loading: () => <Skeleton height={300} />,
-  ssr: false,
-});
-```
-
-### 2. Virtualization for Long Lists
-
-```typescript
-import { useVirtualizer } from '@tanstack/react-virtual';
-
-const TokenList = ({ tokens }) => {
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
-    count: tokens.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 60,
-  });
-
-  return (
-    <Div ref={parentRef} height="400px" overflow="auto">
-      <Div height={`${virtualizer.getTotalSize()}px`} position="relative">
-        {virtualizer.getVirtualItems().map((virtualItem) => (
-          <TokenRow
-            key={virtualItem.key}
-            token={tokens[virtualItem.index]}
-            style={{
-              position: 'absolute',
-              top: virtualItem.start,
-              height: virtualItem.size,
-            }}
-          />
-        ))}
-      </Div>
-    </Div>
-  );
-};
-```
-
-### 3. Debouncing User Input
-
-```typescript
-import { useDebouncedValue } from 'use-debounce';
-
-const [inputValue, setInputValue] = useState('');
-const [debouncedValue] = useDebouncedValue(inputValue, 300);
-
-// Use debouncedValue for API calls
-useEffect(() => {
-  if (debouncedValue) {
-    fetchQuote(debouncedValue);
-  }
-}, [debouncedValue]);
-```
-
-### 4. Avoiding Unnecessary Re-renders
-
-```typescript
-// Use selectors with Zustand
-const balance = useAppState((state) => state.balances[coinType]);
-
-// NOT this (re-renders on any state change)
-const { balances } = useAppState();
-const balance = balances[coinType];
-```
-
----
-
-## Error Handling
-
-### Toast Notifications
-
-```typescript
-import { toast } from 'react-hot-toast';
-
-// Success
-toast.success('Swap completed!');
-
-// Error with custom styling
-toast.error('Transaction failed', {
-  duration: 5000,
-});
-
-// Loading with promise
-toast.promise(executeSwap(), {
-  loading: 'Swapping...',
-  success: 'Swap completed!',
-  error: (err) => `Failed: ${err.message}`,
-});
-```
-
-### Error Boundaries
-
-```typescript
-import { Component, ReactNode } from 'react';
-
-class ErrorBoundary extends Component<
-  { children: ReactNode; fallback?: ReactNode },
-  { hasError: boolean }
-> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <ErrorFallback />;
-    }
-    return this.props.children;
-  }
+if (hasWallet('sui')) {
+  // Sui wallet available
 }
 ```
 
 ---
 
-## Common Pitfalls
+## Anti-Patterns to Avoid
 
-### 1. Missing Key Prop
-
-```typescript
-// BAD - Using index as key
-{tokens.map((token, index) => (
-  <TokenRow key={index} token={token} />
-))}
-
-// GOOD - Using unique identifier
-{tokens.map((token) => (
-  <TokenRow key={token.coinType} token={token} />
-))}
-```
-
-### 2. Stale Closure in useEffect
+### 1. Hard-Coded Colors
 
 ```typescript
-// BAD - Stale closure
-useEffect(() => {
-  const interval = setInterval(() => {
-    console.log(count); // Always logs initial value
-  }, 1000);
-  return () => clearInterval(interval);
-}, []); // Missing count dependency
+// BAD - hard-coded hex
+<Div bg="#A78BFA" />
 
-// GOOD - Use ref or include in deps
-const countRef = useRef(count);
-countRef.current = count;
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    console.log(countRef.current); // Current value
-  }, 1000);
-  return () => clearInterval(interval);
-}, []);
+// GOOD - use constants
+import { ACCENT } from '@/constants/colors';
+<Div bg={ACCENT} />
 ```
 
-### 3. Hydration Mismatch
+### 2. Direct Zustand Destructuring
 
 ```typescript
-// BAD - Different values server vs client
-const [time, setTime] = useState(new Date().toISOString());
+// BAD - re-renders on any state change
+const { balances, loadingCoins } = useAppState();
 
-// GOOD - Initialize on client only
-const [time, setTime] = useState<string | null>(null);
-useEffect(() => {
-  setTime(new Date().toISOString());
-}, []);
+// GOOD - selector with useShallow
+const { balances, loadingCoins } = useAppState(
+  useShallow((s) => ({ balances: s.balances, loadingCoins: s.loadingCoins }))
+);
 ```
 
-### 4. Missing Cleanup
+### 3. Raw Privy Address Extraction
 
 ```typescript
-// GOOD - Always cleanup subscriptions
-useEffect(() => {
-  const subscription = client.subscribe(handleUpdate);
-  return () => subscription.unsubscribe();
-}, []);
+// BAD - manual linkedAccounts parsing
+const suiWallet = user?.linkedAccounts.find(...);
+
+// GOOD - use the hook
+const { getAddress } = useWalletAddresses();
+const suiAddress = getAddress('sui');
 ```
+
+### 4. Floating-Point Token Math
+
+```typescript
+// BAD - floating point
+const total = amount * 1e9;
+
+// GOOD - BigNumber / CurrencyAmount
+const total = FixedPointMath.toBigNumber(amount, 9);
+```
+
+### 5. Silent Error Swallowing
+
+```typescript
+// BAD - error silently lost
+try { await doThing(); } catch {}
+
+// GOOD - extract and show error
+try {
+  await doThing();
+} catch (err) {
+  const message = extractErrorMessage(err, 'Operation failed');
+  toasting.error({ action: 'Action', message });
+}
+```
+
+---
+
+## Accessibility Checklist
+
+When adding or modifying components, ensure:
+
+- [ ] Icon-only buttons have `aria-label` attribute
+- [ ] Interactive elements are keyboard focusable
+- [ ] Tab components use `role="tablist"`, `role="tab"`, `aria-selected`
+- [ ] Modals trap focus and return focus on close
+- [ ] Color is not the sole indicator of state (add text/icons)
+- [ ] Form inputs have associated labels
+- [ ] Tooltips are keyboard accessible (not hover-only)
 
 ---
 
@@ -810,16 +837,17 @@ useEffect(() => {
 |------|------------|---------|
 | Components | `kebab-case/index.tsx` | `wallet-button/index.tsx` |
 | Types | `{name}.types.ts` | `input-field.types.ts` |
-| Hooks | `use-{name}/index.ts` | `use-coins/index.ts` |
-| Utils | `{name}.ts` | `format.ts` |
+| Hooks | `use-{name}/index.ts` | `use-swap/index.ts` |
+| Utils | `{name}.ts` | `format-address.ts` |
 | Constants | `{category}.ts` | `colors.ts` |
-| SVG | `{name}.tsx` | `swap.tsx` |
+| API Routes | `{action}/route.ts` | `create-request/route.ts` |
+| SVG Icons | `{name}.tsx` | `wallet.tsx` |
 
 ---
 
 ## Available SVG Icons
 
-Import from `@/components/svg`:
+Import from `@/components/ui/icons`:
 
 ```typescript
 import {
@@ -827,11 +855,9 @@ import {
   CheckSVG, ErrorSVG, InfoSVG, SearchSVG,
   CaretDownSVG, CaretUpSVG, ChevronDownSVG, ChevronRightSVG,
   ExternalLinkSVG, LogoutSVG, GridSVG, BarsSVG,
-  // DeFi protocol icons
-  BluefinSVG, BucketSVG, ScallopSVG, NoodlesSVG, WalSVG,
-  // Pizza indicators
+  // Pizza indicators (balance quick-select)
   PizzaPart25SVG, PizzaPart50SVG, PizzaPart100SVG,
-} from '@/components/svg';
+} from '@/components/ui/icons';
 ```
 
 ---
@@ -842,18 +868,24 @@ import {
 pnpm dev          # Development server (port 3000)
 pnpm build        # Production build
 pnpm start        # Start production server
-pnpm lint         # Run ESLint
-pnpm type-check   # TypeScript check (npx tsc --noEmit)
+pnpm lint         # Biome check
+pnpm lint:fix     # Biome auto-fix
+pnpm format       # Biome format
+```
+
+Type checking (not in scripts):
+```bash
+npx tsc --noEmit  # TypeScript type check
 ```
 
 ---
 
 ## Important Project Notes
 
-1. **Privy App ID**: `cmla080ug00abk10dlfl0bplc`
-2. **Package Manager**: pnpm (9.1.0)
-3. **Node Version**: >=18.17 (see .nvmrc)
-4. **Active Views**: `views/swap` (main) and `views/account`
+1. **Package Manager**: pnpm (9.1.0, pinned)
+2. **Node Version**: >=18.17
+3. **Active Views**: `views/swap` (Swap + Bridge tabs) and `views/account` (Balances + Deposit + Withdraw)
+4. **Commit Style**: Gitmoji convention via commitlint
 
 ### Removed Features (Do Not Recreate)
 
@@ -874,25 +906,30 @@ import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 
 // Next.js
 import dynamic from 'next/dynamic';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 
 // Styling
 import { Div, Span, Button, Input } from '@stylin.js/elements';
-import { motion } from 'motion/react';
+import Motion from '@/components/ui/motion';
 
 // State
-import { useAppState } from '@/hooks/use-app-state';
+import { useShallow } from 'zustand/shallow';
+import { useAppState } from '@/hooks/store/use-app-state';
+
+// Entities
+import { Token, CurrencyAmount, FixedPointMath } from '@/lib/entities';
+import BigNumber from 'bignumber.js';
 
 // Utils
-import BigNumber from 'bignumber.js';
-import { toast } from 'react-hot-toast';
+import { extractErrorMessage } from '@/utils';
+import { toasting } from '@/components/ui/toast';
 
 // Constants
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
+import { CHAIN_REGISTRY } from '@/constants/chains';
 
 // Types
-import { ComponentProps } from './component.types';
+import type { ComponentProps } from './component.types';
 ```
 
 ---
