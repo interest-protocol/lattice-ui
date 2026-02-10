@@ -21,6 +21,7 @@ const handler: NextApiHandler = async (req, res) => {
     const response = await fetch(`${SOLVER_API_URL}/api/v1/fulfill`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
         requestId,
         userAddress,

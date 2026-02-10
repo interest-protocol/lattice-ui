@@ -10,7 +10,9 @@ const handler: NextApiHandler = async (req, res) => {
     return res.status(500).json({ error: 'SOLVER_API_URL not configured' });
 
   try {
-    const response = await fetch(`${SOLVER_API_URL}/api/v1/metadata`);
+    const response = await fetch(`${SOLVER_API_URL}/api/v1/metadata`, {
+      signal: AbortSignal.timeout(10_000),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -16,7 +16,8 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     const response = await fetch(
-      `${SOLVER_API_URL}/api/v1/requests/${requestId}`
+      `${SOLVER_API_URL}/api/v1/requests/${requestId}`,
+      { signal: AbortSignal.timeout(10_000) }
     );
 
     if (!response.ok) {

@@ -34,6 +34,7 @@ const handler: NextApiHandler = async (req, res) => {
     const response = await fetch(`${ENCLAVE_URL}/new_request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
         digest,
         chain_id: chainId,
