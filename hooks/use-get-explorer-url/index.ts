@@ -1,11 +1,11 @@
 import { useReadLocalStorage } from 'usehooks-ts';
 
 import {
-  Explorer,
   EXPLORER_PATH_GETTER,
   EXPLORER_STORAGE_KEY,
   EXPLORER_URL_GETTER,
-  ExplorerMode,
+  Explorer,
+  type ExplorerMode,
 } from '@/constants';
 
 import { useNetwork } from '../use-network';

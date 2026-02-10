@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { UseBackgroundMotionTranslate } from './use-background-position.types';
+import type { UseBackgroundMotionTranslate } from './use-background-position.types';
 
 export const useBackgroundMotionTranslate =
   create<UseBackgroundMotionTranslate>((set) => ({

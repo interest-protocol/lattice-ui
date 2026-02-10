@@ -5,7 +5,7 @@ import { path } from 'ramda';
 import useSWR from 'swr';
 
 import { INTEREST_LABS, LST_TYPES_MAP, STAKING_OBJECT } from '@/constants';
-import { Node } from '@/interface';
+import type { Node } from '@/interface';
 
 import useBlizzardSdk from '../use-blizzard-sdk';
 

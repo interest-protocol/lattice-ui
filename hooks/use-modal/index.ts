@@ -1,5 +1,5 @@
-import { DivProps } from '@stylin.js/elements';
-import { ReactNode } from 'react';
+import type { DivProps } from '@stylin.js/elements';
+import type { ReactNode } from 'react';
 import { create } from 'zustand';
 
 type MotionProps = Omit<

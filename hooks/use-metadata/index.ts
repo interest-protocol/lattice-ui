@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
 import { ASSET_METADATA } from '@/constants';
-import { AssetMetadata } from '@/interface';
+import type { AssetMetadata } from '@/interface';
 
 const useMetadata = (rawTypes: ReadonlyArray<string>) => {
   const types = rawTypes.filter((type) => type);
@@ -18,22 +18,19 @@ const useMetadata = (rawTypes: ReadonlyArray<string>) => {
   // Only use SWR for fetching missing metadata from API
   const { data: fetchedMetadata, isLoading } = useSWR<
     Record<string, AssetMetadata>
-  >(
-    missingTypes.length ? [useMetadata.name, missingTypes] : null,
-    async () => {
-      const response = await fetch(
-        `https://coin-metadata-api-production.up.railway.app/api/v1/fetch-coins?coinTypes=${missingTypes}`
-      );
-      const data: ReadonlyArray<AssetMetadata> = await response.json();
-      return data.reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.type]: item,
-        }),
-        {}
-      );
-    }
-  );
+  >(missingTypes.length ? [useMetadata.name, missingTypes] : null, async () => {
+    const response = await fetch(
+      `https://coin-metadata-api-production.up.railway.app/api/v1/fetch-coins?coinTypes=${missingTypes}`
+    );
+    const data: ReadonlyArray<AssetMetadata> = await response.json();
+    return data.reduce(
+      (acc, item) => ({
+        ...acc,
+        [item.type]: item,
+      }),
+      {}
+    );
+  });
 
   // Return combined metadata: local (always available) + fetched (if any)
   return {

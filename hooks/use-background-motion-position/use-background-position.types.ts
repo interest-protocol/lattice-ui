@@ -1,4 +1,4 @@
-import { MotionValue } from 'motion/react';
+import type { MotionValue } from 'motion/react';
 
 export interface UseBackgroundMotionTranslate {
   x?: MotionValue<number>;
