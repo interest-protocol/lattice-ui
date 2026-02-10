@@ -1,4 +1,3 @@
-import { Div, Span } from '@stylin.js/elements';
 import { type FC, useState } from 'react';
 
 import { useHealth } from '@/hooks/domain/use-health';
@@ -36,79 +35,46 @@ const HealthIndicator: FC = () => {
   const overallState = getOverallState(enclaveState, solverState);
 
   return (
-    <Div
-      position="fixed"
-      bottom="1rem"
-      left="1rem"
-      zIndex={1000}
-      display="flex"
-      flexDirection="column"
-      gap="0.5rem"
-    >
+    <div className="fixed bottom-4 left-4 z-[1000] flex flex-col gap-2">
       {expanded && (
-        <Div
-          bg="#1a1a1a"
-          borderRadius="8px"
-          border="1px solid #333"
-          p="0.75rem"
-          display="flex"
-          flexDirection="column"
-          gap="0.5rem"
-          minWidth="180px"
-        >
-          <Div display="flex" alignItems="center" gap="0.5rem">
-            <Div
-              width="8px"
-              height="8px"
-              borderRadius="50%"
-              bg={stateColors[enclaveState]}
+        <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-3 flex flex-col gap-2 min-w-[180px]">
+          <div className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ background: stateColors[enclaveState] }}
             />
-            <Span color="#fff" fontSize="12px">
-              Enclave
-            </Span>
-            <Span color="#888" fontSize="11px" ml="auto">
+            <span className="text-white text-xs">Enclave</span>
+            <span className="text-[#888] text-[11px] ml-auto">
               {enclaveState}
-            </Span>
-          </Div>
+            </span>
+          </div>
 
-          <Div display="flex" alignItems="center" gap="0.5rem">
-            <Div
-              width="8px"
-              height="8px"
-              borderRadius="50%"
-              bg={stateColors[solverState]}
+          <div className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ background: stateColors[solverState] }}
             />
-            <Span color="#fff" fontSize="12px">
-              Solver API
-            </Span>
-            <Span color="#888" fontSize="11px" ml="auto">
+            <span className="text-white text-xs">Solver API</span>
+            <span className="text-[#888] text-[11px] ml-auto">
               {solverState}
-            </Span>
-          </Div>
-        </Div>
+            </span>
+          </div>
+        </div>
       )}
 
-      <Div
-        display="flex"
-        alignItems="center"
-        gap="0.5rem"
-        bg="#1a1a1a"
-        borderRadius="8px"
-        border="1px solid #333"
-        p="0.5rem 0.75rem"
-        cursor="pointer"
-        nHover={{ bg: '#252525' }}
-        transition="background 0.2s"
+      <button
+        type="button"
+        className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg border border-[#333] py-2 px-3 cursor-pointer hover:bg-[#252525] transition-colors duration-200"
         onClick={() => setExpanded(!expanded)}
       >
-        <Div
-          width="8px"
-          height="8px"
-          borderRadius="50%"
-          bg={stateColors[overallState]}
-          boxShadow={`0 0 6px ${stateColors[overallState]}`}
+        <div
+          className="w-2 h-2 rounded-full"
+          style={{
+            background: stateColors[overallState],
+            boxShadow: `0 0 6px ${stateColors[overallState]}`,
+          }}
         />
-        <Span color="#fff" fontSize="12px" fontWeight="500">
+        <span className="text-white text-xs font-medium">
           {overallState === 'loading'
             ? 'Checking...'
             : overallState === 'healthy'
@@ -116,9 +82,9 @@ const HealthIndicator: FC = () => {
               : overallState === 'degraded'
                 ? 'Degraded Performance'
                 : 'Service Disruption'}
-        </Span>
-      </Div>
-    </Div>
+        </span>
+      </button>
+    </div>
   );
 };
 

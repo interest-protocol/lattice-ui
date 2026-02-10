@@ -1,4 +1,3 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -14,147 +13,89 @@ const DepositModal: FC = () => {
   };
 
   return (
-    <Div display="flex" flexDirection="column" gap="1.25rem" px="0.5rem">
-      <Div
-        p="1.25rem"
-        bg="#FFFFFF0D"
-        borderRadius="0.75rem"
-        border="1px solid #FFFFFF1A"
-        display="flex"
-        flexDirection="column"
-        gap="1rem"
-      >
-        <Div display="flex" alignItems="center" gap="0.75rem">
-          <Div
-            width="2.5rem"
-            height="2.5rem"
-            borderRadius="50%"
-            bg="#4DA2FF1A"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontSize="1.25rem"
+    <div className="flex flex-col gap-5 px-2">
+      <div className="p-5 bg-surface-light rounded-xl border border-surface-border flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+            style={{ background: '#4DA2FF1A' }}
           >
             S
-          </Div>
-          <Div>
-            <P color="#FFFFFF" fontWeight="600">
-              Sui Network
-            </P>
-            <P color="#FFFFFF80" fontSize="0.75rem">
+          </div>
+          <div>
+            <p className="text-white font-semibold">Sui Network</p>
+            <p className="text-text-muted text-xs">
               Send SUI tokens to your wallet address
-            </P>
-          </Div>
-        </Div>
+            </p>
+          </div>
+        </div>
         {suiAddress ? (
           <>
-            <Div
-              display="flex"
-              alignItems="center"
-              gap="0.75rem"
-              p="0.75rem"
-              bg="#000000"
-              borderRadius="0.5rem"
-              border="1px solid #FFFFFF1A"
-            >
-              <Span
-                flex="1"
-                color="#FFFFFF"
-                fontFamily="JetBrains Mono"
-                fontSize="0.75rem"
-                wordBreak="break-all"
-              >
+            <div className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border">
+              <span className="flex-1 text-white font-mono text-xs break-all">
                 {suiAddress}
-              </Span>
-              <Div
-                cursor="pointer"
+              </span>
+              <button
+                type="button"
+                className="cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
                 onClick={() => copyAddress(suiAddress)}
-                nHover={{ opacity: 0.7 }}
+                aria-label="Copy address"
               >
                 <CopySVG maxWidth="1rem" width="100%" />
-              </Div>
-            </Div>
-            <P color="#FFFFFF60" fontSize="0.75rem">
+              </button>
+            </div>
+            <p className="text-text-dimmed text-xs">
               Only send Sui network assets to this address
-            </P>
+            </p>
           </>
         ) : (
-          <P color="#FFFFFF60" fontSize="0.875rem">
+          <p className="text-text-dimmed text-sm">
             No Sui wallet connected. Create one from the Account page.
-          </P>
+          </p>
         )}
-      </Div>
+      </div>
 
-      <Div
-        p="1.25rem"
-        bg="#FFFFFF0D"
-        borderRadius="0.75rem"
-        border="1px solid #FFFFFF1A"
-        display="flex"
-        flexDirection="column"
-        gap="1rem"
-      >
-        <Div display="flex" alignItems="center" gap="0.75rem">
-          <Div
-            width="2.5rem"
-            height="2.5rem"
-            borderRadius="50%"
-            bg="#9945FF1A"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontSize="1.25rem"
+      <div className="p-5 bg-surface-light rounded-xl border border-surface-border flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+            style={{ background: '#9945FF1A' }}
           >
             S
-          </Div>
-          <Div>
-            <P color="#FFFFFF" fontWeight="600">
-              Solana Network
-            </P>
-            <P color="#FFFFFF80" fontSize="0.75rem">
+          </div>
+          <div>
+            <p className="text-white font-semibold">Solana Network</p>
+            <p className="text-text-muted text-xs">
               Fund via card, exchange, or external wallet
-            </P>
-          </Div>
-        </Div>
+            </p>
+          </div>
+        </div>
         {solanaAddress ? (
           <>
-            <Div
-              display="flex"
-              alignItems="center"
-              gap="0.75rem"
-              p="0.75rem"
-              bg="#000000"
-              borderRadius="0.5rem"
-              border="1px solid #FFFFFF1A"
-            >
-              <Span
-                flex="1"
-                color="#FFFFFF"
-                fontFamily="JetBrains Mono"
-                fontSize="0.75rem"
-                wordBreak="break-all"
-              >
+            <div className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border">
+              <span className="flex-1 text-white font-mono text-xs break-all">
                 {solanaAddress}
-              </Span>
-              <Div
-                cursor="pointer"
+              </span>
+              <button
+                type="button"
+                className="cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
                 onClick={() => copyAddress(solanaAddress)}
-                nHover={{ opacity: 0.7 }}
+                aria-label="Copy address"
               >
                 <CopySVG maxWidth="1rem" width="100%" />
-              </Div>
-            </Div>
-            <P color="#FFFFFF60" fontSize="0.75rem">
+              </button>
+            </div>
+            <p className="text-text-dimmed text-xs">
               Only send Solana network assets to this address
-            </P>
+            </p>
           </>
         ) : (
-          <P color="#FFFFFF60" fontSize="0.875rem">
+          <p className="text-text-dimmed text-sm">
             No Solana wallet connected. Connect one to fund via Privy.
-          </P>
+          </p>
         )}
-      </Div>
-    </Div>
+      </div>
+    </div>
   );
 };
 

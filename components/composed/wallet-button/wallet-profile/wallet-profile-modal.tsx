@@ -1,4 +1,3 @@
-import { Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { CopySVG, LogoutSVG } from '@/components/ui/icons';
@@ -25,38 +24,32 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
   };
 
   return (
-    <Div display="flex" flexDirection="column" gap="0.75rem">
-      <Div display="flex" alignItems="center" justifyContent="space-between">
-        <Span fontFamily="JetBrains Mono">{displayAddress}</Span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <span className="font-mono">{displayAddress}</span>
         {fullAddress && (
-          <Span
-            cursor="pointer"
+          <button
+            type="button"
+            className="cursor-pointer hover:text-accent bg-transparent border-none p-0"
             onClick={copyAddress}
-            nHover={{ color: '#A78BFA' }}
+            aria-label="Copy address"
           >
             <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-          </Span>
+          </button>
         )}
-      </Div>
-      <Div
-        p="1rem"
-        display="flex"
-        color="#E53E3E"
-        cursor="pointer"
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius="0.5rem"
-        border="1px solid #FFFFFF33"
+      </div>
+      <button
+        type="button"
+        className="p-4 flex text-[#E53E3E] cursor-pointer items-center justify-between rounded-lg border border-[#FFFFFF33] hover:opacity-90 bg-transparent w-full"
         onClick={() => {
           onLogout();
           onClose();
         }}
-        nHover={{ opacity: 0.9 }}
       >
-        <Span>Disconnect</Span>
+        <span>Disconnect</span>
         <LogoutSVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-      </Div>
-    </Div>
+      </button>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Div, Img, Input, Label, P, Span } from '@stylin.js/elements';
+import Image from 'next/image';
 import { type FC, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { SearchSVG } from '@/components/ui/icons';
@@ -25,36 +25,17 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
 
   return (
     <>
-      <Label
-        px="1rem"
-        mx="0.5rem"
-        gap="0.5rem"
-        bg="#FFFFFF1A"
-        display="flex"
-        alignItems="center"
-        borderRadius="0.75rem"
-      >
-        <Label color="#FFFFFF80">
+      <label className="px-4 mx-2 gap-2 bg-surface-lighter flex items-center rounded-xl">
+        <span className="text-text-muted">
           <SearchSVG maxWidth="1.25rem" width="100%" />
-        </Label>
-        <Input
-          py="1rem"
-          width="100%"
-          border="none"
-          outline="none"
-          bg="transparent"
-          color="#FFFFFF80"
+        </span>
+        <input
+          className="py-4 w-full border-none outline-none bg-transparent text-text-muted"
           placeholder="Search asset"
           onChange={(e) => setSearch(e.target.value.toLowerCase())}
         />
-      </Label>
-      <Div
-        gap="1rem"
-        px="0.5rem"
-        display="flex"
-        overflow="auto"
-        flexDirection="column"
-      >
+      </label>
+      <div className="gap-4 px-2 flex overflow-auto flex-col">
         {assetList
           .filter(
             ({ symbol, type, name }) =>
@@ -65,74 +46,45 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
                 symbol.toLowerCase().includes(search))
           )
           .map(({ symbol, type, decimals, name, iconUrl }) => (
-            <Div
-              p="1rem"
+            <button
+              type="button"
               key={type}
-              gap="0.5rem"
-              display="grid"
-              cursor="pointer"
-              borderRadius="1rem"
-              border="1px solid #FFFFFF1A"
-              gridTemplateColumns="2fr 1fr 1fr"
-              nHover={{ borderColor: '#A78BFA4D', bg: '#A78BFA33' }}
+              className="p-4 gap-2 grid cursor-pointer rounded-2xl border border-surface-border grid-cols-[2fr_1fr_1fr] hover:border-accent-4d hover:bg-accent-33 bg-transparent text-inherit text-left"
               onClick={() => {
                 setValue(`${fieldName}.type`, type);
                 handleClose();
               }}
             >
-              <Div display="flex" gap="1rem" alignItems="center">
-                <Span
-                  display="flex"
-                  overflow="hidden"
-                  borderRadius="0.5rem"
-                  width="2.5rem"
-                  height="2.5rem"
-                  minWidth="2.5rem"
-                  bg="#FFFFFF1A"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Img
+              <div className="flex gap-4 items-center">
+                <span className="flex overflow-hidden rounded-lg w-10 h-10 min-w-10 bg-surface-lighter items-center justify-center">
+                  <Image
                     alt={name}
-                    width="100%"
-                    height="100%"
-                    objectFit="contain"
+                    className="object-contain"
                     src={iconUrl}
+                    width={40}
+                    height={40}
                   />
-                </Span>
-                <P fontSize="0.875rem">{symbol}</P>
-              </Div>
-              <Div display="flex" alignItems="center">
-                <Span
-                  px="0.75rem"
-                  py="0.25rem"
-                  bg="#FFFFFF14"
-                  fontSize="0.825rem"
-                  borderRadius="1.5rem"
-                  textTransform="uppercase"
-                >
+                </span>
+                <p className="text-sm">{symbol}</p>
+              </div>
+              <div className="flex items-center">
+                <span className="px-3 py-1 bg-text-dim text-[0.825rem] rounded-3xl uppercase">
                   coin
-                </Span>
-              </Div>
-              <Div
-                gap="0.25rem"
-                display="flex"
-                textAlign="right"
-                flexDirection="column"
-                justifyContent="center"
-              >
-                <P fontSize="0.875rem" fontFamily="JetBrains Mono">
+                </span>
+              </div>
+              <div className="gap-1 flex text-right flex-col justify-center">
+                <p className="text-sm font-mono">
                   {
                     +FixedPointMath.toNumber(
                       balances[type] ?? ZERO_BIG_INT,
                       decimals
                     ).toFixed(4)
                   }
-                </P>
-              </Div>
-            </Div>
+                </p>
+              </div>
+            </button>
           ))}
-      </Div>
+      </div>
     </>
   );
 };

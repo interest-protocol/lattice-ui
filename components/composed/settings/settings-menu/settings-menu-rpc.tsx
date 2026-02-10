@@ -1,4 +1,3 @@
-import { Div, P } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
 import type { FC } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
@@ -8,35 +7,29 @@ import { RPC, RPC_DISPLAY, RPC_STORAGE_KEY, RPCs } from '@/constants';
 import type { SettingsMenusProps } from './settings-menu.types';
 import SettingsMenuItem from './settings-menu-item';
 
-const Motion = motion.create(Div);
-
 const SettingsMenuRPC: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
   const [localRPC, setRPC] = useLocalStorage<RPC>(RPC_STORAGE_KEY, RPC.Shinami);
 
   return (
-    <Motion>
-      <Div
-        px="1rem"
-        py="0.5rem"
-        display="flex"
-        cursor="pointer"
-        alignItems="center"
+    <div>
+      <button
+        type="button"
+        className="px-4 py-2 flex cursor-pointer items-center justify-between bg-transparent border-none w-full text-inherit"
         onClick={toggleShow}
-        justifyContent="space-between"
       >
-        <P>RPCs</P>
-        <Motion animate={{ rotate: show ? '90deg' : '0deg' }}>
+        <p>RPCs</p>
+        <motion.div animate={{ rotate: show ? '90deg' : '0deg' }}>
           <ChevronRightSVG
             width="100%"
             maxWidth="1.25rem"
             maxHeight="1.25rem"
           />
-        </Motion>
-      </Div>
+        </motion.div>
+      </button>
       <AnimatePresence>
         {show && (
-          <Motion
-            ml="1.5rem"
+          <motion.div
+            className="ml-6"
             style={{ originY: 0 }}
             exit={{ scaleY: 0, height: 0, opacity: 0 }}
             animate={{
@@ -56,10 +49,10 @@ const SettingsMenuRPC: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
                 tag={rpc === RPC.Shinami ? 'Recommended' : null}
               />
             ))}
-          </Motion>
+          </motion.div>
         )}
       </AnimatePresence>
-    </Motion>
+    </div>
   );
 };
 

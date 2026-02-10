@@ -1,4 +1,3 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
 import { type FC, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
@@ -6,8 +5,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { useModal } from '@/hooks/store/use-modal';
 import useEventListener from '@/hooks/ui/use-event-listener';
 import { useSafeHeight } from '@/hooks/ui/use-safe-height';
-
-const Motion = motion.create(Div);
 
 const OVERLAY_EXIT = { opacity: 0 };
 const OVERLAY_ANIMATE = { opacity: [0, 1] };
@@ -57,74 +54,53 @@ const ModalProvider: FC = () => {
   return (
     <AnimatePresence>
       {content && (
-        <Motion
-          inset="0"
-          bg="#0007"
-          zIndex="99"
-          width="100vw"
-          display="flex"
-          position="fixed"
-          height={safeHeight}
+        <motion.div
+          className="inset-0 fixed z-[99] w-screen flex justify-center items-end md:items-center"
+          style={{
+            background: '#0007',
+            height: safeHeight,
+            backdropFilter: 'blur(10px)',
+            paddingTop: `calc(100vh - ${safeHeight}px)`,
+          }}
           exit={OVERLAY_EXIT}
-          justifyContent="center"
           onClick={onHandleClose}
-          backdropFilter="blur(10px)"
           animate={OVERLAY_ANIMATE}
           transition={OVERLAY_TRANSITION}
-          pt={`calc(100vh - ${safeHeight}px)`}
-          alignItems={['flex-end', 'flex-end', 'center']}
-          {...overlayProps}
+          {...(overlayProps as Record<string, unknown>)}
         >
-          <Motion
-            display="flex"
-            maxWidth={['100vw', '100vw', '95vw']}
+          <motion.div
+            className="flex max-w-screen md:max-w-[95vw]"
+            style={{ maxHeight: safeHeight * 0.9 }}
             transition={CONTAINER_TRANSITION}
             animate={CONTAINER_ANIMATE}
-            maxHeight={[safeHeight * 0.9, safeHeight * 0.9, '90vh']}
-            {...containerProps}
+            {...(containerProps as Record<string, unknown>)}
             onClick={(e) => {
               e.stopPropagation();
               containerProps?.onClick?.(e);
             }}
           >
-            <Div
-              p="1rem"
-              gap="1.5rem"
-              width="27rem"
-              display="flex"
-              color="#ffffff"
-              maxHeight="100%"
-              flexDirection="column"
-              backdropFilter="blur(50px)"
-              borderRadius={['1rem 1rem 0 0', '1rem 1rem 0 0', '1rem']}
-              bg="linear-gradient(45deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.10))"
+            <div
+              className="p-4 gap-6 w-[27rem] flex text-white max-h-full flex-col rounded-t-[1rem] md:rounded-[1rem]"
+              style={{
+                backdropFilter: 'blur(50px)',
+                background:
+                  'linear-gradient(45deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.10))',
+              }}
             >
-              <Div
-                px="0.5rem"
-                pt="0.5rem"
-                display="flex"
-                justifyContent="space-between"
-              >
-                <P fontSize="1.25rem" fontWeight="600">
-                  {title}
-                </P>
-                <Span
-                  py="0.25rem"
-                  px="0.75rem"
-                  bg="#FFFFFF1A"
-                  display="flex"
-                  fontWeight="500"
-                  cursor="pointer"
-                  borderRadius="0.5rem"
+              <div className="px-2 pt-2 flex justify-between">
+                <p className="text-xl font-semibold">{title}</p>
+                <button
+                  type="button"
+                  className="py-1 px-3 bg-surface-lighter flex font-medium cursor-pointer rounded-lg border-none text-inherit"
                   onClick={handleClose}
                 >
                   ESC
-                </Span>
-              </Div>
+                </button>
+              </div>
               {content}
-            </Div>
-          </Motion>
-        </Motion>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );

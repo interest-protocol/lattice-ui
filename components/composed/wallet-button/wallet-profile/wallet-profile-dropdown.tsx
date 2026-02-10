@@ -1,4 +1,3 @@
-import { Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { CopySVG, LogoutSVG } from '@/components/ui/icons';
@@ -23,63 +22,38 @@ const WalletProfileDropdown: FC<
 
   return (
     <Motion
-      py="1rem"
-      zIndex="1"
-      mt="4.25rem"
-      gap="0.5rem"
-      width="20rem"
-      bg="#FFFFFF0D"
-      color="#ffffff"
-      overflow="hidden"
-      position="absolute"
-      borderRadius="1rem"
+      className="py-4 z-[1] mt-[4.25rem] gap-2 w-80 bg-surface-light text-white overflow-hidden absolute rounded-2xl flex-col hidden md:flex border border-surface-border"
+      style={{ backdropFilter: 'blur(50px)', originY: 0, right: 0 }}
       exit={{ scaleY: 0 }}
-      flexDirection="column"
-      style={{ originY: 0 }}
-      backdropFilter="blur(50px)"
-      right={['0.5rem', 'unset']}
       animate={{ scaleY: [0, 1] }}
-      border="1px solid #FFFFFF1A"
-      display={['none', 'none', 'flex']}
       onClick={(e) => e.stopPropagation()}
     >
-      <Div
-        px="1rem"
-        py="0.5rem"
-        display="flex"
-        flexDirection="column"
-        gap="0.5rem"
-      >
-        <Div display="flex" alignItems="center" justifyContent="space-between">
-          <Span fontFamily="JetBrains Mono">{displayAddress}</Span>
+      <div className="px-4 py-2 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="font-mono">{displayAddress}</span>
           {fullAddress && (
-            <Span
-              cursor="pointer"
+            <button
+              type="button"
+              className="cursor-pointer hover:text-accent bg-transparent border-none p-0"
               onClick={copyAddress}
-              nHover={{ color: '#A78BFA' }}
+              aria-label="Copy address"
             >
               <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-            </Span>
+            </button>
           )}
-        </Div>
-        <Div
-          p="1rem"
-          display="flex"
-          color="#E53E3E"
-          cursor="pointer"
-          alignItems="center"
-          justifyContent="space-between"
-          borderTop="1px solid #FFFFFF33"
+        </div>
+        <button
+          type="button"
+          className="p-4 flex text-[#E53E3E] cursor-pointer items-center justify-between border-t border-t-[#FFFFFF33] hover:opacity-90 bg-transparent w-full"
           onClick={() => {
             onLogout();
             close();
           }}
-          nHover={{ opacity: 0.9 }}
         >
-          <Span>Disconnect</Span>
+          <span>Disconnect</span>
           <LogoutSVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-        </Div>
-      </Div>
+        </button>
+      </div>
     </Motion>
   );
 };

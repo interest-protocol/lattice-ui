@@ -1,5 +1,4 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
-import { Div } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -40,14 +39,7 @@ const SwapForm: FC = () => {
 
   return (
     <FormProvider {...form}>
-      <Div
-        display="flex"
-        flexDirection="column"
-        gap="1rem"
-        p="1.5rem"
-        bg="#FFFFFF0D"
-        borderRadius="1rem"
-      >
+      <div className="flex flex-col gap-4 p-6 bg-surface-light rounded-2xl">
         <InputField
           name="from"
           label="From"
@@ -55,11 +47,9 @@ const SwapForm: FC = () => {
           topContent="balance"
         />
 
-        <Div
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          cursor="pointer"
+        <button
+          type="button"
+          className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
           onClick={() => {
             const fromValue = form.getValues('from');
             const toValue = form.getValues('to');
@@ -67,19 +57,10 @@ const SwapForm: FC = () => {
             form.setValue('to', fromValue);
           }}
         >
-          <Div
-            width="2.5rem"
-            height="2.5rem"
-            borderRadius="50%"
-            bg="#FFFFFF1A"
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            nHover={{ bg: '#FFFFFF2A' }}
-          >
-            ↓↑
-          </Div>
-        </Div>
+          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover">
+            &#x2193;&#x2191;
+          </div>
+        </button>
 
         <InputField
           name="to"
@@ -90,7 +71,7 @@ const SwapForm: FC = () => {
         />
 
         <SwapFormButton />
-      </Div>
+      </div>
     </FormProvider>
   );
 };

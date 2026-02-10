@@ -1,4 +1,3 @@
-import { Div, P } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
 import type { FC } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
@@ -13,8 +12,6 @@ import {
 import type { SettingsMenusProps } from './settings-menu.types';
 import SettingsMenuItem from './settings-menu-item';
 
-const Motion = motion.create(Div);
-
 const SettingsMenuExplorer: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
   const [localExplorer, setExplorer] = useLocalStorage<Explorer>(
     EXPLORER_STORAGE_KEY,
@@ -22,29 +19,25 @@ const SettingsMenuExplorer: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
   );
 
   return (
-    <Motion>
-      <Div
-        px="1rem"
-        py="0.5rem"
-        display="flex"
-        cursor="pointer"
-        alignItems="center"
+    <div>
+      <button
+        type="button"
+        className="px-4 py-2 flex cursor-pointer items-center justify-between bg-transparent border-none w-full text-inherit"
         onClick={toggleShow}
-        justifyContent="space-between"
       >
-        <P>Explorer</P>
-        <Motion animate={{ rotate: show ? '90deg' : '0deg' }}>
+        <p>Explorer</p>
+        <motion.div animate={{ rotate: show ? '90deg' : '0deg' }}>
           <ChevronRightSVG
             width="100%"
             maxWidth="1.25rem"
             maxHeight="1.25rem"
           />
-        </Motion>
-      </Div>
+        </motion.div>
+      </button>
       <AnimatePresence>
         {show && (
-          <Motion
-            ml="1.5rem"
+          <motion.div
+            className="ml-6"
             style={{ originY: 0 }}
             exit={{ scaleY: 0, height: 0, opacity: 0 }}
             animate={{
@@ -63,10 +56,10 @@ const SettingsMenuExplorer: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
                 onSelect={() => setExplorer(explorer)}
               />
             ))}
-          </Motion>
+          </motion.div>
         )}
       </AnimatePresence>
-    </Motion>
+    </div>
   );
 };
 

@@ -1,6 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, Div, H1, H2, Img, P } from '@stylin.js/elements';
+import Image from 'next/image';
 import { type FC, useCallback, useState } from 'react';
 
 import { CopySVG } from '@/components/ui/icons';
@@ -32,46 +32,31 @@ const AssetRow: FC<{
   decimals: number;
   isLoading: boolean;
 }> = ({ symbol, name, iconUrl, balance, decimals, isLoading }) => (
-  <Div
-    p="1rem"
-    bg="#FFFFFF0D"
-    display="flex"
-    alignItems="center"
-    borderRadius="0.5rem"
-    nHover={{ bg: '#FFFFFF1A' }}
-    justifyContent="space-between"
-  >
-    <Div display="flex" alignItems="center" gap="1rem">
+  <div className="p-4 bg-surface-light flex items-center rounded-lg hover:bg-surface-hover justify-between">
+    <div className="flex items-center gap-4">
       {iconUrl && (
-        <Img
+        <Image
           src={iconUrl}
           alt={symbol}
-          width="2.5rem"
-          height="2.5rem"
-          borderRadius="50%"
-          objectFit="cover"
+          width={40}
+          height={40}
+          className="rounded-full object-cover"
         />
       )}
-      <Div>
-        <P color="#FFFFFF" fontWeight="600" mb="0.25rem">
-          {symbol}
-        </P>
-        <P color="#FFFFFF80" fontSize="0.875rem">
-          {name}
-        </P>
-      </Div>
-    </Div>
-    <Div textAlign="right">
-      <P color="#FFFFFF" fontFamily="JetBrains Mono" fontWeight="600">
+      <div>
+        <p className="text-white font-semibold mb-1">{symbol}</p>
+        <p className="text-text-muted text-sm">{name}</p>
+      </div>
+    </div>
+    <div className="text-right">
+      <p className="text-white font-mono font-semibold">
         {isLoading
           ? '...'
           : formatMoney(FixedPointMath.toNumber(balance, decimals))}
-      </P>
-      <P color="#FFFFFF80" fontSize="0.875rem">
-        {symbol}
-      </P>
-    </Div>
-  </Div>
+      </p>
+      <p className="text-text-muted text-sm">{symbol}</p>
+    </div>
+  </div>
 );
 
 const BalancesView: FC<{
@@ -93,55 +78,41 @@ const BalancesView: FC<{
   creatingSuiWallet,
   createSuiWallet,
 }) => (
-  <Div display="flex" flexDirection="column" gap="1.5rem">
+  <div className="flex flex-col gap-6">
     {!displaySuiAddress ? (
-      <Button
-        all="unset"
-        width="100%"
-        p="1rem"
-        bg="#A78BFA1A"
-        color="#A78BFA"
-        borderRadius="0.5rem"
-        border="1px solid #A78BFA4D"
-        fontWeight="600"
-        fontSize="0.875rem"
-        textAlign="center"
-        cursor={creatingSuiWallet ? 'wait' : 'pointer'}
-        opacity={creatingSuiWallet ? '0.6' : '1'}
+      <button
+        type="button"
+        className="w-full p-4 rounded-lg font-semibold text-sm text-center border-none hover:opacity-80"
+        style={{
+          background: '#A78BFA1A',
+          color: '#A78BFA',
+          border: '1px solid #A78BFA4D',
+          cursor: creatingSuiWallet ? 'wait' : 'pointer',
+          opacity: creatingSuiWallet ? 0.6 : 1,
+        }}
         onClick={createSuiWallet}
         disabled={creatingSuiWallet}
-        nHover={{ bg: '#A78BFA2A' }}
       >
         {creatingSuiWallet ? 'Creating...' : 'Create Sui Wallet'}
-      </Button>
+      </button>
     ) : (
-      <Div
-        p="1.5rem"
-        bg="#FFFFFF0D"
-        borderRadius="1rem"
-        border="1px solid #FFFFFF1A"
-      >
-        <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
-          Sui Wallet
-        </H2>
-        <Div
-          display="flex"
-          alignItems="center"
-          gap="0.5rem"
-          mb="1rem"
-          cursor="pointer"
+      <div className="p-6 bg-surface-light rounded-2xl border border-surface-border">
+        <h2 className="text-white text-xl mb-2">Sui Wallet</h2>
+        <button
+          type="button"
+          className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
           onClick={() => {
             window.navigator.clipboard.writeText(displaySuiAddress);
             toasting.success({ action: 'Copy', message: 'Address copied' });
           }}
-          nHover={{ opacity: 0.7 }}
+          aria-label="Copy address"
         >
-          <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
+          <p className="text-text-muted text-xs font-mono">
             {formatAddress(displaySuiAddress)}
-          </P>
+          </p>
           <CopySVG maxWidth="0.875rem" width="100%" />
-        </Div>
-        <Div display="flex" flexDirection="column" gap="0.75rem">
+        </button>
+        <div className="flex flex-col gap-3">
           <AssetRow
             symbol="SUI"
             name={ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui'}
@@ -160,38 +131,28 @@ const BalancesView: FC<{
             decimals={XBRIDGE_DECIMALS}
             isLoading={suiLoading}
           />
-        </Div>
-      </Div>
+        </div>
+      </div>
     )}
 
     {solanaAddress && (
-      <Div
-        p="1.5rem"
-        bg="#FFFFFF0D"
-        borderRadius="1rem"
-        border="1px solid #FFFFFF1A"
-      >
-        <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
-          Solana Wallet
-        </H2>
-        <Div
-          display="flex"
-          alignItems="center"
-          gap="0.5rem"
-          mb="1rem"
-          cursor="pointer"
+      <div className="p-6 bg-surface-light rounded-2xl border border-surface-border">
+        <h2 className="text-white text-xl mb-2">Solana Wallet</h2>
+        <button
+          type="button"
+          className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
           onClick={() => {
             window.navigator.clipboard.writeText(solanaAddress);
             toasting.success({ action: 'Copy', message: 'Address copied' });
           }}
-          nHover={{ opacity: 0.7 }}
+          aria-label="Copy address"
         >
-          <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
+          <p className="text-text-muted text-xs font-mono">
             {formatAddress(solanaAddress, 4, 4)}
-          </P>
+          </p>
           <CopySVG maxWidth="0.875rem" width="100%" />
-        </Div>
-        <Div display="flex" flexDirection="column" gap="0.75rem">
+        </button>
+        <div className="flex flex-col gap-3">
           <AssetRow
             symbol="SOL"
             name="Solana"
@@ -210,10 +171,10 @@ const BalancesView: FC<{
             decimals={XBRIDGE_DECIMALS}
             isLoading={solLoading}
           />
-        </Div>
-      </Div>
+        </div>
+      </div>
     )}
-  </Div>
+  </div>
 );
 
 const AccountContent: FC = () => {
@@ -257,56 +218,23 @@ const AccountContent: FC = () => {
 
   if (!authenticated) {
     return (
-      <Div
-        flex="1"
-        mx="auto"
-        gap="1rem"
-        display="flex"
-        borderRadius="1rem"
-        flexDirection="column"
-        px={['0.5rem', '2rem']}
-        width={['100%', '34rem']}
-        my={['1rem', '1rem', '1rem', '1rem', '3rem']}
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Div
-          p="2rem"
-          bg="#FFFFFF0D"
-          borderRadius="1rem"
-          textAlign="center"
-          border="1px solid #FFFFFF1A"
-          width="100%"
-        >
-          <H2 color="#FFFFFF" mb="1rem">
-            Connect Your Wallet
-          </H2>
-          <P color="#FFFFFF80">
+      <div className="flex-1 mx-auto gap-4 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12 justify-center items-center">
+        <div className="p-8 bg-surface-light rounded-2xl text-center border border-surface-border w-full">
+          <h2 className="text-white mb-4">Connect Your Wallet</h2>
+          <p className="text-text-muted">
             Please connect your wallet to view your account
-          </P>
-        </Div>
-      </Div>
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Div
-      flex="1"
-      mx="auto"
-      gap="1.5rem"
-      display="flex"
-      borderRadius="1rem"
-      flexDirection="column"
-      px={['0.5rem', '2rem']}
-      width={['100%', '34rem']}
-      my={['1rem', '1rem', '1rem', '1rem', '3rem']}
-    >
-      <Div>
-        <H1 color="#FFFFFF" fontSize="2.5rem" mb="0.5rem">
-          Account
-        </H1>
-        <P color="#FFFFFF80">Manage your wallet and assets</P>
-      </Div>
+    <div className="flex-1 mx-auto gap-6 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12">
+      <div>
+        <h1 className="text-white text-4xl mb-2">Account</h1>
+        <p className="text-text-muted">Manage your wallet and assets</p>
+      </div>
 
       <Tabs
         tab={activeTab}
@@ -328,15 +256,7 @@ const AccountContent: FC = () => {
       )}
 
       {(activeTab === 1 || activeTab === 2) && (
-        <Div
-          p="1.5rem"
-          bg="#FFFFFF0D"
-          borderRadius="1rem"
-          border="1px solid #FFFFFF1A"
-          display="flex"
-          flexDirection="column"
-          gap="1.25rem"
-        >
+        <div className="p-6 bg-surface-light rounded-2xl border border-surface-border flex flex-col gap-5">
           <NetworkTabs network={network} setNetwork={setNetwork} />
 
           {activeTab === 1 ? (
@@ -344,9 +264,9 @@ const AccountContent: FC = () => {
           ) : (
             <WithdrawView network={network} />
           )}
-        </Div>
+        </div>
       )}
-    </Div>
+    </div>
   );
 };
 

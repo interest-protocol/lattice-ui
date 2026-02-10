@@ -1,4 +1,3 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import { QRCodeSVG } from 'qrcode.react';
 import type { FC } from 'react';
 
@@ -24,76 +23,48 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
 
   if (!address) {
     return (
-      <Div textAlign="center" py="2rem">
-        <P color="#FFFFFF80" fontSize="0.875rem">
-          {config.noWalletMessage}
-        </P>
-      </Div>
+      <div className="text-center py-8">
+        <p className="text-text-muted text-sm">{config.noWalletMessage}</p>
+      </div>
     );
   }
 
   return (
-    <Div
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      gap="1.25rem"
-    >
-      <Div
-        p="1rem"
-        bg="#FFFFFF"
-        borderRadius="0.75rem"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+    <div className="flex flex-col items-center gap-5">
+      <div className="p-4 bg-white rounded-xl flex items-center justify-center">
         <QRCodeSVG value={address} size={160} level="H" />
-      </Div>
+      </div>
 
-      <Div width="100%">
-        <P color="#FFFFFF80" fontSize="0.75rem" mb="0.5rem" textAlign="center">
+      <div className="w-full">
+        <p className="text-text-muted text-xs mb-2 text-center">
           {config.displayName} Deposit Address
-        </P>
-        <Div
-          display="flex"
-          alignItems="center"
-          gap="0.75rem"
-          p="0.75rem"
-          bg="#000000"
-          borderRadius="0.5rem"
-          border="1px solid #FFFFFF1A"
-          cursor="pointer"
+        </p>
+        <button
+          type="button"
+          className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light w-full"
           onClick={copyAddress}
-          nHover={{ bg: '#FFFFFF0D' }}
         >
-          <Span
-            flex="1"
-            color="#FFFFFF"
-            fontFamily="JetBrains Mono"
-            fontSize="0.6875rem"
-            wordBreak="break-all"
-            textAlign="center"
-          >
+          <span className="flex-1 text-white font-mono text-[0.6875rem] break-all text-center">
             {address}
-          </Span>
-          <Div nHover={{ opacity: 0.7 }}>
+          </span>
+          <div className="hover:opacity-70">
             <CopySVG maxWidth="1rem" width="100%" />
-          </Div>
-        </Div>
-      </Div>
+          </div>
+        </button>
+      </div>
 
-      <Div
-        p="0.75rem"
-        bg={`${config.color}1A`}
-        borderRadius="0.5rem"
-        border={`1px solid ${config.color}4D`}
-        width="100%"
+      <div
+        className="p-3 rounded-lg w-full"
+        style={{
+          background: `${config.color}1A`,
+          border: `1px solid ${config.color}4D`,
+        }}
       >
-        <P color="#FFFFFF" fontSize="0.8125rem" textAlign="center">
+        <p className="text-white text-[0.8125rem] text-center">
           Only send {config.displayName} network assets to this address
-        </P>
-      </Div>
-    </Div>
+        </p>
+      </div>
+    </div>
   );
 };
 

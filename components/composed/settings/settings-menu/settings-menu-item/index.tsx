@@ -1,4 +1,3 @@
-import { Div, Small, Span } from '@stylin.js/elements';
 import { memo } from 'react';
 
 import { ToggleButton } from '@/components/ui/toggle';
@@ -7,20 +6,17 @@ import type { SettingsMenuItemProps } from './settings-menu-item.types';
 
 const SettingsMenuItem = memo<SettingsMenuItemProps>(
   ({ name, title, selected, onSelect, withBorder, tag }) => (
-    <Div
-      mx="1rem"
-      py="0.5rem"
-      display="flex"
+    <button
+      type="button"
+      className={`mx-4 py-2 flex justify-between bg-transparent border-none w-full text-inherit cursor-pointer ${withBorder ? 'border-t border-t-[#242424]' : ''}`}
       onClick={onSelect}
-      justifyContent="space-between"
-      {...(withBorder && { borderTop: '1px solid #242424' })}
     >
-      <Span>
+      <span>
         {title}
-        {tag && <Small opacity="0.6"> ({tag})</Small>}
-      </Span>
+        {tag && <small className="opacity-60"> ({tag})</small>}
+      </span>
       <ToggleButton name={name} defaultValue={selected} onChange={onSelect} />
-    </Div>
+    </button>
   )
 );
 
