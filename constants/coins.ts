@@ -1,8 +1,11 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 import type { AssetMetadata } from '@/interface';
+import { Token } from '@/lib/entities/token';
 
 export const SOL_TYPE = 'sol';
+
+export { Token };
 
 export const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
 export const SOL_DECIMALS = 9;

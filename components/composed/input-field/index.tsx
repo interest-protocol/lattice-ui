@@ -2,7 +2,7 @@ import { Div, Input, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+import { CurrencyAmount, Token } from '@/lib/entities';
 import { parseInputEventToNumberString } from '@/utils';
 
 import InputFieldAsset from './input-field-asset';
@@ -19,7 +19,7 @@ const InputField: FC<InputFieldProps> = ({
   topContent,
   oppositeName,
 }) => {
-  const { register, setValue } = useFormContext();
+  const { register, setValue, getValues } = useFormContext();
 
   return (
     <Div
@@ -59,10 +59,12 @@ const InputField: FC<InputFieldProps> = ({
           {...register(`${name}.value`, {
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
               const value = parseInputEventToNumberString(event);
+              const tokenType = getValues(`${name}.type`) as string;
+              const token = Token.fromType(tokenType);
               setValue(`${name}.value`, value);
               setValue(
                 `${name}.valueBN`,
-                FixedPointMath.toBigNumber(Number(value) || 0)
+                CurrencyAmount.fromHumanAmount(token, value || '0').raw
               );
             },
           })}

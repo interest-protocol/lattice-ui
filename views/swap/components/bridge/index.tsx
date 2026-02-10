@@ -1,17 +1,16 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Div } from '@stylin.js/elements';
 import BigNumberJS from 'bignumber.js';
 import type BigNumber from 'bignumber.js';
 import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { SOL_DECIMALS, XBRIDGE_DECIMALS } from '@/constants';
+import { XBRIDGE_DECIMALS } from '@/constants';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
-import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useBridge, { type BridgeDirection } from '@/hooks/domain/use-bridge';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { Token } from '@/lib/entities';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
@@ -22,14 +21,14 @@ import type { TokenKey, TokenOption, ValidationResult } from './bridge.types';
 
 const TOKEN_OPTIONS: Record<string, TokenOption> = {
   SUI: {
-    symbol: 'SUI',
-    iconUrl: ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl,
-    decimals: 9,
+    symbol: Token.SUI.symbol,
+    iconUrl: Token.SUI.iconUrl,
+    decimals: Token.SUI.decimals,
   },
   SOL: {
-    symbol: 'SOL',
-    iconUrl: ASSET_METADATA[SOL_TYPE]?.iconUrl,
-    decimals: SOL_DECIMALS,
+    symbol: Token.SOL.symbol,
+    iconUrl: Token.SOL.iconUrl,
+    decimals: Token.SOL.decimals,
   },
 };
 
@@ -68,7 +67,7 @@ const Bridge: FC = () => {
     if (sourceNetwork === 'sui') {
       return selectedToken === 'SUI' ? 9 : XBRIDGE_DECIMALS;
     }
-    return selectedToken === 'SOL' ? SOL_DECIMALS : XBRIDGE_DECIMALS;
+    return selectedToken === 'SOL' ? Token.SOL.decimals : XBRIDGE_DECIMALS;
   };
 
   const balanceLoading = sourceNetwork === 'sui' ? suiLoading : solLoading;

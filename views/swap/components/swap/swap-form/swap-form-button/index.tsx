@@ -3,12 +3,13 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-import { CHAIN_REGISTRY, chainKeyFromTokenType } from '@/constants/chains';
+import { CHAIN_REGISTRY } from '@/constants/chains';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
-import { validateSwapInput } from '@/utils/gas-validation';
+import { CurrencyAmount, Token } from '@/lib/entities';
+import { validateSwapAmount } from '@/utils/gas-validation';
 
 const SwapFormButton: FC = () => {
   const { control } = useFormContext();
@@ -18,28 +19,22 @@ const SwapFormButton: FC = () => {
 
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
-  const { balances: suiBalances } = useSuiBalances(suiAddress);
-  const { balances: solanaBalances } = useSolanaBalances(solanaAddress);
+  const { amounts: suiAmounts } = useSuiBalances(suiAddress);
+  const { amounts: solanaAmounts } = useSolanaBalances(solanaAddress);
 
-  const sourceChain = chainKeyFromTokenType(fromType);
-  const destChain = chainKeyFromTokenType(toType);
-  const sourceConfig = CHAIN_REGISTRY[sourceChain];
-  const destConfig = CHAIN_REGISTRY[destChain];
+  const sourceToken = Token.fromType(fromType);
+  const destToken = Token.fromType(toType);
+  const sourceConfig = CHAIN_REGISTRY[sourceToken.chainId];
+  const destConfig = CHAIN_REGISTRY[destToken.chainId];
 
   const validation = useMemo(() => {
-    const token = sourceConfig.nativeToken.symbol as 'SUI' | 'SOL';
-    return validateSwapInput({
-      amount: fromValue,
-      token,
-      gasBalance: sourceChain === 'sui' ? suiBalances.sui : solanaBalances.sol,
-    });
-  }, [
-    fromValue,
-    sourceChain,
-    sourceConfig.nativeToken.symbol,
-    suiBalances.sui,
-    solanaBalances.sol,
-  ]);
+    const amount = CurrencyAmount.fromHumanAmount(
+      sourceToken,
+      fromValue || '0'
+    );
+    const gasBalance = sourceToken.isSui() ? suiAmounts.sui : solanaAmounts.sol;
+    return validateSwapAmount(amount, gasBalance);
+  }, [fromValue, sourceToken, suiAmounts.sui, solanaAmounts.sol]);
 
   const handleSwap = () => {
     // Swap execution handled by parent form submission

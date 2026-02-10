@@ -5,6 +5,7 @@ import useSWR from 'swr';
 
 import { WSUI_SOLANA_MINT } from '@/constants';
 import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
+import { CurrencyAmount, Token } from '@/lib/entities';
 import { balanceSwrConfig } from '@/lib/swr/config';
 
 const DEFAULT_SOLANA_BALANCES = {
@@ -44,8 +45,16 @@ const useSolanaBalances = (address: string | null) => {
 
   const balances = useMemo(() => data ?? DEFAULT_SOLANA_BALANCES, [data]);
 
+  const amounts = useMemo(
+    () => ({
+      sol: CurrencyAmount.fromRawAmount(Token.SOL, balances.sol),
+    }),
+    [balances.sol]
+  );
+
   return {
     balances,
+    amounts,
     isLoading,
     mutate,
   };

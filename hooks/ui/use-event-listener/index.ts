@@ -9,7 +9,6 @@ const useEventListener = (
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: stable ref pattern
   useEffect(() => {
     const handler = (event?: Event) => callbackRef.current(event);
     if (runOnInit) handler();

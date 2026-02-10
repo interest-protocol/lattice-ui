@@ -4,6 +4,7 @@ import useSWR from 'swr';
 
 import { WSOL_SUI_TYPE } from '@/constants';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
+import { CurrencyAmount, Token } from '@/lib/entities';
 import { balanceSwrConfig } from '@/lib/swr/config';
 
 const DEFAULT_SUI_BALANCES = { sui: new BigNumber(0), wsol: new BigNumber(0) };
@@ -30,8 +31,16 @@ const useSuiBalances = (address: string | null) => {
 
   const balances = useMemo(() => data ?? DEFAULT_SUI_BALANCES, [data]);
 
+  const amounts = useMemo(
+    () => ({
+      sui: CurrencyAmount.fromRawAmount(Token.SUI, balances.sui),
+    }),
+    [balances.sui]
+  );
+
   return {
     balances,
+    amounts,
     isLoading,
     mutate,
   };

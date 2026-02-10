@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
+import type { CurrencyAmount } from '@/lib/entities/currency-amount';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
 interface ValidationResult {
@@ -105,6 +106,41 @@ export const validateSwapInput = ({
     amount: amountNum,
     isGasToken,
     symbol: token,
+    displayDecimals: config.displayPrecision,
+  });
+  if (gasError) return gasError;
+
+  return { isDisabled: false, message: null };
+};
+
+/**
+ * CurrencyAmount-based swap validation — simpler API with fewer params.
+ * Token carries its own decimals/chain info, so we derive everything.
+ */
+export const validateSwapAmount = (
+  amount: CurrencyAmount,
+  gasBalance: CurrencyAmount
+): SwapValidationResult => {
+  if (amount.isZero() || !amount.isPositive()) {
+    return { isDisabled: true, message: 'Enter amount' };
+  }
+
+  const humanAmount = amount.toNumber();
+  const symbol = amount.token.symbol as 'SUI' | 'SOL';
+
+  const alphaError = validateAlphaLimit(symbol, humanAmount);
+  if (alphaError) return alphaError;
+
+  const config = CHAIN_REGISTRY[amount.token.chainId];
+  const isGasToken = gasBalance.token.equals(amount.token);
+
+  const gasError = validateGasBalance({
+    gasBalance: gasBalance.raw,
+    gasDecimals: config.decimals,
+    minGas: config.minGas,
+    amount: humanAmount,
+    isGasToken,
+    symbol,
     displayDecimals: config.displayPrecision,
   });
   if (gasError) return gasError;
