@@ -58,7 +58,7 @@ const WalletProfile: FC = () => {
   return (
     <>
       <Div
-        ref={menuRef as any}
+        ref={menuRef as never}
         alignItems="flex-end"
         flexDirection="column"
         display={['none', 'none', 'flex']}

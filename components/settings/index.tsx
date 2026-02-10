@@ -1,4 +1,4 @@
-import { Button, Div, type DivElementProps, Span } from '@stylin.js/elements';
+import { Button, Div, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { type FC, useState } from 'react';
 
@@ -10,13 +10,13 @@ import SettingsMenu from './settings-menu';
 const Settings: FC = () => {
   const [show, setShow] = useState(false);
 
-  const menuRef = useClickOutsideListenerRef<DivElementProps>(() =>
+  const menuRef = useClickOutsideListenerRef<HTMLDivElement>(() =>
     setShow(false)
   );
 
   return (
     <Div
-      ref={menuRef}
+      ref={menuRef as never}
       display="flex"
       position="relative"
       alignItems="flex-end"
