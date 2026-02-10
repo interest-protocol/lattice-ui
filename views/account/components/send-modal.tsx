@@ -18,7 +18,9 @@ import { formatMoney } from '@/utils';
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
   const handleClose = useModal((s) => s.handleClose);
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const [network, setNetwork] = useState<ChainKey>('solana');
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);

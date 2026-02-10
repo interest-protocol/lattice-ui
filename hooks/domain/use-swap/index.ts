@@ -48,7 +48,9 @@ export const useSwap = () => {
 
   const suiClient = useSuiClient();
   const solanaRpc = useSolanaRpc();
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const { balances: suiBalances, mutate: mutateSuiBalances } =
     useSuiBalances(suiAddress);

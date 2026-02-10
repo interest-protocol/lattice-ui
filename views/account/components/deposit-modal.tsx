@@ -5,7 +5,9 @@ import { CopySVG } from '@/components/ui/icons';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
 const DepositModal: FC = () => {
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const copyAddress = (addr: string) => {
     window.navigator.clipboard.writeText(addr);

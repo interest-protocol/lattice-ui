@@ -47,7 +47,9 @@ export const useBridge = () => {
   const [error, setError] = useState<string | null>(null);
 
   const solanaRpc = useSolanaRpc();
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
   const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);

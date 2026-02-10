@@ -179,7 +179,9 @@ const BalancesView: FC<{
 
 const AccountContent: FC = () => {
   const { user, authenticated } = usePrivy();
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
   const [creatingSuiWallet, setCreatingSuiWallet] = useState(false);
   const [newSuiAddress, setNewSuiAddress] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);

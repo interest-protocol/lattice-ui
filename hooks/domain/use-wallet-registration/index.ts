@@ -22,7 +22,9 @@ type LinkedUsers = Record<string, boolean>;
 
 const useWalletRegistration = () => {
   const { user, authenticated, ready } = usePrivy();
-  const { hasSuiWallet, hasSolanaWallet } = useWalletAddresses();
+  const { hasWallet } = useWalletAddresses();
+  const hasSuiWallet = hasWallet('sui');
+  const hasSolanaWallet = hasWallet('solana');
   const [mounted, setMounted] = useState(false);
   const [registeredUsers, setRegisteredUsers] =
     useLocalStorage<RegisteredUsers>(WALLETS_REGISTERED_KEY, {});

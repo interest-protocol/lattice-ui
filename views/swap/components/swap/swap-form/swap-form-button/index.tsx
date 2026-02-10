@@ -15,7 +15,9 @@ const SwapFormButton: FC = () => {
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const { amounts: suiAmounts } = useSuiBalances(suiAddress);
   const { amounts: solanaAmounts } = useSolanaBalances(solanaAddress);

@@ -7,14 +7,12 @@ import {
   parseBigNumberish,
   parseToPositiveStringNumber,
   ZERO_BIG_INT,
-  ZERO_BIG_NUMBER,
 } from './bn';
 
 describe('bn utilities', () => {
-  describe('ZERO_BIG_INT / ZERO_BIG_NUMBER', () => {
+  describe('ZERO_BIG_INT', () => {
     it('is zero', () => {
       expect(ZERO_BIG_INT).toBe(0n);
-      expect(ZERO_BIG_NUMBER).toBe(0n);
     });
   });
 

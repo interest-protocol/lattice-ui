@@ -36,7 +36,9 @@ const OPPOSITE_CHAIN: Record<ChainKey, ChainKey> = {
 
 const Bridge: FC = () => {
   const { bridge, status, isLoading } = useBridge();
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const [sourceNetwork, setSourceNetwork] = useState<ChainKey>('solana');
   const [selectedToken, setSelectedToken] = useState<TokenKey>('SOL');

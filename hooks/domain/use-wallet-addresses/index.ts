@@ -7,14 +7,6 @@ export interface WalletAddresses {
   addresses: Record<ChainKey, string | null>;
   getAddress: (chain: ChainKey) => string | null;
   hasWallet: (chain: ChainKey) => boolean;
-  /** @deprecated Use addresses.sui */
-  suiAddress: string | null;
-  /** @deprecated Use addresses.solana */
-  solanaAddress: string | null;
-  /** @deprecated Use hasWallet('sui') */
-  hasSuiWallet: boolean;
-  /** @deprecated Use hasWallet('solana') */
-  hasSolanaWallet: boolean;
 }
 
 const findWalletAddress = (
@@ -63,10 +55,6 @@ export const useWalletAddresses = (): WalletAddresses => {
       addresses,
       getAddress,
       hasWallet,
-      suiAddress: addresses.sui,
-      solanaAddress: addresses.solana,
-      hasSuiWallet: hasWallet('sui'),
-      hasSolanaWallet: hasWallet('solana'),
     };
   }, [user]);
 };

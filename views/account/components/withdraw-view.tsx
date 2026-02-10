@@ -20,7 +20,9 @@ interface WithdrawViewProps {
 
 const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const { authenticated, user } = usePrivy();
-  const { suiAddress, solanaAddress } = useWalletAddresses();
+  const { getAddress } = useWalletAddresses();
+  const suiAddress = getAddress('sui');
+  const solanaAddress = getAddress('solana');
 
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
   const [recipient, setRecipient] = useState('');
