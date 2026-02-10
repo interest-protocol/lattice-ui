@@ -2,7 +2,7 @@ import { Div, P, Span } from '@stylin.js/elements';
 import { type FC, useState } from 'react';
 
 import Tabs from '@/components/ui/tabs';
-import { ALPHA_MAX_SOL, ALPHA_MAX_SUI } from '@/constants/alpha-limits';
+import { CHAIN_REGISTRY } from '@/constants/chains';
 
 import { Bridge, Swap } from './components';
 
@@ -43,11 +43,11 @@ const SwapContent: FC = () => {
           This is an early alpha version with limited liquidity. Transactions
           are capped at{' '}
           <Span color="#FFFFFF" fontWeight="600">
-            {ALPHA_MAX_SUI} SUI
+            {CHAIN_REGISTRY.sui.alphaMax} SUI
           </Span>{' '}
           and{' '}
           <Span color="#FFFFFF" fontWeight="600">
-            {ALPHA_MAX_SOL} SOL
+            {CHAIN_REGISTRY.solana.alphaMax} SOL
           </Span>
           . You must have enough native tokens to cover gas fees.
         </P>

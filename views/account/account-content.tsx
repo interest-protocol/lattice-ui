@@ -14,6 +14,7 @@ import {
   WSUI_SOLANA_MINT,
   XBRIDGE_DECIMALS,
 } from '@/constants';
+import type { ChainKey } from '@/constants/chains';
 import { ASSET_METADATA } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
@@ -23,8 +24,6 @@ import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
 import { formatAddress, formatMoney } from '@/utils';
 
 import { DepositView, NetworkTabs, WithdrawView } from './components';
-
-type NetworkType = 'sui' | 'solana';
 
 const AssetRow: FC<{
   symbol: string;
@@ -224,7 +223,7 @@ const AccountContent: FC = () => {
   const [creatingSuiWallet, setCreatingSuiWallet] = useState(false);
   const [newSuiAddress, setNewSuiAddress] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [network, setNetwork] = useState<NetworkType>('solana');
+  const [network, setNetwork] = useState<ChainKey>('solana');
 
   // Use newly created address if the hook doesn't have one yet
   const displaySuiAddress = suiAddress ?? newSuiAddress;

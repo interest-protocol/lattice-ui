@@ -1,8 +1,8 @@
 import { Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
-import Motion from '@/components/ui/motion';
 import { CopySVG, LogoutSVG } from '@/components/ui/icons';
+import Motion from '@/components/ui/motion';
 import { toasting } from '@/components/ui/toast';
 
 import type { WalletProfileDropdownProps } from './wallet-profile.types';

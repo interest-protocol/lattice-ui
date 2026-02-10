@@ -1,32 +1,27 @@
-import { SolanaPubkey, SuiAddress } from '@interest-protocol/registry-sdk';
-import {
-  ChainId,
-  DWalletAddress,
-  WalletKey,
-} from '@interest-protocol/xswap-sdk';
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { DWalletAddress, WalletKey } from '@interest-protocol/xswap-sdk';
 import { usePrivy } from '@privy-io/react-auth';
 import type BigNumber from 'bignumber.js';
 import { useCallback, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/ui/toast';
+import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
 import {
   BALANCE_POLL_INTERVAL_MS,
   BALANCE_POLL_MAX_ATTEMPTS,
-  NATIVE_SOL_MINT,
   REQUEST_DEADLINE_MS,
-  SOL_TYPE,
 } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import type { ChainAdapter } from '@/lib/chain-adapters';
+import { sdkChainIdFromKey } from '@/lib/chain-adapters';
+import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
+import { createSuiAdapter } from '@/lib/chain-adapters/sui-adapter';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
-import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
 import { fetchMetadata } from '@/lib/solver/client';
-import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
 
@@ -64,6 +59,24 @@ export const useSwap = () => {
   const solanaBalancesRef = useRef(solanaBalances);
   solanaBalancesRef.current = solanaBalances;
 
+  const getAdapter = useCallback(
+    (chainKey: ChainKey): ChainAdapter => {
+      const adapterFactories: Record<ChainKey, () => ChainAdapter> = {
+        sui: () => createSuiAdapter(suiClient, mutateSuiBalances),
+        solana: () =>
+          createSolanaAdapter(solanaConnection, mutateSolanaBalances),
+      };
+      return adapterFactories[chainKey]();
+    },
+    [suiClient, solanaConnection, mutateSuiBalances, mutateSolanaBalances]
+  );
+
+  const getBalancesRef = useCallback(
+    (chainKey: ChainKey): Record<string, BigNumber> =>
+      chainKey === 'sui' ? suiBalancesRef.current : solanaBalancesRef.current,
+    []
+  );
+
   const swap = useCallback(
     async ({ fromType, toType, fromAmount }: SwapParams) => {
       const SWAP_TOAST_ID = 'swap-operation';
@@ -76,17 +89,20 @@ export const useSwap = () => {
         return;
       }
 
-      const isSuiToSol = fromType === SUI_TYPE_ARG && toType === SOL_TYPE;
-      const isSolToSui = fromType === SOL_TYPE && toType === SUI_TYPE_ARG;
+      const sourceChainKey = chainKeyFromTokenType(fromType);
+      const destChainKey = chainKeyFromTokenType(toType);
 
-      if (!isSuiToSol && !isSolToSui) {
+      if (sourceChainKey === destChainKey) {
         toasting.error({ action: 'Swap', message: 'Invalid swap direction' });
         return;
       }
 
-      const sourceChain = isSuiToSol ? ChainId.Sui : ChainId.Solana;
-      const destinationChain = isSuiToSol ? ChainId.Solana : ChainId.Sui;
+      const sourceChain = sdkChainIdFromKey(sourceChainKey);
+      const destinationChain = sdkChainIdFromKey(destChainKey);
       const dwalletAddress = DWalletAddress[sourceChain];
+
+      const sourceAdapter = getAdapter(sourceChainKey);
+      const destAdapter = getAdapter(destChainKey);
 
       try {
         setStatus('depositing');
@@ -96,36 +112,18 @@ export const useSwap = () => {
           SWAP_TOAST_ID
         );
 
-        let depositDigest: string;
+        invariant(
+          suiAddress && solanaAddress,
+          'Both wallets must be connected'
+        );
 
-        if (isSuiToSol) {
-          invariant(suiAddress, 'Sui wallet not connected');
+        const { txId: depositDigest } = await sourceAdapter.deposit({
+          userId: user.id,
+          recipient: dwalletAddress,
+          amount: fromAmount.toString(),
+        });
 
-          const result = await sendSui({
-            userId: user.id,
-            recipient: dwalletAddress,
-            amount: fromAmount.toString(),
-          });
-
-          depositDigest = result.digest;
-
-          await suiClient.waitForTransaction({
-            digest: depositDigest,
-            options: { showEffects: true },
-          });
-        } else {
-          invariant(solanaAddress, 'Solana wallet not connected');
-
-          const result = await sendSolana({
-            userId: user.id,
-            recipient: dwalletAddress,
-            amount: fromAmount.toString(),
-          });
-
-          depositDigest = result.signature;
-
-          await confirmSolanaTransaction(solanaConnection, depositDigest);
-        }
+        await sourceAdapter.confirmTransaction(depositDigest);
 
         setStatus('verifying');
         toasting.update(SWAP_TOAST_ID, 'Verifying deposit on-chain...');
@@ -139,26 +137,19 @@ export const useSwap = () => {
         const solverSuiAddress = metadata.solver.sui;
         const solverSolanaAddress = metadata.solver.solana;
 
-        invariant(
-          suiAddress && solanaAddress,
-          'Both wallets must be connected'
+        const sourceAddress = sourceAdapter.encodeAddress(
+          sourceChainKey === 'sui' ? suiAddress : solanaAddress
         );
-
-        const destinationAddress = isSuiToSol
-          ? SolanaPubkey.fromBs58(solanaAddress).toBytes()
-          : SuiAddress.fromHex(suiAddress).toBytes();
-        const solverSender = isSuiToSol
-          ? SolanaPubkey.fromBs58(solverSolanaAddress).toBytes()
-          : SuiAddress.fromHex(solverSuiAddress).toBytes();
-        const solverRecipient = isSuiToSol
-          ? SuiAddress.fromHex(solverSuiAddress).toBytes()
-          : SolanaPubkey.fromBs58(solverSolanaAddress).toBytes();
-        const destinationToken = isSuiToSol
-          ? SolanaPubkey.fromBs58(NATIVE_SOL_MINT).toBytes()
-          : new TextEncoder().encode(SUI_TYPE_ARG);
-        const sourceAddress = isSuiToSol
-          ? SuiAddress.fromHex(suiAddress).toBytes()
-          : SolanaPubkey.fromBs58(solanaAddress).toBytes();
+        const destinationAddress = destAdapter.encodeAddress(
+          destChainKey === 'sui' ? suiAddress : solanaAddress
+        );
+        const solverSender = destAdapter.encodeAddress(
+          destChainKey === 'sui' ? solverSuiAddress : solverSolanaAddress
+        );
+        const solverRecipient = sourceAdapter.encodeAddress(
+          sourceChainKey === 'sui' ? solverSuiAddress : solverSolanaAddress
+        );
+        const destinationToken = destAdapter.encodeNativeToken();
 
         const walletKey = WalletKey[sourceChain];
         const deadline = BigInt(Date.now() + REQUEST_DEADLINE_MS);
@@ -191,25 +182,24 @@ export const useSwap = () => {
         setStatus('waiting');
         toasting.update(SWAP_TOAST_ID, 'Waiting for solver to complete...');
 
-        const initialBalance = isSuiToSol
-          ? solanaBalancesRef.current.sol
-          : suiBalancesRef.current.sui;
+        const initialBalance = destAdapter.getBalanceForPolling(
+          getBalancesRef(destChainKey)
+        );
 
         for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
           await new Promise((resolve) =>
             setTimeout(resolve, BALANCE_POLL_INTERVAL_MS)
           );
 
-          let currentBalance: BigNumber | undefined;
-          if (isSuiToSol) {
-            const newBalances = await mutateSolanaBalances();
-            currentBalance = newBalances?.sol;
-          } else {
-            const newBalances = await mutateSuiBalances();
-            currentBalance = newBalances?.sui;
-          }
+          const newBalances = await destAdapter.refetchBalance();
+          const currentBalance = newBalances
+            ? destAdapter.getBalanceForPolling(newBalances)
+            : undefined;
 
-          if (currentBalance && !currentBalance.eq(initialBalance)) {
+          if (
+            currentBalance &&
+            (!initialBalance || !currentBalance.eq(initialBalance))
+          ) {
             break;
           }
         }
@@ -228,15 +218,7 @@ export const useSwap = () => {
         toasting.error({ action: 'Swap', message: `Failed: ${message}` });
       }
     },
-    [
-      user,
-      suiAddress,
-      solanaAddress,
-      suiClient,
-      solanaConnection,
-      mutateSuiBalances,
-      mutateSolanaBalances,
-    ]
+    [user, suiAddress, solanaAddress, getAdapter, getBalancesRef]
   );
 
   const reset = useCallback(() => {

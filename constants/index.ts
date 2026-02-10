@@ -1,4 +1,3 @@
-export * from './alpha-limits';
 export * from './bridged-tokens';
 export * from './colors';
 export * from './coins';

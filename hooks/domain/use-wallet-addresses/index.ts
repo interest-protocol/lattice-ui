@@ -1,60 +1,73 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useMemo } from 'react';
 
+import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
+
 export interface WalletAddresses {
+  addresses: Record<ChainKey, string | null>;
+  getAddress: (chain: ChainKey) => string | null;
+  hasWallet: (chain: ChainKey) => boolean;
+  /** @deprecated Use addresses.sui */
   suiAddress: string | null;
+  /** @deprecated Use addresses.solana */
   solanaAddress: string | null;
+  /** @deprecated Use hasWallet('sui') */
   hasSuiWallet: boolean;
+  /** @deprecated Use hasWallet('solana') */
   hasSolanaWallet: boolean;
 }
+
+const findWalletAddress = (
+  linkedAccounts: Array<Record<string, unknown>> | undefined,
+  chainKey: ChainKey
+): string | null => {
+  const config = CHAIN_REGISTRY[chainKey];
+
+  const wallet = linkedAccounts?.find((account) => {
+    if (account.type !== 'wallet' || !('address' in account)) return false;
+
+    if (
+      'chainType' in account &&
+      String(account.chainType).toLowerCase() === config.privyChainType
+    )
+      return true;
+
+    const addr = account.address;
+    if (typeof addr !== 'string') return false;
+
+    const { prefix, lengthRange } = config.addressFormat;
+    if (prefix && !addr.startsWith(prefix)) return false;
+    if (!prefix && addr.startsWith('0x')) return false;
+    return addr.length >= lengthRange[0] && addr.length <= lengthRange[1];
+  });
+
+  return wallet && 'address' in wallet ? (wallet.address as string) : null;
+};
 
 export const useWalletAddresses = (): WalletAddresses => {
   const { user } = usePrivy();
 
   return useMemo(() => {
-    const suiWallet = user?.linkedAccounts?.find((account) => {
-      if (account.type !== 'wallet' || !('address' in account)) return false;
-      if (
-        'chainType' in account &&
-        String(account.chainType).toLowerCase() === 'sui'
-      )
-        return true;
-      return (
-        typeof account.address === 'string' &&
-        account.address.startsWith('0x') &&
-        account.address.length === 66
-      );
-    });
+    const accounts = user?.linkedAccounts as
+      | Array<Record<string, unknown>>
+      | undefined;
 
-    const solanaWallet = user?.linkedAccounts?.find((account) => {
-      if (account.type !== 'wallet' || !('address' in account)) return false;
-      if (
-        'chainType' in account &&
-        String(account.chainType).toLowerCase() === 'solana'
-      )
-        return true;
-      return (
-        typeof account.address === 'string' &&
-        !account.address.startsWith('0x') &&
-        account.address.length >= 32 &&
-        account.address.length <= 44
-      );
-    });
+    const addresses = {} as Record<ChainKey, string | null>;
+    for (const key of CHAIN_KEYS) {
+      addresses[key] = findWalletAddress(accounts, key);
+    }
 
-    const suiAddress =
-      suiWallet && 'address' in suiWallet
-        ? (suiWallet.address as string)
-        : null;
-    const solanaAddress =
-      solanaWallet && 'address' in solanaWallet
-        ? (solanaWallet.address as string)
-        : null;
+    const getAddress = (chain: ChainKey) => addresses[chain];
+    const hasWallet = (chain: ChainKey) => Boolean(addresses[chain]);
 
     return {
-      suiAddress,
-      solanaAddress,
-      hasSuiWallet: Boolean(suiWallet),
-      hasSolanaWallet: Boolean(solanaWallet),
+      addresses,
+      getAddress,
+      hasWallet,
+      suiAddress: addresses.sui,
+      solanaAddress: addresses.solana,
+      hasSuiWallet: hasWallet('sui'),
+      hasSolanaWallet: hasWallet('solana'),
     };
   }, [user]);
 };

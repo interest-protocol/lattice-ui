@@ -1,12 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import {
-  ALPHA_MAX_SOL,
-  ALPHA_MAX_SUI,
-  MIN_GAS_SOL,
-  MIN_GAS_SUI,
-} from '@/constants/alpha-limits';
-import { SOL_DECIMALS, SUI_DECIMALS } from '@/constants/coins';
+import { CHAIN_REGISTRY } from '@/constants/chains';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
 interface ValidationResult {
@@ -15,8 +9,8 @@ interface ValidationResult {
 }
 
 const ALPHA_LIMITS: Record<string, { max: number; symbol: string }> = {
-  SUI: { max: ALPHA_MAX_SUI, symbol: 'SUI' },
-  SOL: { max: ALPHA_MAX_SOL, symbol: 'SOL' },
+  SUI: { max: CHAIN_REGISTRY.sui.alphaMax, symbol: 'SUI' },
+  SOL: { max: CHAIN_REGISTRY.solana.alphaMax, symbol: 'SOL' },
 };
 
 export const validateAlphaLimit = (
@@ -101,15 +95,17 @@ export const validateSwapInput = ({
   const alphaError = validateAlphaLimit(token, amountNum);
   if (alphaError) return alphaError;
 
-  const isSui = token === 'SUI';
+  const chainKey = token === 'SUI' ? 'sui' : 'solana';
+  const config = CHAIN_REGISTRY[chainKey];
+
   const gasError = validateGasBalance({
     gasBalance,
-    gasDecimals: isSui ? SUI_DECIMALS : SOL_DECIMALS,
-    minGas: isSui ? MIN_GAS_SUI : MIN_GAS_SOL,
+    gasDecimals: config.decimals,
+    minGas: config.minGas,
     amount: amountNum,
     isGasToken,
     symbol: token,
-    displayDecimals: isSui ? 4 : 6,
+    displayDecimals: config.displayPrecision,
   });
   if (gasError) return gasError;
 

@@ -1,8 +1,6 @@
-import type BigNumber from 'bignumber.js';
+import type { ChainKey } from '@/constants/chains';
+import type { BridgeStatus } from '@/hooks/domain/use-bridge';
 
-import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
-
-export type NetworkType = 'sui' | 'solana';
 export type TokenKey = 'SUI' | 'SOL';
 
 export interface TokenOption {
@@ -12,8 +10,8 @@ export interface TokenOption {
 }
 
 export interface BridgeFormProps {
-  sourceNetwork: NetworkType;
-  setSourceNetwork: (net: NetworkType) => void;
+  sourceNetwork: ChainKey;
+  setSourceNetwork: (net: ChainKey) => void;
   selectedToken: TokenKey;
   setSelectedToken: (tk: TokenKey) => void;
   amount: string;
@@ -31,8 +29,8 @@ export interface BridgeFormProps {
 }
 
 export interface BridgeNetworkSelectorProps {
-  sourceNetwork: NetworkType;
-  setSourceNetwork: (net: NetworkType) => void;
+  sourceNetwork: ChainKey;
+  setSourceNetwork: (net: ChainKey) => void;
 }
 
 export interface BridgeTokenSelectorProps {
@@ -50,7 +48,7 @@ export interface BridgeAmountInputProps {
 }
 
 export interface BridgeDetailsProps {
-  sourceNetwork: NetworkType;
+  sourceNetwork: ChainKey;
   selectedToken: TokenKey;
   destNetwork: string;
   amount: string;

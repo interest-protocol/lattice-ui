@@ -6,8 +6,20 @@ import {
   WSOL_SUI_TYPE,
   WSUI_SOLANA_MINT,
 } from '@/constants';
+import { CHAIN_REGISTRY } from '@/constants/chains';
 
 import type { BridgeDetailsProps } from './bridge.types';
+
+const RECEIVE_TOKEN: Record<string, Record<string, string>> = {
+  sui: {
+    SUI: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI',
+    SOL: 'SOL',
+  },
+  solana: {
+    SOL: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL',
+    SUI: 'SUI',
+  },
+};
 
 const BridgeDetails: FC<BridgeDetailsProps> = ({
   sourceNetwork,
@@ -29,7 +41,7 @@ const BridgeDetails: FC<BridgeDetailsProps> = ({
           Route
         </Span>
         <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          {sourceNetwork === 'sui' ? 'Sui' : 'Solana'} → {destNetwork}
+          {CHAIN_REGISTRY[sourceNetwork].displayName} → {destNetwork}
         </Span>
       </Div>
       <Div display="flex" justifyContent="space-between" alignItems="center">
@@ -38,13 +50,7 @@ const BridgeDetails: FC<BridgeDetailsProps> = ({
         </Span>
         <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
           {amount || '0'}{' '}
-          {sourceNetwork === 'sui'
-            ? selectedToken === 'SUI'
-              ? (BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI')
-              : 'SOL'
-            : selectedToken === 'SOL'
-              ? (BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL')
-              : 'SUI'}
+          {RECEIVE_TOKEN[sourceNetwork]?.[selectedToken] ?? selectedToken}
         </Span>
       </Div>
       <Div display="flex" justifyContent="space-between" alignItems="center">

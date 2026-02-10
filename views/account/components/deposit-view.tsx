@@ -4,19 +4,17 @@ import type { FC } from 'react';
 
 import { CopySVG } from '@/components/ui/icons';
 import { toasting } from '@/components/ui/toast';
+import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
-type NetworkType = 'sui' | 'solana';
-
 interface DepositViewProps {
-  network: NetworkType;
+  network: ChainKey;
 }
 
 const DepositView: FC<DepositViewProps> = ({ network }) => {
-  const { suiAddress, solanaAddress } = useWalletAddresses();
-  const address = network === 'sui' ? suiAddress : solanaAddress;
-  const networkName = network === 'sui' ? 'Sui' : 'Solana';
-  const networkColor = network === 'sui' ? '#4DA2FF' : '#9945FF';
+  const { getAddress } = useWalletAddresses();
+  const config = CHAIN_REGISTRY[network];
+  const address = getAddress(network);
 
   const copyAddress = () => {
     if (!address) return;
@@ -28,10 +26,7 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
     return (
       <Div textAlign="center" py="2rem">
         <P color="#FFFFFF80" fontSize="0.875rem">
-          No {networkName} wallet connected.
-          {network === 'sui'
-            ? ' Create one from the Account page.'
-            : ' Connect one via Privy.'}
+          {config.noWalletMessage}
         </P>
       </Div>
     );
@@ -57,7 +52,7 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
 
       <Div width="100%">
         <P color="#FFFFFF80" fontSize="0.75rem" mb="0.5rem" textAlign="center">
-          {networkName} Deposit Address
+          {config.displayName} Deposit Address
         </P>
         <Div
           display="flex"
@@ -89,13 +84,13 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
 
       <Div
         p="0.75rem"
-        bg={`${networkColor}1A`}
+        bg={`${config.color}1A`}
         borderRadius="0.5rem"
-        border={`1px solid ${networkColor}4D`}
+        border={`1px solid ${config.color}4D`}
         width="100%"
       >
         <P color="#FFFFFF" fontSize="0.8125rem" textAlign="center">
-          Only send {networkName} network assets to this address
+          Only send {config.displayName} network assets to this address
         </P>
       </Div>
     </Div>

@@ -1,23 +1,18 @@
 import { Button, Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
-type NetworkType = 'sui' | 'solana';
+import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 
 interface NetworkTabsProps {
-  network: NetworkType;
-  setNetwork: (network: NetworkType) => void;
+  network: ChainKey;
+  setNetwork: (network: ChainKey) => void;
 }
-
-const NETWORK_COLORS = {
-  solana: '#9945FF',
-  sui: '#4DA2FF',
-} as const;
 
 const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
   <Div display="flex" gap="0.5rem">
-    {(['solana', 'sui'] as const).map((net) => {
+    {CHAIN_KEYS.map((net) => {
       const isSelected = net === network;
-      const color = NETWORK_COLORS[net];
+      const { color, displayName } = CHAIN_REGISTRY[net];
 
       return (
         <Button
@@ -49,10 +44,10 @@ const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
             fontWeight="700"
             color={color}
           >
-            {net === 'solana' ? 'S' : 'S'}
+            {displayName[0]}
           </Div>
           <Span color="#FFFFFF" fontWeight="600" fontSize="0.875rem">
-            {net === 'solana' ? 'Solana' : 'Sui'}
+            {displayName}
           </Span>
         </Button>
       );

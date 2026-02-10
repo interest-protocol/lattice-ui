@@ -1,8 +1,8 @@
 import { Div, H1, Header as HTMLHeader } from '@stylin.js/elements';
 import type { FC } from 'react';
 
-import { LogoSVG } from '@/components/ui/icons';
 import WalletButton from '@/components/composed/wallet-button';
+import { LogoSVG } from '@/components/ui/icons';
 import Navbar from './navbar';
 
 const Header: FC = () => (

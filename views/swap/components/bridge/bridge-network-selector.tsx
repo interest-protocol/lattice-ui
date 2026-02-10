@@ -1,27 +1,22 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Button, Div, Label, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
-import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
+import { CHAIN_KEYS, CHAIN_REGISTRY } from '@/constants/chains';
 
-import type { BridgeNetworkSelectorProps, NetworkType } from './bridge.types';
+import type { BridgeNetworkSelectorProps } from './bridge.types';
 
 const BridgeNetworkSelector: FC<BridgeNetworkSelectorProps> = ({
   sourceNetwork,
   setSourceNetwork,
 }) => (
   <Div>
-    <Label
-      color="#FFFFFF80"
-      fontSize="0.875rem"
-      mb="0.5rem"
-      display="block"
-    >
+    <Label color="#FFFFFF80" fontSize="0.875rem" mb="0.5rem" display="block">
       From Network
     </Label>
     <Div display="flex" gap="0.5rem">
-      {(['sui', 'solana'] as const).map((net: NetworkType) => {
+      {CHAIN_KEYS.map((net) => {
         const isSelected = net === sourceNetwork;
+        const config = CHAIN_REGISTRY[net];
         return (
           <Button
             key={net}
@@ -39,26 +34,17 @@ const BridgeNetworkSelector: FC<BridgeNetworkSelectorProps> = ({
             onClick={() => setSourceNetwork(net)}
             nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
           >
-            {net === 'sui' && ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl && (
+            {config.nativeToken?.iconUrl && (
               <img
-                src={ASSET_METADATA[SUI_TYPE_ARG].iconUrl}
-                alt="Sui"
-                width="20"
-                height="20"
-                style={{ borderRadius: '50%' }}
-              />
-            )}
-            {net === 'solana' && ASSET_METADATA[SOL_TYPE]?.iconUrl && (
-              <img
-                src={ASSET_METADATA[SOL_TYPE].iconUrl}
-                alt="Solana"
+                src={config.nativeToken.iconUrl}
+                alt={config.displayName}
                 width="20"
                 height="20"
                 style={{ borderRadius: '50%' }}
               />
             )}
             <Span color="#FFFFFF" fontWeight="600">
-              {net === 'sui' ? 'Sui' : 'Solana'}
+              {config.displayName}
             </Span>
           </Button>
         );

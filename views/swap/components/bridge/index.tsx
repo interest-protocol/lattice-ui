@@ -5,8 +5,8 @@ import type BigNumber from 'bignumber.js';
 import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { SOL_DECIMALS, SUI_DECIMALS, XBRIDGE_DECIMALS } from '@/constants';
-import { MIN_GAS_SOL, MIN_GAS_SUI } from '@/constants/alpha-limits';
+import { SOL_DECIMALS, XBRIDGE_DECIMALS } from '@/constants';
+import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
@@ -18,12 +18,7 @@ import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
 
 import BridgeDetails from './bridge-details';
 import BridgeForm from './bridge-form';
-import type {
-  NetworkType,
-  TokenKey,
-  TokenOption,
-  ValidationResult,
-} from './bridge.types';
+import type { TokenKey, TokenOption, ValidationResult } from './bridge.types';
 
 const TOKEN_OPTIONS: Record<string, TokenOption> = {
   SUI: {
@@ -38,16 +33,22 @@ const TOKEN_OPTIONS: Record<string, TokenOption> = {
   },
 };
 
+const OPPOSITE_CHAIN: Record<ChainKey, ChainKey> = {
+  sui: 'solana',
+  solana: 'sui',
+};
+
 const Bridge: FC = () => {
   const { bridge, status, isLoading } = useBridge();
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
-  const [sourceNetwork, setSourceNetwork] = useState<NetworkType>('solana');
+  const [sourceNetwork, setSourceNetwork] = useState<ChainKey>('solana');
   const [selectedToken, setSelectedToken] = useState<TokenKey>('SOL');
   const [amount, setAmount] = useState('');
 
-  const destNetwork = sourceNetwork === 'sui' ? 'Solana' : 'Sui';
+  const destNetwork = CHAIN_REGISTRY[OPPOSITE_CHAIN[sourceNetwork]].displayName;
   const token = TOKEN_OPTIONS[selectedToken];
+  const sourceConfig = CHAIN_REGISTRY[sourceNetwork];
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(suiAddress);
@@ -93,37 +94,28 @@ const Bridge: FC = () => {
       if (alphaError) return alphaError;
     }
 
-    if (sourceNetwork === 'sui') {
-      const gasError = validateGasBalance({
-        gasBalance: suiBalances.sui,
-        gasDecimals: SUI_DECIMALS,
-        minGas: MIN_GAS_SUI,
-        amount: amountNum,
-        isGasToken: selectedToken === 'SUI',
-        symbol: 'SUI',
-        displayDecimals: 4,
-      });
-      if (gasError) return gasError;
-    }
-
-    if (sourceNetwork === 'solana') {
-      const gasError = validateGasBalance({
-        gasBalance: solanaBalances.sol,
-        gasDecimals: SOL_DECIMALS,
-        minGas: MIN_GAS_SOL,
-        amount: amountNum,
-        isGasToken: selectedToken === 'SOL',
-        symbol: 'SOL',
-        displayDecimals: 6,
-      });
-      if (gasError) return gasError;
-    }
+    const gasBalance =
+      sourceNetwork === 'sui' ? suiBalances.sui : solanaBalances.sol;
+    const gasError = validateGasBalance({
+      gasBalance,
+      gasDecimals: sourceConfig.decimals,
+      minGas: sourceConfig.minGas,
+      amount: amountNum,
+      isGasToken:
+        sourceNetwork === 'sui'
+          ? selectedToken === 'SUI'
+          : selectedToken === 'SOL',
+      symbol: sourceConfig.nativeToken.symbol,
+      displayDecimals: sourceConfig.displayPrecision,
+    });
+    if (gasError) return gasError;
 
     return { isDisabled: false, message: null };
   }, [
     amount,
     selectedToken,
     sourceNetwork,
+    sourceConfig,
     suiBalances.sui,
     solanaBalances.sol,
   ]);

@@ -1,3 +1,4 @@
+import type { ChainKey } from '@/constants/chains';
 import { post } from '@/lib/api/client';
 
 export interface CreateWalletResult {
@@ -43,3 +44,44 @@ export const sendSolana = (params: {
 
 export const linkSolanaWallet = (userId: string) =>
   post<LinkSolanaResult>('/api/wallet/link-solana', { userId });
+
+// Unified send interface
+
+interface SendTokensParams {
+  userId: string;
+  recipient: string;
+  amount: string;
+  tokenType?: string;
+}
+
+interface SendTokensResult {
+  txId: string;
+}
+
+type SendHandler = (params: SendTokensParams) => Promise<SendTokensResult>;
+
+const SEND_HANDLERS: Record<ChainKey, SendHandler> = {
+  sui: async (p) => {
+    const result = await sendSui({
+      userId: p.userId,
+      recipient: p.recipient,
+      amount: p.amount,
+      coinType: p.tokenType,
+    });
+    return { txId: result.digest };
+  },
+  solana: async (p) => {
+    const result = await sendSolana({
+      userId: p.userId,
+      recipient: p.recipient,
+      amount: p.amount,
+      mint: p.tokenType,
+    });
+    return { txId: result.signature };
+  },
+};
+
+export const sendTokens = (
+  chainKey: ChainKey,
+  params: SendTokensParams
+): Promise<SendTokensResult> => SEND_HANDLERS[chainKey](params);

@@ -1,5 +1,7 @@
 import type { PrivyClient } from '@privy-io/node';
 
+import type { ChainKey } from '@/constants/chains';
+
 export class WalletNotFoundError extends Error {
   constructor(chainType: string) {
     super(`No ${chainType} wallet found`);
@@ -10,7 +12,7 @@ export class WalletNotFoundError extends Error {
 export const getFirstWallet = async (
   privy: PrivyClient,
   userId: string,
-  chainType: 'sui' | 'solana'
+  chainType: ChainKey
 ) => {
   const wallets = [];
   for await (const wallet of privy.wallets().list({

@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from 'motion/react';
 import { type FC, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
-import useEventListener from '@/hooks/ui/use-event-listener';
 import { useModal } from '@/hooks/store/use-modal';
+import useEventListener from '@/hooks/ui/use-event-listener';
 import { useSafeHeight } from '@/hooks/ui/use-safe-height';
 
 const Motion = motion.create(Div);

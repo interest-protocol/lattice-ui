@@ -5,79 +5,31 @@ import type BigNumber from 'bignumber.js';
 import { type FC, useState } from 'react';
 
 import { toasting } from '@/components/ui/toast';
-import {
-  BRIDGED_ASSET_METADATA,
-  SOL_DECIMALS,
-  WSOL_SUI_TYPE,
-  WSUI_SOLANA_MINT,
-  XBRIDGE_DECIMALS,
-} from '@/constants';
-import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
-import { useModal } from '@/hooks/store/use-modal';
+import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
+import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
+import { SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { sendSolana, sendSui } from '@/lib/wallet/client';
+import { sendTokens } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';
-
-type NetworkType = 'sui' | 'solana';
-
-interface TokenOption {
-  type: string;
-  symbol: string;
-  name: string;
-  iconUrl?: string;
-  decimals: number;
-}
-
-const SUI_TOKENS: TokenOption[] = [
-  {
-    type: SUI_TYPE_ARG,
-    symbol: 'SUI',
-    name: ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui',
-    iconUrl: ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl,
-    decimals: 9,
-  },
-  {
-    type: WSOL_SUI_TYPE,
-    symbol: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL',
-    name: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.name ?? 'Solana (Wormhole)',
-    iconUrl: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.iconUrl,
-    decimals: XBRIDGE_DECIMALS,
-  },
-];
-
-const SOLANA_TOKENS: TokenOption[] = [
-  {
-    type: SOL_TYPE,
-    symbol: 'SOL',
-    name: ASSET_METADATA[SOL_TYPE]?.name ?? 'Solana',
-    iconUrl: ASSET_METADATA[SOL_TYPE]?.iconUrl,
-    decimals: SOL_DECIMALS,
-  },
-  {
-    type: WSUI_SOLANA_MINT,
-    symbol: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI',
-    name: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.name ?? 'Sui (Wormhole)',
-    iconUrl: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.iconUrl,
-    decimals: XBRIDGE_DECIMALS,
-  },
-];
 
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
   const handleClose = useModal((s) => s.handleClose);
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
-  const [network, setNetwork] = useState<NetworkType>('solana');
+  const [network, setNetwork] = useState<ChainKey>('solana');
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [sending, setSending] = useState(false);
 
-  const tokens = network === 'sui' ? SUI_TOKENS : SOLANA_TOKENS;
+  const tokens = CHAIN_TOKENS[network];
   const selectedToken = tokens[selectedTokenIndex];
+  const config = CHAIN_REGISTRY[network];
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(suiAddress);
@@ -103,52 +55,8 @@ const SendModal: FC = () => {
     );
   };
 
-  const handleSendSolana = async () => {
-    if (!user?.id) {
-      toasting.error({ action: 'Send', message: 'Not authenticated' });
-      return;
-    }
-
-    const rawAmount = FixedPointMath.toBigNumber(
-      Number.parseFloat(amount),
-      selectedToken.decimals
-    )
-      .toFixed(0)
-      .toString();
-
-    const result = await sendSolana({
-      userId: user.id,
-      recipient,
-      amount: rawAmount,
-      mint: selectedToken.type === SOL_TYPE ? undefined : selectedToken.type,
-    });
-
-    return result.signature;
-  };
-
-  const handleSendSui = async () => {
-    if (!user?.id) {
-      toasting.error({ action: 'Send', message: 'Not authenticated' });
-      return;
-    }
-
-    const rawAmount = FixedPointMath.toBigNumber(
-      Number.parseFloat(amount),
-      selectedToken.decimals
-    )
-      .toFixed(0)
-      .toString();
-
-    const result = await sendSui({
-      userId: user.id,
-      recipient,
-      amount: rawAmount,
-      coinType:
-        selectedToken.type === SUI_TYPE_ARG ? undefined : selectedToken.type,
-    });
-
-    return result.digest;
-  };
+  const isNativeToken = (type: string, chain: ChainKey): boolean =>
+    chain === 'sui' ? type === SUI_TYPE_ARG : type === SOL_TYPE;
 
   const handleSend = async () => {
     if (!authenticated) {
@@ -159,17 +67,32 @@ const SendModal: FC = () => {
       toasting.error({ action: 'Send', message: 'Please fill in all fields' });
       return;
     }
+    if (!user?.id) {
+      toasting.error({ action: 'Send', message: 'Not authenticated' });
+      return;
+    }
 
     setSending(true);
     const dismiss = toasting.loading({
       message: `Sending ${selectedToken.symbol}...`,
     });
     try {
-      if (network === 'solana') {
-        await handleSendSolana();
-      } else {
-        await handleSendSui();
-      }
+      const rawAmount = FixedPointMath.toBigNumber(
+        Number.parseFloat(amount),
+        selectedToken.decimals
+      )
+        .toFixed(0)
+        .toString();
+
+      await sendTokens(network, {
+        userId: user.id,
+        recipient,
+        amount: rawAmount,
+        tokenType: isNativeToken(selectedToken.type, network)
+          ? undefined
+          : selectedToken.type,
+      });
+
       dismiss();
       toasting.success({
         action: 'Send',
@@ -200,7 +123,7 @@ const SendModal: FC = () => {
           Network
         </Label>
         <Div display="flex" gap="0.5rem">
-          {(['solana', 'sui'] as const).map((net) => {
+          {CHAIN_KEYS.map((net) => {
             const isSelected = net === network;
             return (
               <Button
@@ -227,7 +150,7 @@ const SendModal: FC = () => {
                   fontWeight="600"
                   textTransform="capitalize"
                 >
-                  {net === 'sui' ? 'Sui' : 'Solana'}
+                  {CHAIN_REGISTRY[net].displayName}
                 </Span>
               </Button>
             );
@@ -303,7 +226,7 @@ const SendModal: FC = () => {
           border="1px solid #FFFFFF1A"
           fontFamily="JetBrains Mono"
           fontSize="0.875rem"
-          placeholder={network === 'sui' ? '0x...' : 'Solana address...'}
+          placeholder={config.addressPlaceholder}
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
         />
@@ -387,7 +310,7 @@ const SendModal: FC = () => {
       >
         {sending
           ? 'Sending...'
-          : `Send ${selectedToken.symbol} on ${network === 'sui' ? 'Sui' : 'Solana'}`}
+          : `Send ${selectedToken.symbol} on ${config.displayName}`}
       </Button>
     </Div>
   );

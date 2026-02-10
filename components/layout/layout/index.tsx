@@ -5,9 +5,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { useBackgroundMotionTranslate } from '@/hooks/ui/use-background-motion-position';
 import { useBackgroundTranslate } from '@/hooks/ui/use-background-position';
 
-import Background from '@/components/layout/background';
 import Header from '@/components/composed/header';
 import HealthIndicator from '@/components/composed/health-indicator';
+import Background from '@/components/layout/background';
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
   const { x, y } = useBackgroundMotionTranslate(

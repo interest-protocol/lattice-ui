@@ -1,9 +1,9 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Button } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
+import { CHAIN_REGISTRY, chainKeyFromTokenType } from '@/constants/chains';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
@@ -16,22 +16,30 @@ const SwapFormButton: FC = () => {
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  // Get wallet addresses from centralized hook
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
-  // Get balances
   const { balances: suiBalances } = useSuiBalances(suiAddress);
   const { balances: solanaBalances } = useSolanaBalances(solanaAddress);
 
-  // Validation
+  const sourceChain = chainKeyFromTokenType(fromType);
+  const destChain = chainKeyFromTokenType(toType);
+  const sourceConfig = CHAIN_REGISTRY[sourceChain];
+  const destConfig = CHAIN_REGISTRY[destChain];
+
   const validation = useMemo(() => {
-    const isSui = fromType === SUI_TYPE_ARG;
+    const token = sourceConfig.nativeToken.symbol as 'SUI' | 'SOL';
     return validateSwapInput({
       amount: fromValue,
-      token: isSui ? 'SUI' : 'SOL',
-      gasBalance: isSui ? suiBalances.sui : solanaBalances.sol,
+      token,
+      gasBalance: sourceChain === 'sui' ? suiBalances.sui : solanaBalances.sol,
     });
-  }, [fromValue, fromType, suiBalances.sui, solanaBalances.sol]);
+  }, [
+    fromValue,
+    sourceChain,
+    sourceConfig.nativeToken.symbol,
+    suiBalances.sui,
+    solanaBalances.sol,
+  ]);
 
   const handleSwap = () => {
     // Swap execution handled by parent form submission
@@ -39,7 +47,7 @@ const SwapFormButton: FC = () => {
 
   const buttonLabel = validation.message
     ? validation.message
-    : `Swap ${fromType === SUI_TYPE_ARG ? 'SUI' : 'SOL'} to ${toType === SUI_TYPE_ARG ? 'SUI' : 'SOL'}`;
+    : `Swap ${sourceConfig.nativeToken.symbol} to ${destConfig.nativeToken.symbol}`;
 
   return (
     <Button

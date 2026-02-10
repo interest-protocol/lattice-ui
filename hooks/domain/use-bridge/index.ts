@@ -12,8 +12,7 @@ import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
-import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
-import { sendSolana } from '@/lib/wallet/client';
+import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import {
   createMintRequest,
   executeMint,
@@ -52,23 +51,30 @@ export const useBridge = () => {
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
-  useSolanaBalances(solanaAddress);
+  const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);
+
+  const solanaAdapter = useCallback(
+    () => createSolanaAdapter(solanaConnection, mutateSolanaBalances),
+    [solanaConnection, mutateSolanaBalances]
+  );
 
   const bridgeSolToWsol = useCallback(
     async (amount: BigNumber, toastId: string) => {
       invariant(user && solanaAddress && suiAddress, 'Wallets not connected');
 
       const dwalletAddress = DWalletAddress[ChainId.Solana];
+      const adapter = solanaAdapter();
 
       setStatus('depositing');
       toasting.update(toastId, 'Depositing to bridge...');
-      const { signature: depositSignature } = await sendSolana({
+
+      const { txId: depositSignature } = await adapter.deposit({
         userId: user.id,
         recipient: dwalletAddress,
         amount: amount.toString(),
       });
 
-      await confirmSolanaTransaction(solanaConnection, depositSignature);
+      await adapter.confirmTransaction(depositSignature);
 
       setStatus('creating');
       toasting.update(toastId, 'Creating mint request...');
@@ -111,7 +117,7 @@ export const useBridge = () => {
       toasting.update(toastId, 'Confirming transaction...');
       await mutateSuiBalances();
     },
-    [user, solanaAddress, suiAddress, solanaConnection, mutateSuiBalances]
+    [user, solanaAddress, suiAddress, solanaAdapter, mutateSuiBalances]
   );
 
   const bridge = useCallback(

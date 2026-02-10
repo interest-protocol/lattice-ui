@@ -8,7 +8,11 @@ import BridgeButton from './bridge-button';
 import BridgeNetworkSelector from './bridge-network-selector';
 import type { BridgeFormProps, TokenKey } from './bridge.types';
 
-const TOKEN_OPTIONS_LIST: { key: TokenKey; iconUrl?: string; symbol: string }[] = [
+const TOKEN_OPTIONS_LIST: {
+  key: TokenKey;
+  iconUrl?: string;
+  symbol: string;
+}[] = [
   { key: 'SUI', iconUrl: ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl, symbol: 'SUI' },
   { key: 'SOL', iconUrl: ASSET_METADATA[SOL_TYPE]?.iconUrl, symbol: 'SOL' },
 ];
@@ -60,12 +64,7 @@ const BridgeForm: FC<BridgeFormProps> = ({
 
     {/* Token */}
     <Div>
-      <Label
-        color="#FFFFFF80"
-        fontSize="0.875rem"
-        mb="0.5rem"
-        display="block"
-      >
+      <Label color="#FFFFFF80" fontSize="0.875rem" mb="0.5rem" display="block">
         Token
       </Label>
       <Div display="flex" gap="0.5rem">
