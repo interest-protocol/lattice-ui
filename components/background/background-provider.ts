@@ -1,5 +1,5 @@
 import { useSpring } from 'motion/react';
-import { FC, useEffect } from 'react';
+import { type FC, useEffect } from 'react';
 
 import { useBackgroundMotionTranslate } from '@/hooks/use-background-motion-position';
 

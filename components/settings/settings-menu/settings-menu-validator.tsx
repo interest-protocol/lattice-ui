@@ -1,5 +1,5 @@
 import { Div, P } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { FormProvider, useFormContext } from 'react-hook-form';
 
 import Motion from '@/components/motion';

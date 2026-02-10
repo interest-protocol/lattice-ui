@@ -6,15 +6,15 @@ import {
   useSwitchAccount,
 } from '@mysten/dapp-kit';
 import {
+  SUI_TYPE_ARG,
   formatAddress,
   normalizeStructTag,
   normalizeSuiAddress,
-  SUI_TYPE_ARG,
 } from '@mysten/sui/utils';
 import { Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
-import { FC } from 'react';
+import type { FC } from 'react';
 import unikey from 'unikey';
 
 import { ChevronDownSVG, CopySVG, LogoutSVG } from '@/components/svg';
@@ -25,7 +25,7 @@ import { useGetExplorerUrl } from '@/hooks/use-get-explorer-url';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
 
-import { WalletProfileItemProps } from './wallet-profile.types';
+import type { WalletProfileItemProps } from './wallet-profile.types';
 
 const Motion = motion.create(Div);
 

@@ -1,10 +1,10 @@
 import { Div, P, Span } from '@stylin.js/elements';
 import Link from 'next/link';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { CheckSVG } from '../svg';
-import { ToastProps, ToastSuccessProps } from './toast.types';
 import ToastTimer from './toast-timer';
+import type { ToastProps, ToastSuccessProps } from './toast.types';
 
 const ToastContent: FC<ToastProps> = ({ action, message }) => (
   <Div display="flex" alignItems="center" gap="1rem">

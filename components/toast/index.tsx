@@ -1,13 +1,13 @@
 import toast from 'react-hot-toast';
 
-import {
+import ToastError from './toast-error';
+import ToastLoading from './toast-loading';
+import ToastSuccess from './toast-success';
+import type {
   ToastLoadingProps,
   ToastProps,
   ToastSuccessProps,
 } from './toast.types';
-import ToastError from './toast-error';
-import ToastLoading from './toast-loading';
-import ToastSuccess from './toast-success';
 
 const dismissHandler = (toastId: string) => () => toast.dismiss(toastId);
 
@@ -18,7 +18,7 @@ export const toasting = {
   loading: (args: ToastLoadingProps) =>
     dismissHandler(
       toast.loading(<ToastLoading {...args} />, {
-        duration: Infinity,
+        duration: Number.POSITIVE_INFINITY,
       })
     ),
 };

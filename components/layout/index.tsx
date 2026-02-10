@@ -1,5 +1,5 @@
 import { Main } from '@stylin.js/elements';
-import { FC, MouseEventHandler, PropsWithChildren } from 'react';
+import type { FC, MouseEventHandler, PropsWithChildren } from 'react';
 
 import { useBackgroundMotionTranslate } from '@/hooks/use-background-motion-position';
 import { useBackgroundTranslate } from '@/hooks/use-background-position';

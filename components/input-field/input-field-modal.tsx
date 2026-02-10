@@ -1,17 +1,17 @@
 import { TYPES } from '@interest-protocol/blizzard-sdk';
 import { Div, Img, Input, Label, P, Span } from '@stylin.js/elements';
 import { useRouter } from 'next/router';
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { LST_TYPES, LST_TYPES_KEY, NFT_TYPES } from '@/constants';
 import { useAppState } from '@/hooks/use-app-state';
 import { useModal } from '@/hooks/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { typeFromMaybeNftType, ZERO_BIG_NUMBER } from '@/utils';
+import { ZERO_BIG_NUMBER, typeFromMaybeNftType } from '@/utils';
 
 import { SearchSVG } from '../svg';
-import { InputFieldModalProps } from './input-field.types';
+import type { InputFieldModalProps } from './input-field.types';
 
 const InputFieldModal: FC<InputFieldModalProps> = ({
   assetList,
@@ -103,14 +103,23 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
               }}
             >
               <Div display="flex" gap="1rem" alignItems="center">
-                <Span display="flex" overflow="hidden" borderRadius="0.25rem">
+                <Span
+                  display="flex"
+                  overflow="hidden"
+                  borderRadius="0.5rem"
+                  width="2.5rem"
+                  height="2.5rem"
+                  minWidth="2.5rem"
+                  bg="#FFFFFF1A"
+                  alignItems="center"
+                  justifyContent="center"
+                >
                   <Img
                     alt={name}
                     width="100%"
                     height="100%"
+                    objectFit="contain"
                     src={iconUrl}
-                    maxWidth="2.5rem"
-                    maxHeight="2.5rem"
                   />
                 </Span>
                 <P fontSize="0.875rem">{symbol}</P>

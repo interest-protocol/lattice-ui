@@ -1,7 +1,7 @@
-import { Button, Div, DivElementProps, Span } from '@stylin.js/elements';
+import { Button, Div, type DivElementProps, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { not } from 'ramda';
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import useClickOutsideListenerRef from '@/hooks/use-click-outside-listener-ref';
 

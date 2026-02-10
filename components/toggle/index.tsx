@@ -1,8 +1,8 @@
 import { Div, Input, Label, Span } from '@stylin.js/elements';
 import { motion } from 'motion/react';
-import { ChangeEventHandler, FC, PropsWithChildren } from 'react';
+import type { ChangeEventHandler, FC, PropsWithChildren } from 'react';
 
-import { CheckedButtonProps } from './toggle.types';
+import type { CheckedButtonProps } from './toggle.types';
 
 const Motion = motion(Span);
 

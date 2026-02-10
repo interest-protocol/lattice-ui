@@ -1,8 +1,8 @@
 import { P } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { ToastLoadingProps } from './toast.types';
 import ToastTimer from './toast-timer';
+import type { ToastLoadingProps } from './toast.types';
 
 const ToastLoading: FC<ToastLoadingProps> = ({ message }) => (
   <>

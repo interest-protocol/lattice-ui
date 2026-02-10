@@ -1,6 +1,6 @@
 import { Img, Span } from '@stylin.js/elements';
 import { values } from 'ramda';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
@@ -10,8 +10,8 @@ import { useModal } from '@/hooks/use-modal';
 import { nftTypeFromType } from '@/utils';
 
 import { ChevronDownSVG } from '../svg';
-import { InputFieldAssetProps } from './input-field.types';
 import InputFieldModal from './input-field-modal';
+import type { InputFieldAssetProps } from './input-field.types';
 
 const InputFieldAsset: FC<InputFieldAssetProps> = ({
   name,
@@ -76,11 +76,21 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       cursor={availableTypes.length > 1 ? 'pointer' : 'default'}
       onClick={() => availableTypes.length > 1 && openAssetModal()}
     >
-      <Span overflow="hidden" borderRadius="50%" display="flex">
+      <Span
+        overflow="hidden"
+        borderRadius="50%"
+        display="flex"
+        width="2rem"
+        height="2rem"
+        minWidth="2rem"
+        bg="#FFFFFF1A"
+        alignItems="center"
+        justifyContent="center"
+      >
         <Img
-          width="2rem"
-          height="2rem"
-          borderRadius="50%"
+          width="100%"
+          height="100%"
+          objectFit="contain"
           alt={metadata[type]?.symbol ?? metadata[nftType].symbol}
           src={metadata[type]?.iconUrl ?? metadata[nftType].iconUrl}
         />

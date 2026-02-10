@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from 'react';
+import { type FC, useEffect, useRef } from 'react';
 
 const PURPLE_PALETTE = [
   'rgba(139, 92, 246, 0.8)', // violet-500
@@ -32,7 +32,8 @@ const BackgroundParticles: FC = () => {
     let particles: Particle[] = [];
 
     const setCanvasSize = () => {
-      const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+      const dpr =
+        typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
       const width = window.innerWidth;
       const height = window.innerHeight;
       canvas.width = width * dpr;
@@ -44,14 +45,18 @@ const BackgroundParticles: FC = () => {
     };
 
     const initParticles = () => {
-      const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 15000));
+      const count = Math.min(
+        80,
+        Math.floor((window.innerWidth * window.innerHeight) / 15000)
+      );
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         radius: 1 + Math.random() * 2,
-        color: PURPLE_PALETTE[Math.floor(Math.random() * PURPLE_PALETTE.length)],
+        color:
+          PURPLE_PALETTE[Math.floor(Math.random() * PURPLE_PALETTE.length)],
         opacity: 0.3 + Math.random() * 0.5,
       }));
     };

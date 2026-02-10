@@ -1,7 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
 

@@ -1,5 +1,5 @@
 import { Button, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { WalletSVG } from '@/components/svg';
 

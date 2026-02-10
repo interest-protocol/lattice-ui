@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { type FC, useEffect } from 'react';
 
 import { useAppState } from '@/hooks/use-app-state';
 

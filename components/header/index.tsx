@@ -1,5 +1,5 @@
 import { Div, H1, Header as HTMLHeader } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { LogoSVG } from '../svg';
 import WalletButton from '../wallet-button';

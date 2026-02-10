@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const CaretDown: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg style={{ maxWidth, maxHeight }} viewBox="0 0 8 5" fill="none" {...props}>

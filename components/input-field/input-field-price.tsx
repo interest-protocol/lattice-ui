@@ -1,11 +1,11 @@
 import { Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { useSuiPrice } from '@/hooks/use-sui-price';
 import { formatDollars } from '@/utils';
 
-import { InputFieldGenericProps } from './input-field.types';
+import type { InputFieldGenericProps } from './input-field.types';
 
 const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const { control } = useFormContext();

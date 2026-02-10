@@ -1,6 +1,6 @@
 import { Div, Hr } from '@stylin.js/elements';
 import { motion } from 'motion/react';
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import SettingsMenuExplorer from './settings-menu-explorer';
 import SettingsMenuRPC from './settings-menu-rpc';

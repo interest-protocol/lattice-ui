@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { not } from 'ramda';
-import { FC, useMemo, useState } from 'react';
+import { type FC, useMemo, useState } from 'react';
 
 import { ChevronDownSVG } from '@/components/svg';
 import useClickOutsideListenerRef from '@/hooks/use-click-outside-listener-ref';
@@ -26,7 +26,8 @@ const WalletProfile: FC = () => {
 
   const displayAddress = useMemo(() => {
     if (!user) return '';
-    const wallet = user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
+    const wallet =
+      user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
     const addr = wallet && 'address' in wallet ? wallet.address : null;
     if (addr) return formatDisplay(addr);
     const email = user.email?.address ?? user.google?.email;
@@ -35,7 +36,8 @@ const WalletProfile: FC = () => {
 
   const fullAddress = useMemo(() => {
     if (!user) return '';
-    const wallet = user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
+    const wallet =
+      user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
     return wallet && 'address' in wallet ? wallet.address : '';
   }, [user]);
 

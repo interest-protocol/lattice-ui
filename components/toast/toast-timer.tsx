@@ -1,11 +1,11 @@
 import { AnimatePresence } from 'motion/react';
-import { FC } from 'react';
+import type { FC } from 'react';
 import Countdown from 'react-countdown';
 
 import { TOAST_DURATION } from '@/constants/toast';
 
 import Motion from '../motion';
-import { ToastTimerProps } from './toast.types';
+import type { ToastTimerProps } from './toast.types';
 
 const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
   if (loading)
@@ -20,7 +20,7 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
           transition={{
             duration: 1,
             ease: 'linear',
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             repeatType: 'mirror',
           }}
         />

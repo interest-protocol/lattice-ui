@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'motion/react';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import BackgroundBlur from './background-blur';
 import BackgroundParticles from './background-particles';

@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const Bars: FC<SVGProps> = ({ maxHeight, maxWidth, ...props }) => (
   <svg

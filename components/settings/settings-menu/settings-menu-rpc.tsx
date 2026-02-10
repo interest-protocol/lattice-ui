@@ -1,6 +1,6 @@
 import { Div, P, Small } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { ChevronRightSVG } from '@/components/svg';
@@ -8,8 +8,8 @@ import { Network } from '@/constants';
 import { RPC, RPC_DISPLAY, RPC_STORAGE_KEY, RPCs } from '@/constants';
 import { useNetwork } from '@/hooks/use-network';
 
-import { SettingsMenusProps } from './settings-menu.types';
 import SettingsMenuItem from './settings-menu-item';
+import type { SettingsMenusProps } from './settings-menu.types';
 
 const Motion = motion.create(Div);
 

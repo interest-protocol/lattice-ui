@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 import { ToggleButton } from '@/components/toggle';
 
-import { SettingsMenuItemProps } from './settings-menu-item.types';
+import type { SettingsMenuItemProps } from './settings-menu-item.types';
 
 const SettingsMenuItem = memo<SettingsMenuItemProps>(
   ({ name, title, selected, onSelect, withBorder, tag }) => (

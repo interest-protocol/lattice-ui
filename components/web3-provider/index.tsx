@@ -1,11 +1,11 @@
 import {
-  createNetworkConfig,
   SuiClientProvider,
   WalletProvider,
+  createNetworkConfig,
 } from '@mysten/dapp-kit';
 import { getFullnodeUrl } from '@mysten/sui/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useReadLocalStorage } from 'usehooks-ts';
 
 import { NETWORK, RPC, RPC_MAP, RPC_STORAGE_KEY } from '@/constants';

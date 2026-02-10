@@ -1,5 +1,5 @@
 import { Div, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { CopySVG, LogoutSVG } from '@/components/svg';
 import { toasting } from '@/components/toast';
@@ -29,7 +29,11 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
       <Div display="flex" alignItems="center" justifyContent="space-between">
         <Span fontFamily="JetBrains Mono">{displayAddress}</Span>
         {fullAddress && (
-          <Span cursor="pointer" onClick={copyAddress} nHover={{ color: '#A78BFA' }}>
+          <Span
+            cursor="pointer"
+            onClick={copyAddress}
+            nHover={{ color: '#A78BFA' }}
+          >
             <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
           </Span>
         )}

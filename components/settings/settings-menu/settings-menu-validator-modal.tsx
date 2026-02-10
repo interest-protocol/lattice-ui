@@ -1,6 +1,6 @@
 import { formatAddress } from '@mysten/sui/utils';
 import { Div, Input, Label, P } from '@stylin.js/elements';
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { SearchSVG } from '@/components/svg';

@@ -1,18 +1,18 @@
 import { Div, P } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { ChevronRightSVG } from '@/components/svg';
 import {
-  Explorer,
+  EXPLORERS,
   EXPLORER_DISPLAY,
   EXPLORER_STORAGE_KEY,
-  EXPLORERS,
+  Explorer,
 } from '@/constants';
 
-import { SettingsMenusProps } from './settings-menu.types';
 import SettingsMenuItem from './settings-menu-item';
+import type { SettingsMenusProps } from './settings-menu.types';
 
 const Motion = motion.create(Div);
 

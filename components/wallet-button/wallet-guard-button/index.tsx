@@ -1,8 +1,8 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, ButtonProps } from '@stylin.js/elements';
-import { FC } from 'react';
+import { Button, type ButtonProps } from '@stylin.js/elements';
+import type { FC } from 'react';
 
 const WalletGuardButton: FC<ButtonProps> = ({ children, ...props }) => {
   const { ready, authenticated, login } = usePrivy();

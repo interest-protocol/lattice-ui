@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { FAST_MODE_STORAGE_KEY } from '@/constants';

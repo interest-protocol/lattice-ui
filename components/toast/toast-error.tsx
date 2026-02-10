@@ -1,9 +1,9 @@
 import { Div, P, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { ErrorSVG } from '../svg';
-import { ToastProps } from './toast.types';
 import ToastTimer from './toast-timer';
+import type { ToastProps } from './toast.types';
 
 const ToastError: FC<ToastProps> = ({ action, message }) => (
   <>

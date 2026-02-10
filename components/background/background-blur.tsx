@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { useBackgroundMotionTranslate } from '@/hooks/use-background-motion-position';
 

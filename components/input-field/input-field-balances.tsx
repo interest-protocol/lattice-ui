@@ -1,5 +1,5 @@
 import { Button, Div, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import unikey from 'unikey';
 
@@ -12,8 +12,8 @@ import { useAppState } from '@/hooks/use-app-state';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { ZERO_BIG_NUMBER } from '@/utils';
 
-import { SVGProps } from '../svg/svg.types';
-import { InputFieldGenericProps } from './input-field.types';
+import type { SVGProps } from '../svg/svg.types';
+import type { InputFieldGenericProps } from './input-field.types';
 
 const PIZZA_ICONS: Record<0.25 | 0.5 | 1, FC<SVGProps>> = {
   0.25: PizzaPart25PercentSVG,

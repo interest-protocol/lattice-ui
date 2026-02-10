@@ -1,5 +1,5 @@
 import { Div, P, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { useWalPrice } from '@/hooks/use-wal-price';

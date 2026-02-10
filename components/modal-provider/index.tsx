@@ -1,6 +1,6 @@
 import { Div, P, Span } from '@stylin.js/elements';
 import { AnimatePresence, motion } from 'motion/react';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import useEventListener from '@/hooks/use-event-listener';
 import { useModal } from '@/hooks/use-modal';

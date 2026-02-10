@@ -1,7 +1,7 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import ConnectWallet from './connect-wallet';
 import LoadingWallet from './loading-wallet';

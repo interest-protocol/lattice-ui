@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const PizzaPart100Percent: FC<SVGProps> = ({
   maxWidth,

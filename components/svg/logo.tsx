@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg
@@ -63,12 +63,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
     />
 
     {/* Center connection nodes (representing swap/exchange) */}
-    <circle
-      cx="20"
-      cy="20"
-      r="3"
-      fill="#A78BFA"
-    />
+    <circle cx="20" cy="20" r="3" fill="#A78BFA" />
 
     {/* Corner nodes */}
     <circle cx="13.33" cy="13.33" r="2" fill="#A78BFA" fillOpacity="0.6" />

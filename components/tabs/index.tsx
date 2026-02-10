@@ -1,8 +1,8 @@
 import { Button, Div } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import unikey from 'unikey';
 
-import { TabsProps } from './tabs.types';
+import type { TabsProps } from './tabs.types';
 
 const Tabs: FC<TabsProps> = ({ setTab, tab, tabs }) => (
   <Div display="flex" gap="0.5rem">

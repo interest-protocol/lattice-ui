@@ -1,7 +1,7 @@
 import { Div, Nav, Span } from '@stylin.js/elements';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { ExternalLinkSVG } from '@/components/svg';
 import { NAV_ITEMS, NAV_ITEMS_TITLE, Routes } from '@/constants/routes';

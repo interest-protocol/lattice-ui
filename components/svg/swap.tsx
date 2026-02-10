@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const Swap: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg

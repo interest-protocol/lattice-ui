@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
-const Error: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
+const ErrorIcon: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 20 20"
@@ -16,4 +16,4 @@ const Error: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   </svg>
 );
 
-export default Error;
+export default ErrorIcon;

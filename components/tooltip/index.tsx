@@ -1,7 +1,7 @@
 import { Div, Span } from '@stylin.js/elements';
-import React from 'react';
+import type React from 'react';
 
-import { TooltipIconProps } from './tooltip.types';
+import type { TooltipIconProps } from './tooltip.types';
 
 const TooltipIcon: React.FC<TooltipIconProps> = ({ icon: Icon, text }) => {
   return (

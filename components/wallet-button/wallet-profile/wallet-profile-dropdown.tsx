@@ -1,11 +1,11 @@
 import { Div, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Motion from '@/components/motion';
 import { CopySVG, LogoutSVG } from '@/components/svg';
 import { toasting } from '@/components/toast';
 
-import { WalletProfileDropdownProps } from './wallet-profile.types';
+import type { WalletProfileDropdownProps } from './wallet-profile.types';
 
 const WalletProfileDropdown: FC<
   WalletProfileDropdownProps & {
@@ -43,7 +43,13 @@ const WalletProfileDropdown: FC<
       display={['none', 'none', 'flex']}
       onClick={(e) => e.stopPropagation()}
     >
-      <Div px="1rem" py="0.5rem" display="flex" flexDirection="column" gap="0.5rem">
+      <Div
+        px="1rem"
+        py="0.5rem"
+        display="flex"
+        flexDirection="column"
+        gap="0.5rem"
+      >
         <Div display="flex" alignItems="center" justifyContent="space-between">
           <Span fontFamily="JetBrains Mono">{displayAddress}</Span>
           {fullAddress && (

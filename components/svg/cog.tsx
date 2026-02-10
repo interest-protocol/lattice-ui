@@ -1,6 +1,6 @@
-import { FC, useId } from 'react';
+import { type FC, useId } from 'react';
 
-import { SVGProps } from './svg.types';
+import type { SVGProps } from './svg.types';
 
 const Cog: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => {
   const id = useId();

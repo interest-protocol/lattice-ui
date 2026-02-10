@@ -1,5 +1,5 @@
 import { Button, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
@@ -8,7 +8,7 @@ import { useAppState } from '@/hooks/use-app-state';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { ZERO_BIG_NUMBER } from '@/utils';
 
-import { InputFieldGenericProps } from './input-field.types';
+import type { InputFieldGenericProps } from './input-field.types';
 
 const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
   const { control, setValue } = useFormContext();

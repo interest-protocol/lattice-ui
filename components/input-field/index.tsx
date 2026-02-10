@@ -1,15 +1,15 @@
 import { Div, Input, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { parseInputEventToNumberString } from '@/utils';
 
-import { InputFieldProps } from './input-field.types';
 import InputFieldAsset from './input-field-asset';
 import InputFieldBalance from './input-field-balance';
 import InputFieldBalances from './input-field-balances';
 import InputFieldPrice from './input-field-price';
+import type { InputFieldProps } from './input-field.types';
 
 const InputField: FC<InputFieldProps> = ({
   name,

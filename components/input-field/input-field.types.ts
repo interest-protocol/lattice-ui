@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { AssetMetadata } from '@/interface';
+import type { AssetMetadata } from '@/interface';
 
 export interface InputFieldGenericProps {
   name: string;
