@@ -4,11 +4,13 @@ import type { SVGProps } from './icons.types';
 
 const Wallet: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 18 17"
     fill="none"
     {...props}
   >
+    <title>Wallet</title>
     <path
       fillRule="evenodd"
       clipRule="evenodd"

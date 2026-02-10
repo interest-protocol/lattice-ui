@@ -7,6 +7,7 @@ const Cog: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => {
 
   return (
     <svg
+      aria-hidden="true"
       style={{ maxWidth, maxHeight }}
       viewBox="0 0 24 24"
       fill="none"

@@ -4,6 +4,7 @@ import type { SVGProps } from './icons.types';
 
 const ChevronRight: FC<SVGProps> = ({ maxHeight, maxWidth, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 16 16"
     fill="none"

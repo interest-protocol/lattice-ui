@@ -7,11 +7,13 @@ const Wal: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => {
 
   return (
     <svg
+      aria-hidden="true"
       style={{ maxWidth, maxHeight }}
       viewBox="0 0 1000 1000"
       fill="none"
       {...props}
     >
+      <title>WAL</title>
       <g clipPath={`url(#clip0_${id})`}>
         <path d="M1000 0H0V1000H1000V0Z" fill="#97F0E5" />
         <path

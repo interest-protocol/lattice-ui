@@ -23,7 +23,7 @@
         "noExplicitAny": "off"
       },
       "a11y": {
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "error"
       },
       "complexity": {
         "noForEach": "off"
@@ -59,7 +59,8 @@
       "!.next",
       "!dist",
       "!build",
-      "!*.min.js"
+      "!*.min.js",
+      "!next-env.d.ts"
     ]
   }
 }

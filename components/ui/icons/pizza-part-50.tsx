@@ -8,6 +8,7 @@ const PizzaPart50Percent: FC<SVGProps> = ({
   ...props
 }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 14 16"
     fill="none"

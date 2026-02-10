@@ -4,6 +4,7 @@ import type { SVGProps } from './icons.types';
 
 const Bars: FC<SVGProps> = ({ maxHeight, maxWidth, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 18 12"
     fill="none"

@@ -4,11 +4,13 @@ import type { SVGProps } from './icons.types';
 
 const Scallop: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 215 215"
     fill="none"
     {...props}
   >
+    <title>Scallop</title>
     <g clipPath="url(#clip0_2484_3224)">
       <path
         d="M107.5 215C166.871 215 215 166.871 215 107.5C215 48.1294 166.871 0 107.5 0C48.1294 0 0 48.1294 0 107.5C0 166.871 48.1294 215 107.5 215Z"

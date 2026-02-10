@@ -6,11 +6,13 @@ const Checkbox: FC<
   SVGProps & { status: 'active' | 'checked' | 'unchecked' }
 > = ({ maxWidth, maxHeight, status, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 42 42"
     fill="none"
     {...props}
   >
+    <title>Checkbox</title>
     {status === 'checked' ? (
       <>
         <rect width="42" height="42" rx="8" fill="#A78BFA" />

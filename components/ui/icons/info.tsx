@@ -4,6 +4,7 @@ import type { SVGProps } from './icons.types';
 
 const Info: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
   <svg
+    aria-hidden="true"
     style={{ maxWidth, maxHeight }}
     viewBox="0 0 12 12"
     fill="none"
