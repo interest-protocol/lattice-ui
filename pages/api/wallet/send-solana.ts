@@ -6,6 +6,7 @@ import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
+import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { getSolanaConnection } from '@/lib/solana/server';
 
 const handler: NextApiHandler = async (req, res) => {
@@ -23,20 +24,7 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     const privy = getPrivyClient();
-
-    // Find the user's Solana wallet
-    const wallets = [];
-    for await (const wallet of privy.wallets().list({
-      user_id: userId,
-      chain_type: 'solana',
-    })) {
-      wallets.push(wallet);
-    }
-
-    if (wallets.length === 0)
-      return res.status(404).json({ error: 'No Solana wallet found' });
-
-    const wallet = wallets[0];
+    const wallet = await getFirstWallet(privy, userId, 'solana');
     const connection = getSolanaConnection();
     const fromPubkey = new PublicKey(wallet.address);
     const toPubkey = new PublicKey(recipient);
@@ -93,6 +81,8 @@ const handler: NextApiHandler = async (req, res) => {
       signature: (result as unknown as { signature: string }).signature,
     });
   } catch (error: unknown) {
+    if (error instanceof WalletNotFoundError)
+      return res.status(404).json({ error: error.message });
     const message =
       error instanceof Error ? error.message : 'Failed to send transaction';
     return res.status(500).json({ error: message });

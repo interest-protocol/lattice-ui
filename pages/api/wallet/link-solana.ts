@@ -1,11 +1,8 @@
-import {
-  messageWithIntent,
-  toSerializedSignature,
-} from '@mysten/sui/cryptography';
-import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
+import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
+import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { Registry, SolanaPubkey, createRegistrySdk } from '@/lib/registry';
 
 const handler: NextApiHandler = async (req, res) => {
@@ -19,30 +16,8 @@ const handler: NextApiHandler = async (req, res) => {
 
   try {
     const privy = getPrivyClient();
-
-    const suiWallets = [];
-    for await (const wallet of privy.wallets().list({
-      user_id: userId,
-      chain_type: 'sui',
-    })) {
-      suiWallets.push(wallet);
-    }
-
-    const solanaWallets = [];
-    for await (const wallet of privy.wallets().list({
-      user_id: userId,
-      chain_type: 'solana',
-    })) {
-      solanaWallets.push(wallet);
-    }
-
-    if (suiWallets.length === 0)
-      return res.status(404).json({ error: 'No Sui wallet found' });
-    if (solanaWallets.length === 0)
-      return res.status(404).json({ error: 'No Solana wallet found' });
-
-    const suiWallet = suiWallets[0];
-    const solanaWallet = solanaWallets[0];
+    const suiWallet = await getFirstWallet(privy, userId, 'sui');
+    const solanaWallet = await getFirstWallet(privy, userId, 'solana');
 
     const { suiClient, registry } = createRegistrySdk();
 
@@ -75,36 +50,11 @@ const handler: NextApiHandler = async (req, res) => {
     tx.setSender(suiWallet.address);
 
     const rawBytes = await tx.build({ client: suiClient });
-    const intentMessage = messageWithIntent('TransactionData', rawBytes);
-    const bytesHex = Buffer.from(intentMessage).toString('hex');
 
-    const suiSignResult = await privy.wallets().rawSign(suiWallet.id, {
-      params: {
-        bytes: bytesHex,
-        encoding: 'hex',
-        hash_function: 'blake2b256',
-      },
-    });
-
-    const suiSignatureBytes = Uint8Array.from(
-      Buffer.from(suiSignResult.signature, 'hex')
-    );
-
-    const suiWalletInfo = await privy.wallets().get(suiWallet.id);
-    const suiPublicKeyBytes = Uint8Array.from(
-      Buffer.from(suiWalletInfo.public_key ?? '', 'base64')
-    );
-    const suiPublicKey = new Ed25519PublicKey(suiPublicKeyBytes);
-
-    const serializedSignature = toSerializedSignature({
-      signature: suiSignatureBytes,
-      signatureScheme: 'ED25519',
-      publicKey: suiPublicKey,
-    });
-
-    const result = await suiClient.executeTransactionBlock({
-      transactionBlock: Buffer.from(rawBytes).toString('base64'),
-      signature: serializedSignature,
+    const result = await signAndExecuteSuiTransaction(privy, {
+      walletId: suiWallet.id,
+      rawBytes,
+      suiClient,
     });
 
     return res.status(200).json({
@@ -113,6 +63,8 @@ const handler: NextApiHandler = async (req, res) => {
       solanaAddress: solanaWallet.address,
     });
   } catch (error: unknown) {
+    if (error instanceof WalletNotFoundError)
+      return res.status(404).json({ error: error.message });
     const message =
       error instanceof Error ? error.message : 'Failed to link Solana';
     return res.status(500).json({ error: message });
