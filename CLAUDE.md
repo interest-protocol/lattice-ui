@@ -853,8 +853,7 @@ pnpm type-check   # TypeScript check (npx tsc --noEmit)
 1. **Privy App ID**: `cmla080ug00abk10dlfl0bplc`
 2. **Package Manager**: pnpm (9.1.0)
 3. **Node Version**: >=18.17 (see .nvmrc)
-4. **No Navigation Menu**: `NAV_ITEMS` is intentionally empty
-5. **Single View**: Only `views/swap` is active
+4. **Active Views**: `views/swap` (main) and `views/account`
 
 ### Removed Features (Do Not Recreate)
 
@@ -899,5 +898,5 @@ import { ComponentProps } from './component.types';
 ---
 
 **Last Updated**: 2026-02-10
-**Active View**: `views/swap` only
+**Active Views**: `views/swap` and `views/account`
 **Main Features**: Cross-chain SUI/SOL token swapping
