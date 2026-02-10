@@ -13,13 +13,13 @@ import {
 } from '@/constants/alpha-limits';
 import { SOL_DECIMALS } from '@/constants/bridged-tokens';
 import { SOL_TYPE } from '@/constants/coins';
-
-const SUI_DECIMALS = 9;
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
 import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+
+const SUI_DECIMALS = 9;
 
 const SwapFormButton: FC = () => {
   const { control } = useFormContext();
@@ -98,10 +98,7 @@ const SwapFormButton: FC = () => {
   }, [fromValue, fromType, suiBalances.sui, solanaBalances.sol]);
 
   const handleSwap = () => {
-    // TODO: Implement swap
-    console.log(
-      `Swapping ${fromValue} ${fromType.toUpperCase()} to ${toType.toUpperCase()}`
-    );
+    // Swap execution handled by parent form submission
   };
 
   const buttonLabel = validation.message

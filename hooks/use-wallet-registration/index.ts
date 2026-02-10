@@ -69,9 +69,7 @@ const useWalletRegistration = () => {
 
         // Mark as registered
         setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
-      } catch (error) {
-        console.error('Failed to register wallets:', error);
-
+      } catch (_error) {
         // Retry with exponential backoff
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           const delay = RETRY_DELAYS_MS[retryCount];
@@ -106,9 +104,7 @@ const useWalletRegistration = () => {
       try {
         await linkSolanaWallet(user.id);
         setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
-      } catch (error) {
-        console.error('Failed to link wallets:', error);
-
+      } catch (_error) {
         // Retry with exponential backoff
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           const delay = RETRY_DELAYS_MS[retryCount];
@@ -134,6 +130,8 @@ const useWalletRegistration = () => {
 
   // Auto-register on mount when authenticated
   useEffect(() => {
+    if (!mounted) return;
+
     if (
       ready &&
       authenticated &&
@@ -143,6 +141,7 @@ const useWalletRegistration = () => {
       registerWallets();
     }
   }, [
+    mounted,
     ready,
     authenticated,
     user?.id,
@@ -152,6 +151,8 @@ const useWalletRegistration = () => {
 
   // Auto-link after wallets exist
   useEffect(() => {
+    if (!mounted) return;
+
     if (
       ready &&
       authenticated &&
@@ -163,6 +164,7 @@ const useWalletRegistration = () => {
       linkWallets();
     }
   }, [
+    mounted,
     ready,
     authenticated,
     user?.id,

@@ -12,8 +12,6 @@ const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const { data: suiPrice } = useSuiPrice();
   const value = useWatch({ control, name: `${name}.value` }) as string;
 
-  // For now, we only support SUI price
-  // TODO: Add SOL price support when implementing cross-chain swap
   const price = suiPrice ?? 0;
 
   return (
