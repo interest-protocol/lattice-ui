@@ -1,8 +1,8 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, H1, H2, P } from '@stylin.js/elements';
-import BigNumber from 'bignumber.js';
-import { FC, useCallback, useState } from 'react';
+import type BigNumber from 'bignumber.js';
+import { type FC, useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';
@@ -383,7 +383,6 @@ const AccountContent: FC = () => {
           </Div>
         </Div>
       )}
-
     </Div>
   );
 };

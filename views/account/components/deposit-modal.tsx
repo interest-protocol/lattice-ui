@@ -1,6 +1,6 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { Div, P, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';

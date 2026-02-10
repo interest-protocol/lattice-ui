@@ -1,6 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Div } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import InputField from '@/components/input-field';

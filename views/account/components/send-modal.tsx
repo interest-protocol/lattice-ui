@@ -1,8 +1,8 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
-import BigNumber from 'bignumber.js';
-import { FC, useState } from 'react';
+import type BigNumber from 'bignumber.js';
+import { type FC, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -135,7 +135,7 @@ const SendModal: FC = () => {
     }
 
     const rawAmount = FixedPointMath.toBigNumber(
-      parseFloat(amount),
+      Number.parseFloat(amount),
       selectedToken.decimals
     )
       .toFixed(0)
@@ -165,7 +165,7 @@ const SendModal: FC = () => {
     }
 
     const rawAmount = FixedPointMath.toBigNumber(
-      parseFloat(amount),
+      Number.parseFloat(amount),
       selectedToken.decimals
     )
       .toFixed(0)

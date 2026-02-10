@@ -1,5 +1,5 @@
 import { Div } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import SwapDetails from './swap-details';
 import SwapForm from './swap-form';

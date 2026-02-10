@@ -1,5 +1,5 @@
 import { Button } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
@@ -10,11 +10,13 @@ const SwapFormButton: FC = () => {
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  const isDisabled = !fromValue || parseFloat(fromValue) <= 0;
+  const isDisabled = !fromValue || Number.parseFloat(fromValue) <= 0;
 
   const handleSwap = () => {
     // TODO: Implement Wormhole bridge integration
-    console.log(`Swapping ${fromValue} ${fromType.toUpperCase()} to ${toType.toUpperCase()}`);
+    console.log(
+      `Swapping ${fromValue} ${fromType.toUpperCase()} to ${toType.toUpperCase()}`
+    );
   };
 
   return (

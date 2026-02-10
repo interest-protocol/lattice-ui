@@ -1,5 +1,5 @@
 import { Div, Span } from '@stylin.js/elements';
-import { FC } from 'react';
+import type { FC } from 'react';
 
 const SwapDetails: FC = () => (
   <Div

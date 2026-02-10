@@ -1,8 +1,8 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
-import BigNumber from 'bignumber.js';
-import { FC, useState } from 'react';
+import type BigNumber from 'bignumber.js';
+import { type FC, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
@@ -115,11 +115,10 @@ const Bridge: FC = () => {
     setAmount(FixedPointMath.toNumber(balance, decimals).toString());
   };
 
-  const isDisabled =
-    bridging || !amount || parseFloat(amount) <= 0;
+  const isDisabled = bridging || !amount || Number.parseFloat(amount) <= 0;
 
   const handleBridge = async () => {
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || Number.parseFloat(amount) <= 0) {
       toast.error('Enter an amount');
       return;
     }
@@ -129,9 +128,7 @@ const Bridge: FC = () => {
       // TODO: Implement Wormhole bridge integration
       toast('Bridge integration coming soon');
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Bridge failed'
-      );
+      toast.error(error instanceof Error ? error.message : 'Bridge failed');
     } finally {
       setBridging(false);
     }
@@ -355,11 +352,7 @@ const Bridge: FC = () => {
         flexDirection="column"
         gap="1rem"
       >
-        <Div
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Div display="flex" justifyContent="space-between" alignItems="center">
           <Span fontSize="0.875rem" color="#FFFFFF80">
             Route
           </Span>
@@ -367,11 +360,7 @@ const Bridge: FC = () => {
             {sourceNetwork === 'sui' ? 'Sui' : 'Solana'} → {destNetwork}
           </Span>
         </Div>
-        <Div
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Div display="flex" justifyContent="space-between" alignItems="center">
           <Span fontSize="0.875rem" color="#FFFFFF80">
             You receive
           </Span>
@@ -386,11 +375,7 @@ const Bridge: FC = () => {
                 : (BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI')}
           </Span>
         </Div>
-        <Div
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Div display="flex" justifyContent="space-between" alignItems="center">
           <Span fontSize="0.875rem" color="#FFFFFF80">
             Bridge Fee
           </Span>
@@ -398,11 +383,7 @@ const Bridge: FC = () => {
             --
           </Span>
         </Div>
-        <Div
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Div display="flex" justifyContent="space-between" alignItems="center">
           <Span fontSize="0.875rem" color="#FFFFFF80">
             Estimated Time
           </Span>

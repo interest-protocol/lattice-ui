@@ -1,5 +1,5 @@
 import { Div } from '@stylin.js/elements';
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import Tabs from '@/components/tabs';
 
