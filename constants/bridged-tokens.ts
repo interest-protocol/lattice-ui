@@ -1,10 +1,9 @@
-import { AssetMetadata } from '@/interface';
+import type { AssetMetadata } from '@/interface';
 
 export const WSOL_SUI_TYPE =
   '0xb7844e289a8410e50fb3ca48d69eb9cf29e27d223ef90353fe1bd8e27ff8f3f8::coin::COIN';
 
-export const WSUI_SOLANA_MINT =
-  'G1vJEgzepqhnVu35BN4jrkv3wVwkujYWFFCxhbEZ1CZr';
+export const WSUI_SOLANA_MINT = 'G1vJEgzepqhnVu35BN4jrkv3wVwkujYWFFCxhbEZ1CZr';
 
 export const WORMHOLE_DECIMALS = 8;
 

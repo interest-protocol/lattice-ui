@@ -1,6 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
-import { AssetMetadata } from '@/interface';
+import type { AssetMetadata } from '@/interface';
 
 // Solana token type identifier
 export const SOL_TYPE = 'sol';
@@ -21,7 +21,6 @@ export const ASSET_METADATA: Record<string, AssetMetadata> = {
     decimals: 9,
     symbol: 'SOL',
     type: SOL_TYPE,
-    iconUrl:
-      'https://cryptologos.cc/logos/solana-sol-logo.png?v=035',
+    iconUrl: 'https://cryptologos.cc/logos/solana-sol-logo.png?v=035',
   },
 };

@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import type BigNumber from 'bignumber.js';
 
 export type BigNumberish = BigNumber | bigint | string | number;
 

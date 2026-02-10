@@ -7,10 +7,10 @@ export enum Explorer {
 }
 
 export enum ExplorerMode {
-  Object,
-  Account,
-  Transaction,
-  Coin,
+  Object = 0,
+  Account = 1,
+  Transaction = 2,
+  Coin = 3,
 }
 
 export const EXPLORERS = [
