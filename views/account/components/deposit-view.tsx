@@ -1,9 +1,9 @@
 import { Div, P, Span } from '@stylin.js/elements';
 import { QRCodeSVG } from 'qrcode.react';
 import type { FC } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';
+import { toasting } from '@/components/toast';
 import useWalletAddresses from '@/hooks/use-wallet-addresses';
 
 type NetworkType = 'sui' | 'solana';
@@ -21,7 +21,7 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
   const copyAddress = () => {
     if (!address) return;
     window.navigator.clipboard.writeText(address);
-    toast.success('Address copied');
+    toasting.success({ action: 'Copy', message: 'Address copied' });
   };
 
   if (!address) {

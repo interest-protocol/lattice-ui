@@ -3,8 +3,8 @@ import { usePrivy } from '@privy-io/react-auth';
 import type BigNumber from 'bignumber.js';
 import bs58 from 'bs58';
 import { useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
+import { toasting } from '@/components/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
@@ -54,7 +54,7 @@ export const useBridge = () => {
   useSolanaBalances(solanaAddress);
 
   const bridgeSolToWsol = useCallback(
-    async (amount: BigNumber) => {
+    async (amount: BigNumber, toastId: string) => {
       if (!user || !solanaAddress || !suiAddress) {
         throw new Error('Wallets not connected');
       }
@@ -62,6 +62,7 @@ export const useBridge = () => {
       const dwalletAddress = DWalletAddress[ChainId.Solana];
 
       setStatus('depositing');
+      toasting.update(toastId, 'Depositing to bridge...');
       const { signature: depositSignature } = await sendSolana({
         userId: user.id,
         recipient: dwalletAddress,
@@ -69,9 +70,9 @@ export const useBridge = () => {
       });
 
       await solanaConnection.confirmTransaction(depositSignature, 'finalized');
-      toast.success('SOL deposited to bridge!');
 
       setStatus('creating');
+      toasting.update(toastId, 'Creating mint request...');
       const { requestId, mintCapId } = await createMintRequest({
         userId: user.id,
         sourceChain: ChainId.Solana,
@@ -85,9 +86,9 @@ export const useBridge = () => {
       if (!requestId || !mintCapId) {
         throw new Error('Failed to get requestId or mintCapId');
       }
-      toast.success('Mint request created!');
 
       setStatus('voting');
+      toasting.update(toastId, 'Verifying with enclave...');
       await setMintDigest({
         userId: user.id,
         requestId,
@@ -100,17 +101,17 @@ export const useBridge = () => {
         requestId,
         depositSignature,
       });
-      toast.success('Request verified by enclave!');
 
       setStatus('executing');
+      toasting.update(toastId, 'Minting tokens...');
       await executeMint({
         userId: user.id,
         requestId,
         mintCapId,
       });
-      toast.success('wSOL minted successfully!');
 
       setStatus('waiting');
+      toasting.update(toastId, 'Confirming transaction...');
       await mutateSuiBalances();
     },
     [user, solanaAddress, suiAddress, solanaConnection, mutateSuiBalances]
@@ -118,39 +119,47 @@ export const useBridge = () => {
 
   const bridge = useCallback(
     async ({ direction, amount }: BridgeParams) => {
+      const BRIDGE_TOAST_ID = 'bridge-operation';
+
       if (!user) {
-        toast.error('Please connect your wallet first');
+        toasting.error({ action: 'Bridge', message: 'Please connect your wallet first' });
         return;
       }
 
       try {
         setStatus('idle');
         setError(null);
+        toasting.loadingWithId({ message: 'Starting bridge...' }, BRIDGE_TOAST_ID);
 
         switch (direction) {
           case 'sol-to-wsol':
-            await bridgeSolToWsol(amount);
+            await bridgeSolToWsol(amount, BRIDGE_TOAST_ID);
             break;
           case 'wsol-to-sol':
-            toast.error('wSOL → SOL bridge coming soon');
+            toasting.dismiss(BRIDGE_TOAST_ID);
+            toasting.error({ action: 'Bridge', message: 'wSOL → SOL bridge coming soon' });
             return;
           case 'sui-to-wsui':
-            toast.error('SUI → wSUI bridge coming soon');
+            toasting.dismiss(BRIDGE_TOAST_ID);
+            toasting.error({ action: 'Bridge', message: 'SUI → wSUI bridge coming soon' });
             return;
           case 'wsui-to-sui':
-            toast.error('wSUI → SUI bridge coming soon');
+            toasting.dismiss(BRIDGE_TOAST_ID);
+            toasting.error({ action: 'Bridge', message: 'wSUI → SUI bridge coming soon' });
             return;
           default:
             throw new Error('Invalid bridge direction');
         }
 
         setStatus('success');
-        toast.success('Bridge completed!');
+        toasting.dismiss(BRIDGE_TOAST_ID);
+        toasting.success({ action: 'Bridge', message: 'Your tokens are ready' });
       } catch (err: unknown) {
         setStatus('error');
         const message = err instanceof Error ? err.message : 'Bridge failed';
         setError(message);
-        toast.error(message);
+        toasting.dismiss(BRIDGE_TOAST_ID);
+        toasting.error({ action: 'Bridge', message: `Failed: ${message}` });
       }
     },
     [user, bridgeSolToWsol]

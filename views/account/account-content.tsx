@@ -3,9 +3,9 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, H1, H2, Img, P } from '@stylin.js/elements';
 import type BigNumber from 'bignumber.js';
 import { type FC, useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';
+import { toasting } from '@/components/toast';
 import Tabs from '@/components/tabs';
 import {
   BRIDGED_ASSET_METADATA,
@@ -134,7 +134,7 @@ const BalancesView: FC<{
           cursor="pointer"
           onClick={() => {
             window.navigator.clipboard.writeText(displaySuiAddress);
-            toast.success('Address copied');
+            toasting.success({ action: 'Copy', message: 'Address copied' });
           }}
           nHover={{ opacity: 0.7 }}
         >
@@ -184,7 +184,7 @@ const BalancesView: FC<{
           cursor="pointer"
           onClick={() => {
             window.navigator.clipboard.writeText(solanaAddress);
-            toast.success('Address copied');
+            toasting.success({ action: 'Copy', message: 'Address copied' });
           }}
           nHover={{ opacity: 0.7 }}
         >
@@ -237,14 +237,18 @@ const AccountContent: FC = () => {
   const createSuiWallet = useCallback(async () => {
     if (!user?.id) return;
     setCreatingSuiWallet(true);
+    const dismiss = toasting.loading({ message: 'Creating Sui wallet...' });
     try {
       const data = await createSuiWalletApi(user.id);
       setNewSuiAddress(data.address);
-      toast.success('Sui wallet created');
+      dismiss();
+      toasting.success({ action: 'Wallet', message: 'Sui wallet created' });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create Sui wallet'
-      );
+      dismiss();
+      toasting.error({
+        action: 'Wallet',
+        message: error instanceof Error ? error.message : 'Failed to create Sui wallet',
+      });
     } finally {
       setCreatingSuiWallet(false);
     }

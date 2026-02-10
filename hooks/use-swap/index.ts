@@ -7,9 +7,9 @@ import {
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import type BigNumber from 'bignumber.js';
-import { useCallback, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { useCallback, useRef, useState } from 'react';
 
+import { toasting } from '@/components/toast';
 import { SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
@@ -55,10 +55,17 @@ export const useSwap = () => {
   const { balances: solanaBalances, mutate: mutateSolanaBalances } =
     useSolanaBalances(solanaAddress);
 
+  const suiBalancesRef = useRef(suiBalances);
+  suiBalancesRef.current = suiBalances;
+  const solanaBalancesRef = useRef(solanaBalances);
+  solanaBalancesRef.current = solanaBalances;
+
   const swap = useCallback(
     async ({ fromType, toType, fromAmount }: SwapParams) => {
+      const SWAP_TOAST_ID = 'swap-operation';
+
       if (!user) {
-        toast.error('Please connect your wallet first');
+        toasting.error({ action: 'Swap', message: 'Please connect your wallet first' });
         return;
       }
 
@@ -66,7 +73,7 @@ export const useSwap = () => {
       const isSolToSui = fromType === SOL_TYPE && toType === SUI_TYPE_ARG;
 
       if (!isSuiToSol && !isSolToSui) {
-        toast.error('Invalid swap direction');
+        toasting.error({ action: 'Swap', message: 'Invalid swap direction' });
         return;
       }
 
@@ -77,6 +84,7 @@ export const useSwap = () => {
       try {
         setStatus('depositing');
         setError(null);
+        toasting.loadingWithId({ message: 'Depositing funds to bridge...' }, SWAP_TOAST_ID);
 
         let depositDigest: string;
 
@@ -113,15 +121,13 @@ export const useSwap = () => {
           await solanaConnection.confirmTransaction(depositDigest, 'confirmed');
         }
 
-        toast.success('Deposit confirmed!');
-
         setStatus('verifying');
+        toasting.update(SWAP_TOAST_ID, 'Verifying deposit on-chain...');
 
         const proof = await fetchNewRequestProof(depositDigest, sourceChain);
 
-        toast.success('Deposit verified!');
-
         setStatus('creating');
+        toasting.update(SWAP_TOAST_ID, 'Creating swap request...');
 
         const metadata = await fetchMetadata();
         const solverSuiAddress = metadata.solver.sui;
@@ -175,14 +181,13 @@ export const useSwap = () => {
           solverRecipient: Array.from(solverRecipient),
         });
 
-        toast.success('Request created! Waiting for solver...');
-
         setStatus('waiting');
+        toasting.update(SWAP_TOAST_ID, 'Waiting for solver to complete...');
 
-        // Capture initial balance to detect changes
+        // Capture initial balance to detect changes (use ref for latest value)
         const initialBalance = isSuiToSol
-          ? solanaBalances.sol
-          : suiBalances.sui;
+          ? solanaBalancesRef.current.sol
+          : suiBalancesRef.current.sui;
 
         // Poll for balance changes with early exit when change is detected
         for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
@@ -207,12 +212,14 @@ export const useSwap = () => {
         }
 
         setStatus('success');
-        toast.success('Swap completed!');
+        toasting.dismiss(SWAP_TOAST_ID);
+        toasting.success({ action: 'Swap', message: 'Your tokens have been exchanged' });
       } catch (err: unknown) {
         setStatus('error');
         const message = err instanceof Error ? err.message : 'Swap failed';
         setError(message);
-        toast.error(message);
+        toasting.dismiss(SWAP_TOAST_ID);
+        toasting.error({ action: 'Swap', message: `Failed: ${message}` });
       }
     },
     [
@@ -221,8 +228,6 @@ export const useSwap = () => {
       solanaAddress,
       suiClient,
       solanaConnection,
-      suiBalances,
-      solanaBalances,
       mutateSuiBalances,
       mutateSolanaBalances,
     ]

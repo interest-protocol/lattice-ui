@@ -21,4 +21,24 @@ export const toasting = {
         duration: Number.POSITIVE_INFINITY,
       })
     ),
+
+  // Loading toast with specific ID for updates
+  loadingWithId: (args: ToastLoadingProps, id: string) =>
+    dismissHandler(
+      toast.loading(<ToastLoading {...args} />, {
+        id,
+        duration: Number.POSITIVE_INFINITY,
+      })
+    ),
+
+  // Update existing toast message
+  update: (id: string, message: string) => {
+    toast.loading(<ToastLoading message={message} />, {
+      id,
+      duration: Number.POSITIVE_INFINITY,
+    });
+  },
+
+  // Dismiss toast by ID
+  dismiss: (id: string) => toast.dismiss(id),
 };

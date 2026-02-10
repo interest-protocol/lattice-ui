@@ -3,8 +3,8 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
 import type BigNumber from 'bignumber.js';
 import { type FC, useState } from 'react';
-import { toast } from 'react-hot-toast';
 
+import { toasting } from '@/components/toast';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
@@ -106,7 +106,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
 
   const handleSendSolana = async () => {
     if (!user?.id) {
-      toast.error('Not authenticated');
+      toasting.error({ action: 'Withdraw', message: 'Not authenticated' });
       return;
     }
 
@@ -129,7 +129,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
 
   const handleSendSui = async () => {
     if (!user?.id) {
-      toast.error('Not authenticated');
+      toasting.error({ action: 'Withdraw', message: 'Not authenticated' });
       return;
     }
 
@@ -153,28 +153,32 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
 
   const handleSend = async () => {
     if (!authenticated) {
-      toast.error('Please connect your wallet');
+      toasting.error({ action: 'Withdraw', message: 'Please connect your wallet' });
       return;
     }
     if (!recipient || !amount) {
-      toast.error('Please fill in all fields');
+      toasting.error({ action: 'Withdraw', message: 'Please fill in all fields' });
       return;
     }
 
     setSending(true);
+    const dismiss = toasting.loading({ message: `Withdrawing ${selectedToken.symbol}...` });
     try {
       if (network === 'solana') {
         await handleSendSolana();
       } else {
         await handleSendSui();
       }
-      toast.success('Transaction sent!');
+      dismiss();
+      toasting.success({ action: 'Withdraw', message: `${amount} ${selectedToken.symbol} sent` });
       setRecipient('');
       setAmount('');
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Transaction failed'
-      );
+      dismiss();
+      toasting.error({
+        action: 'Withdraw',
+        message: error instanceof Error ? error.message : 'Transaction failed',
+      });
     } finally {
       setSending(false);
     }

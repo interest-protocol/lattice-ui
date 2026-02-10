@@ -1,8 +1,8 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { toasting } from '@/components/toast';
 import {
   WALLETS_LINKED_KEY,
   WALLETS_REGISTERED_KEY,
@@ -48,6 +48,7 @@ const useWalletRegistration = () => {
       if (effectiveRegisteredUsers[user.id]) return;
 
       isRegistering.current = true;
+      const WALLET_SETUP_TOAST_ID = 'wallet-setup';
 
       try {
         const promises: Promise<unknown>[] = [];
@@ -64,12 +65,17 @@ const useWalletRegistration = () => {
 
         // Run wallet creations in parallel
         if (promises.length > 0) {
+          const message = retryCount > 0 ? 'Retrying wallet setup...' : 'Setting up your wallets...';
+          toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
           await Promise.all(promises);
+          toasting.dismiss(WALLET_SETUP_TOAST_ID);
+          toasting.success({ action: 'Wallet Setup', message: 'Your wallets are ready' });
         }
 
         // Mark as registered
         setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
       } catch (_error) {
+        toasting.dismiss(WALLET_SETUP_TOAST_ID);
         // Retry with exponential backoff
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           const delay = RETRY_DELAYS_MS[retryCount];
@@ -79,7 +85,7 @@ const useWalletRegistration = () => {
         }
 
         // After all retries failed, notify user
-        toast.error('Failed to set up wallets. Please refresh the page.');
+        toasting.error({ action: 'Wallet Setup', message: 'Please refresh the page' });
       } finally {
         isRegistering.current = false;
       }
@@ -114,7 +120,7 @@ const useWalletRegistration = () => {
         }
 
         // After all retries failed, notify user
-        toast.error('Failed to link wallets. Please refresh the page.');
+        toasting.error({ action: 'Wallet Link', message: 'Please refresh the page' });
       } finally {
         isLinking.current = false;
       }
