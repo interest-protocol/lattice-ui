@@ -17,7 +17,6 @@ const InputField: FC<InputFieldProps> = ({
   types,
   disabled,
   topContent,
-  redirecting,
   oppositeName,
 }) => {
   const { register, setValue } = useFormContext();
@@ -71,7 +70,6 @@ const InputField: FC<InputFieldProps> = ({
         <InputFieldAsset
           name={name}
           types={types}
-          redirecting={redirecting}
           oppositeName={oppositeName}
         />
       </Div>

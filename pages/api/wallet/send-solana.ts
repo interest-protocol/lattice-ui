@@ -94,9 +94,14 @@ const handler: NextApiHandler = async (req, res) => {
     const result = await privy
       .wallets()
       .solana()
-      .signAndSendTransaction(wallet.id, { transaction: serialized });
+      .signAndSendTransaction(wallet.id, {
+        caip2: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+        transaction: serialized,
+      });
 
-    return res.status(200).json({ signature: result.signature });
+    return res.status(200).json({
+      signature: (result as unknown as { signature: string }).signature,
+    });
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : 'Failed to send transaction';

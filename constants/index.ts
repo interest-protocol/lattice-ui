@@ -6,4 +6,3 @@ export * from './network';
 export * from './routes';
 export * from './rpc';
 export * from './storage-keys';
-export * from './validators';

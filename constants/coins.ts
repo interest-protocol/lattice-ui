@@ -8,11 +8,6 @@ export const SOL_TYPE = 'sol';
 // Main tradeable coins for SUI/SOL swap
 export const COIN_TYPES: ReadonlyArray<string> = [SUI_TYPE_ARG, SOL_TYPE];
 
-// Legacy staking types (deprecated - kept for compatibility)
-export const LST_TYPES: ReadonlyArray<string> = [];
-export const LST_TYPES_KEY: ReadonlyArray<string> = [];
-export const NFT_TYPES: ReadonlyArray<string> = [];
-
 export const ASSET_METADATA: Record<string, AssetMetadata> = {
   [SUI_TYPE_ARG]: {
     name: 'Sui',

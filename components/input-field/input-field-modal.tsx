@@ -1,25 +1,20 @@
-import { TYPES } from '@interest-protocol/blizzard-sdk';
 import { Div, Img, Input, Label, P, Span } from '@stylin.js/elements';
-import { useRouter } from 'next/router';
 import { type FC, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-import { LST_TYPES, LST_TYPES_KEY, NFT_TYPES } from '@/constants';
 import { useAppState } from '@/hooks/use-app-state';
 import { useModal } from '@/hooks/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { ZERO_BIG_NUMBER, typeFromMaybeNftType } from '@/utils';
+import { ZERO_BIG_NUMBER } from '@/utils';
 
 import { SearchSVG } from '../svg';
 import type { InputFieldModalProps } from './input-field.types';
 
 const InputFieldModal: FC<InputFieldModalProps> = ({
   assetList,
-  redirecting,
   oppositeName,
   name: fieldName,
 }) => {
-  const { push } = useRouter();
   const { balances } = useAppState();
   const { handleClose } = useModal();
   const { control, setValue } = useFormContext();
@@ -71,13 +66,6 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
                 name.toLowerCase().includes(search) ||
                 symbol.toLowerCase().includes(search))
           )
-          .sort((a, b) =>
-            typeFromMaybeNftType(a.type) === TYPES.WWAL
-              ? -1
-              : typeFromMaybeNftType(b.type) === TYPES.WWAL
-                ? 1
-                : 0
-          )
           .map(({ symbol, type, decimals, name, iconUrl }) => (
             <Div
               p="1rem"
@@ -90,14 +78,6 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
               gridTemplateColumns="2fr 1fr 1fr"
               nHover={{ borderColor: '#A78BFA4D', bg: '#A78BFA33' }}
               onClick={() => {
-                redirecting &&
-                  push(
-                    `/${LST_TYPES_KEY[
-                      LST_TYPES.findIndex(
-                        (item) => item === typeFromMaybeNftType(type)
-                      )
-                    ].toLowerCase()}`
-                  );
                 setValue(`${fieldName}.type`, type);
                 handleClose();
               }}
@@ -133,13 +113,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
                   borderRadius="1.5rem"
                   textTransform="uppercase"
                 >
-                  {symbol.endsWith('NFT')
-                    ? 'nft'
-                    : LST_TYPES.includes(type)
-                      ? 'lst'
-                      : NFT_TYPES.includes(type)
-                        ? 'nft'
-                        : 'coin'}
+                  coin
                 </Span>
               </Div>
               <Div

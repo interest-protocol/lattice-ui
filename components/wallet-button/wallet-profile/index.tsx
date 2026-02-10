@@ -59,7 +59,7 @@ const WalletProfile: FC = () => {
   return (
     <>
       <Div
-        ref={menuRef}
+        ref={menuRef as any}
         alignItems="flex-end"
         flexDirection="column"
         display={['none', 'none', 'flex']}

@@ -8,11 +8,9 @@ export interface InputFieldGenericProps {
 }
 
 export interface InputFieldAssetProps extends InputFieldGenericProps {
-  redirecting?: boolean;
   types: ReadonlyArray<string>;
 }
 export interface InputFieldModalProps extends InputFieldGenericProps {
-  redirecting?: boolean;
   assetList: ReadonlyArray<AssetMetadata>;
 }
 

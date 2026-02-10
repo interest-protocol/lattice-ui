@@ -4,7 +4,6 @@ import { type FC, useState } from 'react';
 
 import SettingsMenuExplorer from './settings-menu-explorer';
 import SettingsMenuRPC from './settings-menu-rpc';
-import SettingsMenuValidator from './settings-menu-validator';
 
 const Motion = motion.create(Div);
 
@@ -30,8 +29,6 @@ const SettingsMenu: FC = () => {
       border="1px solid #FFFFFF1A"
     >
       <Motion py="0.5rem" borderRadius="0.75rem" width="20rem">
-        <SettingsMenuValidator />
-        <Hr border="none" borderBottom="1px solid #242424" mx="1rem" />
         <SettingsMenuExplorer
           show={menu === 'explorer'}
           toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
