@@ -6,6 +6,7 @@ import { useBackgroundTranslate } from '@/hooks/use-background-position';
 
 import Background from '../background';
 import Header from '../header';
+import HealthIndicator from '../health-indicator';
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
   const { x, y } = useBackgroundMotionTranslate();
@@ -35,6 +36,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
       <Background />
       <Header />
       {children}
+      <HealthIndicator />
     </Main>
   );
 };
