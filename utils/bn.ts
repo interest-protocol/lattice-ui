@@ -1,46 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import BigNumber from 'bignumber.js';
-
-const MAX_BPS = 10000;
 
 import type { BigNumberish } from '@/interface';
 
-export function isHexString(value: any, length?: number): boolean {
-  if (typeof value !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
-    return false;
-  }
-  if (length && value.length !== 2 + 2 * length) {
-    return false;
-  }
-  return true;
-}
-
-export const parseBigNumberish = (x: any): BigNumber =>
-  isBigNumberish(x) ? new BigNumber(x.toString()) : ZERO_BIG_NUMBER;
-
-export const parseToPositiveStringNumber = (x: string): string => {
-  if (Number.isNaN(+x)) return '0';
-  if (0 > +x) return '0';
-  return x;
-};
+const MAX_BPS = 10000;
 
 export const ZERO_BIG_NUMBER = new BigNumber(0);
 
-export function isBigNumberish(value: any): value is BigNumberish {
-  return (
-    value != null &&
-    (BigNumber.isBigNumber(value) ||
-      (typeof value === 'number' && value % 1 === 0) ||
-      (typeof value === 'string' && !!value.match(/^-?[0-9]+$/)) ||
-      isHexString(value) ||
-      typeof value === 'bigint')
-  );
-}
+export const isHexString = (value: unknown, length?: number): boolean => {
+  if (typeof value !== 'string' || !/^0x[0-9A-Fa-f]*$/.test(value)) {
+    return false;
+  }
+  return !length || value.length === 2 + 2 * length;
+};
 
-export const isNumeric = (bn: BigNumber) => !Number.isNaN(bn.toNumber());
+export const isBigNumberish = (value: unknown): value is BigNumberish =>
+  value != null &&
+  (BigNumber.isBigNumber(value) ||
+    (typeof value === 'number' && value % 1 === 0) ||
+    (typeof value === 'string' && /^-?[0-9]+$/.test(value)) ||
+    isHexString(value) ||
+    typeof value === 'bigint');
+
+export const parseBigNumberish = (value: unknown): BigNumber => {
+  if (value == null) return ZERO_BIG_NUMBER;
+  try {
+    const bn = new BigNumber(String(value));
+    return bn.isFinite() ? bn : ZERO_BIG_NUMBER;
+  } catch {
+    return ZERO_BIG_NUMBER;
+  }
+};
+
+export const parseToPositiveStringNumber = (x: string): string => {
+  if (Number.isNaN(+x) || +x < 0) return '0';
+  return x;
+};
 
 /**
- * @name bpsCalcUp
+ * @name feesCalcUp
  * @description this is the function that takes the fees based on @interest/bps package
  * @link https://github.com/interest-protocol/interest-mvr/blob/a2ed0e88d7b993a014c73061d7b369cc45c45624/bps/sources/bps.move#L57
  */
