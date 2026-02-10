@@ -11,9 +11,10 @@ const useSuiBalances = (address: string | null) => {
   const { data, isLoading, mutate } = useSWR(
     address ? [useSuiBalances.name, address] : null,
     async () => {
+      if (!address) return { sui: new BigNumber(0), wsol: new BigNumber(0) };
       const [suiBalance, wsolBalance] = await Promise.all([
-        suiClient.getBalance({ owner: address! }),
-        suiClient.getBalance({ owner: address!, coinType: WSOL_SUI_TYPE }),
+        suiClient.getBalance({ owner: address }),
+        suiClient.getBalance({ owner: address, coinType: WSOL_SUI_TYPE }),
       ]);
 
       return {

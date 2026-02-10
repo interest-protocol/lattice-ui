@@ -127,9 +127,13 @@ export const useSwap = () => {
         const solverSuiAddress = metadata.solver.sui;
         const solverSolanaAddress = metadata.solver.solana;
 
+        if (!suiAddress || !solanaAddress) {
+          throw new Error('Both wallets must be connected');
+        }
+
         const destinationAddress = isSuiToSol
-          ? SolanaPubkey.fromBs58(solanaAddress!).toBytes()
-          : SuiAddress.fromHex(suiAddress!).toBytes();
+          ? SolanaPubkey.fromBs58(solanaAddress).toBytes()
+          : SuiAddress.fromHex(suiAddress).toBytes();
         const solverSender = isSuiToSol
           ? SolanaPubkey.fromBs58(solverSolanaAddress).toBytes()
           : SuiAddress.fromHex(solverSuiAddress).toBytes();
@@ -140,8 +144,8 @@ export const useSwap = () => {
           ? SolanaPubkey.fromBs58(NATIVE_SOL_MINT).toBytes()
           : new TextEncoder().encode(SUI_TYPE_ARG);
         const sourceAddress = isSuiToSol
-          ? SuiAddress.fromHex(suiAddress!).toBytes()
-          : SolanaPubkey.fromBs58(solanaAddress!).toBytes();
+          ? SuiAddress.fromHex(suiAddress).toBytes()
+          : SolanaPubkey.fromBs58(solanaAddress).toBytes();
 
         const walletKey = WalletKey[sourceChain];
         const deadline = BigInt(Date.now() + REQUEST_DEADLINE_MS);
