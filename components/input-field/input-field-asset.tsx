@@ -6,7 +6,6 @@ import Skeleton from 'react-loading-skeleton';
 import Motion from '@/components/motion';
 import useMetadata from '@/hooks/use-metadata';
 import { useModal } from '@/hooks/use-modal';
-import { nftTypeFromType } from '@/utils';
 
 import { ChevronDownSVG } from '../svg';
 import InputFieldModal from './input-field-modal';
@@ -26,11 +25,9 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   const type = useWatch({ control, name: `${name}.type` });
   const oppositeType = useWatch({ control, name: `${oppositeName}.type` });
 
-  const nftType = nftTypeFromType(type);
-
   const availableTypes = types.filter((item) => item !== oppositeType);
 
-  if (isLoading || (!metadata?.[type] && !metadata?.[nftType]))
+  if (isLoading || !metadata?.[type])
     return (
       <Motion
         gap="0.5rem"
@@ -88,11 +85,11 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
           width="100%"
           height="100%"
           objectFit="contain"
-          alt={metadata[type]?.symbol ?? metadata[nftType].symbol}
-          src={metadata[type]?.iconUrl ?? metadata[nftType].iconUrl}
+          alt={metadata[type]?.symbol}
+          src={metadata[type]?.iconUrl}
         />
       </Span>
-      {metadata?.[type]?.symbol ?? metadata?.[nftType]?.symbol ?? 'Select Coin'}
+      {metadata?.[type]?.symbol ?? 'Select Coin'}
       {availableTypes.length > 1 && (
         <ChevronDownSVG maxWidth="1rem" width="100%" />
       )}

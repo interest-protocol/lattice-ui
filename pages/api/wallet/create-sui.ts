@@ -1,8 +1,6 @@
-import { PrivyClient } from '@privy-io/node';
 import type { NextApiHandler } from 'next';
 
-const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
-const appSecret = process.env.PRIVY_APP_SECRET ?? '';
+import { getPrivyClient } from '@/lib/privy/server';
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== 'POST')
@@ -13,11 +11,8 @@ const handler: NextApiHandler = async (req, res) => {
   if (!userId || typeof userId !== 'string')
     return res.status(400).json({ error: 'Missing userId (did:privy:...)' });
 
-  if (!appSecret)
-    return res.status(500).json({ error: 'PRIVY_APP_SECRET not configured' });
-
   try {
-    const privy = new PrivyClient({ appId, appSecret });
+    const privy = getPrivyClient();
 
     const wallet = await privy.wallets().create({
       chain_type: 'sui',

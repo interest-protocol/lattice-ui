@@ -1,0 +1,13 @@
+import { Connection } from '@solana/web3.js';
+
+import { SOLANA_RPC_URL } from '@/constants';
+
+let cachedConnection: Connection | null = null;
+
+export const getSolanaConnection = (): Connection => {
+  if (!cachedConnection) {
+    cachedConnection = new Connection(SOLANA_RPC_URL, 'confirmed');
+  }
+
+  return cachedConnection;
+};

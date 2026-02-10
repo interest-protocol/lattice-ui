@@ -8,15 +8,16 @@ import { toast } from 'react-hot-toast';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
-  WORMHOLE_DECIMALS,
   WSOL_SUI_TYPE,
   WSUI_SOLANA_MINT,
+  XBRIDGE_DECIMALS,
 } from '@/constants';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import { useModal } from '@/hooks/use-modal';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';
 
 type NetworkType = 'sui' | 'solana';
@@ -42,7 +43,7 @@ const SUI_TOKENS: TokenOption[] = [
     symbol: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL',
     name: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.name ?? 'Solana (Wormhole)',
     iconUrl: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.iconUrl,
-    decimals: WORMHOLE_DECIMALS,
+    decimals: XBRIDGE_DECIMALS,
   },
 ];
 
@@ -59,7 +60,7 @@ const SOLANA_TOKENS: TokenOption[] = [
     symbol: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI',
     name: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.name ?? 'Sui (Wormhole)',
     iconUrl: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.iconUrl,
-    decimals: WORMHOLE_DECIMALS,
+    decimals: XBRIDGE_DECIMALS,
   },
 ];
 
@@ -141,21 +142,14 @@ const SendModal: FC = () => {
       .toFixed(0)
       .toString();
 
-    const res = await fetch('/api/wallet/send-solana', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: user.id,
-        recipient,
-        amount: rawAmount,
-        mint: selectedToken.type === SOL_TYPE ? undefined : selectedToken.type,
-      }),
+    const result = await sendSolana({
+      userId: user.id,
+      recipient,
+      amount: rawAmount,
+      mint: selectedToken.type === SOL_TYPE ? undefined : selectedToken.type,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-
-    return data.signature;
+    return result.signature;
   };
 
   const handleSendSui = async () => {
@@ -171,22 +165,15 @@ const SendModal: FC = () => {
       .toFixed(0)
       .toString();
 
-    const res = await fetch('/api/wallet/send-sui', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: user.id,
-        recipient,
-        amount: rawAmount,
-        coinType:
-          selectedToken.type === SUI_TYPE_ARG ? undefined : selectedToken.type,
-      }),
+    const result = await sendSui({
+      userId: user.id,
+      recipient,
+      amount: rawAmount,
+      coinType:
+        selectedToken.type === SUI_TYPE_ARG ? undefined : selectedToken.type,
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-
-    return data.digest;
+    return result.digest;
   };
 
   const handleSend = async () => {

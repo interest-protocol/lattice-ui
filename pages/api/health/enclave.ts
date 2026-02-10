@@ -1,6 +1,6 @@
 import type { NextApiHandler } from 'next';
 
-const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL ?? '';
+const ENCLAVE_URL = process.env.ENCLAVE_URL ?? '';
 
 export interface EnclaveHealthResponse {
   healthy: boolean;

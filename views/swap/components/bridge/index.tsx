@@ -1,17 +1,27 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
+import BigNumberJS from 'bignumber.js';
 import type BigNumber from 'bignumber.js';
-import { type FC, useState } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
-  WORMHOLE_DECIMALS,
   WSOL_SUI_TYPE,
   WSUI_SOLANA_MINT,
+  XBRIDGE_DECIMALS,
 } from '@/constants';
+import {
+  ALPHA_MAX_SOL,
+  ALPHA_MAX_SUI,
+  MIN_GAS_SOL,
+  MIN_GAS_SUI,
+} from '@/constants/alpha-limits';
+import useBridge, { type BridgeDirection, type BridgeStatus } from '@/hooks/use-bridge';
+
+const SUI_DECIMALS = 9;
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/use-solana-balances';
@@ -42,13 +52,24 @@ const TOKEN_OPTIONS: Record<string, TokenOption> = {
 
 type TokenKey = 'SUI' | 'SOL';
 
+const STATUS_LABELS: Record<BridgeStatus, string> = {
+  idle: '',
+  depositing: 'Depositing...',
+  creating: 'Creating request...',
+  voting: 'Verifying...',
+  executing: 'Executing...',
+  waiting: 'Confirming...',
+  success: 'Bridge completed!',
+  error: 'Bridge failed',
+};
+
 const Bridge: FC = () => {
   const { user } = usePrivy();
+  const { bridge, reset, status, isLoading, error } = useBridge();
 
-  const [sourceNetwork, setSourceNetwork] = useState<NetworkType>('sui');
-  const [selectedToken, setSelectedToken] = useState<TokenKey>('SUI');
+  const [sourceNetwork, setSourceNetwork] = useState<NetworkType>('solana');
+  const [selectedToken, setSelectedToken] = useState<TokenKey>('SOL');
   const [amount, setAmount] = useState('');
-  const [bridging, setBridging] = useState(false);
 
   const destNetwork = sourceNetwork === 'sui' ? 'Solana' : 'Sui';
   const token = TOKEN_OPTIONS[selectedToken];
@@ -99,12 +120,12 @@ const Bridge: FC = () => {
 
   const getDecimals = (): number => {
     if (sourceNetwork === 'sui') {
-      return selectedToken === 'SUI' ? 9 : WORMHOLE_DECIMALS;
+      return selectedToken === 'SUI' ? 9 : XBRIDGE_DECIMALS;
     }
-    return selectedToken === 'SOL' ? SOL_DECIMALS : WORMHOLE_DECIMALS;
+    return selectedToken === 'SOL' ? SOL_DECIMALS : XBRIDGE_DECIMALS;
   };
 
-  const isLoading = sourceNetwork === 'sui' ? suiLoading : solLoading;
+  const balanceLoading = sourceNetwork === 'sui' ? suiLoading : solLoading;
   const balance = getBalance();
   const decimals = getDecimals();
   const balanceFormatted = formatMoney(
@@ -115,7 +136,103 @@ const Bridge: FC = () => {
     setAmount(FixedPointMath.toNumber(balance, decimals).toString());
   };
 
-  const isDisabled = bridging || !amount || Number.parseFloat(amount) <= 0;
+  // Validation for alpha limits and gas
+  const validation = useMemo(() => {
+    const amountNum = Number.parseFloat(amount) || 0;
+
+    // No amount entered
+    if (!amount || amountNum <= 0) {
+      return { isDisabled: true, message: 'Enter amount' };
+    }
+
+    // Check alpha limits based on selected token
+    if (selectedToken === 'SUI' && amountNum > ALPHA_MAX_SUI) {
+      return {
+        isDisabled: true,
+        message: `Max ${ALPHA_MAX_SUI} SUI (alpha limit)`,
+      };
+    }
+    if (selectedToken === 'SOL' && amountNum > ALPHA_MAX_SOL) {
+      return {
+        isDisabled: true,
+        message: `Max ${ALPHA_MAX_SOL} SOL (alpha limit)`,
+      };
+    }
+
+    // Check gas balance based on source network
+    if (sourceNetwork === 'sui') {
+      const gasNeeded = new BigNumberJS(MIN_GAS_SUI).times(10 ** SUI_DECIMALS);
+      // If bridging SUI, need amount + gas; if bridging wSOL, just need gas
+      const amountNeeded =
+        selectedToken === 'SUI'
+          ? new BigNumberJS(amountNum).times(10 ** SUI_DECIMALS)
+          : new BigNumberJS(0);
+      const totalNeeded = gasNeeded.plus(amountNeeded);
+
+      if (suiBalances.sui.lt(totalNeeded)) {
+        const suiBalance = FixedPointMath.toNumber(
+          suiBalances.sui,
+          SUI_DECIMALS
+        );
+        if (selectedToken === 'SUI') {
+          return {
+            isDisabled: true,
+            message: `Insufficient SUI (need ${amountNum} + ~${MIN_GAS_SUI} gas, have ${suiBalance.toFixed(4)})`,
+          };
+        }
+        return {
+          isDisabled: true,
+          message: `Insufficient SUI for gas (need ~${MIN_GAS_SUI}, have ${suiBalance.toFixed(4)})`,
+        };
+      }
+    }
+
+    if (sourceNetwork === 'solana') {
+      const gasNeeded = new BigNumberJS(MIN_GAS_SOL).times(10 ** SOL_DECIMALS);
+      // If bridging SOL, need amount + gas; if bridging wSUI, just need gas
+      const amountNeeded =
+        selectedToken === 'SOL'
+          ? new BigNumberJS(amountNum).times(10 ** SOL_DECIMALS)
+          : new BigNumberJS(0);
+      const totalNeeded = gasNeeded.plus(amountNeeded);
+
+      if (solanaBalances.sol.lt(totalNeeded)) {
+        const solBalance = FixedPointMath.toNumber(
+          solanaBalances.sol,
+          SOL_DECIMALS
+        );
+        if (selectedToken === 'SOL') {
+          return {
+            isDisabled: true,
+            message: `Insufficient SOL (need ${amountNum} + ~${MIN_GAS_SOL} gas, have ${solBalance.toFixed(6)})`,
+          };
+        }
+        return {
+          isDisabled: true,
+          message: `Insufficient SOL for gas (need ~${MIN_GAS_SOL}, have ${solBalance.toFixed(6)})`,
+        };
+      }
+    }
+
+    return { isDisabled: false, message: null };
+  }, [
+    amount,
+    selectedToken,
+    sourceNetwork,
+    suiBalances.sui,
+    solanaBalances.sol,
+  ]);
+
+  const isDisabled = isLoading || validation.isDisabled;
+
+  const getBridgeDirection = (): BridgeDirection => {
+    if (sourceNetwork === 'sui') {
+      // From Sui: SUI → wSUI (on Solana), or wSOL → SOL (on Solana)
+      return selectedToken === 'SUI' ? 'sui-to-wsui' : 'wsol-to-sol';
+    }
+    // From Solana: SOL → wSOL (on Sui), or wSUI → SUI (on Sui)
+    return selectedToken === 'SOL' ? 'sol-to-wsol' : 'wsui-to-sui';
+  };
 
   const handleBridge = async () => {
     if (!amount || Number.parseFloat(amount) <= 0) {
@@ -123,14 +240,13 @@ const Bridge: FC = () => {
       return;
     }
 
-    setBridging(true);
-    try {
-      // TODO: Implement Wormhole bridge integration
-      toast('Bridge integration coming soon');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Bridge failed');
-    } finally {
-      setBridging(false);
+    const direction = getBridgeDirection();
+    const amountBN = new BigNumberJS(amount).times(10 ** decimals);
+
+    await bridge({ direction, amount: amountBN });
+
+    if (status === 'success') {
+      setAmount('');
     }
   };
 
@@ -287,7 +403,7 @@ const Bridge: FC = () => {
             >
               <Span color="#FFFFFF80" fontSize="0.875rem">
                 Balance:{' '}
-                {isLoading ? '...' : `${balanceFormatted} ${token.symbol}`}
+                {balanceLoading ? '...' : `${balanceFormatted} ${token.symbol}`}
               </Span>
             </Button>
           </Div>
@@ -335,10 +451,10 @@ const Bridge: FC = () => {
           onClick={handleBridge}
           disabled={isDisabled}
         >
-          {bridging
-            ? 'Bridging...'
-            : isDisabled
-              ? 'Enter amount'
+          {isLoading
+            ? STATUS_LABELS[status]
+            : validation.message
+              ? validation.message
               : `Bridge ${token.symbol} to ${destNetwork}`}
         </Button>
       </Div>
@@ -369,10 +485,10 @@ const Bridge: FC = () => {
             {sourceNetwork === 'sui'
               ? selectedToken === 'SUI'
                 ? (BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI')
-                : (BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL')
+                : 'SOL'
               : selectedToken === 'SOL'
                 ? (BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL')
-                : (BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI')}
+                : 'SUI'}
           </Span>
         </Div>
         <Div display="flex" justifyContent="space-between" alignItems="center">
@@ -395,7 +511,7 @@ const Bridge: FC = () => {
 
       {/* Info */}
       <P color="#FFFFFF40" fontSize="0.75rem" textAlign="center">
-        Powered by Wormhole. Assets are bridged as wrapped tokens.
+        Powered by XBridge. Assets are bridged as wrapped tokens.
       </P>
     </Div>
   );

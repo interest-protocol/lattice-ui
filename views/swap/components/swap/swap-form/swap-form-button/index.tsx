@@ -1,23 +1,138 @@
+import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { usePrivy } from '@privy-io/react-auth';
 import { Button } from '@stylin.js/elements';
+import BigNumber from 'bignumber.js';
 import type { FC } from 'react';
+import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
+import {
+  ALPHA_MAX_SOL,
+  ALPHA_MAX_SUI,
+  MIN_GAS_SOL,
+  MIN_GAS_SUI,
+} from '@/constants/alpha-limits';
+import { SOL_DECIMALS } from '@/constants/bridged-tokens';
+import { SOL_TYPE } from '@/constants/coins';
+
+const SUI_DECIMALS = 9;
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
+import useSolanaBalances from '@/hooks/use-solana-balances';
+import useSuiBalances from '@/hooks/use-sui-balances';
+import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
 const SwapFormButton: FC = () => {
+  const { user } = usePrivy();
   const { control } = useFormContext();
   const fromValue = useWatch({ control, name: 'from.value' }) as string;
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  const isDisabled = !fromValue || Number.parseFloat(fromValue) <= 0;
+  // Get wallet addresses from Privy
+  const suiWallet = user?.linkedAccounts?.find((a) => {
+    if (a.type !== 'wallet' || !('address' in a)) return false;
+    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
+      return true;
+    return (
+      typeof a.address === 'string' &&
+      a.address.startsWith('0x') &&
+      a.address.length === 66
+    );
+  });
+  const suiAddress =
+    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
+
+  const solanaWallet = user?.linkedAccounts?.find((a) => {
+    if (a.type !== 'wallet' || !('address' in a)) return false;
+    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
+      return true;
+    return (
+      typeof a.address === 'string' &&
+      !a.address.startsWith('0x') &&
+      a.address.length >= 32 &&
+      a.address.length <= 44
+    );
+  });
+  const solanaAddress =
+    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
+
+  // Get balances
+  const { balances: suiBalances } = useSuiBalances(suiAddress);
+  const { balances: solanaBalances } = useSolanaBalances(solanaAddress);
+
+  // Validation
+  const validation = useMemo(() => {
+    const amount = Number.parseFloat(fromValue) || 0;
+    const isSui = fromType === SUI_TYPE_ARG;
+    const isSol = fromType === SOL_TYPE;
+
+    // No amount entered
+    if (!fromValue || amount <= 0) {
+      return { isDisabled: true, message: 'Enter amount' };
+    }
+
+    // Check alpha limits
+    if (isSui && amount > ALPHA_MAX_SUI) {
+      return {
+        isDisabled: true,
+        message: `Max ${ALPHA_MAX_SUI} SUI (alpha limit)`,
+      };
+    }
+    if (isSol && amount > ALPHA_MAX_SOL) {
+      return {
+        isDisabled: true,
+        message: `Max ${ALPHA_MAX_SOL} SOL (alpha limit)`,
+      };
+    }
+
+    // Check gas balance
+    if (isSui) {
+      const gasNeeded = new BigNumber(MIN_GAS_SUI).times(10 ** SUI_DECIMALS);
+      const amountRaw = new BigNumber(amount).times(10 ** SUI_DECIMALS);
+      const totalNeeded = gasNeeded.plus(amountRaw);
+
+      if (suiBalances.sui.lt(totalNeeded)) {
+        const suiBalance = FixedPointMath.toNumber(
+          suiBalances.sui,
+          SUI_DECIMALS
+        );
+        return {
+          isDisabled: true,
+          message: `Insufficient SUI (need ${amount} + ~${MIN_GAS_SUI} gas, have ${suiBalance.toFixed(4)})`,
+        };
+      }
+    }
+
+    if (isSol) {
+      const gasNeeded = new BigNumber(MIN_GAS_SOL).times(10 ** SOL_DECIMALS);
+      const amountRaw = new BigNumber(amount).times(10 ** SOL_DECIMALS);
+      const totalNeeded = gasNeeded.plus(amountRaw);
+
+      if (solanaBalances.sol.lt(totalNeeded)) {
+        const solBalance = FixedPointMath.toNumber(
+          solanaBalances.sol,
+          SOL_DECIMALS
+        );
+        return {
+          isDisabled: true,
+          message: `Insufficient SOL (need ${amount} + ~${MIN_GAS_SOL} gas, have ${solBalance.toFixed(6)})`,
+        };
+      }
+    }
+
+    return { isDisabled: false, message: null };
+  }, [fromValue, fromType, suiBalances.sui, solanaBalances.sol]);
 
   const handleSwap = () => {
-    // TODO: Implement Wormhole bridge integration
+    // TODO: Implement swap
     console.log(
       `Swapping ${fromValue} ${fromType.toUpperCase()} to ${toType.toUpperCase()}`
     );
   };
+
+  const buttonLabel = validation.message
+    ? validation.message
+    : `Swap ${fromType === SUI_TYPE_ARG ? 'SUI' : 'SOL'} to ${toType === SUI_TYPE_ARG ? 'SUI' : 'SOL'}`;
 
   return (
     <Button
@@ -30,15 +145,13 @@ const SwapFormButton: FC = () => {
       fontWeight="600"
       borderRadius="0.75rem"
       border="none"
-      cursor={isDisabled ? 'not-allowed' : 'pointer'}
-      opacity={isDisabled ? 0.5 : 1}
-      nHover={!isDisabled ? { bg: ACCENT_HOVER } : {}}
+      cursor={validation.isDisabled ? 'not-allowed' : 'pointer'}
+      opacity={validation.isDisabled ? 0.5 : 1}
+      nHover={!validation.isDisabled ? { bg: ACCENT_HOVER } : {}}
       onClick={handleSwap}
-      disabled={isDisabled}
+      disabled={validation.isDisabled}
     >
-      {isDisabled
-        ? 'Enter amount'
-        : `Swap ${fromType.toUpperCase()} to ${toType.toUpperCase()}`}
+      {buttonLabel}
     </Button>
   );
 };

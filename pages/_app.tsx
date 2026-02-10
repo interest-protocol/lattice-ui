@@ -9,6 +9,7 @@ import { SkeletonTheme } from 'react-loading-skeleton';
 import { BackgroundProvider } from '@/components';
 import AppStateProvider from '@/components/app-state-provider';
 import ModalProvider from '@/components/modal-provider';
+import WalletRegistrationProvider from '@/components/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
 import { GlobalStyles } from '@/styles';
 
@@ -38,6 +39,7 @@ const App = ({ Component, pageProps }: AppProps) => (
     />
     <SkeletonTheme baseColor="#FFFFFF0D" highlightColor="#FFFFFF1A">
       <AppStateProvider />
+      <WalletRegistrationProvider />
       <BackgroundProvider />
       <Component {...pageProps} />
       <Analytics />

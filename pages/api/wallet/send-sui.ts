@@ -1,13 +1,11 @@
-import { SuiClient } from '@mysten/sui/client';
 import { messageWithIntent } from '@mysten/sui/cryptography';
 import { toSerializedSignature } from '@mysten/sui/cryptography';
 import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
-import { PrivyClient } from '@privy-io/node';
 import type { NextApiHandler } from 'next';
 
-const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
-const appSecret = process.env.PRIVY_APP_SECRET ?? '';
+import { getPrivyClient } from '@/lib/privy/server';
+import { getSuiClient } from '@/lib/xbridge/sui-client';
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== 'POST')
@@ -21,11 +19,9 @@ const handler: NextApiHandler = async (req, res) => {
     return res.status(400).json({ error: 'Missing recipient' });
   if (!amount || typeof amount !== 'string')
     return res.status(400).json({ error: 'Missing amount' });
-  if (!appSecret)
-    return res.status(500).json({ error: 'PRIVY_APP_SECRET not configured' });
 
   try {
-    const privy = new PrivyClient({ appId, appSecret });
+    const privy = getPrivyClient();
 
     // Find the user's Sui wallet
     const wallets = [];
@@ -41,9 +37,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const wallet = wallets[0];
 
-    const client = new SuiClient({
-      url: rpcUrl || 'https://fullnode.mainnet.sui.io:443',
-    });
+    const client = getSuiClient(rpcUrl);
 
     // Build the transaction
     const tx = new Transaction();

@@ -1,0 +1,104 @@
+import {
+  messageWithIntent,
+  toSerializedSignature,
+} from '@mysten/sui/cryptography';
+import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
+import bs58 from 'bs58';
+import type { NextApiHandler } from 'next';
+
+import { getPrivyClient } from '@/lib/privy/server';
+import { createXBridgeClients, toSdkClient } from '@/lib/xbridge';
+
+interface SetMintDigestBody {
+  userId: string;
+  requestId: string;
+  mintCapId: string;
+  depositSignature: string;
+  rpcUrl?: string;
+}
+
+const handler: NextApiHandler = async (req, res) => {
+  if (req.method !== 'POST')
+    return res.status(405).json({ error: 'Method not allowed' });
+
+  const body: SetMintDigestBody = req.body;
+
+  if (!body.userId) return res.status(400).json({ error: 'Missing userId' });
+  if (!body.requestId)
+    return res.status(400).json({ error: 'Missing requestId' });
+  if (!body.mintCapId)
+    return res.status(400).json({ error: 'Missing mintCapId' });
+  if (!body.depositSignature)
+    return res.status(400).json({ error: 'Missing depositSignature' });
+
+  try {
+    const privy = getPrivyClient();
+
+    const wallets = [];
+    for await (const wallet of privy.wallets().list({
+      user_id: body.userId,
+      chain_type: 'sui',
+    })) {
+      wallets.push(wallet);
+    }
+
+    if (wallets.length === 0)
+      return res.status(404).json({ error: 'No Sui wallet found' });
+
+    const wallet = wallets[0];
+    const { suiClient, xbridge } = createXBridgeClients(body.rpcUrl);
+
+    const digest = bs58.decode(body.depositSignature);
+
+    const tx = xbridge.setMintDigest({
+      requestId: body.requestId,
+      mintCapId: body.mintCapId,
+      digest,
+    });
+
+    tx.setSender(wallet.address);
+
+    const rawBytes = await tx.build({ client: toSdkClient(suiClient) });
+
+    const intentMessage = messageWithIntent('TransactionData', rawBytes);
+    const bytesHex = Buffer.from(intentMessage).toString('hex');
+
+    const signResult = await privy.wallets().rawSign(wallet.id, {
+      params: {
+        bytes: bytesHex,
+        encoding: 'hex',
+        hash_function: 'blake2b256',
+      },
+    });
+
+    const signatureBytes = Uint8Array.from(
+      Buffer.from(signResult.signature, 'hex')
+    );
+
+    const walletInfo = await privy.wallets().get(wallet.id);
+    const publicKeyBytes = Uint8Array.from(
+      Buffer.from(walletInfo.public_key ?? '', 'base64')
+    );
+    const publicKey = new Ed25519PublicKey(publicKeyBytes);
+
+    const serializedSignature = toSerializedSignature({
+      signature: signatureBytes,
+      signatureScheme: 'ED25519',
+      publicKey,
+    });
+
+    const txResult = await suiClient.executeTransactionBlock({
+      transactionBlock: Buffer.from(rawBytes).toString('base64'),
+      signature: serializedSignature,
+      options: { showEffects: true },
+    });
+
+    return res.status(200).json({ digest: txResult.digest });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to set mint digest';
+    return res.status(500).json({ error: message });
+  }
+};
+
+export default handler;

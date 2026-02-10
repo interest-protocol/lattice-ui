@@ -12,8 +12,8 @@ const useSolanaBalances = (address: string | null) => {
 
   const { data, isLoading, mutate } = useSWR(
     address ? [useSolanaBalances.name, address] : null,
-    async () => {
-      const pubkey = new PublicKey(address!);
+    async ([, addr]) => {
+      const pubkey = new PublicKey(addr);
       const wsuiMint = new PublicKey(WSUI_SOLANA_MINT);
 
       const [solLamports, tokenAccounts] = await Promise.all([

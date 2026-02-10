@@ -1,20 +1,16 @@
-import { PrivyClient } from '@privy-io/node';
 import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
 import {
-  Connection,
   PublicKey,
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
 import type { NextApiHandler } from 'next';
 
-import { SOLANA_RPC_URL } from '@/constants';
-
-const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
-const appSecret = process.env.PRIVY_APP_SECRET ?? '';
+import { getPrivyClient } from '@/lib/privy/server';
+import { getSolanaConnection } from '@/lib/solana/server';
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== 'POST')
@@ -28,11 +24,9 @@ const handler: NextApiHandler = async (req, res) => {
     return res.status(400).json({ error: 'Missing recipient' });
   if (!amount || typeof amount !== 'string')
     return res.status(400).json({ error: 'Missing amount' });
-  if (!appSecret)
-    return res.status(500).json({ error: 'PRIVY_APP_SECRET not configured' });
 
   try {
-    const privy = new PrivyClient({ appId, appSecret });
+    const privy = getPrivyClient();
 
     // Find the user's Solana wallet
     const wallets = [];
@@ -47,7 +41,7 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'No Solana wallet found' });
 
     const wallet = wallets[0];
-    const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
+    const connection = getSolanaConnection();
     const fromPubkey = new PublicKey(wallet.address);
     const toPubkey = new PublicKey(recipient);
 

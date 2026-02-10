@@ -6,21 +6,24 @@ import { type FC, useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';
+import Tabs from '@/components/tabs';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
-  WORMHOLE_DECIMALS,
   WSOL_SUI_TYPE,
   WSUI_SOLANA_MINT,
+  XBRIDGE_DECIMALS,
 } from '@/constants';
 import { ASSET_METADATA } from '@/constants/coins';
-import { useModal } from '@/hooks/use-modal';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';
 
-import { DepositModal, SendModal } from './components';
+import { DepositView, NetworkTabs, WithdrawView } from './components';
+
+type NetworkType = 'sui' | 'solana';
 
 const AssetRow: FC<{
   symbol: string;
@@ -72,11 +75,154 @@ const AssetRow: FC<{
   </Div>
 );
 
+const BalancesView: FC<{
+  displaySuiAddress: string | null;
+  solanaAddress: string | null;
+  suiBalances: { sui: BigNumber; wsol: BigNumber };
+  solanaBalances: { sol: BigNumber; wsui: BigNumber };
+  suiLoading: boolean;
+  solLoading: boolean;
+  creatingSuiWallet: boolean;
+  createSuiWallet: () => void;
+}> = ({
+  displaySuiAddress,
+  solanaAddress,
+  suiBalances,
+  solanaBalances,
+  suiLoading,
+  solLoading,
+  creatingSuiWallet,
+  createSuiWallet,
+}) => (
+  <Div display="flex" flexDirection="column" gap="1.5rem">
+    {!displaySuiAddress ? (
+      <Button
+        all="unset"
+        width="100%"
+        p="1rem"
+        bg="#A78BFA1A"
+        color="#A78BFA"
+        borderRadius="0.5rem"
+        border="1px solid #A78BFA4D"
+        fontWeight="600"
+        fontSize="0.875rem"
+        textAlign="center"
+        cursor={creatingSuiWallet ? 'wait' : 'pointer'}
+        opacity={creatingSuiWallet ? '0.6' : '1'}
+        onClick={createSuiWallet}
+        disabled={creatingSuiWallet}
+        nHover={{ bg: '#A78BFA2A' }}
+      >
+        {creatingSuiWallet ? 'Creating...' : 'Create Sui Wallet'}
+      </Button>
+    ) : (
+      <Div
+        p="1.5rem"
+        bg="#FFFFFF0D"
+        borderRadius="1rem"
+        border="1px solid #FFFFFF1A"
+      >
+        <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
+          Sui Wallet
+        </H2>
+        <Div
+          display="flex"
+          alignItems="center"
+          gap="0.5rem"
+          mb="1rem"
+          cursor="pointer"
+          onClick={() => {
+            window.navigator.clipboard.writeText(displaySuiAddress);
+            toast.success('Address copied');
+          }}
+          nHover={{ opacity: 0.7 }}
+        >
+          <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
+            {displaySuiAddress.slice(0, 6)}...{displaySuiAddress.slice(-4)}
+          </P>
+          <CopySVG maxWidth="0.875rem" width="100%" />
+        </Div>
+        <Div display="flex" flexDirection="column" gap="0.75rem">
+          <AssetRow
+            symbol="SUI"
+            name={ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui'}
+            iconUrl={ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl}
+            balance={suiBalances.sui}
+            decimals={9}
+            isLoading={suiLoading}
+          />
+          <AssetRow
+            symbol={BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL'}
+            name={
+              BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.name ?? 'Solana (Wormhole)'
+            }
+            iconUrl={BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.iconUrl}
+            balance={suiBalances.wsol}
+            decimals={XBRIDGE_DECIMALS}
+            isLoading={suiLoading}
+          />
+        </Div>
+      </Div>
+    )}
+
+    {solanaAddress && (
+      <Div
+        p="1.5rem"
+        bg="#FFFFFF0D"
+        borderRadius="1rem"
+        border="1px solid #FFFFFF1A"
+      >
+        <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
+          Solana Wallet
+        </H2>
+        <Div
+          display="flex"
+          alignItems="center"
+          gap="0.5rem"
+          mb="1rem"
+          cursor="pointer"
+          onClick={() => {
+            window.navigator.clipboard.writeText(solanaAddress);
+            toast.success('Address copied');
+          }}
+          nHover={{ opacity: 0.7 }}
+        >
+          <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
+            {solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)}
+          </P>
+          <CopySVG maxWidth="0.875rem" width="100%" />
+        </Div>
+        <Div display="flex" flexDirection="column" gap="0.75rem">
+          <AssetRow
+            symbol="SOL"
+            name="Solana"
+            iconUrl={ASSET_METADATA.sol?.iconUrl}
+            balance={solanaBalances.sol}
+            decimals={SOL_DECIMALS}
+            isLoading={solLoading}
+          />
+          <AssetRow
+            symbol={BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI'}
+            name={
+              BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.name ?? 'Sui (Wormhole)'
+            }
+            iconUrl={BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.iconUrl}
+            balance={solanaBalances.wsui}
+            decimals={XBRIDGE_DECIMALS}
+            isLoading={solLoading}
+          />
+        </Div>
+      </Div>
+    )}
+  </Div>
+);
+
 const AccountContent: FC = () => {
-  const { setContent } = useModal();
   const { user, authenticated } = usePrivy();
   const [creatingSuiWallet, setCreatingSuiWallet] = useState(false);
   const [newSuiAddress, setNewSuiAddress] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [network, setNetwork] = useState<NetworkType>('solana');
 
   const suiWallet = user?.linkedAccounts?.find((a) => {
     if (a.type !== 'wallet' || !('address' in a)) return false;
@@ -121,13 +267,7 @@ const AccountContent: FC = () => {
     if (!user?.id) return;
     setCreatingSuiWallet(true);
     try {
-      const res = await fetch('/api/wallet/create-sui', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await createSuiWalletApi(user.id);
       setNewSuiAddress(data.address);
       toast.success('Sui wallet created');
     } catch (error) {
@@ -189,192 +329,45 @@ const AccountContent: FC = () => {
         <H1 color="#FFFFFF" fontSize="2.5rem" mb="0.5rem">
           Account
         </H1>
-        <P color="#FFFFFF80">Manage your wallet and view your assets</P>
+        <P color="#FFFFFF80">Manage your wallet and assets</P>
       </Div>
 
-      <Div
-        p="1.5rem"
-        bg="#FFFFFF0D"
-        borderRadius="1rem"
-        border="1px solid #FFFFFF1A"
-      >
-        <Div mb="1.5rem" textAlign="center">
-          <P color="#FFFFFF80" fontSize="0.875rem" mb="0.5rem">
-            Total Balance
-          </P>
-          <H2
-            color="#FFFFFF"
-            fontSize={['2rem', '2.5rem']}
-            fontFamily="JetBrains Mono"
-            mb="0.25rem"
-          >
-            $0.00
-          </H2>
-          <P color="#FFFFFF80" fontSize="0.875rem">
-            USD Value
-          </P>
-        </Div>
+      <Tabs
+        tab={activeTab}
+        setTab={setActiveTab}
+        tabs={['Balances', 'Deposit', 'Withdraw']}
+      />
 
-        <Div display="flex" gap="1rem" mb="1.5rem" flexWrap="wrap">
-          <Button
-            all="unset"
-            flex="1"
-            minWidth="8rem"
-            p="1rem"
-            bg="#A78BFA"
-            color="#000000"
-            borderRadius="0.75rem"
-            fontWeight="600"
-            fontSize="1rem"
-            textAlign="center"
-            cursor="pointer"
-            onClick={() => setContent(<DepositModal />, { title: 'Deposit' })}
-            nHover={{ bg: '#C4B5FD' }}
-          >
-            Deposit
-          </Button>
-          <Button
-            all="unset"
-            flex="1"
-            minWidth="8rem"
-            p="1rem"
-            bg="#FFFFFF1A"
-            color="#FFFFFF"
-            border="1px solid #FFFFFF1A"
-            borderRadius="0.75rem"
-            fontWeight="600"
-            fontSize="1rem"
-            textAlign="center"
-            cursor="pointer"
-            onClick={() => setContent(<SendModal />, { title: 'Send' })}
-            nHover={{ bg: '#FFFFFF2A' }}
-          >
-            Send
-          </Button>
-        </Div>
-      </Div>
-
-      {!displaySuiAddress ? (
-        <Button
-          all="unset"
-          width="100%"
-          p="1rem"
-          bg="#A78BFA1A"
-          color="#A78BFA"
-          borderRadius="0.5rem"
-          border="1px solid #A78BFA4D"
-          fontWeight="600"
-          fontSize="0.875rem"
-          textAlign="center"
-          cursor={creatingSuiWallet ? 'wait' : 'pointer'}
-          opacity={creatingSuiWallet ? '0.6' : '1'}
-          onClick={createSuiWallet}
-          disabled={creatingSuiWallet}
-          nHover={{ bg: '#A78BFA2A' }}
-        >
-          {creatingSuiWallet ? 'Creating...' : 'Create Sui Wallet'}
-        </Button>
-      ) : (
-        <Div
-          p="1.5rem"
-          bg="#FFFFFF0D"
-          borderRadius="1rem"
-          border="1px solid #FFFFFF1A"
-        >
-          <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
-            Sui Wallet
-          </H2>
-          <Div
-            display="flex"
-            alignItems="center"
-            gap="0.5rem"
-            mb="1rem"
-            cursor="pointer"
-            onClick={() => {
-              window.navigator.clipboard.writeText(displaySuiAddress);
-              toast.success('Address copied');
-            }}
-            nHover={{ opacity: 0.7 }}
-          >
-            <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
-              {displaySuiAddress.slice(0, 6)}...{displaySuiAddress.slice(-4)}
-            </P>
-            <CopySVG maxWidth="0.875rem" width="100%" />
-          </Div>
-          <Div display="flex" flexDirection="column" gap="0.75rem">
-            <AssetRow
-              symbol="SUI"
-              name={ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui'}
-              iconUrl={ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl}
-              balance={suiBalances.sui}
-              decimals={9}
-              isLoading={suiLoading}
-            />
-            <AssetRow
-              symbol={BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL'}
-              name={
-                BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.name ??
-                'Solana (Wormhole)'
-              }
-              iconUrl={BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.iconUrl}
-              balance={suiBalances.wsol}
-              decimals={WORMHOLE_DECIMALS}
-              isLoading={suiLoading}
-            />
-          </Div>
-        </Div>
+      {activeTab === 0 && (
+        <BalancesView
+          displaySuiAddress={displaySuiAddress}
+          solanaAddress={solanaAddress}
+          suiBalances={suiBalances}
+          solanaBalances={solanaBalances}
+          suiLoading={suiLoading}
+          solLoading={solLoading}
+          creatingSuiWallet={creatingSuiWallet}
+          createSuiWallet={createSuiWallet}
+        />
       )}
 
-      {solanaAddress && (
+      {(activeTab === 1 || activeTab === 2) && (
         <Div
           p="1.5rem"
           bg="#FFFFFF0D"
           borderRadius="1rem"
           border="1px solid #FFFFFF1A"
+          display="flex"
+          flexDirection="column"
+          gap="1.25rem"
         >
-          <H2 color="#FFFFFF" fontSize="1.25rem" mb="0.5rem">
-            Solana Wallet
-          </H2>
-          <Div
-            display="flex"
-            alignItems="center"
-            gap="0.5rem"
-            mb="1rem"
-            cursor="pointer"
-            onClick={() => {
-              window.navigator.clipboard.writeText(solanaAddress);
-              toast.success('Address copied');
-            }}
-            nHover={{ opacity: 0.7 }}
-          >
-            <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
-              {solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)}
-            </P>
-            <CopySVG maxWidth="0.875rem" width="100%" />
-          </Div>
-          <Div display="flex" flexDirection="column" gap="0.75rem">
-            <AssetRow
-              symbol="SOL"
-              name="Solana"
-              iconUrl={ASSET_METADATA.sol?.iconUrl}
-              balance={solanaBalances.sol}
-              decimals={SOL_DECIMALS}
-              isLoading={solLoading}
-            />
-            <AssetRow
-              symbol={
-                BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI'
-              }
-              name={
-                BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.name ??
-                'Sui (Wormhole)'
-              }
-              iconUrl={BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.iconUrl}
-              balance={solanaBalances.wsui}
-              decimals={WORMHOLE_DECIMALS}
-              isLoading={solLoading}
-            />
-          </Div>
+          <NetworkTabs network={network} setNetwork={setNetwork} />
+
+          {activeTab === 1 ? (
+            <DepositView network={network} />
+          ) : (
+            <WithdrawView network={network} />
+          )}
         </Div>
       )}
     </Div>
