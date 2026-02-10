@@ -8,11 +8,16 @@
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@interest-protocol/enclave-sdk": "^0.0.1",
+    "@interest-protocol/lattice-solver-api-sdk": "^0.0.1",
+    "@interest-protocol/registry-sdk": "^1.0.0",
     "@interest-protocol/sui-core-sdk": "^0.0.1",
     "@interest-protocol/walrus-sdk": "^1.0.0",
+    "@interest-protocol/xswap-sdk": "^1.0.0",
     "@mysten/sui": "^1.36.2",
     "@privy-io/node": "^0.8.0",
     "@privy-io/react-auth": "^3.13.1",
@@ -36,9 +41,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^19.7.1",
     "@types/node": "^20.9.4",
     "@types/react": "^18.2.38",
     "@types/react-dom": "^18.2.17",
+    "commitlint-config-gitmoji": "^2.3.1",
+    "husky": "^9.1.7",
     "typescript": "^5.3.2"
   },
   "engines": {
