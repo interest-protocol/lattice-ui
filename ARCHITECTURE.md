@@ -8,16 +8,17 @@
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Framework | Next.js (App Router) | 14.0.3 |
-| Language | TypeScript (strict mode) | 5.3 |
-| UI | React | 18.2 |
-| Styling | Stylin.js + styled-components | 1.0.2 |
-| Animation | Framer Motion (`motion`) | 12.3 |
-| Global State | Zustand | 5.0.3 |
-| Server State | SWR | 2.3.2 |
+| Framework | Next.js (App Router) | 16 |
+| Language | TypeScript (strict mode) | 5.9 |
+| UI | React | 19 |
+| Styling | Tailwind CSS | v4 |
+| Animation | Framer Motion (`motion/react`) | 12.3 |
+| Global State | Zustand | 5.0 |
+| Server State | TanStack Query | v5 |
 | Forms | React Hook Form | 7.54 |
 | Wallet Auth | Privy | 3.13 |
-| Linting | Biome | 1.9.4 |
+| Testing | Vitest + React Testing Library | 4.0 |
+| Linting | Biome | 2.3 |
 | Analytics | Vercel Analytics | 1.6 |
 | Package Manager | pnpm | 9.1.0 |
 
@@ -26,14 +27,12 @@
 | SDK | Purpose |
 |-----|---------|
 | `@mysten/sui` | Sui RPC client |
-| `@solana/web3.js` + `@solana/spl-token` | Solana RPC + SPL tokens |
+| `@solana/kit` | Solana RPC + SPL tokens |
 | `@interest-protocol/enclave-sdk` | TEE-based signing enclave |
 | `@interest-protocol/xswap-sdk` | Cross-chain swap protocol |
 | `@interest-protocol/xbridge-sdk` | Cross-chain bridge protocol |
-| `@interest-protocol/lattice-solver-api-sdk` | Solver/market-maker API |
 | `@interest-protocol/registry-sdk` | On-chain registry |
 | `@interest-protocol/xcore-sdk` | Core protocol utilities |
-| `@interest-protocol/walrus-sdk` | Walrus storage integration |
 
 ---
 
@@ -44,7 +43,6 @@ lattice-ui/
 ├── app/                        # Next.js App Router
 │   ├── layout.tsx              # Root layout (fonts, metadata, providers)
 │   ├── page.tsx                # Home → SwapView
-│   ├── registry.tsx            # styled-components SSR registry
 │   ├── providers.tsx           # Provider composition tree
 │   ├── globals.css             # Global styles
 │   ├── account/
@@ -76,7 +74,7 @@ lattice-ui/
 │   │   └── wallet-registration-provider/  # Auto wallet setup
 │   └── ui/                     # Reusable UI primitives
 │       ├── icons/              # 26+ SVG icon components
-│       ├── motion/             # Framer Motion + Stylin.js wrapper
+│       ├── motion/             # Framer Motion wrapper
 │       ├── tabs/               # Tab navigation
 │       ├── toast/              # Toast notification system
 │       ├── toggle/             # Custom toggle switch
@@ -174,8 +172,7 @@ lattice-ui/
 │   │   └── confirm-transaction.ts  # Transaction confirmation
 │   ├── sui/                    # Sui helpers
 │   │   └── client.ts           # Server-side Sui client
-│   ├── swr/                    # SWR configuration
-│   │   └── config.ts           # Shared SWR configs
+│   ├── bigint-utils.ts         # BigInt formatting utilities
 │   └── external/               # External API clients
 │       └── client.ts           # Price fetching (Pyth)
 │
@@ -209,7 +206,7 @@ lattice-ui/
 │
 ├── utils/                      # Pure utility functions (7 files)
 │   ├── index.ts                # Barrel export
-│   ├── bn.ts                   # BigNumber helpers
+│   ├── bn.ts                   # BigInt helpers
 │   ├── money.ts                # Number formatting (Intl)
 │   ├── number.ts               # Input parsing/sanitization
 │   ├── format-address.ts       # Address truncation
@@ -217,7 +214,7 @@ lattice-ui/
 │   └── gas-validation.ts       # Validation logic
 │
 ├── interface/                  # Shared TypeScript types
-│   └── index.ts                # BigNumberish, AssetMetadata, Node, SdkPool
+│   └── index.ts                # AssetMetadata, Node, SdkPool
 │
 └── public/                     # Static assets
     ├── bg.png                  # Background image
@@ -301,7 +298,7 @@ The component hierarchy follows a 4-layer pattern with clear dependency rules:
                                │ useShallow selectors
                                ▼
                         ┌──────────────────┐     ┌─────────────────┐
-                        │   SWR Cache      │◄───►│  API Routes     │
+                        │  TanStack Query  │◄───►│  API Routes     │
                         │  (balances,      │     │  (server-side   │
                         │   prices, health)│     │   SDK calls)    │
                         └──────────────────┘     └─────────────────┘
@@ -309,8 +306,8 @@ The component hierarchy follows a 4-layer pattern with clear dependency rules:
 
 **State types:**
 - **Zustand** — Global app state (balances, loading flags, modal content)
-- **SWR** — Server-state cache with 30-60s refresh intervals
-- **React Hook Form** — Swap/bridge form state with BigNumber values
+- **TanStack Query** — Server-state cache with 30-60s refetch intervals
+- **React Hook Form** — Swap/bridge form state with BigInt values
 - **localStorage** — User preferences (RPC, explorer, wallet registration flags)
 - **URL** — Page routing via App Router (`/`, `/account`)
 
@@ -340,7 +337,7 @@ useSwap hook orchestrates:
          │
          ▼
     Toast notification (success/error)
-    SWR cache invalidation (mutate balances)
+    TanStack Query cache invalidation (invalidateQueries)
 ```
 
 ---
@@ -415,13 +412,13 @@ ChainAdapter (interface)
 ├── createSuiAdapter(suiClient, mutate)
 │   ├── deposit(params) → txDigest
 │   ├── refetchBalance() → balances
-│   ├── getBalanceForPolling(balances) → BigNumber
+│   ├── getBalanceForPolling(balances) → bigint
 │   └── encodeAddress(address) → Uint8Array
 │
 └── createSolanaAdapter(connection, mutate)
     ├── deposit(params) → txSignature
     ├── refetchBalance() → balances
-    ├── getBalanceForPolling(balances) → BigNumber
+    ├── getBalanceForPolling(balances) → bigint
     └── encodeAddress(address) → Uint8Array
 ```
 
@@ -482,7 +479,7 @@ Immutable value object representing a blockchain token.
 Amount + Token pair with safe arithmetic.
 
 - **Private constructor** — must use factories:
-  - `CurrencyAmount.fromRawAmount(token, rawBigNumber)`
+  - `CurrencyAmount.fromRawAmount(token, rawBigInt)`
   - `CurrencyAmount.fromHumanAmount(token, "1.5")`
   - `CurrencyAmount.zero(token)`
 - Arithmetic: `add()`, `subtract()`, `multiply()`
@@ -493,7 +490,7 @@ Amount + Token pair with safe arithmetic.
 
 Base class for rational number representation.
 
-- Numerator + denominator as BigNumber
+- Numerator + denominator as bigint
 - `Rounding` enum: `ROUND_DOWN`, `ROUND_HALF_UP`, `ROUND_UP`
 - Arithmetic + comparison operations
 
@@ -505,7 +502,7 @@ Extends Fraction for percentage values (e.g., slippage, fees).
 
 Static utility for decimal ↔ raw amount conversion.
 
-- `toBigNumber(value, decimals)` — human → raw
+- `parseUnits(value, decimals)` — human → raw
 - `toNumber(rawBN, decimals)` — raw → human
 
 ### Trade
@@ -534,11 +531,9 @@ Additionally, the root `layout.tsx` wraps everything in:
 ```
 <html>
   <body>
-    <StyledComponentsRegistry>  (SSR style injection)
-      <Providers>
-        {children}
-      </Providers>
-    </StyledComponentsRegistry>
+    <Providers>
+      {children}
+    </Providers>
     <Analytics />  (Vercel)
   </body>
 </html>
@@ -606,16 +601,17 @@ toasting.error({ action: 'Bridge', message: 'Insufficient balance' });
 toasting.loading({ message: 'Confirming transaction...' }, toastId);
 ```
 
-### 6. SWR with Conditional Fetching
+### 6. TanStack Query with Conditional Fetching
 
 Data fetching hooks conditionally skip when dependencies are missing:
 
 ```typescript
-const { data } = useSWR(
-  address ? [useSuiBalances.name, address] : null,  // null = skip
-  fetcher,
-  balanceSwrConfig
-);
+const { data } = useQuery({
+  queryKey: ['sui-balances', address],
+  queryFn: () => fetchBalances(address!),
+  enabled: !!address,  // skip when address is null
+  refetchInterval: 30_000,
+});
 ```
 
 ### 7. Zod Validation on All API Routes
