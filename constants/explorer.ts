@@ -1,5 +1,3 @@
-import { Network } from './network';
-
 export enum Explorer {
   SuiVision = 'sui-vision',
   SuiScan = 'sui-scan',
@@ -25,23 +23,12 @@ export const EXPLORER_DISPLAY = {
   [Explorer.Polymedia]: 'Polymedia',
 };
 
-export const EXPLORER_URL_GETTER = {
-  [Explorer.SuiVision]: {
-    [Network.MAINNET]: (path: string) => `https://suivision.xyz/${path}`,
-    [Network.TESTNET]: (path: string) =>
-      `https://testnet.suivision.xyz/${path}`,
-  },
-  [Explorer.SuiScan]: {
-    [Network.MAINNET]: (path: string) => `https://suiscan.xyz/mainnet/${path}`,
-    [Network.TESTNET]: (path: string) => `https://suiscan.xyz/testnet/${path}`,
-  },
-  [Explorer.Polymedia]: {
-    [Network.MAINNET]: (path: string) =>
-      `https://explorer.polymedia.app/${path}`,
-    [Network.TESTNET]: (path: string) =>
-      `https://explorer.polymedia.app/${path}?network=testnet`,
-  },
-} as Record<Explorer, Record<Network, (path: string) => string>>;
+export const EXPLORER_URL_GETTER: Record<Explorer, (path: string) => string> = {
+  [Explorer.SuiVision]: (path: string) => `https://suivision.xyz/${path}`,
+  [Explorer.SuiScan]: (path: string) => `https://suiscan.xyz/mainnet/${path}`,
+  [Explorer.Polymedia]: (path: string) =>
+    `https://explorer.polymedia.app/${path}`,
+};
 
 export const EXPLORER_PATH_GETTER = {
   [Explorer.SuiVision]: {

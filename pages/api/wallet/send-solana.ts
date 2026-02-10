@@ -2,11 +2,7 @@ import {
   createTransferInstruction,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
-import {
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';

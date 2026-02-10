@@ -4,13 +4,13 @@ import { PrivyProvider } from '@privy-io/react-auth';
 import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
 import type { FC, PropsWithChildren } from 'react';
 
-const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
+import { PRIVY_APP_ID } from '@/lib/config';
 
 const solanaConnectors = toSolanaWalletConnectors();
 
 const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
   <PrivyProvider
-    appId={appId}
+    appId={PRIVY_APP_ID}
     config={{
       loginMethods: ['email', 'wallet'],
       appearance: {

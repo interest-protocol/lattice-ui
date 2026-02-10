@@ -5,7 +5,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { getSuiClient } from '@/lib/xbridge/sui-client';
+import { getSuiClient } from '@/lib/sui/client';
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== 'POST')

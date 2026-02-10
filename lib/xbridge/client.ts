@@ -1,8 +1,11 @@
 import {
-  ChainId,
+  type ChainId,
+  type VoteBurnProofRaw,
+  type VoteMintProofRaw,
   XBridgeInbound,
-  XBridgeOutbound,
 } from '@interest-protocol/xbridge-sdk';
+
+import { post } from '@/lib/api/client';
 
 export type { ChainId };
 
@@ -36,37 +39,18 @@ export const fetchVoteMintProof = async (
   requestId: string,
   depositDigest: string
 ): Promise<VoteMintProof> => {
-  const response = await fetch('/api/xbridge/vote-mint', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ requestId, depositDigest }),
+  const raw = await post<unknown>('/api/xbridge/vote-mint', {
+    requestId,
+    depositDigest,
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch vote mint proof');
-  }
-
-  const raw = await response.json();
-  return XBridgeInbound.parseVoteMintProof(raw);
+  return XBridgeInbound.parseVoteMintProof(raw as VoteMintProofRaw);
 };
 
 export const fetchVoteBurnProof = async (
   requestId: string
 ): Promise<VoteBurnProof> => {
-  const response = await fetch('/api/xbridge/vote-burn', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ requestId }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch vote burn proof');
-  }
-
-  const raw = await response.json();
-  return XBridgeInbound.parseVoteBurnProof(raw);
+  const raw = await post<unknown>('/api/xbridge/vote-burn', { requestId });
+  return XBridgeInbound.parseVoteBurnProof(raw as VoteBurnProofRaw);
 };
 
 export interface CreateMintRequestResult {
@@ -87,7 +71,7 @@ export interface ExecuteMintResult {
   digest: string;
 }
 
-export const createMintRequest = async (params: {
+export const createMintRequest = (params: {
   userId: string;
   sourceChain: number;
   sourceToken: number[];
@@ -96,79 +80,27 @@ export const createMintRequest = async (params: {
   sourceAmount: string;
   coinType: string;
   rpcUrl?: string;
-}): Promise<CreateMintRequestResult> => {
-  const response = await fetch('/api/xbridge/create-mint-request', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
+}) => post<CreateMintRequestResult>('/api/xbridge/create-mint-request', params);
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create mint request');
-  }
-
-  return response.json();
-};
-
-export const setMintDigest = async (params: {
+export const setMintDigest = (params: {
   userId: string;
   requestId: string;
   mintCapId: string;
   depositSignature: string;
   rpcUrl?: string;
-}): Promise<SetMintDigestResult> => {
-  const response = await fetch('/api/xbridge/set-mint-digest', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
+}) => post<SetMintDigestResult>('/api/xbridge/set-mint-digest', params);
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to set mint digest');
-  }
-
-  return response.json();
-};
-
-export const voteMint = async (params: {
+export const voteMint = (params: {
   userId: string;
   requestId: string;
   depositSignature: string;
   rpcUrl?: string;
-}): Promise<VoteMintResult> => {
-  const response = await fetch('/api/xbridge/vote-mint', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
+}) => post<VoteMintResult>('/api/xbridge/vote-mint', params);
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to vote on mint request');
-  }
-
-  return response.json();
-};
-
-export const executeMint = async (params: {
+export const executeMint = (params: {
   userId: string;
   requestId: string;
   mintCapId: string;
   coinType?: string;
   rpcUrl?: string;
-}): Promise<ExecuteMintResult> => {
-  const response = await fetch('/api/xbridge/execute-mint', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to execute mint');
-  }
-
-  return response.json();
-};
+}) => post<ExecuteMintResult>('/api/xbridge/execute-mint', params);

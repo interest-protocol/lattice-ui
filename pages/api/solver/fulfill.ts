@@ -1,6 +1,6 @@
 import type { NextApiHandler } from 'next';
 
-const SOLVER_API_URL = process.env.NEXT_PUBLIC_SOLVER_API_URL ?? '';
+import { SOLVER_API_URL } from '@/lib/config';
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== 'POST')

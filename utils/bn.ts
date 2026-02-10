@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MAX_BPS } from '@interest-protocol/sui-core-sdk';
 import BigNumber from 'bignumber.js';
+
+const MAX_BPS = 10000;
 
 import type { BigNumberish } from '@/interface';
 

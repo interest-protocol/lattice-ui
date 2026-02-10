@@ -23,7 +23,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
   const selectedTypes = useWatch({
     control,
     name: [fieldName, oppositeName].map((name) => `${name}.type`),
-  });
+  }) as string[];
 
   return (
     <>

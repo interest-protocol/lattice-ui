@@ -1,11 +1,4 @@
-import {
-  DWALLET_COORDINATOR_SHARED_OBJECT_DATA,
-  ENCLAVE_SHARED_OBJECT_DATA,
-  MAINNET_PACKAGE_ID,
-  XSwap,
-  XSWAP_SHARED_OBJECT_DATA,
-} from '@interest-protocol/xswap-sdk';
-import { REGISTRY_SHARED_OBJECT_DATA } from '@interest-protocol/registry-sdk';
+import type { ChainId } from '@interest-protocol/xswap-sdk';
 import {
   messageWithIntent,
   toSerializedSignature,
@@ -14,13 +7,7 @@ import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { getSuiClient } from '@/lib/xbridge/sui-client';
-
-const XCORE_SHARED_OBJECT_DATA = {
-  objectId:
-    '0x4ad90f6e1dff41d0ed8e2eefc5f00dce6c31ef7cc4c2c7a01a43beaf8ea02f67',
-  initialSharedVersion: '595876492',
-} as const;
+import { createXSwapSdk } from '@/lib/xswap';
 
 interface RequestProof {
   signature: number[];
@@ -75,17 +62,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const wallet = wallets[0];
 
-    const client = getSuiClient(body.rpcUrl);
-
-    const xswap = new XSwap({
-      suiClient: client,
-      packageId: MAINNET_PACKAGE_ID,
-      xswapSharedObjectData: XSWAP_SHARED_OBJECT_DATA,
-      xcoreSharedObjectData: XCORE_SHARED_OBJECT_DATA,
-      registrySharedObjectData: REGISTRY_SHARED_OBJECT_DATA,
-      dwalletCoordinatorSharedObjectData: DWALLET_COORDINATOR_SHARED_OBJECT_DATA,
-      enclaveSharedObjectData: ENCLAVE_SHARED_OBJECT_DATA,
-    });
+    const { suiClient, xswap } = createXSwapSdk(body.rpcUrl);
 
     const { tx, result } = xswap.newRequest({
       params: {
@@ -95,10 +72,10 @@ const handler: NextApiHandler = async (req, res) => {
         walletKey: BigInt(body.walletKey),
         dwalletAddress: new Uint8Array(body.proof.dwalletAddress),
         sourceAddress: new Uint8Array(body.sourceAddress),
-        sourceChain: body.sourceChain,
+        sourceChain: body.sourceChain as ChainId,
         sourceToken: new Uint8Array(body.proof.token),
         sourceAmount: BigInt(body.proof.amount),
-        destinationChain: body.destinationChain,
+        destinationChain: body.destinationChain as ChainId,
         destinationToken: new Uint8Array(body.destinationToken),
         destinationAddress: new Uint8Array(body.destinationAddress),
         minDestinationAmount: BigInt(body.minDestinationAmount),
@@ -113,7 +90,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     xswap.shareRequest({ tx, request: result });
 
-    const rawBytes = await tx.build({ client });
+    const rawBytes = await tx.build({ client: suiClient });
 
     const intentMessage = messageWithIntent('TransactionData', rawBytes);
     const bytesHex = Buffer.from(intentMessage).toString('hex');
@@ -142,7 +119,7 @@ const handler: NextApiHandler = async (req, res) => {
       publicKey,
     });
 
-    const txResult = await client.executeTransactionBlock({
+    const txResult = await suiClient.executeTransactionBlock({
       transactionBlock: Buffer.from(rawBytes).toString('base64'),
       signature: serializedSignature,
       options: {

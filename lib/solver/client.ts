@@ -1,3 +1,5 @@
+import { get, post } from '@/lib/api/client';
+
 export interface SolverMetadata {
   solver: {
     sui: string;
@@ -24,59 +26,18 @@ export interface RequestStatus {
   errorMessage?: string;
 }
 
-export const fetchMetadata = async (): Promise<SolverMetadata> => {
-  const response = await fetch('/api/solver/metadata');
+export const fetchMetadata = () => get<SolverMetadata>('/api/solver/metadata');
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch metadata');
-  }
+export const fetchPrices = () => get<PriceData>('/api/solver/prices');
 
-  return response.json();
-};
-
-export const fetchPrices = async (): Promise<PriceData> => {
-  const response = await fetch('/api/solver/prices');
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch prices');
-  }
-
-  return response.json();
-};
-
-export const fulfill = async (params: {
+export const fulfill = (params: {
   requestId: string;
   userAddress: string;
   requestInitialSharedVersion?: string;
-}): Promise<FulfillResult> => {
-  const response = await fetch('/api/solver/fulfill', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
+}) => post<FulfillResult>('/api/solver/fulfill', params);
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fulfill request');
-  }
-
-  return response.json();
-};
-
-export const fetchStatus = async (
-  requestId: string
-): Promise<RequestStatus> => {
-  const response = await fetch(`/api/solver/status?requestId=${requestId}`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch status');
-  }
-
-  return response.json();
-};
+export const fetchStatus = (requestId: string) =>
+  get<RequestStatus>(`/api/solver/status?requestId=${requestId}`);
 
 export const waitForSettlement = async (
   requestId: string,

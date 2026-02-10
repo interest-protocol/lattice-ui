@@ -1,9 +1,12 @@
 import {
   type ChainId,
+  type NewRequestProof,
+  type NewRequestProofRaw,
   WalletKey,
   XSwap,
-  type NewRequestProof,
 } from '@interest-protocol/xswap-sdk';
+
+import { post } from '@/lib/api/client';
 
 export type { NewRequestProof };
 
@@ -11,19 +14,10 @@ export const fetchNewRequestProof = async (
   digest: string,
   chainId: ChainId
 ): Promise<NewRequestProof> => {
-  const response = await fetch('/api/enclave/new-request', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ digest, chainId }),
+  const raw = await post<NewRequestProofRaw>('/api/enclave/new-request', {
+    digest,
+    chainId,
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch proof');
-  }
-
-  const raw = await response.json();
-
   return XSwap.parseNewRequestProof(raw);
 };
 

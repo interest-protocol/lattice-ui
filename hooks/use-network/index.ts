@@ -1,4 +1,4 @@
-import { NETWORK, type Network } from '@/constants/network';
+import { Network } from '@/constants/network';
 
 /** UI-only: no chain context. */
-export const useNetwork = () => NETWORK as Network;
+export const useNetwork = () => Network.MAINNET;

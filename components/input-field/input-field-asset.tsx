@@ -22,8 +22,11 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
 
   const { control } = form;
 
-  const type = useWatch({ control, name: `${name}.type` });
-  const oppositeType = useWatch({ control, name: `${oppositeName}.type` });
+  const type = useWatch({ control, name: `${name}.type` }) as string;
+  const oppositeType = useWatch({
+    control,
+    name: `${oppositeName}.type`,
+  }) as string;
 
   const availableTypes = types.filter((item) => item !== oppositeType);
 

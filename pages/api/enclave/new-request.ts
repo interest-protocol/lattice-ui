@@ -1,6 +1,6 @@
 import type { NextApiHandler } from 'next';
 
-const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL ?? '';
+import { ENCLAVE_URL } from '@/lib/config';
 
 interface NewRequestProofRaw {
   signature: string;

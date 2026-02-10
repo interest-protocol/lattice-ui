@@ -1,4 +1,4 @@
-import { ChainId } from '@interest-protocol/xbridge-sdk';
+import type { ChainId } from '@interest-protocol/xbridge-sdk';
 import {
   messageWithIntent,
   toSerializedSignature,
@@ -8,7 +8,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { createXBridgeClients, toSdkClient, toSdkTransaction } from '@/lib/xbridge';
+import { createXBridgeSdk } from '@/lib/xbridge';
 
 interface CreateMintRequestBody {
   userId: string;
@@ -46,7 +46,7 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'No Sui wallet found' });
 
     const wallet = wallets[0];
-    const { suiClient, xbridge } = createXBridgeClients(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
 
     const tx = new Transaction();
     tx.setSender(wallet.address);
@@ -54,7 +54,7 @@ const handler: NextApiHandler = async (req, res) => {
     const feeCoin = tx.splitCoins(tx.gas, [tx.pure.u64(1_000_000)]);
 
     const { result: mintRequest, mintCap } = xbridge.newMintRequest({
-      tx: toSdkTransaction(tx),
+      tx,
       sourceChain: body.sourceChain as ChainId,
       sourceToken: new Uint8Array(body.sourceToken),
       sourceDecimals: body.sourceDecimals,
@@ -64,10 +64,10 @@ const handler: NextApiHandler = async (req, res) => {
       coinType: body.coinType,
     });
 
-    xbridge.shareMintRequest({ tx: toSdkTransaction(tx), request: mintRequest });
+    xbridge.shareMintRequest({ tx, request: mintRequest });
     tx.transferObjects([mintCap], wallet.address);
 
-    const rawBytes = await tx.build({ client: toSdkClient(suiClient) });
+    const rawBytes = await tx.build({ client: suiClient });
 
     const intentMessage = messageWithIntent('TransactionData', rawBytes);
     const bytesHex = Buffer.from(intentMessage).toString('hex');
@@ -111,12 +111,18 @@ const handler: NextApiHandler = async (req, res) => {
     );
 
     const requestId =
-      requestObject && 'objectId' in requestObject ? requestObject.objectId : null;
+      requestObject && 'objectId' in requestObject
+        ? requestObject.objectId
+        : null;
 
     const mintCapId =
-      mintCapObject && 'objectId' in mintCapObject ? mintCapObject.objectId : null;
+      mintCapObject && 'objectId' in mintCapObject
+        ? mintCapObject.objectId
+        : null;
 
-    return res.status(200).json({ digest: txResult.digest, requestId, mintCapId });
+    return res
+      .status(200)
+      .json({ digest: txResult.digest, requestId, mintCapId });
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : 'Failed to create mint request';

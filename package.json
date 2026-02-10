@@ -14,12 +14,12 @@
   "dependencies": {
     "@interest-protocol/enclave-sdk": "^0.0.1",
     "@interest-protocol/lattice-solver-api-sdk": "^0.0.1",
-    "@interest-protocol/registry-sdk": "^1.0.0",
-    "@interest-protocol/sui-core-sdk": "^0.0.1",
+    "@interest-protocol/registry-sdk": "^1.0.1",
     "@interest-protocol/walrus-sdk": "^1.0.0",
-    "@interest-protocol/xbridge-sdk": "^1.1.0",
-    "@interest-protocol/xswap-sdk": "^1.0.0",
-    "@mysten/sui": "^1.36.2",
+    "@interest-protocol/xbridge-sdk": "^1.1.1",
+    "@interest-protocol/xcore-sdk": "^1.0.1",
+    "@interest-protocol/xswap-sdk": "^1.0.1",
+    "@mysten/sui": "^1.45.2",
     "@privy-io/node": "^0.8.0",
     "@privy-io/react-auth": "^3.13.1",
     "@solana/spl-token": "^0.4.14",
@@ -32,7 +32,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.54.2",
+    "react-hook-form": "7.54.2",
     "react-hot-toast": "^2.5.2",
     "react-loading-skeleton": "^3.5.0",
     "styled-components": "^6.3.9",
@@ -54,5 +54,10 @@
   "engines": {
     "node": ">=18.17"
   },
-  "packageManager": "pnpm@9.1.0+sha512.67f5879916a9293e5cf059c23853d571beaf4f753c707f40cb22bed5fb1578c6aad3b6c4107ccb3ba0b35be003eb621a16471ac836c87beb53f9d54bb4612724"
+  "packageManager": "pnpm@9.1.0+sha512.67f5879916a9293e5cf059c23853d571beaf4f753c707f40cb22bed5fb1578c6aad3b6c4107ccb3ba0b35be003eb621a16471ac836c87beb53f9d54bb4612724",
+  "pnpm": {
+    "overrides": {
+      "@noble/curves": "^1.9.4"
+    }
+  }
 }

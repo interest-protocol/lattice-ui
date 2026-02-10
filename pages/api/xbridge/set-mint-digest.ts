@@ -7,7 +7,7 @@ import bs58 from 'bs58';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { createXBridgeClients, toSdkClient } from '@/lib/xbridge';
+import { createXBridgeSdk } from '@/lib/xbridge';
 
 interface SetMintDigestBody {
   userId: string;
@@ -46,7 +46,7 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'No Sui wallet found' });
 
     const wallet = wallets[0];
-    const { suiClient, xbridge } = createXBridgeClients(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
 
     const digest = bs58.decode(body.depositSignature);
 
@@ -58,7 +58,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     tx.setSender(wallet.address);
 
-    const rawBytes = await tx.build({ client: toSdkClient(suiClient) });
+    const rawBytes = await tx.build({ client: suiClient });
 
     const intentMessage = messageWithIntent('TransactionData', rawBytes);
     const bytesHex = Buffer.from(intentMessage).toString('hex');

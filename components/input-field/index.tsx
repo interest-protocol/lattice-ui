@@ -57,7 +57,7 @@ const InputField: FC<InputFieldProps> = ({
           autoComplete="off"
           disabled={disabled}
           {...register(`${name}.value`, {
-            onChange: (event) => {
+            onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
               const value = parseInputEventToNumberString(event);
               setValue(`${name}.value`, value);
               setValue(

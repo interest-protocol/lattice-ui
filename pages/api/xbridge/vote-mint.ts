@@ -1,7 +1,7 @@
 import {
+  Intent,
   WITNESS_TYPE,
   XBridgeInbound,
-  Intent,
 } from '@interest-protocol/xbridge-sdk';
 import {
   messageWithIntent,
@@ -11,7 +11,7 @@ import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { createXBridgeClients, toSdkClient, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
+import { ENCLAVE_OBJECT_ID, createXBridgeSdk } from '@/lib/xbridge';
 
 const enclaveUrl = process.env.ENCLAVE_URL ?? 'http://localhost:3000';
 
@@ -49,7 +49,7 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'No Sui wallet found' });
 
     const wallet = wallets[0];
-    const { suiClient, xbridge } = createXBridgeClients(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
 
     const enclaveResponse = await fetch(`${enclaveUrl}/xbridge/vote_mint`, {
       method: 'POST',
@@ -81,7 +81,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     tx.setSender(wallet.address);
 
-    const rawBytes = await tx.build({ client: toSdkClient(suiClient) });
+    const rawBytes = await tx.build({ client: suiClient });
 
     const intentMessage = messageWithIntent('TransactionData', rawBytes);
     const bytesHex = Buffer.from(intentMessage).toString('hex');

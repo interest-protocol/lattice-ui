@@ -7,7 +7,7 @@ import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import type { NextApiHandler } from 'next';
 
 import { getPrivyClient } from '@/lib/privy/server';
-import { createXBridgeClients, toSdkClient } from '@/lib/xbridge';
+import { createXBridgeSdk } from '@/lib/xbridge';
 
 interface ExecuteMintBody {
   userId: string;
@@ -44,7 +44,7 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'No Sui wallet found' });
 
     const wallet = wallets[0];
-    const { suiClient, xbridge } = createXBridgeClients(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
 
     const { tx, result: mintedCoin } = xbridge.executeMintRequest({
       requestId: body.requestId,
@@ -53,9 +53,13 @@ const handler: NextApiHandler = async (req, res) => {
     });
 
     tx.setSender(wallet.address);
-    tx.transferObjects([mintedCoin], wallet.address);
+    // Cast mintedCoin from SDK return type to Transaction argument type
+    tx.transferObjects(
+      [mintedCoin as Parameters<typeof tx.transferObjects>[0][0]],
+      wallet.address
+    );
 
-    const rawBytes = await tx.build({ client: toSdkClient(suiClient) });
+    const rawBytes = await tx.build({ client: suiClient });
 
     const intentMessage = messageWithIntent('TransactionData', rawBytes);
     const bytesHex = Buffer.from(intentMessage).toString('hex');
