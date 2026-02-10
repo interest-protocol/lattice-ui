@@ -25,10 +25,7 @@ const Navbar: FC = () => {
           </Link>
         );
       })}
-      <Link
-        target="_blank"
-        href="https://interest-protocol.gitbook.io/winter-walrus"
-      >
+      <Link target="_blank" href="https://docs.lattice.trade">
         <Div
           gap="0.5rem"
           display="flex"

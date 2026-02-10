@@ -1,5 +1,4 @@
 import { Img, Span } from '@stylin.js/elements';
-import { values } from 'ramda';
 import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
@@ -55,7 +54,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
         <InputFieldModal
           name={name}
           oppositeName={oppositeName}
-          assetList={values(metadata)}
+          assetList={Object.values(metadata)}
         />
       </FormProvider>,
       { title: 'Select Asset' }

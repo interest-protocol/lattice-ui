@@ -6,6 +6,7 @@ const useEventListener = (
   runOnInit = false,
   target?: Element
 ): void => {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only effect
   useEffect(() => {
     runOnInit && callback();
     (target ?? window).addEventListener(eventType, callback);

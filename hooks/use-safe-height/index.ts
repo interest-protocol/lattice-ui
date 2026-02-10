@@ -1,15 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export const useSafeHeight = () => {
   const [safeHeight, setSafeHeight] = useState(0);
 
-  const getSafeHeight = () => {
+  const getSafeHeight = useCallback(() => {
     const value = window.visualViewport?.height ?? window.innerHeight;
-
-    if (safeHeight === value) return;
-
-    setSafeHeight(value);
-  };
+    setSafeHeight((prev) => (prev === value ? prev : value));
+  }, []);
 
   useEffect(() => {
     if (!window.visualViewport) return;
@@ -20,7 +17,7 @@ export const useSafeHeight = () => {
 
     return () =>
       window.visualViewport?.removeEventListener('resize', getSafeHeight);
-  }, []);
+  }, [getSafeHeight]);
 
   useEffect(() => {
     if (!window) return;
@@ -30,7 +27,7 @@ export const useSafeHeight = () => {
     window.addEventListener('resize', getSafeHeight);
 
     return () => window.removeEventListener('resize', getSafeHeight);
-  }, []);
+  }, [getSafeHeight]);
 
   return safeHeight;
 };

@@ -1,6 +1,5 @@
 import { AnimatePresence } from 'motion/react';
-import type { FC } from 'react';
-import Countdown from 'react-countdown';
+import { type FC, useEffect, useState } from 'react';
 
 import { TOAST_DURATION } from '@/constants/toast';
 
@@ -8,6 +7,22 @@ import Motion from '../motion';
 import type { ToastTimerProps } from './toast.types';
 
 const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
+  const [progress, setProgress] = useState(100);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 100 - (elapsed / TOAST_DURATION) * 100);
+      setProgress(remaining);
+      if (remaining <= 0) clearInterval(interval);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
   if (loading)
     return (
       <Motion left="0" right="0" bottom="0" width="100%" position="absolute">
@@ -29,29 +44,16 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
 
   return (
     <AnimatePresence>
-      <Countdown
-        date={Date.now() + TOAST_DURATION}
-        renderer={({ seconds }) => (
-          <Motion
-            left="0"
-            right="0"
-            bottom="0"
-            width="100%"
-            position="absolute"
-          >
-            <Motion
-              layout
-              bg={color}
-              height="0.15rem"
-              initial={{ width: '100%' }}
-              transition={{ duration: 1, ease: 'linear' }}
-              animate={{
-                width: `${(((seconds - 1) * 1000) / TOAST_DURATION) * 100}%`,
-              }}
-            />
-          </Motion>
-        )}
-      />
+      <Motion left="0" right="0" bottom="0" width="100%" position="absolute">
+        <Motion
+          layout
+          bg={color}
+          height="0.15rem"
+          initial={{ width: '100%' }}
+          transition={{ duration: 0.1, ease: 'linear' }}
+          animate={{ width: `${progress}%` }}
+        />
+      </Motion>
     </AnimatePresence>
   );
 };

@@ -3,7 +3,6 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
-import { not } from 'ramda';
 import { type FC, useMemo, useState } from 'react';
 
 import { ChevronDownSVG } from '@/components/svg';
@@ -41,7 +40,7 @@ const WalletProfile: FC = () => {
     return wallet && 'address' in wallet ? wallet.address : '';
   }, [user]);
 
-  const handleOpenProfileDropdown = () => setOpen(not);
+  const handleOpenProfileDropdown = () => setOpen((prev) => !prev);
   const handleOpenProfileModal = () =>
     setContent(
       <WalletProfileModal

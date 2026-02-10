@@ -1,6 +1,5 @@
 import { Button, Div, type DivElementProps, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
-import { not } from 'ramda';
 import { type FC, useState } from 'react';
 
 import useClickOutsideListenerRef from '@/hooks/use-click-outside-listener-ref';
@@ -33,7 +32,7 @@ const Settings: FC = () => {
         justifyContent="center"
         width={['2rem', 'unset']}
         height={['2rem', 'unset']}
-        onClick={() => setShow(not)}
+        onClick={() => setShow((prev) => !prev)}
         border="1px solid #A78BFA4D"
         borderRadius={['0.5rem', '0.75rem']}
         nHover={{ bg: '#A78BFA80', borderColor: '#A78BFA4D' }}

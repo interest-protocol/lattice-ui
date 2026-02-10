@@ -1,8 +1,4 @@
 import BigNumber from 'bignumber.js';
-import _Decimal from 'decimal.js-light';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import toFormat from 'toformat';
 
 import { parseBigNumberish } from '@/utils';
 
@@ -12,12 +8,10 @@ export enum Rounding {
   ROUND_UP = 2,
 }
 
-const Decimal = toFormat(_Decimal);
-
-const toSignificantRounding = {
-  [Rounding.ROUND_DOWN]: Decimal.ROUND_DOWN,
-  [Rounding.ROUND_HALF_UP]: Decimal.ROUND_HALF_UP,
-  [Rounding.ROUND_UP]: Decimal.ROUND_UP,
+const toBigNumberRounding: Record<Rounding, BigNumber.RoundingMode> = {
+  [Rounding.ROUND_DOWN]: BigNumber.ROUND_DOWN,
+  [Rounding.ROUND_HALF_UP]: BigNumber.ROUND_HALF_UP,
+  [Rounding.ROUND_UP]: BigNumber.ROUND_UP,
 };
 
 export class Fraction {
@@ -130,22 +124,19 @@ export class Fraction {
 
   public toSignificant(
     significantDigits: number,
-    format: Record<string, string> = { groupSeparator: '' },
+    _format: Record<string, string> = { groupSeparator: '' },
     rounding: Rounding = Rounding.ROUND_HALF_UP
   ): string {
-    Decimal.set({
-      precision: significantDigits + 1,
-      rounding: toSignificantRounding[rounding],
-    });
-
-    const quotient = new Decimal(this.numerator.toString())
-      .div(this.denominator.toString())
-      .toSignificantDigits(significantDigits);
-    return quotient.toFormat(quotient.decimalPlaces(), format);
+    const quotient = this.numerator.div(this.denominator);
+    return quotient
+      .precision(significantDigits, toBigNumberRounding[rounding])
+      .toString();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public toFixed(decimalPlaces: number, options?: Record<string, any>): string {
+  public toFixed(
+    decimalPlaces: number,
+    options?: Intl.NumberFormatOptions
+  ): string {
     const value = this.numerator.div(this.denominator).toString();
     const decimals = value.slice(value.length - decimalPlaces);
     const nonDecimals = value.slice(0, value.length - decimalPlaces);

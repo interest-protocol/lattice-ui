@@ -1,6 +1,6 @@
-import { css } from '@emotion/react';
+import { createGlobalStyle } from 'styled-components';
 
-export const GlobalStyles = css`
+export const GlobalStyles = createGlobalStyle`
   @font-face {
     font-family: 'PPNeuebit';
     src: url('https://cdn.prod.website-files.com/66a8b39f3ac043de2548ab05/66acb4a18a6ad9a9419941f3_PPNeueBit-Regular.otf')

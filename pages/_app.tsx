@@ -1,6 +1,5 @@
 import 'react-loading-skeleton/dist/skeleton.css';
 
-import { Global } from '@emotion/react';
 import { Analytics } from '@vercel/analytics/next';
 import type { AppProps } from 'next/app';
 import dynamic from 'next/dynamic';
@@ -20,7 +19,7 @@ const PrivyProviderWrapper = dynamic(
 
 const App = ({ Component, pageProps }: AppProps) => (
   <PrivyProviderWrapper>
-    <Global styles={GlobalStyles} />
+    <GlobalStyles />
     <ModalProvider />
     <Toaster
       position="bottom-right"
