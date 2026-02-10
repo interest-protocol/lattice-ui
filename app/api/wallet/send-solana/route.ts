@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       });
 
     return NextResponse.json({
-      signature: (result as unknown as { signature: string }).signature,
+      signature: result.hash,
     });
   } catch (error: unknown) {
     if (error instanceof WalletNotFoundError)
