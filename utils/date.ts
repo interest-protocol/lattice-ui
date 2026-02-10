@@ -25,7 +25,7 @@ const MS_SCALES_MAP = {
   [YEAR_MS]: 'year',
 };
 
-export const msToDate = (ms: number, short: boolean = false) => {
+export const msToDate = (ms: number, short = false) => {
   const scale = MS_SCALES.toReversed().find((scale) => ms / scale > 1);
 
   if (!scale)

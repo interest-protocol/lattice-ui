@@ -2,7 +2,7 @@
 import { MAX_BPS } from '@interest-protocol/sui-core-sdk';
 import BigNumber from 'bignumber.js';
 
-import { BigNumberish } from '@/interface';
+import type { BigNumberish } from '@/interface';
 
 export function isHexString(value: any, length?: number): boolean {
   if (typeof value !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
@@ -18,7 +18,7 @@ export const parseBigNumberish = (x: any): BigNumber =>
   isBigNumberish(x) ? new BigNumber(x.toString()) : ZERO_BIG_NUMBER;
 
 export const parseToPositiveStringNumber = (x: string): string => {
-  if (isNaN(+x)) return '0';
+  if (Number.isNaN(+x)) return '0';
   if (0 > +x) return '0';
   return x;
 };

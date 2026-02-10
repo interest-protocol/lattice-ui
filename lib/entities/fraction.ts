@@ -7,9 +7,9 @@ import toFormat from 'toformat';
 import { parseBigNumberish } from '@/utils';
 
 export enum Rounding {
-  ROUND_DOWN,
-  ROUND_HALF_UP,
-  ROUND_UP,
+  ROUND_DOWN = 0,
+  ROUND_HALF_UP = 1,
+  ROUND_UP = 2,
 }
 
 const Decimal = toFormat(_Decimal);

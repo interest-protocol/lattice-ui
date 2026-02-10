@@ -1,9 +1,9 @@
-import {
+import type {
   DryRunTransactionBlockResponse,
   SuiTransactionBlockResponse,
 } from '@mysten/sui/client';
 
-import {
+import type {
   SignAndExecuteArgs,
   TimedSuiTransactionBlockResponse,
   WaitForTxArgs,

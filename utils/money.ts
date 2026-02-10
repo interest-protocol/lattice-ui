@@ -3,7 +3,7 @@ const isExponential = (number: number) => number.toString().includes('e');
 const removeZero = (array: ReadonlyArray<string>): string => {
   if (!array.length) return '';
 
-  if (array[array.length - 1] == '0') return removeZero(array.slice(0, -1));
+  if (array[array.length - 1] === '0') return removeZero(array.slice(0, -1));
 
   return array.join('');
 };
@@ -36,13 +36,13 @@ const treatMoneyDecimals = (
               ? `${integralPart.slice(0, -3)}.${integralPart.slice(-3, -1)}`
               : `${integralPart}.${
                   +integralPart >= 10
-                    ? decimalPart?.slice(0, 2) ?? 0
-                    : decimalPart ?? 0
+                    ? (decimalPart?.slice(0, 2) ?? 0)
+                    : (decimalPart ?? 0)
                 }`
             : `${integralPart}.${
                 +integralPart >= 10
-                  ? decimalPart?.slice(0, 2) ?? 0
-                  : decimalPart ?? 0
+                  ? (decimalPart?.slice(0, 2) ?? 0)
+                  : (decimalPart ?? 0)
               }`
   );
 
@@ -55,7 +55,7 @@ const treatMoneyDecimals = (
   const decimalDigits =
     integralDigits <= 6 && +integralPart >= 10
       ? 2
-      : newMoneyString.split('.')[1]?.length ?? baseDecimals;
+      : (newMoneyString.split('.')[1]?.length ?? baseDecimals);
 
   return {
     newMoney,
@@ -67,7 +67,7 @@ const treatMoneyDecimals = (
 export const formatMoney = (
   money: number,
   maxFractionDigits = 20,
-  allowK: boolean = false
+  allowK = false
 ): string => {
   const { integralDigits, newMoney, decimalDigits } = treatMoneyDecimals(
     money,
@@ -103,8 +103,5 @@ export const formatMoney = (
   }`.slice(1);
 };
 
-export const formatDollars = (
-  money: number,
-  max = 6,
-  allowK: boolean = false
-): string => '$' + formatMoney(money, max, allowK);
+export const formatDollars = (money: number, max = 6, allowK = false): string =>
+  `$${formatMoney(money, max, allowK)}`;

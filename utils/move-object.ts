@@ -1,4 +1,4 @@
-import { MoveStruct, SuiParsedData } from '@mysten/sui/client';
+import type { MoveStruct, SuiParsedData } from '@mysten/sui/client';
 
 export const isMoveObject = (
   content?: SuiParsedData | null | undefined

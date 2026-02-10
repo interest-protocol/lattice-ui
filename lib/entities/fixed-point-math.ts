@@ -1,10 +1,10 @@
 import BigNumber from 'bignumber.js';
 
-import { BigNumberish } from '@/interface';
+import type { BigNumberish } from '@/interface';
 import {
+  ZERO_BIG_NUMBER,
   isBigNumberish,
   parseToPositiveStringNumber,
-  ZERO_BIG_NUMBER,
 } from '@/utils';
 
 import { Fraction } from './fraction';
@@ -50,7 +50,7 @@ export class FixedPointMath {
         ? Number.MAX_SAFE_INTEGER
         : value;
 
-    if (safeValue == null || isNaN(+safeValue)) return ZERO_BIG_NUMBER;
+    if (safeValue == null || Number.isNaN(+safeValue)) return ZERO_BIG_NUMBER;
 
     const factor = BigNumber(10).pow(significant);
 

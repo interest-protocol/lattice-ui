@@ -1,7 +1,7 @@
-import { TransactionResult } from '@mysten/sui/transactions';
+import type { TransactionResult } from '@mysten/sui/transactions';
 import { normalizeStructTag } from '@mysten/sui/utils';
 
-import { GetCoinOfValueArgs } from './utils.types';
+import type { GetCoinOfValueArgs } from './utils.types';
 
 export async function getCoinOfValue({
   tx,
