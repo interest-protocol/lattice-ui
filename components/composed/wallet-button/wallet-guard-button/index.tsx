@@ -1,27 +1,33 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, type ButtonProps } from '@stylin.js/elements';
-import type { FC } from 'react';
+import type { ButtonHTMLAttributes, FC } from 'react';
 
-const WalletGuardButton: FC<ButtonProps> = ({ children, ...props }) => {
+const WalletGuardButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({
+  children,
+  ...props
+}) => {
   const { ready, authenticated, login } = usePrivy();
 
   if (!ready)
     return (
-      <Button {...props} onClick={undefined} disabled>
+      <button type="button" {...props} onClick={undefined} disabled>
         Connecting...
-      </Button>
+      </button>
     );
 
   if (!authenticated)
     return (
-      <Button {...props} onClick={login}>
+      <button type="button" {...props} onClick={login}>
         Connect Wallet
-      </Button>
+      </button>
     );
 
-  return <Button {...props}>{children}</Button>;
+  return (
+    <button type="button" {...props}>
+      {children}
+    </button>
+  );
 };
 
 export default WalletGuardButton;

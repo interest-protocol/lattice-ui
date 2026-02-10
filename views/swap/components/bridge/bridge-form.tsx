@@ -1,5 +1,4 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
-import { Button, Div, Input, Label, Span } from '@stylin.js/elements';
 import Image from 'next/image';
 import type { FC } from 'react';
 
@@ -35,57 +34,35 @@ const BridgeForm: FC<BridgeFormProps> = ({
   setMaxAmount,
   onBridge,
 }) => (
-  <Div
-    display="flex"
-    flexDirection="column"
-    gap="1rem"
-    p="1.5rem"
-    bg="#FFFFFF0D"
-    borderRadius="1rem"
-  >
+  <div className="flex flex-col gap-4 p-6 bg-surface-light rounded-2xl">
     <BridgeNetworkSelector
       sourceNetwork={sourceNetwork}
       setSourceNetwork={setSourceNetwork}
     />
 
     {/* Destination indicator */}
-    <Div display="flex" justifyContent="center" alignItems="center">
-      <Div
-        px="1rem"
-        py="0.25rem"
-        borderRadius="1rem"
-        bg="#FFFFFF0D"
-        color="#FFFFFF80"
-        fontSize="0.75rem"
-      >
-        → To {destNetwork}
-      </Div>
-    </Div>
+    <div className="flex justify-center items-center">
+      <div className="px-4 py-1 rounded-2xl bg-surface-light text-text-muted text-xs">
+        &#x2192; To {destNetwork}
+      </div>
+    </div>
 
     {/* Token */}
-    <Div>
-      <Label color="#FFFFFF80" fontSize="0.875rem" mb="0.5rem" display="block">
-        Token
-      </Label>
-      <Div display="flex" gap="0.5rem">
+    <div>
+      <span className="text-text-muted text-sm mb-2 block">Token</span>
+      <div className="flex gap-2">
         {TOKEN_OPTIONS_LIST.map(({ key: tk, iconUrl, symbol }) => {
           const isSelected = tk === selectedToken;
           return (
-            <Button
+            <button
+              type="button"
               key={tk}
-              all="unset"
-              flex="1"
-              p="0.75rem"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap="0.5rem"
-              cursor="pointer"
-              borderRadius="0.5rem"
-              border={`1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`}
-              bg={isSelected ? '#A78BFA1A' : '#FFFFFF0D'}
+              className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg border-none"
+              style={{
+                border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+                background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+              }}
               onClick={() => setSelectedToken(tk)}
-              nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
             >
               {iconUrl && (
                 <Image
@@ -96,59 +73,41 @@ const BridgeForm: FC<BridgeFormProps> = ({
                   style={{ borderRadius: '50%' }}
                 />
               )}
-              <Span color="#FFFFFF" fontWeight="600">
-                {symbol}
-              </Span>
-            </Button>
+              <span className="text-white font-semibold">{symbol}</span>
+            </button>
           );
         })}
-      </Div>
-    </Div>
+      </div>
+    </div>
 
     {/* Amount */}
-    <Div>
-      <Div display="flex" justifyContent="space-between" mb="0.5rem">
-        <Label color="#FFFFFF80" fontSize="0.875rem">
-          Amount
-        </Label>
-        <Button
-          all="unset"
-          cursor="pointer"
-          display="flex"
-          gap="0.25rem"
-          nHover={{ color: '#A78BFA' }}
+    <div>
+      <div className="flex justify-between mb-2">
+        <span className="text-text-muted text-sm">Amount</span>
+        <button
+          type="button"
+          className="cursor-pointer flex gap-1 hover:text-accent bg-transparent border-none p-0 text-inherit"
           onClick={setMaxAmount}
         >
-          <Span color="#FFFFFF80" fontSize="0.875rem">
+          <span className="text-text-muted text-sm">
             Balance:{' '}
             {balanceLoading ? '...' : `${balanceFormatted} ${token.symbol}`}
-          </Span>
-        </Button>
-      </Div>
-      <Div
-        p="1rem"
-        bg="#FFFFFF0D"
-        borderRadius="0.75rem"
-        border="1px solid #FFFFFF1A"
-        display="flex"
-        alignItems="center"
-      >
-        <Input
-          all="unset"
-          flex="1"
-          color="#FFFFFF"
-          fontFamily="JetBrains Mono"
-          fontSize="1.5rem"
+          </span>
+        </button>
+      </div>
+      <div className="p-4 bg-surface-light rounded-xl border border-surface-border flex items-center">
+        <input
+          className="flex-1 bg-transparent border-none outline-none text-white font-mono text-2xl appearance-none"
           placeholder="0"
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-        <Span color="#FFFFFF80" fontSize="0.875rem" fontWeight="600">
+        <span className="text-text-muted text-sm font-semibold">
           {token.symbol}
-        </Span>
-      </Div>
-    </Div>
+        </span>
+      </div>
+    </div>
 
     <BridgeButton
       isDisabled={isDisabled}
@@ -159,7 +118,7 @@ const BridgeForm: FC<BridgeFormProps> = ({
       destNetwork={destNetwork}
       onBridge={onBridge}
     />
-  </Div>
+  </div>
 );
 
 export default BridgeForm;

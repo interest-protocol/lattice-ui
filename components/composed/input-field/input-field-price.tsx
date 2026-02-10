@@ -1,4 +1,3 @@
-import { Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -14,9 +13,9 @@ const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const type = useWatch({ control, name: `${name}.type` }) as string;
 
   return (
-    <Span fontFamily="JetBrains Mono">
+    <span className="font-mono">
       {formatDollars(getPrice(type) * Number(value), 2)}
-    </Span>
+    </span>
   );
 };
 

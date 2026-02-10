@@ -16,11 +16,11 @@ Analyze the specified component(s) against Lattice UI project conventions and re
 
 ## Checklist
 
-### Stylin.js Usage
-- [ ] Uses `Div`, `Span`, `Button`, `Input` from `@stylin.js/elements` (not raw HTML)
-- [ ] Responsive values use arrays: `p={['0.5rem', '1rem', '2rem']}`
-- [ ] Hover states use `nHover={{ ... }}` prop
-- [ ] No inline `style={{}}` props (use Stylin.js props instead)
+### Tailwind CSS Usage
+- [ ] Uses Tailwind utility classes on native HTML elements (not `@stylin.js/elements`)
+- [ ] Responsive values use breakpoint prefixes: `sm:p-4 md:p-8`
+- [ ] Hover states use `hover:` prefix (e.g., `hover:bg-white/10`)
+- [ ] Inline `style={{}}` only for truly dynamic values (runtime-computed colors, sizes)
 
 ### Color Constants
 - [ ] Uses `ACCENT`, `ACCENT_HOVER`, `ACCENT_80`, `ACCENT_4D` from `@/constants/colors`

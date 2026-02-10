@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { validateBody } from '@/lib/api/validate-params';
-import { ENCLAVE_URL } from '@/lib/config';
+import { ENCLAVE_URL } from '@/lib/config.server';
 
 interface NewRequestProofRaw {
   signature: string;
@@ -25,12 +25,6 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
-
-  if (!ENCLAVE_URL)
-    return NextResponse.json(
-      { error: 'ENCLAVE_URL not configured' },
-      { status: 500 }
-    );
 
   try {
     const response = await fetch(`${ENCLAVE_URL}/new_request`, {

@@ -66,14 +66,14 @@ const ModalProvider: FC = () => {
           onClick={onHandleClose}
           animate={OVERLAY_ANIMATE}
           transition={OVERLAY_TRANSITION}
-          {...(overlayProps as Record<string, unknown>)}
+          {...overlayProps}
         >
           <motion.div
             className="flex max-w-screen md:max-w-[95vw]"
             style={{ maxHeight: safeHeight * 0.9 }}
             transition={CONTAINER_TRANSITION}
             animate={CONTAINER_ANIMATE}
-            {...(containerProps as Record<string, unknown>)}
+            {...containerProps}
             onClick={(e) => {
               e.stopPropagation();
               containerProps?.onClick?.(e);

@@ -23,11 +23,18 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
 
   if (loading)
     return (
-      <Motion left="0" right="0" bottom="0" width="100%" position="absolute">
+      <Motion
+        style={{
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          position: 'absolute',
+        }}
+      >
         <Motion
           layout
-          bg={color}
-          height="0.15rem"
+          style={{ background: color, height: '0.15rem' }}
           initial={{ scaleX: 1 }}
           animate={{ scaleX: [0, 1] }}
           transition={{
@@ -42,11 +49,18 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
 
   return (
     <AnimatePresence>
-      <Motion left="0" right="0" bottom="0" width="100%" position="absolute">
+      <Motion
+        style={{
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          position: 'absolute',
+        }}
+      >
         <Motion
           layout
-          bg={color}
-          height="0.15rem"
+          style={{ background: color, height: '0.15rem' }}
           initial={{ width: '100%' }}
           transition={{ duration: 0.1, ease: 'linear' }}
           animate={{ width: `${progress}%` }}

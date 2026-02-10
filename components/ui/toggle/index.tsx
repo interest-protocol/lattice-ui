@@ -15,7 +15,12 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center" role="switch">
+    <div
+      className="flex flex-wrap items-center"
+      role="switch"
+      aria-checked={active}
+      tabIndex={0}
+    >
       <label className="ml-1.5 flex relative rounded-full">
         <input
           className="hidden"

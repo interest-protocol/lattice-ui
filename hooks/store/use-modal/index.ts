@@ -1,11 +1,8 @@
-import type { DivProps } from '@stylin.js/elements';
+import type { HTMLMotionProps } from 'motion/react';
 import type { ReactNode } from 'react';
 import { create } from 'zustand';
 
-type MotionProps = Omit<
-  DivProps,
-  'transition' | 'onAnimationStart' | 'onDragStart' | 'onDragEnd' | 'onDrag'
->;
+type ModalDivProps = Omit<HTMLMotionProps<'div'>, 'children'>;
 
 interface UseModal {
   title: string;
@@ -13,16 +10,16 @@ interface UseModal {
   onClose?: () => void;
   allowClose?: boolean;
   handleClose: () => void;
-  overlayProps?: MotionProps;
-  containerProps?: MotionProps;
+  overlayProps?: ModalDivProps;
+  containerProps?: ModalDivProps;
   setContent: (
     content: ReactNode,
     options: {
       title: string;
       onClose?: () => void;
       allowClose?: boolean;
-      overlayProps?: DivProps;
-      containerProps?: DivProps;
+      overlayProps?: ModalDivProps;
+      containerProps?: ModalDivProps;
     }
   ) => void;
 }

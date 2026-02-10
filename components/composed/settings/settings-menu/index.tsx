@@ -1,45 +1,31 @@
-import { Div, Hr } from '@stylin.js/elements';
 import { motion } from 'motion/react';
 import { type FC, useState } from 'react';
 
 import SettingsMenuExplorer from './settings-menu-explorer';
 import SettingsMenuRPC from './settings-menu-rpc';
 
-const Motion = motion.create(Div);
-
 const SettingsMenu: FC = () => {
   const [menu, setMenu] = useState<'explorer' | 'rpc' | null>(null);
 
   return (
-    <Motion
-      gap="2rem"
-      zIndex="1"
-      mt="4.25rem"
-      bg="#FFFFFF0D"
-      display="flex"
-      color="#ffffff"
-      overflow="hidden"
-      position="absolute"
-      borderRadius="1rem"
+    <motion.div
+      className="gap-8 z-[1] mt-[4.25rem] bg-surface-light flex text-white overflow-hidden absolute rounded-2xl flex-col border border-surface-border"
+      style={{ backdropFilter: 'blur(50px)', originY: 0 }}
       exit={{ scaleY: 0 }}
-      flexDirection="column"
-      style={{ originY: 0 }}
-      backdropFilter="blur(50px)"
       animate={{ scaleY: [0, 1] }}
-      border="1px solid #FFFFFF1A"
     >
-      <Motion py="0.5rem" borderRadius="0.75rem" width="20rem">
+      <motion.div className="py-2 rounded-xl w-80">
         <SettingsMenuExplorer
           show={menu === 'explorer'}
           toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
         />
-        <Hr border="none" borderBottom="1px solid #242424" mx="1rem" />
+        <hr className="border-none border-b border-b-[#242424] mx-4" />
         <SettingsMenuRPC
           show={menu === 'rpc'}
           toggleShow={() => setMenu(menu === 'rpc' ? null : 'rpc')}
         />
-      </Motion>
-    </Motion>
+      </motion.div>
+    </motion.div>
   );
 };
 

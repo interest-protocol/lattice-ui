@@ -1,4 +1,3 @@
-import { Div } from '@stylin.js/elements';
 import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -143,14 +142,7 @@ const Bridge: FC = () => {
   };
 
   return (
-    <Div
-      display="flex"
-      flexDirection="column"
-      gap="1.5rem"
-      width="100%"
-      maxWidth="40rem"
-      mx="auto"
-    >
+    <div className="flex flex-col gap-6 w-full max-w-[40rem] mx-auto">
       <BridgeForm
         sourceNetwork={sourceNetwork}
         setSourceNetwork={setSourceNetwork}
@@ -176,7 +168,7 @@ const Bridge: FC = () => {
         destNetwork={destNetwork}
         amount={amount}
       />
-    </Div>
+    </div>
   );
 };
 

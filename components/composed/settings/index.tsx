@@ -1,4 +1,3 @@
-import { Button, Div, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { type FC, useState } from 'react';
 import { BarsSVG, CogSVG } from '@/components/ui/icons';
@@ -13,46 +12,21 @@ const Settings: FC = () => {
   );
 
   return (
-    <Div
-      ref={menuRef as never}
-      display="flex"
-      position="relative"
-      alignItems="flex-end"
-      flexDirection="column"
-    >
-      <Button
-        all="unset"
-        color="#fff"
-        lineHeight="0"
-        display="flex"
-        cursor="pointer"
-        alignItems="center"
-        justifyContent="center"
-        width={['2rem', 'unset']}
-        height={['2rem', 'unset']}
+    <div ref={menuRef} className="flex relative items-end flex-col">
+      <button
+        type="button"
+        className="text-white leading-none flex cursor-pointer items-center justify-center w-8 sm:w-auto h-8 sm:h-auto border border-accent-4d rounded-lg sm:rounded-xl bg-transparent hover:bg-accent-80 hover:border-accent-4d"
         onClick={() => setShow((prev) => !prev)}
-        border="1px solid #A78BFA4D"
-        borderRadius={['0.5rem', '0.75rem']}
-        nHover={{ bg: '#A78BFA80', borderColor: '#A78BFA4D' }}
       >
-        <Span
-          p="0.25rem"
-          transition="all 300ms linear"
-          display={['inline-block', 'inline-block', 'inline-block', 'none']}
-        >
+        <span className="p-1 transition-all duration-300 lg:hidden">
           <BarsSVG maxWidth="1rem" maxHeight="1rem" width="100%" />
-        </Span>
-        <Span
-          p={['0.5rem', '0.75rem']}
-          transition="all 300ms linear"
-          nHover={{ rotate: '90deg', color: '#FFFFFF' }}
-          display={['none', 'none', 'none', 'inline-block']}
-        >
+        </span>
+        <span className="p-2 sm:p-3 transition-all duration-300 hidden lg:inline-block hover:rotate-90 hover:text-white">
           <CogSVG maxWidth="1.5rem" maxHeight="1.5rem" width="100%" />
-        </Span>
-      </Button>
+        </span>
+      </button>
       <AnimatePresence>{show && <SettingsMenu />}</AnimatePresence>
-    </Div>
+    </div>
   );
 };
 

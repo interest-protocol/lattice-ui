@@ -1,6 +1,5 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
@@ -109,82 +108,52 @@ const SendModal: FC = () => {
   };
 
   return (
-    <Div display="flex" flexDirection="column" gap="1.5rem" p="1.5rem">
+    <div className="flex flex-col gap-6 p-6">
       {/* Network Selection */}
-      <Div>
-        <Label
-          color="#FFFFFF80"
-          fontSize="0.875rem"
-          mb="0.5rem"
-          display="block"
-        >
-          Network
-        </Label>
-        <Div display="flex" gap="0.5rem">
+      <div>
+        <span className="text-text-muted text-sm mb-2 block">Network</span>
+        <div className="flex gap-2">
           {CHAIN_KEYS.map((net) => {
             const isSelected = net === network;
             return (
-              <Button
+              <button
                 key={net}
-                all="unset"
-                flex="1"
-                p="0.75rem"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                gap="0.5rem"
-                cursor="pointer"
-                borderRadius="0.5rem"
-                border={`1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`}
-                bg={isSelected ? '#A78BFA1A' : '#FFFFFF0D'}
+                type="button"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg"
+                style={{
+                  border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+                  background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+                }}
                 onClick={() => {
                   setNetwork(net);
                   setSelectedTokenIndex(0);
                 }}
-                nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
               >
-                <Span
-                  color="#FFFFFF"
-                  fontWeight="600"
-                  textTransform="capitalize"
-                >
+                <span className="text-white font-semibold capitalize">
                   {CHAIN_REGISTRY[net].displayName}
-                </Span>
-              </Button>
+                </span>
+              </button>
             );
           })}
-        </Div>
-      </Div>
+        </div>
+      </div>
 
       {/* Token Selection */}
-      <Div>
-        <Label
-          color="#FFFFFF80"
-          fontSize="0.875rem"
-          mb="0.5rem"
-          display="block"
-        >
-          Token
-        </Label>
-        <Div display="flex" gap="0.5rem">
+      <div>
+        <span className="text-text-muted text-sm mb-2 block">Token</span>
+        <div className="flex gap-2">
           {tokens.map((token, index) => {
             const isSelected = index === selectedTokenIndex;
             return (
-              <Button
+              <button
                 key={token.type}
-                all="unset"
-                flex="1"
-                p="0.75rem"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                gap="0.5rem"
-                cursor="pointer"
-                borderRadius="0.5rem"
-                border={`1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`}
-                bg={isSelected ? '#A78BFA1A' : '#FFFFFF0D'}
+                type="button"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg"
+                style={{
+                  border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+                  background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+                }}
                 onClick={() => setSelectedTokenIndex(index)}
-                nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
               >
                 {token.iconUrl && (
                   <Image
@@ -195,122 +164,83 @@ const SendModal: FC = () => {
                     style={{ borderRadius: '50%' }}
                   />
                 )}
-                <Span color="#FFFFFF" fontWeight="600">
-                  {token.symbol}
-                </Span>
-              </Button>
+                <span className="text-white font-semibold">{token.symbol}</span>
+              </button>
             );
           })}
-        </Div>
-      </Div>
+        </div>
+      </div>
 
       {/* Recipient Address */}
-      <Div>
-        <Label
-          color="#FFFFFF80"
-          fontSize="0.875rem"
-          mb="0.5rem"
-          display="block"
-        >
+      <div>
+        <span className="text-text-muted text-sm mb-2 block">
           Recipient Address
-        </Label>
-        <Input
-          all="unset"
-          width="100%"
-          p="1rem"
-          color="#FFFFFF"
-          bg="#000000"
-          borderRadius="0.5rem"
-          border="1px solid #FFFFFF1A"
-          fontFamily="JetBrains Mono"
-          fontSize="0.875rem"
+        </span>
+        <input
+          className="w-full p-4 text-white bg-black rounded-lg border border-surface-border font-mono text-sm outline-none"
           placeholder={config.addressPlaceholder}
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
         />
-      </Div>
+      </div>
 
       {/* Amount */}
-      <Div>
-        <Div display="flex" justifyContent="space-between" mb="0.5rem">
-          <Label color="#FFFFFF80" fontSize="0.875rem">
-            Amount
-          </Label>
-          <Span color="#FFFFFF80" fontSize="0.875rem">
+      <div>
+        <div className="flex justify-between mb-2">
+          <span className="text-text-muted text-sm">Amount</span>
+          <span className="text-text-muted text-sm">
             Balance:{' '}
             {isLoading ? '...' : `${balanceFormatted} ${selectedToken.symbol}`}
-          </Span>
-        </Div>
-        <Div position="relative">
-          <Input
-            all="unset"
-            width="100%"
-            p="1rem"
-            pr="4rem"
-            color="#FFFFFF"
-            bg="#000000"
-            borderRadius="0.5rem"
-            border="1px solid #FFFFFF1A"
-            fontFamily="JetBrains Mono"
-            fontSize="1rem"
+          </span>
+        </div>
+        <div className="relative">
+          <input
+            className="w-full p-4 pr-16 text-white bg-black rounded-lg border border-surface-border font-mono text-base outline-none"
             placeholder="0.0"
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <Button
-            all="unset"
-            position="absolute"
-            right="1rem"
-            top="50%"
-            transform="translateY(-50%)"
-            cursor="pointer"
-            color="#A78BFA"
-            fontSize="0.875rem"
-            fontWeight="600"
+          <button
+            type="button"
+            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-accent text-sm font-semibold bg-transparent border-none hover:opacity-70"
             onClick={setMaxAmount}
-            nHover={{ opacity: 0.7 }}
           >
             MAX
-          </Button>
-        </Div>
-      </Div>
+          </button>
+        </div>
+      </div>
 
       {/* Warning */}
-      <Div
-        p="1rem"
-        bg="#A78BFA1A"
-        borderRadius="0.5rem"
-        border="1px solid #A78BFA4D"
+      <div
+        className="p-4 rounded-lg"
+        style={{
+          background: '#A78BFA1A',
+          border: '1px solid #A78BFA4D',
+        }}
       >
-        <P color="#FFFFFF" fontSize="0.875rem">
+        <p className="text-white text-sm">
           Please verify the recipient address carefully. Transactions cannot be
           reversed.
-        </P>
-      </Div>
+        </p>
+      </div>
 
       {/* Send Button */}
-      <Button
-        all="unset"
-        width="100%"
-        p="1rem"
-        bg="#A78BFA"
-        color="#000000"
-        borderRadius="0.75rem"
-        fontWeight="600"
-        fontSize="1rem"
-        textAlign="center"
-        cursor={sending ? 'wait' : 'pointer'}
-        opacity={sending ? '0.6' : '1'}
+      <button
+        type="button"
+        className="w-full p-4 bg-accent text-black rounded-xl font-semibold text-base text-center border-none hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
+        style={{
+          cursor: sending ? 'wait' : 'pointer',
+          opacity: sending ? 0.6 : 1,
+        }}
         onClick={handleSend}
         disabled={sending}
-        nHover={!sending ? { bg: '#C4B5FD' } : {}}
       >
         {sending
           ? 'Sending...'
           : `Send ${selectedToken.symbol} on ${config.displayName}`}
-      </Button>
-    </Div>
+      </button>
+    </div>
   );
 };
 

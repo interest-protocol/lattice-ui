@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const ENCLAVE_URL = process.env.ENCLAVE_URL ?? '';
+import { ENCLAVE_URL } from '@/lib/config.server';
 
 export interface EnclaveHealthResponse {
   healthy: boolean;
@@ -12,8 +12,6 @@ export interface EnclaveHealthResponse {
 }
 
 export async function GET() {
-  if (!ENCLAVE_URL) return NextResponse.json({ healthy: false });
-
   try {
     const response = await fetch(`${ENCLAVE_URL}/health_check`, {
       signal: AbortSignal.timeout(5_000),

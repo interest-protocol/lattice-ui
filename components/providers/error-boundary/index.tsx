@@ -1,8 +1,5 @@
-import { Button, Div, Span } from '@stylin.js/elements';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
-
-import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -43,90 +40,45 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <Div
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="100vh"
-          p="2rem"
-          bg="#0D1117"
-          color="#FFFFFF"
-        >
-          <Div
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            maxWidth="400px"
-            textAlign="center"
-            gap="1.5rem"
-          >
-            <Span fontSize="3rem" role="img" aria-label="Error">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-[#0D1117] text-white">
+          <div className="flex flex-col items-center max-w-[400px] text-center gap-6">
+            <span className="text-5xl" role="img" aria-label="Error">
               &#x26A0;
-            </Span>
-            <Div display="flex" flexDirection="column" gap="0.5rem">
-              <Span fontSize="1.5rem" fontWeight="600">
+            </span>
+            <div className="flex flex-col gap-2">
+              <span className="text-2xl font-semibold">
                 Something went wrong
-              </Span>
-              <Span fontSize="0.875rem" color="#FFFFFF80">
+              </span>
+              <span className="text-sm text-text-muted">
                 An unexpected error occurred. You can try again or refresh the
                 page.
-              </Span>
-            </Div>
+              </span>
+            </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <Div
-                width="100%"
-                p="1rem"
-                bg="#FFFFFF0D"
-                borderRadius="0.5rem"
-                overflow="auto"
-                maxHeight="200px"
-              >
-                <Span
-                  fontSize="0.75rem"
-                  fontFamily="monospace"
-                  color="#FF6B6B"
-                  whiteSpace="pre-wrap"
-                  wordBreak="break-all"
-                >
+              <div className="w-full p-4 bg-surface-light rounded-lg overflow-auto max-h-[200px]">
+                <span className="text-xs font-mono text-[#FF6B6B] whitespace-pre-wrap break-all">
                   {this.state.error.message}
-                </Span>
-              </Div>
+                </span>
+              </div>
             )}
-            <Div display="flex" gap="1rem">
-              <Button
-                py="0.75rem"
-                px="1.5rem"
-                bg={ACCENT}
-                color="white"
-                fontSize="0.875rem"
-                fontWeight="600"
-                borderRadius="0.5rem"
-                border="none"
-                cursor="pointer"
-                nHover={{ bg: ACCENT_HOVER }}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                className="py-3 px-6 bg-accent text-white text-sm font-semibold rounded-lg border-none cursor-pointer hover:bg-accent-hover"
                 onClick={this.handleRetry}
               >
                 Try Again
-              </Button>
-              <Button
-                py="0.75rem"
-                px="1.5rem"
-                bg="transparent"
-                color="white"
-                fontSize="0.875rem"
-                fontWeight="600"
-                borderRadius="0.5rem"
-                border="1px solid #FFFFFF1A"
-                cursor="pointer"
-                nHover={{ bg: '#FFFFFF0D' }}
+              </button>
+              <button
+                type="button"
+                className="py-3 px-6 bg-transparent text-white text-sm font-semibold rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light"
                 onClick={this.handleRefresh}
               >
                 Refresh Page
-              </Button>
-            </Div>
-          </Div>
-        </Div>
+              </button>
+            </div>
+          </div>
+        </div>
       );
     }
 

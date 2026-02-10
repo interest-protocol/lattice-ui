@@ -53,11 +53,10 @@ export interface FeatureNameProps {
 'use client';
 
 import type { FC } from 'react';
-import { Div } from '@stylin.js/elements';
 import type { FeatureNameProps } from './{feature-name}.types';
 
 const FeatureName: FC<FeatureNameProps> = ({ children }) => {
-  return <Div>{children}</Div>;
+  return <div>{children}</div>;
 };
 
 export default FeatureName;
@@ -114,22 +113,22 @@ export const POST = async (req: NextRequest) => {
 ### Step 3: Follow These Rules
 
 **Styling:**
-- Use `@stylin.js/elements` components (`Div`, `Span`, `Button`, `Input`)
+- Use Tailwind CSS v4 utility classes on native HTML elements
 - Use color constants from `@/constants/colors` — never hard-code hex values
-- Use responsive arrays for breakpoints: `[mobile, tablet, desktop, wide]`
-- Use `nHover`, `nFocus` props for interaction states
-- Use `Motion` from `@/components/ui/motion` for animations
+- Use responsive prefixes: `sm:`, `md:`, `lg:`, `xl:`
+- Use `hover:` prefix for interaction states
+- Use `motion.div` from `motion/react` for animations
 
 **State:**
 - Use Zustand with `useShallow` selectors for global state
-- Use SWR for server-state with configs from `@/lib/swr/config`
+- Use TanStack Query v5 (`useQuery`) for server-state with appropriate `staleTime`/`refetchInterval`
 - Use React Hook Form for form state
 - Use `useLocalStorage` from `usehooks-ts` for persistence
 
 **Token math:**
-- Always use `BigNumber` from `bignumber.js` for token amounts
+- Always use native `BigInt` for token amounts
 - Use `CurrencyAmount` and `Token` entities from `@/lib/entities`
-- Use `FixedPointMath.toBigNumber()` for decimal conversion
+- Use `parseUnits()` / `formatUnits()` from `@/lib/bigint-utils` for decimal conversion
 - Never use floating-point arithmetic for financial values
 
 **Error handling:**

@@ -1,4 +1,4 @@
-import { Img, Span } from '@stylin.js/elements';
+import Image from 'next/image';
 import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
@@ -31,15 +31,8 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   if (isLoading || !metadata?.[type])
     return (
       <Motion
-        gap="0.5rem"
-        color="white"
-        display="flex"
-        fontSize="1rem"
-        cursor="pointer"
-        overflow="hidden"
+        className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center"
         whileHover="hover"
-        alignItems="center"
-        justifyContent="center"
       >
         <Skeleton width="2rem" height="2rem" />
         <Skeleton width="4rem" />
@@ -60,36 +53,20 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
 
   return (
     <Motion
-      gap="0.5rem"
-      color="white"
-      display="flex"
-      fontSize="1rem"
-      overflow="hidden"
+      className="gap-2 text-white flex text-base overflow-hidden items-center justify-center"
+      style={{ cursor: availableTypes.length > 1 ? 'pointer' : 'default' }}
       whileHover="hover"
-      alignItems="center"
-      justifyContent="center"
-      cursor={availableTypes.length > 1 ? 'pointer' : 'default'}
       onClick={() => availableTypes.length > 1 && openAssetModal()}
     >
-      <Span
-        overflow="hidden"
-        borderRadius="50%"
-        display="flex"
-        width="2rem"
-        height="2rem"
-        minWidth="2rem"
-        bg="#FFFFFF1A"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Img
-          width="100%"
-          height="100%"
-          objectFit="contain"
-          alt={metadata[type]?.symbol}
-          src={metadata[type]?.iconUrl}
+      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 bg-surface-lighter items-center justify-center">
+        <Image
+          className="object-contain"
+          alt={metadata[type]?.symbol ?? ''}
+          src={metadata[type]?.iconUrl ?? ''}
+          width={32}
+          height={32}
         />
-      </Span>
+      </span>
       {metadata?.[type]?.symbol ?? 'Select Coin'}
       {availableTypes.length > 1 && (
         <ChevronDownSVG maxWidth="1rem" width="100%" />

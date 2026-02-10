@@ -11,6 +11,7 @@ import { ASSET_METADATA, SOL_DECIMALS, SOL_TYPE } from '@/constants/coins';
 import type { ChainKey } from './chain.types';
 
 export interface ChainTokenOption {
+  chain: ChainKey;
   type: string;
   symbol: string;
   name: string;
@@ -21,6 +22,7 @@ export interface ChainTokenOption {
 export const CHAIN_TOKENS: Record<ChainKey, ChainTokenOption[]> = {
   sui: [
     {
+      chain: 'sui',
       type: SUI_TYPE_ARG,
       symbol: 'SUI',
       name: ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui',
@@ -28,6 +30,7 @@ export const CHAIN_TOKENS: Record<ChainKey, ChainTokenOption[]> = {
       decimals: 9,
     },
     {
+      chain: 'sui',
       type: WSOL_SUI_TYPE,
       symbol: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.symbol ?? 'wSOL',
       name: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.name ?? 'Solana (Wormhole)',
@@ -37,6 +40,7 @@ export const CHAIN_TOKENS: Record<ChainKey, ChainTokenOption[]> = {
   ],
   solana: [
     {
+      chain: 'solana',
       type: SOL_TYPE,
       symbol: 'SOL',
       name: ASSET_METADATA[SOL_TYPE]?.name ?? 'Solana',
@@ -44,6 +48,7 @@ export const CHAIN_TOKENS: Record<ChainKey, ChainTokenOption[]> = {
       decimals: SOL_DECIMALS,
     },
     {
+      chain: 'solana',
       type: WSUI_SOLANA_MINT,
       symbol: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.symbol ?? 'wSUI',
       name: BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.name ?? 'Sui (Wormhole)',

@@ -1,4 +1,3 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import {
@@ -28,52 +27,33 @@ const BridgeDetails: FC<BridgeDetailsProps> = ({
   amount,
 }) => (
   <>
-    <Div
-      p="1.5rem"
-      bg="#FFFFFF0D"
-      borderRadius="1rem"
-      display="flex"
-      flexDirection="column"
-      gap="1rem"
-    >
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Route
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          {CHAIN_REGISTRY[sourceNetwork].displayName} → {destNetwork}
-        </Span>
-      </Div>
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          You receive
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
+    <div className="p-6 bg-surface-light rounded-2xl flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Route</span>
+        <span className="text-sm font-medium text-white">
+          {CHAIN_REGISTRY[sourceNetwork].displayName} &#x2192; {destNetwork}
+        </span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">You receive</span>
+        <span className="text-sm font-medium text-white">
           {amount || '0'}{' '}
           {RECEIVE_TOKEN[sourceNetwork]?.[selectedToken] ?? selectedToken}
-        </Span>
-      </Div>
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Bridge Fee
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          --
-        </Span>
-      </Div>
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Estimated Time
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          ~2-5 minutes
-        </Span>
-      </Div>
-    </Div>
+        </span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Bridge Fee</span>
+        <span className="text-sm font-medium text-white">--</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Estimated Time</span>
+        <span className="text-sm font-medium text-white">~2-5 minutes</span>
+      </div>
+    </div>
 
-    <P color="#FFFFFF40" fontSize="0.75rem" textAlign="center">
+    <p className="text-text-dimmed text-xs text-center">
       Powered by XBridge. Assets are bridged as wrapped tokens.
-    </P>
+    </p>
   </>
 );
 

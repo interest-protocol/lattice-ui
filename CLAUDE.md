@@ -4,12 +4,13 @@
 
 **Winter Walrus** is a DeFi application that provides cross-chain swap functionality between SUI and SOL tokens. Users can seamlessly exchange assets across the Sui and Solana blockchains.
 
-- **Tech Stack**: Next.js 14 (App Router), TypeScript (strict), React 18, Framer Motion, Stylin.js
+- **Tech Stack**: Next.js 16 (App Router + Turbopack), TypeScript 5.9 (strict), React 19, Framer Motion (`motion/react`), Tailwind CSS v4
 - **Blockchains**: Sui Network & Solana
 - **Wallet**: Privy integration for wallet connection
-- **State**: Zustand for global state, SWR for server state, React Hook Form for forms
-- **Styling**: Stylin.js (CSS-in-JS with prop-based styling)
-- **Linting**: Biome (not ESLint/Prettier)
+- **State**: Zustand for global state, TanStack Query v5 for server state, React Hook Form for forms
+- **Styling**: Tailwind CSS v4 (utility-first, configured via `@theme` in `globals.css`)
+- **Linting**: Biome 2.3 (not ESLint/Prettier)
+- **Testing**: Vitest + React Testing Library
 
 ## Project Structure
 
@@ -19,8 +20,7 @@ lattice-ui/
 │   ├── layout.tsx              # Root layout (fonts, providers)
 │   ├── page.tsx                # Home → SwapView
 │   ├── providers.tsx           # Provider composition tree
-│   ├── registry.tsx            # styled-components SSR registry
-│   ├── account/page.tsx        # Account → AccountView
+│   ├── account/page.tsx        # Account → AccountView (dynamic import)
 │   └── api/                    # API routes (18 endpoints)
 │       ├── enclave/            # TEE enclave proxy
 │       ├── solver/             # Solver API proxy (fulfill, metadata, prices, status)
@@ -56,7 +56,7 @@ lattice-ui/
 │   ├── wallet/                 # Wallet operations
 │   ├── solana/                 # Solana helpers (server client, tx confirmation)
 │   ├── sui/                    # Sui helpers (server client)
-│   ├── swr/                    # SWR shared configs
+│   ├── bigint-utils.ts          # BigInt formatting (formatUnits, parseUnits)
 │   └── external/               # External API clients (Pyth prices)
 │
 ├── views/                      # Page-level view components
@@ -74,7 +74,7 @@ lattice-ui/
 │   └── bridged-tokens.ts       # XBridge token metadata
 │
 ├── utils/                      # Pure utility functions
-│   ├── bn.ts                   # BigNumber helpers
+│   ├── bn.ts                   # BigInt helpers (feesCalcUp, parseBigNumberish)
 │   ├── money.ts                # Number formatting (Intl)
 │   ├── number.ts               # Input parsing
 │   ├── format-address.ts       # Address truncation
@@ -181,7 +181,7 @@ Always handle loading and error states:
 
 ```typescript
 const Component = () => {
-  const { data, isLoading, error } = useSWR(...);
+  const { data, isLoading, error } = useQuery(...);
 
   if (isLoading) return <Skeleton />;
   if (error) return <ErrorMessage error={error} />;
@@ -193,7 +193,7 @@ const Component = () => {
 
 ---
 
-## Next.js 14 Patterns (App Router)
+## Next.js 16 Patterns (App Router)
 
 ### 1. Client Components
 
@@ -303,7 +303,7 @@ This project uses Zustand for global state with `useShallow` selectors:
 import { create } from 'zustand';
 
 interface AppState {
-  balances: Record<string, BigNumber>;
+  balances: Record<string, bigint>;
   loadingCoins: boolean;
   loadingObjects: boolean;
   update: (partial: Partial<AppState>) => void;
@@ -336,23 +336,30 @@ const balances = useAppState((state) => state.balances);
 const { balances } = useAppState(); // Bad!
 ```
 
-### SWR (Server State)
+### TanStack Query v5 (Server State)
 
 Primary data fetching library with caching and revalidation:
 
 ```typescript
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
 
-const { data, error, isLoading, mutate } = useSWR(
-  address ? [useSuiBalances.name, address] : null,  // null = skip
-  async ([, addr]) => {
+const { data, error, isLoading } = useQuery({
+  queryKey: ['suiBalances', address],
+  queryFn: async () => {
     // fetch logic
   },
-  balanceSwrConfig  // from @/lib/swr/config
-);
+  enabled: !!address,           // skip when no address
+  refetchInterval: 30_000,      // 30s for balances
+  staleTime: 5_000,             // dedup within 5s
+  refetchOnWindowFocus: false,
+});
+
+// Invalidate queries
+const queryClient = useQueryClient();
+queryClient.invalidateQueries({ queryKey: ['suiBalances'] });
 ```
 
-Shared configs in `lib/swr/config.ts` provide standard refresh intervals (30s for balances, 60s for prices).
+`QueryClientProvider` is set up in `app/providers.tsx`.
 
 ---
 
@@ -519,80 +526,68 @@ const Select = <T,>({ items, value, onChange, renderItem, keyExtractor }: Select
 
 ---
 
-## Styling with Stylin.js
+## Styling with Tailwind CSS v4
 
-### Core Elements
+### Configuration
 
-```typescript
-import { Div, Span, Button, Input, A } from '@stylin.js/elements';
+Tailwind v4 is configured via CSS, not `tailwind.config.js`. Custom theme tokens are defined in `app/globals.css`:
+
+```css
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-pixel: "PPNeuebit", monospace;
+
+  --color-accent: #a78bfa;
+  --color-accent-hover: #c4b5fd;
+  --color-surface: #0c0f1d;
+  --color-surface-light: #ffffff0d;
+  --color-surface-lighter: #ffffff1a;
+  --color-surface-hover: #ffffff2a;
+  --color-surface-border: #ffffff1a;
+  --color-text: #ffffff;
+  --color-text-muted: #ffffff80;
+  --color-text-dimmed: #ffffff40;
+}
 ```
 
-### Prop Shortcuts
+### Usage Pattern
+
+Use native HTML elements with Tailwind utility classes:
 
 ```typescript
-<Div
-  // Spacing
-  p="1rem"           // padding
-  px="1rem"          // padding-left + padding-right
-  py="0.5rem"        // padding-top + padding-bottom
-  m="1rem"           // margin
-  gap="0.5rem"       // flex/grid gap
+<div className="flex flex-col gap-4 p-6 bg-surface-light rounded-2xl">
+  <span className="text-text-muted text-sm">Label</span>
+  <button className="w-full py-4 bg-accent text-white font-semibold rounded-xl hover:bg-accent-hover disabled:opacity-50">
+    Swap
+  </button>
+</div>
+```
 
-  // Layout
-  display="flex"
-  flexDirection="column"
-  alignItems="center"
-  justifyContent="space-between"
+### Dynamic Styles
 
-  // Sizing
-  width="100%"
-  maxWidth="400px"
-  height="auto"
+For runtime-dependent values (conditional colors, computed dimensions), use `style` prop:
 
-  // Colors — prefer constants from @/constants/colors
-  bg="#FFFFFF0D"     // background
-  color="#FFFFFF"    // text color
+```typescript
+<button
+  className="flex-1 p-3 rounded-lg cursor-pointer"
+  style={{
+    border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+    background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+  }}
+>
 
-  // Borders
-  borderRadius="12px"
-  border="1px solid #FFFFFF1A"
-
-  // Hover/Focus states
-  nHover={{ bg: '#FFFFFF1A', transform: 'scale(1.02)' }}
-  nFocus={{ outline: '2px solid #A78BFA' }}
-
-  // Transitions
-  transition="all 0.2s ease"
-
-  // Cursor
-  cursor="pointer"
-/>
+<div style={{ height: safeHeight, background: `${config.color}1A` }} />
 ```
 
 ### Responsive Design
 
-Use arrays for responsive values: `[mobile, tablet, desktop, wide]`
+Use Tailwind responsive prefixes: `sm:`, `md:`, `lg:`, `xl:`
 
 ```typescript
-<Div
-  display={['block', 'block', 'flex', 'flex']}
-  width={['100%', '100%', '50%', '400px']}
-  fontSize={['14px', '14px', '16px', '18px']}
-  p={['0.5rem', '1rem', '1.5rem', '2rem']}
-/>
-```
-
-### Color Constants
-
-```typescript
-import { ACCENT, ACCENT_HOVER, ACCENT_80, ACCENT_4D } from '@/constants/colors';
-
-<Button
-  bg={ACCENT}
-  nHover={{ bg: ACCENT_HOVER }}
->
-  Swap
-</Button>
+<div className="px-2 sm:px-8 w-full sm:w-[34rem] hidden md:flex" />
 ```
 
 ---
@@ -601,12 +596,13 @@ import { ACCENT, ACCENT_HOVER, ACCENT_80, ACCENT_4D } from '@/constants/colors';
 
 ### Motion Component
 
-Use the project's `Motion` wrapper that combines Stylin.js + Framer Motion:
+The project's `Motion` component is `motion.div` from `motion/react`:
 
 ```typescript
 import Motion from '@/components/ui/motion';
 
 <Motion
+  className="flex flex-col gap-4"
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0, y: -20 }}
@@ -616,14 +612,7 @@ import Motion from '@/components/ui/motion';
 </Motion>
 ```
 
-### Creating Custom Motion Components
-
-```typescript
-import { motion } from 'motion/react';
-import { Div } from '@stylin.js/elements';
-
-const Motion = motion.create(Div);
-```
+For other element types, use `motion.button`, `motion.span`, etc. directly from `motion/react`.
 
 ### AnimatePresence for Mount/Unmount
 
@@ -647,25 +636,29 @@ import { AnimatePresence } from 'motion/react';
 
 ## DeFi-Specific Patterns
 
-### BigNumber Handling
+### BigInt Handling
 
-Always use BigNumber for token amounts:
+Token amounts use native `bigint`:
 
 ```typescript
-import BigNumber from 'bignumber.js';
+import { parseUnits, formatUnits } from '@/lib/bigint-utils';
 
-const amount = new BigNumber(inputValue);
+// Parse human input to raw amount
+const raw = parseUnits('1.5', 9);  // 1500000000n
 
-if (amount.isNaN() || amount.lte(0)) return;
+// Format raw amount for display
+const display = formatUnits(raw, 9);  // '1.5'
 
-if (amount.gt(balance)) {
+// Arithmetic
+const total = amount + fee;
+if (amount > balance) {
   setError('Insufficient balance');
 }
 ```
 
 ### Token Amount Formatting
 
-Use the entity classes instead of raw BigNumber math:
+Use the entity classes instead of raw BigInt math:
 
 ```typescript
 import { CurrencyAmount, Token } from '@/lib/entities';
@@ -759,12 +752,11 @@ if (hasWallet('sui')) {
 ### 1. Hard-Coded Colors
 
 ```typescript
-// BAD - hard-coded hex
-<Div bg="#A78BFA" />
+// BAD - hard-coded hex in className
+<div className="bg-[#A78BFA]" />
 
-// GOOD - use constants
-import { ACCENT } from '@/constants/colors';
-<Div bg={ACCENT} />
+// GOOD - use theme tokens
+<div className="bg-accent" />
 ```
 
 ### 2. Direct Zustand Destructuring
@@ -796,11 +788,52 @@ const suiAddress = getAddress('sui');
 // BAD - floating point
 const total = amount * 1e9;
 
-// GOOD - BigNumber / CurrencyAmount
-const total = FixedPointMath.toBigNumber(amount, 9);
+// GOOD - BigInt / CurrencyAmount
+const total = parseUnits(amount, 9);
 ```
 
-### 5. Silent Error Swallowing
+### 5. Using `<img>` Instead of `<Image>`
+
+```typescript
+// BAD - raw img element (fails Biome noImgElement)
+<img src={iconUrl} alt="Token" />
+
+// GOOD - Next.js Image with explicit dimensions
+import Image from 'next/image';
+<Image src={iconUrl} alt="Token" width={32} height={32} />
+```
+
+### 6. Non-Focusable Interactive Elements
+
+```typescript
+// BAD - div with onClick but no keyboard support
+<div onClick={handleClick}>Click me</div>
+
+// GOOD - use <button> for interactive elements
+<button type="button" onClick={handleClick}>Click me</button>
+
+// If a non-button element must be interactive, add role + tabIndex + keyboard handler:
+import { handleKeyDown } from '@/utils/handle-key-down';
+<div role="button" tabIndex={0} onClick={handleClick} onKeyDown={handleKeyDown(handleClick)}>
+  Click me
+</div>
+```
+
+### 7. Labels Without Associated Controls
+
+```typescript
+// BAD - label not associated with any input
+<label>Amount</label>
+
+// GOOD - associate via htmlFor/id
+<label htmlFor="amount">Amount</label>
+<input id="amount" />
+
+// GOOD - use <span> for decorative labels (no input to associate)
+<span className="text-sm">Token</span>
+```
+
+### 8. Silent Error Swallowing
 
 ```typescript
 // BAD - error silently lost
@@ -822,11 +855,14 @@ try {
 When adding or modifying components, ensure:
 
 - [ ] Icon-only buttons have `aria-label` attribute
-- [ ] Interactive elements are keyboard focusable
+- [ ] Interactive elements are keyboard focusable (`<button>` preferred, or `role="button"` + `tabIndex={0}` + keyboard handler)
+- [ ] Use `handleKeyDown` from `@/utils/handle-key-down` for non-button interactive elements
 - [ ] Tab components use `role="tablist"`, `role="tab"`, `aria-selected`
 - [ ] Modals trap focus and return focus on close
 - [ ] Color is not the sole indicator of state (add text/icons)
-- [ ] Form inputs have associated labels
+- [ ] Form inputs have associated labels (`htmlFor`/`id`) or use `<span>` for decorative labels
+- [ ] Always use `<Image>` from `next/image` instead of `<img>`
+- [ ] Toggle/switch elements have `aria-checked` and `tabIndex={0}`
 - [ ] Tooltips are keyboard accessible (not hover-only)
 
 ---
@@ -865,12 +901,14 @@ import {
 ## Development Commands
 
 ```bash
-pnpm dev          # Development server (port 3000)
+pnpm dev          # Development server (port 3000, Turbopack)
 pnpm build        # Production build
 pnpm start        # Start production server
 pnpm lint         # Biome check
 pnpm lint:fix     # Biome auto-fix
 pnpm format       # Biome format
+pnpm test         # Vitest watch mode
+pnpm test:run     # Vitest single run (CI)
 ```
 
 Type checking (not in scripts):
@@ -906,26 +944,27 @@ import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 
 // Next.js
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
-// Styling
-import { Div, Span, Button, Input } from '@stylin.js/elements';
+// Animation
+import { motion, AnimatePresence } from 'motion/react';
 import Motion from '@/components/ui/motion';
 
 // State
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppState } from '@/hooks/store/use-app-state';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Entities
 import { Token, CurrencyAmount, FixedPointMath } from '@/lib/entities';
-import BigNumber from 'bignumber.js';
+import { parseUnits, formatUnits } from '@/lib/bigint-utils';
 
 // Utils
 import { extractErrorMessage } from '@/utils';
 import { toasting } from '@/components/ui/toast';
 
 // Constants
-import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 
 // Types

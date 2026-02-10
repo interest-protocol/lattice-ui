@@ -1,4 +1,3 @@
-import { Button, Div, Label, Span } from '@stylin.js/elements';
 import Image from 'next/image';
 import type { FC } from 'react';
 
@@ -10,30 +9,22 @@ const BridgeNetworkSelector: FC<BridgeNetworkSelectorProps> = ({
   sourceNetwork,
   setSourceNetwork,
 }) => (
-  <Div>
-    <Label color="#FFFFFF80" fontSize="0.875rem" mb="0.5rem" display="block">
-      From Network
-    </Label>
-    <Div display="flex" gap="0.5rem">
+  <div>
+    <span className="text-text-muted text-sm mb-2 block">From Network</span>
+    <div className="flex gap-2">
       {CHAIN_KEYS.map((net) => {
         const isSelected = net === sourceNetwork;
         const config = CHAIN_REGISTRY[net];
         return (
-          <Button
+          <button
             key={net}
-            all="unset"
-            flex="1"
-            p="0.75rem"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap="0.5rem"
-            cursor="pointer"
-            borderRadius="0.5rem"
-            border={`1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`}
-            bg={isSelected ? '#A78BFA1A' : '#FFFFFF0D'}
+            type="button"
+            className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg border-none"
+            style={{
+              border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+              background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+            }}
             onClick={() => setSourceNetwork(net)}
-            nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
           >
             {config.nativeToken?.iconUrl && (
               <Image
@@ -44,14 +35,14 @@ const BridgeNetworkSelector: FC<BridgeNetworkSelectorProps> = ({
                 style={{ borderRadius: '50%' }}
               />
             )}
-            <Span color="#FFFFFF" fontWeight="600">
+            <span className="text-white font-semibold">
               {config.displayName}
-            </Span>
-          </Button>
+            </span>
+          </button>
         );
       })}
-    </Div>
-  </Div>
+    </div>
+  </div>
 );
 
 export default BridgeNetworkSelector;

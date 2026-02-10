@@ -1,4 +1,3 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import { type FC, useState } from 'react';
 
 import Tabs from '@/components/ui/tabs';
@@ -12,51 +11,33 @@ const SwapContent: FC = () => {
   const [tab, setTab] = useState(0);
 
   return (
-    <Div
-      flex="1"
-      mx="auto"
-      gap="1rem"
-      display="flex"
-      borderRadius="1rem"
-      flexDirection="column"
-      px={['0.5rem', '2rem']}
-      width={['100%', '34rem']}
-      my={['1rem', '1rem', '1rem', '1rem', '3rem']}
-    >
+    <div className="flex-1 mx-auto gap-4 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12">
       {/* Closed Alpha Banner */}
-      <Div
-        p="1rem"
-        bg="#F59E0B1A"
-        border="1px solid #F59E0B4D"
-        borderRadius="0.75rem"
-        display="flex"
-        flexDirection="column"
-        gap="0.5rem"
-      >
-        <Div display="flex" alignItems="center" gap="0.5rem">
-          <Span fontSize="1rem">⚠️</Span>
-          <Span color="#F59E0B" fontWeight="600" fontSize="0.875rem">
+      <div className="p-4 bg-[#F59E0B1A] border border-[#F59E0B4D] rounded-xl flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-base">&#x26A0;&#xFE0F;</span>
+          <span className="text-[#F59E0B] font-semibold text-sm">
             Closed Alpha
-          </Span>
-        </Div>
-        <P color="#FFFFFF99" fontSize="0.8rem" lineHeight="1.4" m="0">
+          </span>
+        </div>
+        <p className="text-[#FFFFFF99] text-[0.8rem] leading-relaxed m-0">
           This is an early alpha version with limited liquidity. Transactions
           are capped at{' '}
-          <Span color="#FFFFFF" fontWeight="600">
+          <span className="text-white font-semibold">
             {CHAIN_REGISTRY.sui.alphaMax} SUI
-          </Span>{' '}
+          </span>{' '}
           and{' '}
-          <Span color="#FFFFFF" fontWeight="600">
+          <span className="text-white font-semibold">
             {CHAIN_REGISTRY.solana.alphaMax} SOL
-          </Span>
+          </span>
           . You must have enough native tokens to cover gas fees.
-        </P>
-      </Div>
+        </p>
+      </div>
 
       <Tabs tab={tab} setTab={setTab} tabs={TABS} />
       {tab === 0 && <Swap />}
       {tab === 1 && <Bridge />}
-    </Div>
+    </div>
   );
 };
 export default SwapContent;

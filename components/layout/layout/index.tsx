@@ -1,6 +1,6 @@
-import { Main } from '@stylin.js/elements';
 import { type FC, type PropsWithChildren, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import Footer from '@/components/composed/footer';
 import Header from '@/components/composed/header';
 import HealthIndicator from '@/components/composed/health-indicator';
 import Background from '@/components/layout/background';
@@ -14,7 +14,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
   const setTranslate = useBackgroundTranslate((s) => s.setTranslate);
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLElement>) => {
       setTranslate({ X: e.clientX, Y: e.clientY });
       x?.set(-(e.nativeEvent.x - window.innerWidth / 2) * 0.1);
       y?.set(-(e.nativeEvent.y - window.innerHeight / 2) * 0.1);
@@ -28,19 +28,17 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
   }, [x, y]);
 
   return (
-    <Main
-      display="flex"
-      minHeight="100vh"
-      position="relative"
-      flexDirection="column"
+    <main
+      className="flex min-h-screen relative flex-col"
       onMouseLeave={handleMouseLeave}
       onMouseMoveCapture={handleMouseMove}
     >
       <Background />
       <Header />
       {children}
+      <Footer />
       <HealthIndicator />
-    </Main>
+    </main>
   );
 };
 export default Layout;

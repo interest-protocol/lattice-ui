@@ -1,4 +1,3 @@
-import { Button, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { WalletSVG } from '@/components/ui/icons';
@@ -8,26 +7,17 @@ interface ConnectWalletProps {
 }
 
 const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => (
-  <Button
-    all="unset"
-    bg="#A78BFA"
-    display="flex"
-    color="#000000"
-    cursor="pointer"
-    position="relative"
-    alignItems="center"
-    borderRadius="0.75rem"
-    gap={['0.5rem', '1rem']}
-    py={['0.75rem', '1rem']}
-    px={['0.75rem', '1.5rem']}
-    backdropFilter="blur(16px)"
+  <button
+    type="button"
+    className="bg-accent flex text-black cursor-pointer relative items-center rounded-xl gap-2 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 border-none"
+    style={{ backdropFilter: 'blur(16px)' }}
     onClick={onConnect}
   >
     <WalletSVG maxWidth="1rem" maxHeight="1rem" width="100%" />
-    <Span>
-      Connect <Span display={['none', 'inline']}>Wallet</Span>
-    </Span>
-  </Button>
+    <span>
+      Connect <span className="hidden sm:inline">Wallet</span>
+    </span>
+  </button>
 );
 
 export default ConnectWallet;

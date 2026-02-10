@@ -1,6 +1,5 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
@@ -117,35 +116,24 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   };
 
   return (
-    <Div display="flex" flexDirection="column" gap="1rem">
-      <Div>
-        <Label
-          color="#FFFFFF80"
-          fontSize="0.8125rem"
-          mb="0.5rem"
-          display="block"
-        >
+    <div className="flex flex-col gap-4">
+      <div>
+        <span className="text-text-muted text-[0.8125rem] mb-2 block">
           Select Token
-        </Label>
-        <Div display="flex" gap="0.5rem">
+        </span>
+        <div className="flex gap-2">
           {tokens.map((token, index) => {
             const isSelected = index === selectedTokenIndex;
             return (
-              <Button
+              <button
                 key={token.type}
-                all="unset"
-                flex="1"
-                p="0.625rem"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                gap="0.5rem"
-                cursor="pointer"
-                borderRadius="0.5rem"
-                border={`1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`}
-                bg={isSelected ? '#A78BFA1A' : 'transparent'}
+                type="button"
+                className="flex-1 p-2.5 flex items-center justify-center gap-2 cursor-pointer rounded-lg"
+                style={{
+                  border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
+                  background: isSelected ? '#A78BFA1A' : 'transparent',
+                }}
                 onClick={() => setSelectedTokenIndex(index)}
-                nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF0D' }}
               >
                 {token.iconUrl && (
                   <Image
@@ -156,117 +144,80 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
                     style={{ borderRadius: '50%' }}
                   />
                 )}
-                <Span color="#FFFFFF" fontWeight="600" fontSize="0.875rem">
+                <span className="text-white font-semibold text-sm">
                   {token.symbol}
-                </Span>
-              </Button>
+                </span>
+              </button>
             );
           })}
-        </Div>
-      </Div>
+        </div>
+      </div>
 
-      <Div>
-        <Label
-          color="#FFFFFF80"
-          fontSize="0.8125rem"
-          mb="0.5rem"
-          display="block"
-        >
+      <div>
+        <span className="text-text-muted text-[0.8125rem] mb-2 block">
           Recipient Address
-        </Label>
-        <Input
-          all="unset"
-          width="100%"
-          p="0.875rem"
-          color="#FFFFFF"
-          bg="#000000"
-          borderRadius="0.5rem"
-          border="1px solid #FFFFFF1A"
-          fontFamily="JetBrains Mono"
-          fontSize="0.8125rem"
+        </span>
+        <input
+          className="w-full p-3.5 text-white bg-black rounded-lg border border-surface-border font-mono text-[0.8125rem] outline-none"
           placeholder={config.addressPlaceholder}
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
         />
-      </Div>
+      </div>
 
-      <Div>
-        <Div display="flex" justifyContent="space-between" mb="0.5rem">
-          <Label color="#FFFFFF80" fontSize="0.8125rem">
-            Amount
-          </Label>
-          <Span color="#FFFFFF80" fontSize="0.8125rem">
+      <div>
+        <div className="flex justify-between mb-2">
+          <span className="text-text-muted text-[0.8125rem]">Amount</span>
+          <span className="text-text-muted text-[0.8125rem]">
             Balance:{' '}
             {isLoading ? '...' : `${balanceFormatted} ${selectedToken.symbol}`}
-          </Span>
-        </Div>
-        <Div position="relative">
-          <Input
-            all="unset"
-            width="100%"
-            p="0.875rem"
-            pr="3.5rem"
-            color="#FFFFFF"
-            bg="#000000"
-            borderRadius="0.5rem"
-            border="1px solid #FFFFFF1A"
-            fontFamily="JetBrains Mono"
-            fontSize="0.9375rem"
+          </span>
+        </div>
+        <div className="relative">
+          <input
+            className="w-full p-3.5 pr-14 text-white bg-black rounded-lg border border-surface-border font-mono text-[0.9375rem] outline-none"
             placeholder="0.0"
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <Button
-            all="unset"
-            position="absolute"
-            right="0.875rem"
-            top="50%"
-            transform="translateY(-50%)"
-            cursor="pointer"
-            color="#A78BFA"
-            fontSize="0.8125rem"
-            fontWeight="600"
+          <button
+            type="button"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-accent text-[0.8125rem] font-semibold bg-transparent border-none hover:opacity-70"
             onClick={setMaxAmount}
-            nHover={{ opacity: 0.7 }}
           >
             MAX
-          </Button>
-        </Div>
-      </Div>
+          </button>
+        </div>
+      </div>
 
-      <Div
-        p="0.75rem"
-        bg="#A78BFA1A"
-        borderRadius="0.5rem"
-        border="1px solid #A78BFA4D"
+      <div
+        className="p-3 rounded-lg"
+        style={{
+          background: '#A78BFA1A',
+          border: '1px solid #A78BFA4D',
+        }}
       >
-        <P color="#FFFFFF" fontSize="0.8125rem">
+        <p className="text-white text-[0.8125rem]">
           Verify the address carefully. Transactions cannot be reversed.
-        </P>
-      </Div>
+        </p>
+      </div>
 
-      <Button
-        all="unset"
-        width="100%"
-        p="0.875rem"
-        bg="#A78BFA"
-        color="#000000"
-        borderRadius="0.5rem"
-        fontWeight="600"
-        fontSize="0.9375rem"
-        textAlign="center"
-        cursor={sending ? 'wait' : 'pointer'}
-        opacity={sending ? '0.6' : '1'}
+      <button
+        type="button"
+        className="w-full p-3.5 bg-accent text-black rounded-lg font-semibold text-[0.9375rem] text-center border-none hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
+        style={{
+          cursor: sending ? 'wait' : 'pointer',
+          opacity: sending ? 0.6 : 1,
+        }}
         onClick={handleSend}
         disabled={sending}
-        nHover={!sending ? { bg: '#C4B5FD' } : {}}
       >
         {sending
           ? 'Sending...'
           : `Withdraw ${selectedToken.symbol} on ${config.displayName}`}
-      </Button>
-    </Div>
+      </button>
+    </div>
   );
 };
 

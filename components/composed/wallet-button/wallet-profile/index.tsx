@@ -1,8 +1,8 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
+import Image from 'next/image';
 import { type FC, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ChevronDownSVG } from '@/components/ui/icons';
@@ -60,42 +60,28 @@ const WalletProfile: FC = () => {
 
   return (
     <>
-      <Div
-        ref={menuRef as never}
-        alignItems="flex-end"
-        flexDirection="column"
-        display={['none', 'none', 'flex']}
-      >
-        <Button
-          all="unset"
-          py="0.75rem"
-          gap="0.5rem"
-          display="flex"
-          bg="#A78BFA1A"
-          color="#F1F1F1"
-          cursor="pointer"
-          alignItems="center"
-          borderRadius="0.5rem"
-          px={['0.75rem', '1rem']}
-          nHover={{ bg: '#A78BFA33' }}
+      <div ref={menuRef} className="items-end flex-col hidden md:flex">
+        <button
+          type="button"
+          className="py-3 gap-2 flex bg-accent-1a text-[#F1F1F1] cursor-pointer items-center rounded-lg px-3 sm:px-4 border-none hover:bg-accent-33"
           onClick={handleOpenProfileDropdown}
         >
-          <Img
+          <Image
             alt="Account"
-            width="1.5rem"
-            height="1.5rem"
-            borderRadius="50%"
+            className="rounded-full"
             src="/icon.svg"
+            width={24}
+            height={24}
           />
-          <Span whiteSpace="nowrap">{displayAddress}</Span>
-          <Span display={['none', 'flex']} alignItems="center" ml="0.25rem">
+          <span className="whitespace-nowrap">{displayAddress}</span>
+          <span className="hidden sm:flex items-center ml-1">
             <ChevronDownSVG
               width="100%"
               maxWidth="0.65rem"
               maxHeight="0.65rem"
             />
-          </Span>
-        </Button>
+          </span>
+        </button>
         <AnimatePresence>
           {isOpen && (
             <WalletProfileDropdown
@@ -106,34 +92,25 @@ const WalletProfile: FC = () => {
             />
           )}
         </AnimatePresence>
-      </Div>
-      <Button
-        all="unset"
-        gap="0.25rem"
-        bg="#A78BFA1A"
-        color="#F1F1F1"
-        cursor="pointer"
-        alignItems="center"
-        borderRadius="0.5rem"
-        py={['0.625rem', '1rem']}
-        px={['0.5rem', '1.5rem']}
+      </div>
+      <button
+        type="button"
+        className="flex md:hidden gap-1 bg-accent-1a text-[#F1F1F1] cursor-pointer items-center rounded-lg py-2.5 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm border-none"
         onClick={handleOpenProfileModal}
-        fontSize={['0.75rem', '0.875rem']}
-        display={['flex', 'flex', 'none']}
       >
-        <Img
+        <Image
           alt="Account"
-          width="1rem"
-          height="1rem"
-          borderRadius="50%"
+          className="rounded-full"
           src="/icon.svg"
+          width={16}
+          height={16}
           style={{ padding: 2 }}
         />
         {displayAddress}
-        <Span display={['none', 'inline']}>
+        <span className="hidden sm:inline">
           <ChevronDownSVG maxWidth="0.65rem" maxHeight="0.65rem" width="100%" />
-        </Span>
-      </Button>
+        </span>
+      </button>
     </>
   );
 };

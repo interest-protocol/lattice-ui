@@ -1,7 +1,5 @@
-import { Button } from '@stylin.js/elements';
 import type { FC } from 'react';
 
-import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import type { BridgeStatus } from '@/hooks/domain/use-bridge';
 
 import type { BridgeButtonProps } from './bridge.types';
@@ -26,21 +24,13 @@ const BridgeButton: FC<BridgeButtonProps> = ({
   destNetwork,
   onBridge,
 }) => (
-  <Button
-    all="unset"
-    width="100%"
-    py="1rem"
-    px="1.5rem"
-    bg={ACCENT}
-    color="white"
-    fontSize="1rem"
-    fontWeight="600"
-    borderRadius="0.75rem"
-    border="none"
-    textAlign="center"
-    cursor={isDisabled ? 'not-allowed' : 'pointer'}
-    opacity={isDisabled ? 0.5 : 1}
-    nHover={!isDisabled ? { bg: ACCENT_HOVER } : {}}
+  <button
+    type="button"
+    className="w-full py-4 px-6 bg-accent text-white text-base font-semibold rounded-xl border-none hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+    style={{
+      cursor: isDisabled ? 'not-allowed' : 'pointer',
+      opacity: isDisabled ? 0.5 : 1,
+    }}
     onClick={onBridge}
     disabled={isDisabled}
   >
@@ -49,7 +39,7 @@ const BridgeButton: FC<BridgeButtonProps> = ({
       : validationMessage
         ? validationMessage
         : `Bridge ${token.symbol} to ${destNetwork}`}
-  </Button>
+  </button>
 );
 
 export default BridgeButton;

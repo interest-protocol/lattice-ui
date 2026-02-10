@@ -1,6 +1,7 @@
 // UI primitives
 
 // Composed
+export { default as Footer } from './composed/footer';
 export { default as InputField } from './composed/input-field';
 export { default as WalletButton } from './composed/wallet-button';
 // Layout

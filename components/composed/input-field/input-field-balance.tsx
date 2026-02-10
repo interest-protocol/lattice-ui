@@ -1,4 +1,3 @@
-import { Button, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
@@ -22,17 +21,13 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
   );
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
-
   const balance = balances[type];
 
   return (
-    <Button
-      all="unset"
-      gap="0.5rem"
-      display="flex"
-      cursor="pointer"
+    <button
+      type="button"
+      className={`flex gap-2 cursor-pointer bg-transparent border-none p-0 text-inherit ${name === 'in' ? 'hover:text-accent' : ''}`}
       {...(name === 'in' && {
-        nHover: { color: '#A78BFA' },
         onClick: () => {
           setValue(
             `${name}.value`,
@@ -43,14 +38,14 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
       })}
     >
       <WalletSVG maxWidth="1rem" width="100%" />
-      <Span fontFamily="JetBrains Mono">
+      <span className="font-mono">
         {loadingCoins || loadingObjects ? (
           <Skeleton width="2rem" />
         ) : (
           FixedPointMath.toNumber(balance ?? ZERO_BIG_INT)
         )}
-      </Span>
-    </Button>
+      </span>
+    </button>
   );
 };
 

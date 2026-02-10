@@ -1,6 +1,5 @@
 'use client';
 
-import { Div, Nav, Span } from '@stylin.js/elements';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { FC } from 'react';
@@ -12,34 +11,26 @@ const Navbar: FC = () => {
   const pathname = usePathname();
 
   return (
-    <Nav display={['none', 'none', 'none', 'flex']} gap="2.5rem">
+    <nav className="hidden lg:flex gap-10">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === Routes[item];
         return (
           <Link key={item} href={Routes[item]}>
-            <Span
-              color={isActive ? '#A78BFA' : '#FFFFFF80'}
-              cursor="pointer"
-              nHover={{ color: '#A78BFA' }}
+            <span
+              className={`cursor-pointer hover:text-accent ${isActive ? 'text-accent' : 'text-text-muted'}`}
             >
               {NAV_ITEMS_TITLE[item]}
-            </Span>
+            </span>
           </Link>
         );
       })}
       <Link target="_blank" href="https://docs.lattice.trade">
-        <Div
-          gap="0.5rem"
-          display="flex"
-          color="#FFFFFF80"
-          alignItems="center"
-          nHover={{ color: '#A78BFA' }}
-        >
-          <Span>Docs</Span>
+        <div className="gap-2 flex text-text-muted items-center hover:text-accent">
+          <span>Docs</span>
           <ExternalLinkSVG maxWidth="1rem" width="100%" />
-        </Div>
+        </div>
       </Link>
-    </Nav>
+    </nav>
   );
 };
 

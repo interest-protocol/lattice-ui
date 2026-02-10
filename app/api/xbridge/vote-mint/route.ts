@@ -7,6 +7,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { validateBody } from '@/lib/api/validate-params';
+import { ENCLAVE_URL } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -20,14 +21,6 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  if (!process.env.ENCLAVE_URL)
-    return NextResponse.json(
-      { error: 'ENCLAVE_URL not configured' },
-      { status: 500 }
-    );
-
-  const enclaveUrl = process.env.ENCLAVE_URL;
-
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
 
@@ -36,7 +29,7 @@ export async function POST(request: NextRequest) {
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
     const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
 
-    const enclaveResponse = await fetch(`${enclaveUrl}/xbridge/vote_mint`, {
+    const enclaveResponse = await fetch(`${ENCLAVE_URL}/xbridge/vote_mint`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(10_000),

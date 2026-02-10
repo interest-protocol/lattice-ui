@@ -4,18 +4,18 @@
 
 - **Package**: `lattice-ui` v1.1.0
 - **Purpose**: DeFi cross-chain swap application (SUI <-> SOL)
-- **Framework**: Next.js 14 App Router + TypeScript strict mode
+- **Framework**: Next.js 16 App Router + TypeScript 5.9 strict mode
 - **Deployed**: Vercel (Analytics integrated)
 
 ## Architecture Decisions
 
 - **App Router** (not Pages Router) — `app/` directory with `layout.tsx`, `page.tsx`, route handlers
-- **Stylin.js** for CSS-in-JS — prop-based styling on `Div`, `Span`, `Button`, `Input` from `@stylin.js/elements`
+- **Tailwind CSS v4** for styling — utility classes on native HTML elements
 - **Zustand** for global state — selector pattern with `useShallow` required
-- **SWR** for server state — balance/price data with 30-60s refresh intervals
+- **TanStack Query v5** for server state — balance/price data with 30-60s refetch intervals
 - **React Hook Form** for forms — `useFormContext()` in sub-components
 - **Privy** for wallet auth — dynamically imported with `ssr: false`
-- **Biome** for linting/formatting (not ESLint/Prettier)
+- **Biome 2.3** for linting/formatting (not ESLint/Prettier)
 - **pnpm** as package manager (pinned to 9.1.0)
 - **Husky + commitlint-config-gitmoji** for commit conventions
 

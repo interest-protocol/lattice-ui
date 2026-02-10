@@ -1,12 +1,11 @@
-import { Div, P } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 const ConnectWalletModal: FC = () => (
-  <Div display="flex" flexDirection="column" gap="0.5rem">
-    <P color="#FFFFFF80">
+  <div className="flex flex-col gap-2">
+    <p className="text-text-muted">
       Use the Connect Wallet button to sign in with Privy.
-    </P>
-  </Div>
+    </p>
+  </div>
 );
 
 export default ConnectWalletModal;

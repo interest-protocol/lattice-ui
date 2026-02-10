@@ -1,4 +1,3 @@
-import { Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { SOL_TYPE } from '@/constants/coins';
@@ -14,39 +13,22 @@ const SwapDetails: FC = () => {
   const rate = hasRates ? (suiPrice / solPrice).toFixed(6) : '...';
 
   return (
-    <Div
-      p="1.5rem"
-      bg="#FFFFFF0D"
-      borderRadius="1rem"
-      display="flex"
-      flexDirection="column"
-      gap="1rem"
-    >
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Exchange Rate
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          1 SUI ≈ {rate} SOL
-        </Span>
-      </Div>
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Slippage Tolerance
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          0.5%
-        </Span>
-      </Div>
-      <Div display="flex" justifyContent="space-between" alignItems="center">
-        <Span fontSize="0.875rem" color="#FFFFFF80">
-          Estimated Time
-        </Span>
-        <Span fontSize="0.875rem" fontWeight="500" color="#FFFFFF">
-          ~2-5 minutes
-        </Span>
-      </Div>
-    </Div>
+    <div className="p-6 bg-surface-light rounded-2xl flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Exchange Rate</span>
+        <span className="text-sm font-medium text-white">
+          1 SUI &#x2248; {rate} SOL
+        </span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Slippage Tolerance</span>
+        <span className="text-sm font-medium text-white">0.5%</span>
+      </div>
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-text-muted">Estimated Time</span>
+        <span className="text-sm font-medium text-white">~2-5 minutes</span>
+      </div>
+    </div>
   );
 };
 

@@ -1,4 +1,3 @@
-import { Button, Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
@@ -9,50 +8,35 @@ interface NetworkTabsProps {
 }
 
 const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
-  <Div display="flex" gap="0.5rem">
+  <div className="flex gap-2">
     {CHAIN_KEYS.map((net) => {
       const isSelected = net === network;
       const { color, displayName } = CHAIN_REGISTRY[net];
 
       return (
-        <Button
+        <button
           key={net}
-          all="unset"
-          flex="1"
-          p="0.75rem"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap="0.5rem"
-          cursor="pointer"
-          borderRadius="0.5rem"
-          border={`2px solid ${isSelected ? color : '#FFFFFF1A'}`}
-          bg={isSelected ? `${color}1A` : 'transparent'}
-          transition="all 0.2s ease"
+          type="button"
+          className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
+          style={{
+            border: `2px solid ${isSelected ? color : '#FFFFFF1A'}`,
+            background: isSelected ? `${color}1A` : 'transparent',
+          }}
           onClick={() => setNetwork(net)}
-          nHover={{ bg: isSelected ? `${color}1A` : '#FFFFFF0D' }}
         >
-          <Div
-            width="1.5rem"
-            height="1.5rem"
-            borderRadius="50%"
-            bg={`${color}33`}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontSize="0.75rem"
-            fontWeight="700"
-            color={color}
+          <div
+            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+            style={{ background: `${color}33`, color }}
           >
             {displayName[0]}
-          </Div>
-          <Span color="#FFFFFF" fontWeight="600" fontSize="0.875rem">
+          </div>
+          <span className="text-white font-semibold text-sm">
             {displayName}
-          </Span>
-        </Button>
+          </span>
+        </button>
       );
     })}
-  </Div>
+  </div>
 );
 
 export default NetworkTabs;

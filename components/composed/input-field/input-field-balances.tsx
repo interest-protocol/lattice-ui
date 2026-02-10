@@ -1,4 +1,3 @@
-import { Button, Div, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -30,35 +29,31 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
   const { control, setValue } = useFormContext();
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
-
   const balance = balances[type] ?? ZERO_BIG_INT;
 
   return (
-    <Div display="flex" gap="0.5rem">
+    <div className="flex gap-2">
       {[0.25, 0.5, 1].map((factor) => {
         const Icon = PIZZA_ICONS[factor];
         const divisor = FACTOR_DIVISORS[factor];
         const scaled = balance / divisor;
 
         return (
-          <Button
-            all="unset"
-            gap="0.5rem"
-            display="flex"
+          <button
+            type="button"
             key={factor}
-            cursor="pointer"
-            nHover={{ color: '#A78BFA' }}
+            className="flex gap-2 cursor-pointer hover:text-accent bg-transparent border-none p-0 text-inherit"
             onClick={() => {
               setValue(`${name}.value`, FixedPointMath.toNumber(scaled));
               setValue(`${name}.valueBN`, scaled);
             }}
           >
-            <Span fontFamily="JetBrains Mono">{factor * 100}%</Span>
+            <span className="font-mono">{factor * 100}%</span>
             <Icon maxWidth="1rem" width="100%" />
-          </Button>
+          </button>
         );
       })}
-    </Div>
+    </div>
   );
 };
 

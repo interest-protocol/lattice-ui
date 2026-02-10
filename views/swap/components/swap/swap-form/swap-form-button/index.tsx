@@ -1,10 +1,8 @@
-import { Button } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
@@ -45,24 +43,18 @@ const SwapFormButton: FC = () => {
     : `Swap ${sourceConfig.nativeToken.symbol} to ${destConfig.nativeToken.symbol}`;
 
   return (
-    <Button
-      width="100%"
-      py="1rem"
-      px="1.5rem"
-      bg={ACCENT}
-      color="white"
-      fontSize="1rem"
-      fontWeight="600"
-      borderRadius="0.75rem"
-      border="none"
-      cursor={validation.isDisabled ? 'not-allowed' : 'pointer'}
-      opacity={validation.isDisabled ? 0.5 : 1}
-      nHover={!validation.isDisabled ? { bg: ACCENT_HOVER } : {}}
+    <button
+      type="button"
+      className="w-full py-4 px-6 bg-accent text-white text-base font-semibold rounded-xl border-none hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+      style={{
+        cursor: validation.isDisabled ? 'not-allowed' : 'pointer',
+        opacity: validation.isDisabled ? 0.5 : 1,
+      }}
       onClick={handleSwap}
       disabled={validation.isDisabled}
     >
       {buttonLabel}
-    </Button>
+    </button>
   );
 };
 

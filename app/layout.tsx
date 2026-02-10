@@ -7,7 +7,6 @@ import { DM_Sans, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import Providers from './providers';
-import StyledComponentsRegistry from './registry';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -35,9 +34,7 @@ export const viewport: Viewport = {
 const RootLayout = ({ children }: { children: ReactNode }) => (
   <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
     <body>
-      <StyledComponentsRegistry>
-        <Providers>{children}</Providers>
-      </StyledComponentsRegistry>
+      <Providers>{children}</Providers>
       <Analytics />
     </body>
   </html>
