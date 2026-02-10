@@ -5,16 +5,8 @@ import type BigNumber from 'bignumber.js';
 import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import {
-  SOL_DECIMALS,
-  XBRIDGE_DECIMALS,
-} from '@/constants';
-import {
-  ALPHA_MAX_SOL,
-  ALPHA_MAX_SUI,
-  MIN_GAS_SOL,
-  MIN_GAS_SUI,
-} from '@/constants/alpha-limits';
+import { SOL_DECIMALS, SUI_DECIMALS, XBRIDGE_DECIMALS } from '@/constants';
+import { MIN_GAS_SOL, MIN_GAS_SUI } from '@/constants/alpha-limits';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
@@ -22,12 +14,16 @@ import useBridge, { type BridgeDirection } from '@/hooks/domain/use-bridge';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
+import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
 
 import BridgeDetails from './bridge-details';
 import BridgeForm from './bridge-form';
-import type { NetworkType, TokenKey, TokenOption, ValidationResult } from './bridge.types';
-
-const SUI_DECIMALS = 9;
+import type {
+  NetworkType,
+  TokenKey,
+  TokenOption,
+  ValidationResult,
+} from './bridge.types';
 
 const TOKEN_OPTIONS: Record<string, TokenOption> = {
   SUI: {
@@ -92,69 +88,35 @@ const Bridge: FC = () => {
       return { isDisabled: true, message: 'Enter amount' };
     }
 
-    if (selectedToken === 'SUI' && amountNum > ALPHA_MAX_SUI) {
-      return {
-        isDisabled: true,
-        message: `Max ${ALPHA_MAX_SUI} SUI (alpha limit)`,
-      };
-    }
-    if (selectedToken === 'SOL' && amountNum > ALPHA_MAX_SOL) {
-      return {
-        isDisabled: true,
-        message: `Max ${ALPHA_MAX_SOL} SOL (alpha limit)`,
-      };
+    if (selectedToken === 'SUI' || selectedToken === 'SOL') {
+      const alphaError = validateAlphaLimit(selectedToken, amountNum);
+      if (alphaError) return alphaError;
     }
 
     if (sourceNetwork === 'sui') {
-      const gasNeeded = new BigNumberJS(MIN_GAS_SUI).times(10 ** SUI_DECIMALS);
-      const amountNeeded =
-        selectedToken === 'SUI'
-          ? new BigNumberJS(amountNum).times(10 ** SUI_DECIMALS)
-          : new BigNumberJS(0);
-      const totalNeeded = gasNeeded.plus(amountNeeded);
-
-      if (suiBalances.sui.lt(totalNeeded)) {
-        const suiBalance = FixedPointMath.toNumber(
-          suiBalances.sui,
-          SUI_DECIMALS
-        );
-        if (selectedToken === 'SUI') {
-          return {
-            isDisabled: true,
-            message: `Insufficient SUI (need ${amountNum} + ~${MIN_GAS_SUI} gas, have ${suiBalance.toFixed(4)})`,
-          };
-        }
-        return {
-          isDisabled: true,
-          message: `Insufficient SUI for gas (need ~${MIN_GAS_SUI}, have ${suiBalance.toFixed(4)})`,
-        };
-      }
+      const gasError = validateGasBalance({
+        gasBalance: suiBalances.sui,
+        gasDecimals: SUI_DECIMALS,
+        minGas: MIN_GAS_SUI,
+        amount: amountNum,
+        isGasToken: selectedToken === 'SUI',
+        symbol: 'SUI',
+        displayDecimals: 4,
+      });
+      if (gasError) return gasError;
     }
 
     if (sourceNetwork === 'solana') {
-      const gasNeeded = new BigNumberJS(MIN_GAS_SOL).times(10 ** SOL_DECIMALS);
-      const amountNeeded =
-        selectedToken === 'SOL'
-          ? new BigNumberJS(amountNum).times(10 ** SOL_DECIMALS)
-          : new BigNumberJS(0);
-      const totalNeeded = gasNeeded.plus(amountNeeded);
-
-      if (solanaBalances.sol.lt(totalNeeded)) {
-        const solBalance = FixedPointMath.toNumber(
-          solanaBalances.sol,
-          SOL_DECIMALS
-        );
-        if (selectedToken === 'SOL') {
-          return {
-            isDisabled: true,
-            message: `Insufficient SOL (need ${amountNum} + ~${MIN_GAS_SOL} gas, have ${solBalance.toFixed(6)})`,
-          };
-        }
-        return {
-          isDisabled: true,
-          message: `Insufficient SOL for gas (need ~${MIN_GAS_SOL}, have ${solBalance.toFixed(6)})`,
-        };
-      }
+      const gasError = validateGasBalance({
+        gasBalance: solanaBalances.sol,
+        gasDecimals: SOL_DECIMALS,
+        minGas: MIN_GAS_SOL,
+        amount: amountNum,
+        isGasToken: selectedToken === 'SOL',
+        symbol: 'SOL',
+        displayDecimals: 6,
+      });
+      if (gasError) return gasError;
     }
 
     return { isDisabled: false, message: null };

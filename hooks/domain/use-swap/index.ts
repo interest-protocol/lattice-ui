@@ -24,9 +24,11 @@ import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
+import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
 import { fetchMetadata } from '@/lib/solver/client';
 import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { createSwapRequest } from '@/lib/xswap/client';
+import { extractErrorMessage } from '@/utils';
 
 export type SwapStatus =
   | 'idle'
@@ -122,12 +124,7 @@ export const useSwap = () => {
 
           depositDigest = result.signature;
 
-          const latestBlockhash = await solanaConnection.getLatestBlockhash();
-          await solanaConnection.confirmTransaction({
-            signature: depositDigest,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-          });
+          await confirmSolanaTransaction(solanaConnection, depositDigest);
         }
 
         setStatus('verifying');
@@ -225,7 +222,7 @@ export const useSwap = () => {
         });
       } catch (err: unknown) {
         setStatus('error');
-        const message = err instanceof Error ? err.message : 'Swap failed';
+        const message = extractErrorMessage(err, 'Swap failed');
         setError(message);
         toasting.dismiss(SWAP_TOAST_ID);
         toasting.error({ action: 'Swap', message: `Failed: ${message}` });

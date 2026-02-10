@@ -20,7 +20,7 @@ import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
-import { formatMoney } from '@/utils';
+import { formatAddress, formatMoney } from '@/utils';
 
 import { DepositView, NetworkTabs, WithdrawView } from './components';
 
@@ -139,7 +139,7 @@ const BalancesView: FC<{
           nHover={{ opacity: 0.7 }}
         >
           <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
-            {displaySuiAddress.slice(0, 6)}...{displaySuiAddress.slice(-4)}
+            {formatAddress(displaySuiAddress)}
           </P>
           <CopySVG maxWidth="0.875rem" width="100%" />
         </Div>
@@ -189,7 +189,7 @@ const BalancesView: FC<{
           nHover={{ opacity: 0.7 }}
         >
           <P color="#FFFFFF80" fontSize="0.75rem" fontFamily="JetBrains Mono">
-            {solanaAddress.slice(0, 4)}...{solanaAddress.slice(-4)}
+            {formatAddress(solanaAddress, 4, 4)}
           </P>
           <CopySVG maxWidth="0.875rem" width="100%" />
         </Div>

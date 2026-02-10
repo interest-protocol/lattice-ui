@@ -1,30 +1,28 @@
 import type { ChainId } from '@interest-protocol/xbridge-sdk';
 import { Transaction } from '@mysten/sui/transactions';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { createXBridgeSdk } from '@/lib/xbridge';
 
-interface CreateMintRequestBody {
-  userId: string;
-  sourceChain: number;
-  sourceToken: number[];
-  sourceDecimals: number;
-  sourceAddress: number[];
-  sourceAmount: string;
-  coinType: string;
-  rpcUrl?: string;
-}
+const schema = z.object({
+  userId: z.string(),
+  sourceChain: z.number(),
+  sourceToken: z.array(z.number()),
+  sourceDecimals: z.number(),
+  sourceAddress: z.array(z.number()),
+  sourceAmount: z.string(),
+  coinType: z.string(),
+  rpcUrl: z.string().optional(),
+});
 
 export async function POST(request: NextRequest) {
-  const body: CreateMintRequestBody = await request.json();
-
-  if (!body.userId)
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-  if (!body.sourceToken)
-    return NextResponse.json({ error: 'Missing sourceToken' }, { status: 400 });
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();

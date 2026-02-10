@@ -1,37 +1,41 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { getSuiClient } from '@/lib/sui/client';
 
-export async function POST(request: NextRequest) {
-  const { userId, recipient, amount, coinType, rpcUrl } = await request.json();
+const schema = z.object({
+  userId: z.string(),
+  recipient: z.string(),
+  amount: z.string(),
+  coinType: z.string().optional(),
+  rpcUrl: z.string().optional(),
+});
 
-  if (!userId || typeof userId !== 'string')
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-  if (!recipient || typeof recipient !== 'string')
-    return NextResponse.json({ error: 'Missing recipient' }, { status: 400 });
-  if (!amount || typeof amount !== 'string')
-    return NextResponse.json({ error: 'Missing amount' }, { status: 400 });
+export async function POST(request: NextRequest) {
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();
-    const wallet = await getFirstWallet(privy, userId, 'sui');
+    const wallet = await getFirstWallet(privy, body.userId, 'sui');
 
-    const client = getSuiClient(rpcUrl);
+    const client = getSuiClient(body.rpcUrl);
 
     const tx = new Transaction();
     tx.setSender(wallet.address);
 
-    if (!coinType || coinType === '0x2::sui::SUI') {
-      const [coin] = tx.splitCoins(tx.gas, [BigInt(amount)]);
-      tx.transferObjects([coin], recipient);
+    if (!body.coinType || body.coinType === '0x2::sui::SUI') {
+      const [coin] = tx.splitCoins(tx.gas, [BigInt(body.amount)]);
+      tx.transferObjects([coin], body.recipient);
     } else {
       const coins = await client.getCoins({
         owner: wallet.address,
-        coinType,
+        coinType: body.coinType,
       });
 
       if (!coins.data.length)
@@ -49,8 +53,8 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const [splitCoin] = tx.splitCoins(primaryCoin, [BigInt(amount)]);
-      tx.transferObjects([splitCoin], recipient);
+      const [splitCoin] = tx.splitCoins(primaryCoin, [BigInt(body.amount)]);
+      tx.transferObjects([splitCoin], body.recipient);
     }
 
     const rawBytes = await tx.build({ client });

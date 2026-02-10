@@ -1,24 +1,14 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Button } from '@stylin.js/elements';
-import BigNumber from 'bignumber.js';
 import type { FC } from 'react';
 import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-import {
-  ALPHA_MAX_SOL,
-  ALPHA_MAX_SUI,
-  MIN_GAS_SOL,
-  MIN_GAS_SUI,
-} from '@/constants/alpha-limits';
-import { SOL_DECIMALS, SOL_TYPE } from '@/constants/coins';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
-import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-
-const SUI_DECIMALS = 9;
+import { validateSwapInput } from '@/utils/gas-validation';
 
 const SwapFormButton: FC = () => {
   const { control } = useFormContext();
@@ -35,65 +25,12 @@ const SwapFormButton: FC = () => {
 
   // Validation
   const validation = useMemo(() => {
-    const amount = Number.parseFloat(fromValue) || 0;
     const isSui = fromType === SUI_TYPE_ARG;
-    const isSol = fromType === SOL_TYPE;
-
-    // No amount entered
-    if (!fromValue || amount <= 0) {
-      return { isDisabled: true, message: 'Enter amount' };
-    }
-
-    // Check alpha limits
-    if (isSui && amount > ALPHA_MAX_SUI) {
-      return {
-        isDisabled: true,
-        message: `Max ${ALPHA_MAX_SUI} SUI (alpha limit)`,
-      };
-    }
-    if (isSol && amount > ALPHA_MAX_SOL) {
-      return {
-        isDisabled: true,
-        message: `Max ${ALPHA_MAX_SOL} SOL (alpha limit)`,
-      };
-    }
-
-    // Check gas balance
-    if (isSui) {
-      const gasNeeded = new BigNumber(MIN_GAS_SUI).times(10 ** SUI_DECIMALS);
-      const amountRaw = new BigNumber(amount).times(10 ** SUI_DECIMALS);
-      const totalNeeded = gasNeeded.plus(amountRaw);
-
-      if (suiBalances.sui.lt(totalNeeded)) {
-        const suiBalance = FixedPointMath.toNumber(
-          suiBalances.sui,
-          SUI_DECIMALS
-        );
-        return {
-          isDisabled: true,
-          message: `Insufficient SUI (need ${amount} + ~${MIN_GAS_SUI} gas, have ${suiBalance.toFixed(4)})`,
-        };
-      }
-    }
-
-    if (isSol) {
-      const gasNeeded = new BigNumber(MIN_GAS_SOL).times(10 ** SOL_DECIMALS);
-      const amountRaw = new BigNumber(amount).times(10 ** SOL_DECIMALS);
-      const totalNeeded = gasNeeded.plus(amountRaw);
-
-      if (solanaBalances.sol.lt(totalNeeded)) {
-        const solBalance = FixedPointMath.toNumber(
-          solanaBalances.sol,
-          SOL_DECIMALS
-        );
-        return {
-          isDisabled: true,
-          message: `Insufficient SOL (need ${amount} + ~${MIN_GAS_SOL} gas, have ${solBalance.toFixed(6)})`,
-        };
-      }
-    }
-
-    return { isDisabled: false, message: null };
+    return validateSwapInput({
+      amount: fromValue,
+      token: isSui ? 'SUI' : 'SOL',
+      gasBalance: isSui ? suiBalances.sui : solanaBalances.sol,
+    });
   }, [fromValue, fromType, suiBalances.sui, solanaBalances.sol]);
 
   const handleSwap = () => {

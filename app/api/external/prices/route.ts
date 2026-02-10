@@ -1,4 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+import { validateBody } from '@/lib/api/validate-params';
 
 const PYTH_HERMES_URL = 'https://hermes.pyth.network/v2/updates/price/latest';
 
@@ -26,16 +29,15 @@ const cache = new Map<string, CacheEntry>();
 const normalizeCoin = (coin: string): string =>
   coin.includes('::') ? 'sui' : coin.toLowerCase();
 
+const schema = z.object({
+  coins: z.array(z.string()),
+});
+
 export async function POST(request: NextRequest) {
-  const { coins } = await request.json();
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
-  if (!coins || !Array.isArray(coins))
-    return NextResponse.json(
-      { error: 'Missing coins array in body' },
-      { status: 400 }
-    );
-
-  const normalized = coins.map(normalizeCoin);
+  const normalized = body.coins.map(normalizeCoin);
   const feedIds = normalized
     .map((c: string) => PYTH_FEED_IDS[c])
     .filter(Boolean);

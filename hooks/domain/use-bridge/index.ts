@@ -12,6 +12,7 @@ import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
 import { sendSolana } from '@/lib/wallet/client';
 import {
   createMintRequest,
@@ -19,6 +20,7 @@ import {
   setMintDigest,
   voteMint,
 } from '@/lib/xbridge/client';
+import { extractErrorMessage } from '@/utils';
 
 export type BridgeStatus =
   | 'idle'
@@ -66,13 +68,7 @@ export const useBridge = () => {
         amount: amount.toString(),
       });
 
-      const latestBlockhash =
-        await solanaConnection.getLatestBlockhash('finalized');
-      await solanaConnection.confirmTransaction({
-        signature: depositSignature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      });
+      await confirmSolanaTransaction(solanaConnection, depositSignature);
 
       setStatus('creating');
       toasting.update(toastId, 'Creating mint request...');
@@ -175,7 +171,7 @@ export const useBridge = () => {
         });
       } catch (err: unknown) {
         setStatus('error');
-        const message = err instanceof Error ? err.message : 'Bridge failed';
+        const message = extractErrorMessage(err, 'Bridge failed');
         setError(message);
         toasting.dismiss(BRIDGE_TOAST_ID);
         toasting.error({ action: 'Bridge', message: `Failed: ${message}` });

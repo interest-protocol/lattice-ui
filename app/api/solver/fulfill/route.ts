@@ -1,16 +1,18 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { SOLVER_API_URL } from '@/lib/config';
 
+const schema = z.object({
+  requestId: z.string(),
+  userAddress: z.string(),
+  requestInitialSharedVersion: z.string().optional(),
+});
+
 export async function POST(request: NextRequest) {
-  const { requestId, userAddress, requestInitialSharedVersion } =
-    await request.json();
-
-  if (!requestId || typeof requestId !== 'string')
-    return NextResponse.json({ error: 'Missing requestId' }, { status: 400 });
-
-  if (!userAddress || typeof userAddress !== 'string')
-    return NextResponse.json({ error: 'Missing userAddress' }, { status: 400 });
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   if (!SOLVER_API_URL)
     return NextResponse.json(
@@ -24,9 +26,9 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
-        requestId,
-        userAddress,
-        requestInitialSharedVersion,
+        requestId: body.requestId,
+        userAddress: body.userAddress,
+        requestInitialSharedVersion: body.requestInitialSharedVersion,
       }),
     });
 

@@ -6,16 +6,14 @@ import { AnimatePresence } from 'motion/react';
 import { type FC, useMemo, useState } from 'react';
 
 import { ChevronDownSVG } from '@/components/ui/icons';
-import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
 import { useModal } from '@/hooks/store/use-modal';
+import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
+import { formatAddress } from '@/utils';
 
 import { useShallow } from 'zustand/react/shallow';
 
 import WalletProfileDropdown from './wallet-profile-dropdown';
 import WalletProfileModal from './wallet-profile-modal';
-
-const formatDisplay = (address: string) =>
-  `${address.slice(0, 6)}...${address.slice(-4)}`;
 
 const WalletProfile: FC = () => {
   const { user, logout } = usePrivy();
@@ -35,7 +33,7 @@ const WalletProfile: FC = () => {
     const wallet =
       user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
     const addr = wallet && 'address' in wallet ? wallet.address : null;
-    if (addr) return formatDisplay(addr);
+    if (addr) return formatAddress(addr);
     const email = user.email?.address ?? user.google?.email;
     return email ?? 'Logged in';
   }, [user]);

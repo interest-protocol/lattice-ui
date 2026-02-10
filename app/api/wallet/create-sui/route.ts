@@ -1,22 +1,23 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 
-export async function POST(request: NextRequest) {
-  const { userId } = await request.json();
+const schema = z.object({
+  userId: z.string(),
+});
 
-  if (!userId || typeof userId !== 'string')
-    return NextResponse.json(
-      { error: 'Missing userId (did:privy:...)' },
-      { status: 400 }
-    );
+export async function POST(request: NextRequest) {
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();
 
     const wallet = await privy.wallets().create({
       chain_type: 'sui',
-      owner: { user_id: userId },
+      owner: { user_id: body.userId },
     });
 
     return NextResponse.json({

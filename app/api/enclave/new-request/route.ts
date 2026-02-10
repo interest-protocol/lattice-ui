@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { ENCLAVE_URL } from '@/lib/config';
 
 interface NewRequestProofRaw {
@@ -15,14 +17,14 @@ interface NewRequestProofRaw {
   timestamp_ms: string;
 }
 
+const schema = z.object({
+  digest: z.string(),
+  chainId: z.number(),
+});
+
 export async function POST(request: NextRequest) {
-  const { digest, chainId } = await request.json();
-
-  if (!digest || typeof digest !== 'string')
-    return NextResponse.json({ error: 'Missing digest' }, { status: 400 });
-
-  if (!chainId || typeof chainId !== 'number')
-    return NextResponse.json({ error: 'Missing chainId' }, { status: 400 });
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   if (!ENCLAVE_URL)
     return NextResponse.json(
@@ -36,8 +38,8 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
-        digest,
-        chain_id: chainId,
+        digest: body.digest,
+        chain_id: body.chainId,
       }),
     });
 

@@ -1,20 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { Registry, SolanaPubkey, createRegistrySdk } from '@/lib/registry';
 
-export async function POST(request: NextRequest) {
-  const { userId } = await request.json();
+const schema = z.object({
+  userId: z.string(),
+});
 
-  if (!userId || typeof userId !== 'string')
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+export async function POST(request: NextRequest) {
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();
-    const suiWallet = await getFirstWallet(privy, userId, 'sui');
-    const solanaWallet = await getFirstWallet(privy, userId, 'solana');
+    const suiWallet = await getFirstWallet(privy, body.userId, 'sui');
+    const solanaWallet = await getFirstWallet(privy, body.userId, 'solana');
 
     const { suiClient, registry } = createRegistrySdk();
 

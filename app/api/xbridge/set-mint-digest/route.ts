@@ -1,33 +1,24 @@
 import bs58 from 'bs58';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { createXBridgeSdk } from '@/lib/xbridge';
 
-interface SetMintDigestBody {
-  userId: string;
-  requestId: string;
-  mintCapId: string;
-  depositSignature: string;
-  rpcUrl?: string;
-}
+const schema = z.object({
+  userId: z.string(),
+  requestId: z.string(),
+  mintCapId: z.string(),
+  depositSignature: z.string(),
+  rpcUrl: z.string().optional(),
+});
 
 export async function POST(request: NextRequest) {
-  const body: SetMintDigestBody = await request.json();
-
-  if (!body.userId)
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-  if (!body.requestId)
-    return NextResponse.json({ error: 'Missing requestId' }, { status: 400 });
-  if (!body.mintCapId)
-    return NextResponse.json({ error: 'Missing mintCapId' }, { status: 400 });
-  if (!body.depositSignature)
-    return NextResponse.json(
-      { error: 'Missing depositSignature' },
-      { status: 400 }
-    );
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();

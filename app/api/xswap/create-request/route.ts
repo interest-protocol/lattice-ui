@@ -1,46 +1,44 @@
 import type { ChainId } from '@interest-protocol/xswap-sdk';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
+import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
 import { createXSwapSdk } from '@/lib/xswap';
 
-interface RequestProof {
-  signature: number[];
-  digest: number[];
-  timestampMs: string;
-  dwalletAddress: number[];
-  user: number[];
-  chainId: number;
-  token: number[];
-  amount: string;
-}
+const proofSchema = z.object({
+  signature: z.array(z.number()),
+  digest: z.array(z.number()),
+  timestampMs: z.string(),
+  dwalletAddress: z.array(z.number()),
+  user: z.array(z.number()),
+  chainId: z.number(),
+  token: z.array(z.number()),
+  amount: z.string(),
+});
 
-interface CreateRequestBody {
-  userId: string;
-  proof: RequestProof;
-  walletKey: string;
-  sourceAddress: number[];
-  sourceChain: number;
-  destinationChain: number;
-  destinationAddress: number[];
-  destinationToken: number[];
-  minDestinationAmount: string;
-  minConfirmations: number;
-  deadline: string;
-  solverSender: number[];
-  solverRecipient: number[];
-  rpcUrl?: string;
-}
+const schema = z.object({
+  userId: z.string(),
+  proof: proofSchema,
+  walletKey: z.string(),
+  sourceAddress: z.array(z.number()),
+  sourceChain: z.number(),
+  destinationChain: z.number(),
+  destinationAddress: z.array(z.number()),
+  destinationToken: z.array(z.number()),
+  minDestinationAmount: z.string(),
+  minConfirmations: z.number(),
+  deadline: z.string(),
+  solverSender: z.array(z.number()),
+  solverRecipient: z.array(z.number()),
+  rpcUrl: z.string().optional(),
+});
 
 export async function POST(request: NextRequest) {
-  const body: CreateRequestBody = await request.json();
-
-  if (!body.userId)
-    return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-  if (!body.proof)
-    return NextResponse.json({ error: 'Missing proof' }, { status: 400 });
+  const { data: body, error } = validateBody(await request.json(), schema);
+  if (error) return error;
 
   try {
     const privy = getPrivyClient();

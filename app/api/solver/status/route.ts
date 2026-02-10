@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+import { validateQueryParam } from '@/lib/api/validate-params';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
   const requestId = request.nextUrl.searchParams.get('requestId');
 
-  if (!requestId)
-    return NextResponse.json({ error: 'Missing requestId' }, { status: 400 });
+  const invalid = validateQueryParam(requestId, 'requestId');
+  if (invalid) return invalid;
 
   if (!SOLVER_API_URL)
     return NextResponse.json(
