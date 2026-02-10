@@ -15,12 +15,14 @@ import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
+import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import type { ChainAdapter } from '@/lib/chain-adapters';
 import { sdkChainIdFromKey } from '@/lib/chain-adapters';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import { createSuiAdapter } from '@/lib/chain-adapters/sui-adapter';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
+import { CurrencyAmount, Token, Trade } from '@/lib/entities';
 import { fetchMetadata } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
@@ -53,6 +55,10 @@ export const useSwap = () => {
     useSuiBalances(suiAddress);
   const { balances: solanaBalances, mutate: mutateSolanaBalances } =
     useSolanaBalances(solanaAddress);
+
+  const { getPrice } = useTokenPrices();
+  const getPriceRef = useRef(getPrice);
+  getPriceRef.current = getPrice;
 
   const suiBalancesRef = useRef(suiBalances);
   suiBalancesRef.current = suiBalances;
@@ -154,6 +160,22 @@ export const useSwap = () => {
         const walletKey = WalletKey[sourceChain];
         const deadline = BigInt(Date.now() + REQUEST_DEADLINE_MS);
 
+        const inputToken = Token.fromType(fromType);
+        const outputToken = Token.fromType(toType);
+        const inputPriceUsd = getPriceRef.current(fromType);
+        const outputPriceUsd = getPriceRef.current(toType);
+
+        let minDestinationAmount = '1';
+        if (inputPriceUsd > 0 && outputPriceUsd > 0) {
+          const trade = Trade.fromOraclePrices({
+            inputAmount: CurrencyAmount.fromRawAmount(inputToken, fromAmount),
+            outputToken,
+            inputPriceUsd,
+            outputPriceUsd,
+          });
+          minDestinationAmount = trade.minimumReceived.raw.toFixed(0);
+        }
+
         await createSwapRequest({
           userId: user.id,
           proof: {
@@ -172,7 +194,7 @@ export const useSwap = () => {
           destinationChain,
           destinationAddress: Array.from(destinationAddress),
           destinationToken: Array.from(destinationToken),
-          minDestinationAmount: '1',
+          minDestinationAmount,
           minConfirmations: 0,
           deadline: deadline.toString(),
           solverSender: Array.from(solverSender),
