@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 
-import type { UseBackgroundTranslate } from './use-background-position.types';
+interface UseBackgroundTranslate {
+  X?: number;
+  Y?: number;
+  setTranslate: (args: { X?: number; Y?: number }) => void;
+}
 
 export const useBackgroundTranslate = create<UseBackgroundTranslate>((set) => ({
   setTranslate: set,

@@ -36,11 +36,6 @@ export const parseToPositiveStringNumber = (x: string): string => {
   return x;
 };
 
-/**
- * @name feesCalcUp
- * @description this is the function that takes the fees based on @interest/bps package
- * @link https://github.com/interest-protocol/interest-mvr/blob/a2ed0e88d7b993a014c73061d7b369cc45c45624/bps/sources/bps.move#L57
- */
 export const feesCalcUp = (
   feeBps: number,
   amount: BigNumber

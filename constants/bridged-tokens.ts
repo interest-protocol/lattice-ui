@@ -1,6 +1,5 @@
 import type { AssetMetadata } from '@/interface';
 
-// XBridge wrapped SOL on Sui
 const XBRIDGE_ORIGINAL_PACKAGE_ID =
   '0xb39fe0c60c140063923a723f4e0e5bc008d1593ae3c6a71aa89fed5dc3546c15';
 const XBRIDGE_TOKENS_PACKAGE_ID =
@@ -9,10 +8,8 @@ const WRAPPED_SOL_OTW = `${XBRIDGE_TOKENS_PACKAGE_ID}::tokens::WrappedSol`;
 
 export const WSOL_SUI_TYPE = `${XBRIDGE_ORIGINAL_PACKAGE_ID}::inbound::XToken<${WRAPPED_SOL_OTW}>`;
 
-// XBridge wrapped SUI on Solana
 export const WSUI_SOLANA_MINT = 'F8x6mpvp4PHTgNyb617zEvKhrN5G5fkJKnXsNCCHUHeB';
 
-// XBridge uses native decimals (9 for both SUI and SOL)
 export const XBRIDGE_DECIMALS = 9;
 
 export const SOL_DECIMALS = 9;

@@ -184,18 +184,15 @@ export const useSwap = () => {
         setStatus('waiting');
         toasting.update(SWAP_TOAST_ID, 'Waiting for solver to complete...');
 
-        // Capture initial balance to detect changes (use ref for latest value)
         const initialBalance = isSuiToSol
           ? solanaBalancesRef.current.sol
           : suiBalancesRef.current.sui;
 
-        // Poll for balance changes with early exit when change is detected
         for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
           await new Promise((resolve) =>
             setTimeout(resolve, BALANCE_POLL_INTERVAL_MS)
           );
 
-          // Poll the appropriate balance based on swap direction
           let currentBalance: BigNumber | undefined;
           if (isSuiToSol) {
             const newBalances = await mutateSolanaBalances();
@@ -205,7 +202,6 @@ export const useSwap = () => {
             currentBalance = newBalances?.sui;
           }
 
-          // Exit early if balance has changed (swap completed)
           if (currentBalance && !currentBalance.eq(initialBalance)) {
             break;
           }

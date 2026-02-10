@@ -33,12 +33,10 @@ const useWalletRegistration = () => {
   const isRegistering = useRef(false);
   const isLinking = useRef(false);
 
-  // Track mount state to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Use empty objects until mounted to avoid hydration mismatch
   const effectiveRegisteredUsers = mounted ? registeredUsers : {};
   const effectiveLinkedUsers = mounted ? linkedUsers : {};
 
@@ -53,17 +51,14 @@ const useWalletRegistration = () => {
       try {
         const promises: Promise<unknown>[] = [];
 
-        // Create SUI wallet if missing
         if (!hasSuiWallet) {
           promises.push(createSuiWallet(user.id));
         }
 
-        // Create Solana wallet if missing
         if (!hasSolanaWallet) {
           promises.push(createSolanaWallet(user.id));
         }
 
-        // Run wallet creations in parallel
         if (promises.length > 0) {
           const message = retryCount > 0 ? 'Retrying wallet setup...' : 'Setting up your wallets...';
           toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
@@ -72,11 +67,9 @@ const useWalletRegistration = () => {
           toasting.success({ action: 'Wallet Setup', message: 'Your wallets are ready' });
         }
 
-        // Mark as registered
         setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
       } catch (_error) {
         toasting.dismiss(WALLET_SETUP_TOAST_ID);
-        // Retry with exponential backoff
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           const delay = RETRY_DELAYS_MS[retryCount];
           isRegistering.current = false;
@@ -84,7 +77,6 @@ const useWalletRegistration = () => {
           return;
         }
 
-        // After all retries failed, notify user
         toasting.error({ action: 'Wallet Setup', message: 'Please refresh the page' });
       } finally {
         isRegistering.current = false;
@@ -111,7 +103,6 @@ const useWalletRegistration = () => {
         await linkSolanaWallet(user.id);
         setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
       } catch (_error) {
-        // Retry with exponential backoff
         if (retryCount < MAX_RETRY_ATTEMPTS) {
           const delay = RETRY_DELAYS_MS[retryCount];
           isLinking.current = false;
@@ -119,7 +110,6 @@ const useWalletRegistration = () => {
           return;
         }
 
-        // After all retries failed, notify user
         toasting.error({ action: 'Wallet Link', message: 'Please refresh the page' });
       } finally {
         isLinking.current = false;
@@ -134,7 +124,6 @@ const useWalletRegistration = () => {
     ]
   );
 
-  // Auto-register on mount when authenticated
   useEffect(() => {
     if (!mounted) return;
 
@@ -155,7 +144,6 @@ const useWalletRegistration = () => {
     registerWallets,
   ]);
 
-  // Auto-link after wallets exist
   useEffect(() => {
     if (!mounted) return;
 

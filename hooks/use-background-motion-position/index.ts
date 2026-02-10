@@ -1,6 +1,14 @@
+import type { MotionValue } from 'motion/react';
 import { create } from 'zustand';
 
-import type { UseBackgroundMotionTranslate } from './use-background-position.types';
+interface UseBackgroundMotionTranslate {
+  x?: MotionValue<number>;
+  y?: MotionValue<number>;
+  setTranslate: (args: {
+    x?: MotionValue<number>;
+    y?: MotionValue<number>;
+  }) => void;
+}
 
 export const useBackgroundMotionTranslate =
   create<UseBackgroundMotionTranslate>((set) => ({

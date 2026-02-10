@@ -22,7 +22,6 @@ export const toasting = {
       })
     ),
 
-  // Loading toast with specific ID for updates
   loadingWithId: (args: ToastLoadingProps, id: string) =>
     dismissHandler(
       toast.loading(<ToastLoading {...args} />, {
@@ -31,7 +30,6 @@ export const toasting = {
       })
     ),
 
-  // Update existing toast message
   update: (id: string, message: string) => {
     toast.loading(<ToastLoading message={message} />, {
       id,
@@ -39,6 +37,5 @@ export const toasting = {
     });
   },
 
-  // Dismiss toast by ID
   dismiss: (id: string) => toast.dismiss(id),
 };

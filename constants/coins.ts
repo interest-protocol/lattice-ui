@@ -2,10 +2,8 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 import type { AssetMetadata } from '@/interface';
 
-// Solana token type identifier
 export const SOL_TYPE = 'sol';
 
-// Main tradeable coins for SUI/SOL swap
 export const COIN_TYPES: ReadonlyArray<string> = [SUI_TYPE_ARG, SOL_TYPE];
 
 export const ASSET_METADATA: Record<string, AssetMetadata> = {

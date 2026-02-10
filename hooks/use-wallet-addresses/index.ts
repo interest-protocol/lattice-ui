@@ -8,15 +8,6 @@ export interface WalletAddresses {
   hasSolanaWallet: boolean;
 }
 
-/**
- * Centralized hook for extracting wallet addresses from Privy user.
- * Eliminates duplicated wallet extraction logic across the codebase.
- *
- * @returns {WalletAddresses} Object containing wallet addresses and availability flags
- *
- * @example
- * const { suiAddress, solanaAddress, hasSuiWallet, hasSolanaWallet } = useWalletAddresses();
- */
 export const useWalletAddresses = (): WalletAddresses => {
   const { user } = usePrivy();
 
@@ -28,7 +19,6 @@ export const useWalletAddresses = (): WalletAddresses => {
         String(account.chainType).toLowerCase() === 'sui'
       )
         return true;
-      // Fallback: check address format for Sui (0x prefix, 66 chars)
       return (
         typeof account.address === 'string' &&
         account.address.startsWith('0x') &&
@@ -43,7 +33,6 @@ export const useWalletAddresses = (): WalletAddresses => {
         String(account.chainType).toLowerCase() === 'solana'
       )
         return true;
-      // Fallback: check address format for Solana (base58, 32-44 chars)
       return (
         typeof account.address === 'string' &&
         !account.address.startsWith('0x') &&
