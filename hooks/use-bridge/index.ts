@@ -3,9 +3,11 @@ import { usePrivy } from '@privy-io/react-auth';
 import type BigNumber from 'bignumber.js';
 import bs58 from 'bs58';
 import { useCallback, useState } from 'react';
+import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
+import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
 import useSuiBalances from '@/hooks/use-sui-balances';
@@ -17,9 +19,6 @@ import {
   setMintDigest,
   voteMint,
 } from '@/lib/xbridge/client';
-
-const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
-const SOL_DECIMALS = 9;
 
 export type BridgeStatus =
   | 'idle'
@@ -55,9 +54,7 @@ export const useBridge = () => {
 
   const bridgeSolToWsol = useCallback(
     async (amount: BigNumber, toastId: string) => {
-      if (!user || !solanaAddress || !suiAddress) {
-        throw new Error('Wallets not connected');
-      }
+      invariant(user && solanaAddress && suiAddress, 'Wallets not connected');
 
       const dwalletAddress = DWalletAddress[ChainId.Solana];
 
@@ -69,7 +66,8 @@ export const useBridge = () => {
         amount: amount.toString(),
       });
 
-      const latestBlockhash = await solanaConnection.getLatestBlockhash('finalized');
+      const latestBlockhash =
+        await solanaConnection.getLatestBlockhash('finalized');
       await solanaConnection.confirmTransaction({
         signature: depositSignature,
         blockhash: latestBlockhash.blockhash,
@@ -88,9 +86,7 @@ export const useBridge = () => {
         coinType: WSOL_SUI_TYPE.split('<')[1].replace('>', ''),
       });
 
-      if (!requestId || !mintCapId) {
-        throw new Error('Failed to get requestId or mintCapId');
-      }
+      invariant(requestId && mintCapId, 'Failed to get requestId or mintCapId');
 
       setStatus('voting');
       toasting.update(toastId, 'Verifying with enclave...');
@@ -127,14 +123,20 @@ export const useBridge = () => {
       const BRIDGE_TOAST_ID = 'bridge-operation';
 
       if (!user) {
-        toasting.error({ action: 'Bridge', message: 'Please connect your wallet first' });
+        toasting.error({
+          action: 'Bridge',
+          message: 'Please connect your wallet first',
+        });
         return;
       }
 
       try {
         setStatus('idle');
         setError(null);
-        toasting.loadingWithId({ message: 'Starting bridge...' }, BRIDGE_TOAST_ID);
+        toasting.loadingWithId(
+          { message: 'Starting bridge...' },
+          BRIDGE_TOAST_ID
+        );
 
         switch (direction) {
           case 'sol-to-wsol':
@@ -142,15 +144,24 @@ export const useBridge = () => {
             break;
           case 'wsol-to-sol':
             toasting.dismiss(BRIDGE_TOAST_ID);
-            toasting.error({ action: 'Bridge', message: 'wSOL → SOL bridge coming soon' });
+            toasting.error({
+              action: 'Bridge',
+              message: 'wSOL → SOL bridge coming soon',
+            });
             return;
           case 'sui-to-wsui':
             toasting.dismiss(BRIDGE_TOAST_ID);
-            toasting.error({ action: 'Bridge', message: 'SUI → wSUI bridge coming soon' });
+            toasting.error({
+              action: 'Bridge',
+              message: 'SUI → wSUI bridge coming soon',
+            });
             return;
           case 'wsui-to-sui':
             toasting.dismiss(BRIDGE_TOAST_ID);
-            toasting.error({ action: 'Bridge', message: 'wSUI → SUI bridge coming soon' });
+            toasting.error({
+              action: 'Bridge',
+              message: 'wSUI → SUI bridge coming soon',
+            });
             return;
           default:
             throw new Error('Invalid bridge direction');
@@ -158,7 +169,10 @@ export const useBridge = () => {
 
         setStatus('success');
         toasting.dismiss(BRIDGE_TOAST_ID);
-        toasting.success({ action: 'Bridge', message: 'Your tokens are ready' });
+        toasting.success({
+          action: 'Bridge',
+          message: 'Your tokens are ready',
+        });
       } catch (err: unknown) {
         setStatus('error');
         const message = err instanceof Error ? err.message : 'Bridge failed';

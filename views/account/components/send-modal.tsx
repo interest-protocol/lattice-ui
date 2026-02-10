@@ -161,7 +161,9 @@ const SendModal: FC = () => {
     }
 
     setSending(true);
-    const dismiss = toasting.loading({ message: `Sending ${selectedToken.symbol}...` });
+    const dismiss = toasting.loading({
+      message: `Sending ${selectedToken.symbol}...`,
+    });
     try {
       if (network === 'solana') {
         await handleSendSolana();
@@ -169,7 +171,10 @@ const SendModal: FC = () => {
         await handleSendSui();
       }
       dismiss();
-      toasting.success({ action: 'Send', message: `${amount} ${selectedToken.symbol} sent` });
+      toasting.success({
+        action: 'Send',
+        message: `${amount} ${selectedToken.symbol} sent`,
+      });
       handleClose();
     } catch (error) {
       dismiss();

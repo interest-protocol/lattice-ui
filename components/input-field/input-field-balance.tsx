@@ -14,7 +14,11 @@ import type { InputFieldGenericProps } from './input-field.types';
 const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
   const { control, setValue } = useFormContext();
   const { balances, loadingCoins, loadingObjects } = useAppState(
-    useShallow((s) => ({ balances: s.balances, loadingCoins: s.loadingCoins, loadingObjects: s.loadingObjects }))
+    useShallow((s) => ({
+      balances: s.balances,
+      loadingCoins: s.loadingCoins,
+      loadingObjects: s.loadingObjects,
+    }))
   );
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
@@ -40,7 +44,7 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
     >
       <WalletSVG maxWidth="1rem" width="100%" />
       <Span fontFamily="JetBrains Mono">
-        {(loadingCoins || loadingObjects) ? (
+        {loadingCoins || loadingObjects ? (
           <Skeleton width="2rem" />
         ) : (
           FixedPointMath.toNumber(

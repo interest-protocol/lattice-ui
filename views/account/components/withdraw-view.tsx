@@ -153,16 +153,24 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
 
   const handleSend = async () => {
     if (!authenticated) {
-      toasting.error({ action: 'Withdraw', message: 'Please connect your wallet' });
+      toasting.error({
+        action: 'Withdraw',
+        message: 'Please connect your wallet',
+      });
       return;
     }
     if (!recipient || !amount) {
-      toasting.error({ action: 'Withdraw', message: 'Please fill in all fields' });
+      toasting.error({
+        action: 'Withdraw',
+        message: 'Please fill in all fields',
+      });
       return;
     }
 
     setSending(true);
-    const dismiss = toasting.loading({ message: `Withdrawing ${selectedToken.symbol}...` });
+    const dismiss = toasting.loading({
+      message: `Withdrawing ${selectedToken.symbol}...`,
+    });
     try {
       if (network === 'solana') {
         await handleSendSolana();
@@ -170,7 +178,10 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         await handleSendSui();
       }
       dismiss();
-      toasting.success({ action: 'Withdraw', message: `${amount} ${selectedToken.symbol} sent` });
+      toasting.success({
+        action: 'Withdraw',
+        message: `${amount} ${selectedToken.symbol} sent`,
+      });
       setRecipient('');
       setAmount('');
     } catch (error) {

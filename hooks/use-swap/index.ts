@@ -8,9 +8,16 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import type BigNumber from 'bignumber.js';
 import { useCallback, useRef, useState } from 'react';
+import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/toast';
-import { SOL_TYPE } from '@/constants/coins';
+import {
+  BALANCE_POLL_INTERVAL_MS,
+  BALANCE_POLL_MAX_ATTEMPTS,
+  NATIVE_SOL_MINT,
+  REQUEST_DEADLINE_MS,
+  SOL_TYPE,
+} from '@/constants/coins';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
 import useSuiBalances from '@/hooks/use-sui-balances';
@@ -20,11 +27,6 @@ import { fetchNewRequestProof } from '@/lib/enclave/client';
 import { fetchMetadata } from '@/lib/solver/client';
 import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { createSwapRequest } from '@/lib/xswap/client';
-
-const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
-const REQUEST_DEADLINE_MS = 60 * 60 * 1000;
-const BALANCE_POLL_INTERVAL_MS = 5000;
-const BALANCE_POLL_MAX_ATTEMPTS = 24;
 
 export type SwapStatus =
   | 'idle'
@@ -65,7 +67,10 @@ export const useSwap = () => {
       const SWAP_TOAST_ID = 'swap-operation';
 
       if (!user) {
-        toasting.error({ action: 'Swap', message: 'Please connect your wallet first' });
+        toasting.error({
+          action: 'Swap',
+          message: 'Please connect your wallet first',
+        });
         return;
       }
 
@@ -84,14 +89,15 @@ export const useSwap = () => {
       try {
         setStatus('depositing');
         setError(null);
-        toasting.loadingWithId({ message: 'Depositing funds to bridge...' }, SWAP_TOAST_ID);
+        toasting.loadingWithId(
+          { message: 'Depositing funds to bridge...' },
+          SWAP_TOAST_ID
+        );
 
         let depositDigest: string;
 
         if (isSuiToSol) {
-          if (!suiAddress) {
-            throw new Error('Sui wallet not connected');
-          }
+          invariant(suiAddress, 'Sui wallet not connected');
 
           const result = await sendSui({
             userId: user.id,
@@ -106,9 +112,7 @@ export const useSwap = () => {
             options: { showEffects: true },
           });
         } else {
-          if (!solanaAddress) {
-            throw new Error('Solana wallet not connected');
-          }
+          invariant(solanaAddress, 'Solana wallet not connected');
 
           const result = await sendSolana({
             userId: user.id,
@@ -138,9 +142,10 @@ export const useSwap = () => {
         const solverSuiAddress = metadata.solver.sui;
         const solverSolanaAddress = metadata.solver.solana;
 
-        if (!suiAddress || !solanaAddress) {
-          throw new Error('Both wallets must be connected');
-        }
+        invariant(
+          suiAddress && solanaAddress,
+          'Both wallets must be connected'
+        );
 
         const destinationAddress = isSuiToSol
           ? SolanaPubkey.fromBs58(solanaAddress).toBytes()
@@ -214,7 +219,10 @@ export const useSwap = () => {
 
         setStatus('success');
         toasting.dismiss(SWAP_TOAST_ID);
-        toasting.success({ action: 'Swap', message: 'Your tokens have been exchanged' });
+        toasting.success({
+          action: 'Swap',
+          message: 'Your tokens have been exchanged',
+        });
       } catch (err: unknown) {
         setStatus('error');
         const message = err instanceof Error ? err.message : 'Swap failed';

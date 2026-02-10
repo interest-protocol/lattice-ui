@@ -5,8 +5,8 @@ import type BigNumber from 'bignumber.js';
 import { type FC, useCallback, useState } from 'react';
 
 import { CopySVG } from '@/components/svg';
-import { toasting } from '@/components/toast';
 import Tabs from '@/components/tabs';
+import { toasting } from '@/components/toast';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
@@ -247,7 +247,10 @@ const AccountContent: FC = () => {
       dismiss();
       toasting.error({
         action: 'Wallet',
-        message: error instanceof Error ? error.message : 'Failed to create Sui wallet',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create Sui wallet',
       });
     } finally {
       setCreatingSuiWallet(false);

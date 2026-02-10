@@ -11,8 +11,7 @@ import {
   MIN_GAS_SOL,
   MIN_GAS_SUI,
 } from '@/constants/alpha-limits';
-import { SOL_DECIMALS } from '@/constants/bridged-tokens';
-import { SOL_TYPE } from '@/constants/coins';
+import { SOL_DECIMALS, SOL_TYPE } from '@/constants/coins';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';

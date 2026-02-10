@@ -5,6 +5,7 @@ import {
   WalletKey,
   XSwap,
 } from '@interest-protocol/xswap-sdk';
+import invariant from 'tiny-invariant';
 
 import { post } from '@/lib/api/client';
 
@@ -25,10 +26,7 @@ export const getWalletKeyForChain = (
   chainId: typeof WalletKey extends Record<infer K, bigint> ? K : never
 ): bigint => {
   const key = WalletKey[chainId];
-
-  if (key === undefined) {
-    throw new Error(`No wallet key for chain ${chainId}`);
-  }
+  invariant(key !== undefined, `No wallet key for chain ${chainId}`);
 
   return key;
 };

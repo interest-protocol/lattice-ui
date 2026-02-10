@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
-import type { EnclaveHealthResponse } from '@/pages/api/health/enclave';
-import type { SolverHealthResponse } from '@/pages/api/health/solver';
+import type { EnclaveHealthResponse } from '@/app/api/health/enclave/route';
+import type { SolverHealthResponse } from '@/app/api/health/solver/route';
 
 export interface HealthStatus {
   enclave: EnclaveHealthResponse | null;

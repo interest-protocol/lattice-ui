@@ -60,11 +60,17 @@ const useWalletRegistration = () => {
         }
 
         if (promises.length > 0) {
-          const message = retryCount > 0 ? 'Retrying wallet setup...' : 'Setting up your wallets...';
+          const message =
+            retryCount > 0
+              ? 'Retrying wallet setup...'
+              : 'Setting up your wallets...';
           toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
           await Promise.all(promises);
           toasting.dismiss(WALLET_SETUP_TOAST_ID);
-          toasting.success({ action: 'Wallet Setup', message: 'Your wallets are ready' });
+          toasting.success({
+            action: 'Wallet Setup',
+            message: 'Your wallets are ready',
+          });
         }
 
         setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
@@ -77,7 +83,10 @@ const useWalletRegistration = () => {
           return;
         }
 
-        toasting.error({ action: 'Wallet Setup', message: 'Please refresh the page' });
+        toasting.error({
+          action: 'Wallet Setup',
+          message: 'Please refresh the page',
+        });
       } finally {
         isRegistering.current = false;
       }
@@ -110,7 +119,10 @@ const useWalletRegistration = () => {
           return;
         }
 
-        toasting.error({ action: 'Wallet Link', message: 'Please refresh the page' });
+        toasting.error({
+          action: 'Wallet Link',
+          message: 'Please refresh the page',
+        });
       } finally {
         isLinking.current = false;
       }

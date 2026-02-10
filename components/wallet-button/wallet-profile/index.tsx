@@ -20,7 +20,10 @@ const formatDisplay = (address: string) =>
 const WalletProfile: FC = () => {
   const { user, logout } = usePrivy();
   const { setContent, handleClose } = useModal(
-    useShallow((s) => ({ setContent: s.setContent, handleClose: s.handleClose }))
+    useShallow((s) => ({
+      setContent: s.setContent,
+      handleClose: s.handleClose,
+    }))
   );
   const [isOpen, setOpen] = useState(false);
   const menuRef = useClickOutsideListenerRef<HTMLDivElement>(() =>

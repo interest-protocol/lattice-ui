@@ -15,7 +15,12 @@
     "incremental": true,
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -25,11 +30,12 @@
     "hooks/**/*.ts",
     "interface/**/*.ts",
     "lib/**/*.ts",
-    "pages/**/*.ts",
-    "pages/**/*.tsx",
+    "app/**/*.ts",
+    "app/**/*.tsx",
     "utils/**/*.ts",
     "views/**/*.ts",
-    "views/**/*.tsx"
+    "views/**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

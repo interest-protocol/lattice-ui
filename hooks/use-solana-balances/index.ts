@@ -7,7 +7,10 @@ import { WSUI_SOLANA_MINT } from '@/constants';
 import useSolanaConnection from '@/hooks/use-solana-connection';
 import { balanceSwrConfig } from '@/lib/swr/config';
 
-const DEFAULT_SOLANA_BALANCES = { sol: new BigNumber(0), wsui: new BigNumber(0) };
+const DEFAULT_SOLANA_BALANCES = {
+  sol: new BigNumber(0),
+  wsui: new BigNumber(0),
+};
 
 const useSolanaBalances = (address: string | null) => {
   const connection = useSolanaConnection();
