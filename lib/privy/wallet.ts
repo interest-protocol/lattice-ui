@@ -14,15 +14,12 @@ export const getFirstWallet = async (
   userId: string,
   chainType: ChainKey
 ) => {
-  const wallets = [];
   for await (const wallet of privy.wallets().list({
     user_id: userId,
     chain_type: chainType,
   })) {
-    wallets.push(wallet);
+    return wallet;
   }
 
-  if (wallets.length === 0) throw new WalletNotFoundError(chainType);
-
-  return wallets[0];
+  throw new WalletNotFoundError(chainType);
 };

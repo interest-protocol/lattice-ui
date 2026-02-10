@@ -52,10 +52,9 @@ export const useWalletAddresses = (): WalletAddresses => {
       | Array<Record<string, unknown>>
       | undefined;
 
-    const addresses = {} as Record<ChainKey, string | null>;
-    for (const key of CHAIN_KEYS) {
-      addresses[key] = findWalletAddress(accounts, key);
-    }
+    const addresses = Object.fromEntries(
+      CHAIN_KEYS.map((key) => [key, findWalletAddress(accounts, key)])
+    ) as Record<ChainKey, string | null>;
 
     const getAddress = (chain: ChainKey) => addresses[chain];
     const hasWallet = (chain: ChainKey) => Boolean(addresses[chain]);

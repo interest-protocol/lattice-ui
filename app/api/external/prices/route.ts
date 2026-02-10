@@ -62,8 +62,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const params = new URLSearchParams();
-    for (const id of feedIds) params.append('ids[]', id);
+    const params = new URLSearchParams(feedIds.map((id) => ['ids[]', id]));
 
     const response = await fetch(`${PYTH_HERMES_URL}?${params.toString()}`);
 

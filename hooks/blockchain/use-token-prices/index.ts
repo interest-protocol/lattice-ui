@@ -14,8 +14,9 @@ const useTokenPrices = () => {
     queryKey: [useTokenPrices.name],
     queryFn: async () => {
       const quotes = await fetchCoinPrices([SUI_TYPE_ARG, SOL_TYPE]);
-      const byNormalized: Record<string, number> = {};
-      for (const q of quotes) byNormalized[q.coin] = q.price;
+      const byNormalized: Record<string, number> = Object.fromEntries(
+        quotes.map((q) => [q.coin, q.price])
+      );
 
       return {
         [SUI_TYPE_ARG]: byNormalized.sui ?? 0,

@@ -33,13 +33,10 @@ const useSolanaBalances = (addr: string | null) => {
         .send(),
     ]);
 
-    let wsuiRaw = 0n;
-    for (const { account } of tokenResult.value) {
-      const parsed = (account.data as any).parsed;
-      if (parsed?.info?.tokenAmount?.amount) {
-        wsuiRaw += BigInt(parsed.info.tokenAmount.amount);
-      }
-    }
+    const wsuiRaw = tokenResult.value.reduce((sum, { account }) => {
+      const amount = account.data.parsed.info.tokenAmount.amount;
+      return amount ? sum + BigInt(amount) : sum;
+    }, 0n);
 
     return {
       sol: BigInt(solResult.value),
