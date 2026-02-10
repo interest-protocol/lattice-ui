@@ -8,7 +8,9 @@ export const useSolPrice = () =>
     queryKey: [useSolPrice.name],
     queryFn: async () => {
       const data = await fetchCoinPrices([SOL_TYPE]);
-      return data[0]?.price ?? 0;
+      const price = data[0]?.price;
+      if (!price) throw new Error('Failed to fetch SOL price');
+      return price;
     },
     refetchInterval: 60_000,
     refetchOnWindowFocus: false,
