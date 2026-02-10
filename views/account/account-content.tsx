@@ -1,6 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { Button, Div, H1, H2, P } from '@stylin.js/elements';
+import { Button, Div, H1, H2, Img, P } from '@stylin.js/elements';
 import type BigNumber from 'bignumber.js';
 import { type FC, useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -41,20 +41,14 @@ const AssetRow: FC<{
   >
     <Div display="flex" alignItems="center" gap="1rem">
       {iconUrl && (
-        <Div
+        <Img
+          src={iconUrl}
+          alt={symbol}
           width="2.5rem"
           height="2.5rem"
           borderRadius="50%"
-          overflow="hidden"
-        >
-          <img
-            src={iconUrl}
-            alt={symbol}
-            width="100%"
-            height="100%"
-            style={{ borderRadius: '50%' }}
-          />
-        </Div>
+          objectFit="cover"
+        />
       )}
       <Div>
         <P color="#FFFFFF" fontWeight="600" mb="0.25rem">
