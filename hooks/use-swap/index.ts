@@ -118,7 +118,12 @@ export const useSwap = () => {
 
           depositDigest = result.signature;
 
-          await solanaConnection.confirmTransaction(depositDigest, 'confirmed');
+          const latestBlockhash = await solanaConnection.getLatestBlockhash();
+          await solanaConnection.confirmTransaction({
+            signature: depositDigest,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+          });
         }
 
         setStatus('verifying');

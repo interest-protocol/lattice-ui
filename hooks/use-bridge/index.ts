@@ -69,7 +69,12 @@ export const useBridge = () => {
         amount: amount.toString(),
       });
 
-      await solanaConnection.confirmTransaction(depositSignature, 'finalized');
+      const latestBlockhash = await solanaConnection.getLatestBlockhash('finalized');
+      await solanaConnection.confirmTransaction({
+        signature: depositSignature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+      });
 
       setStatus('creating');
       toasting.update(toastId, 'Creating mint request...');
