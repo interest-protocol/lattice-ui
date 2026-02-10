@@ -1,6 +1,5 @@
 import { DWalletAddress, WalletKey } from '@interest-protocol/xswap-sdk';
 import { usePrivy } from '@privy-io/react-auth';
-import type BigNumber from 'bignumber.js';
 import { useCallback, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 
@@ -12,7 +11,7 @@ import {
   REQUEST_DEADLINE_MS,
 } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
+import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
@@ -39,7 +38,7 @@ export type SwapStatus =
 interface SwapParams {
   fromType: string;
   toType: string;
-  fromAmount: BigNumber;
+  fromAmount: bigint;
 }
 
 export const useSwap = () => {
@@ -48,7 +47,7 @@ export const useSwap = () => {
   const [error, setError] = useState<string | null>(null);
 
   const suiClient = useSuiClient();
-  const solanaConnection = useSolanaConnection();
+  const solanaRpc = useSolanaRpc();
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const { balances: suiBalances, mutate: mutateSuiBalances } =
@@ -69,16 +68,15 @@ export const useSwap = () => {
     (chainKey: ChainKey): ChainAdapter => {
       const adapterFactories: Record<ChainKey, () => ChainAdapter> = {
         sui: () => createSuiAdapter(suiClient, mutateSuiBalances),
-        solana: () =>
-          createSolanaAdapter(solanaConnection, mutateSolanaBalances),
+        solana: () => createSolanaAdapter(solanaRpc, mutateSolanaBalances),
       };
       return adapterFactories[chainKey]();
     },
-    [suiClient, solanaConnection, mutateSuiBalances, mutateSolanaBalances]
+    [suiClient, solanaRpc, mutateSuiBalances, mutateSolanaBalances]
   );
 
   const getBalancesRef = useCallback(
-    (chainKey: ChainKey): Record<string, BigNumber> =>
+    (chainKey: ChainKey): Record<string, bigint> =>
       chainKey === 'sui' ? suiBalancesRef.current : solanaBalancesRef.current,
     []
   );
@@ -173,7 +171,7 @@ export const useSwap = () => {
             inputPriceUsd,
             outputPriceUsd,
           });
-          minDestinationAmount = trade.minimumReceived.raw.toFixed(0);
+          minDestinationAmount = trade.minimumReceived.raw.toString();
         }
 
         await createSwapRequest({
@@ -219,8 +217,8 @@ export const useSwap = () => {
             : undefined;
 
           if (
-            currentBalance &&
-            (!initialBalance || !currentBalance.eq(initialBalance))
+            currentBalance !== undefined &&
+            (initialBalance === undefined || currentBalance !== initialBalance)
           ) {
             break;
           }

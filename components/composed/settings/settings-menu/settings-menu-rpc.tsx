@@ -5,9 +5,8 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { ChevronRightSVG } from '@/components/ui/icons';
 import { RPC, RPC_DISPLAY, RPC_STORAGE_KEY, RPCs } from '@/constants';
-
-import SettingsMenuItem from './settings-menu-item';
 import type { SettingsMenusProps } from './settings-menu.types';
+import SettingsMenuItem from './settings-menu-item';
 
 const Motion = motion.create(Div);
 

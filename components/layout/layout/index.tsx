@@ -1,13 +1,11 @@
 import { Main } from '@stylin.js/elements';
 import { type FC, type PropsWithChildren, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-
-import { useBackgroundMotionTranslate } from '@/hooks/ui/use-background-motion-position';
-import { useBackgroundTranslate } from '@/hooks/ui/use-background-position';
-
 import Header from '@/components/composed/header';
 import HealthIndicator from '@/components/composed/health-indicator';
 import Background from '@/components/layout/background';
+import { useBackgroundMotionTranslate } from '@/hooks/ui/use-background-motion-position';
+import { useBackgroundTranslate } from '@/hooks/ui/use-background-position';
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
   const { x, y } = useBackgroundMotionTranslate(

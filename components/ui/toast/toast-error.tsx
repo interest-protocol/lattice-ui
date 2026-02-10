@@ -1,36 +1,28 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import { ErrorSVG } from '@/components/ui/icons';
-import ToastTimer from './toast-timer';
 import type { ToastProps } from './toast.types';
+import ToastTimer from './toast-timer';
 
 const ToastError: FC<ToastProps> = ({ action, message }) => (
   <>
-    <Div display="flex" alignItems="center" gap="1rem">
-      <Div
-        width="2rem"
-        height="2rem"
-        color="#F04248"
-        borderRadius="50%"
-        boxShadow="0 0 5rem 1rem #F04248, inset 0 0 1rem 1rem #463846"
+    <div className="flex items-center gap-4">
+      <div
+        className="w-8 h-8 rounded-full"
+        style={{
+          color: '#F04248',
+          boxShadow: '0 0 5rem 1rem #F04248, inset 0 0 1rem 1rem #463846',
+        }}
       >
-        <Span
-          width="2rem"
-          height="2rem"
-          display="flex"
-          borderRadius="50%"
-          alignItems="center"
-          justifyContent="center"
-        >
+        <span className="w-8 h-8 flex rounded-full items-center justify-center">
           <ErrorSVG maxWidth="1.25rem" width="100%" />
-        </Span>
-      </Div>
-      <Div>
-        <P color="#FFFFFF">{action} failed!</P>
-        {message && <P color="#C8C5C5">{message}</P>}
-      </Div>
-    </Div>
+        </span>
+      </div>
+      <div>
+        <p className="text-white">{action} failed!</p>
+        {message && <p className="text-[#C8C5C5]">{message}</p>}
+      </div>
+    </div>
     <ToastTimer color="#F04248" />
   </>
 );

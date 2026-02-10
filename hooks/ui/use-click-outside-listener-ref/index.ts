@@ -5,7 +5,7 @@ type OnClose = (event: MouseEvent) => void;
 
 const useClickOutsideListenerRef = <T extends HTMLElement>(
   onClose: OnClose | noop
-): RefObject<T> => {
+): RefObject<T | null> => {
   const ref = useRef<T>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;

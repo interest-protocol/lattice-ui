@@ -1,14 +1,32 @@
-import type { Connection } from '@solana/web3.js';
+import type { Signature } from '@solana/kit';
+
+import type { SolanaRpc } from './server';
 
 export const confirmSolanaTransaction = async (
-  connection: Connection,
-  signature: string
+  rpc: SolanaRpc,
+  signature: Signature
 ): Promise<void> => {
-  const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash('finalized');
-  await connection.confirmTransaction({
-    signature,
-    blockhash,
-    lastValidBlockHeight,
-  });
+  // Poll for confirmation
+  const maxRetries = 30;
+  for (let i = 0; i < maxRetries; i++) {
+    const { value: statuses } = await rpc
+      .getSignatureStatuses([signature])
+      .send();
+
+    const status = statuses[0];
+    if (
+      status?.confirmationStatus === 'finalized' ||
+      status?.confirmationStatus === 'confirmed'
+    ) {
+      return;
+    }
+
+    if (status?.err) {
+      throw new Error(`Transaction failed: ${JSON.stringify(status.err)}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  throw new Error('Transaction confirmation timed out');
 };

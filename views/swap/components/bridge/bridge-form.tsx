@@ -1,12 +1,12 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { Button, Div, Input, Label, Span } from '@stylin.js/elements';
+import Image from 'next/image';
 import type { FC } from 'react';
 
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
-
+import type { BridgeFormProps, TokenKey } from './bridge.types';
 import BridgeButton from './bridge-button';
 import BridgeNetworkSelector from './bridge-network-selector';
-import type { BridgeFormProps, TokenKey } from './bridge.types';
 
 const TOKEN_OPTIONS_LIST: {
   key: TokenKey;
@@ -88,11 +88,11 @@ const BridgeForm: FC<BridgeFormProps> = ({
               nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
             >
               {iconUrl && (
-                <img
+                <Image
                   src={iconUrl}
                   alt={symbol}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                   style={{ borderRadius: '50%' }}
                 />
               )}

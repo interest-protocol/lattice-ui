@@ -1,7 +1,7 @@
-import type { InputElementProps } from '@stylin.js/elements';
+import type { InputHTMLAttributes } from 'react';
 
 export interface CheckedButtonProps
-  extends Omit<InputElementProps, 'defaultValue'> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'defaultValue'> {
   name: string;
   defaultValue: boolean;
 }

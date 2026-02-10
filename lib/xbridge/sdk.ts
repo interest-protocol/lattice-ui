@@ -44,5 +44,5 @@ export const createXBridgeSdk = (rpcUrl?: string): XBridgeClients => {
   return cachedClient;
 };
 
-export { ENCLAVE_OBJECT_ID } from '@interest-protocol/xswap-sdk';
 export { XBridgeInbound } from '@interest-protocol/xbridge-sdk';
+export { ENCLAVE_OBJECT_ID } from '@interest-protocol/xswap-sdk';

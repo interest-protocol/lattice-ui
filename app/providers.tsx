@@ -1,7 +1,8 @@
 'use client';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
@@ -17,33 +18,49 @@ const PrivyProviderWrapper = dynamic(
   { ssr: false }
 );
 
-const Providers = ({ children }: { children: ReactNode }) => (
-  <ErrorBoundary>
-    <PrivyProviderWrapper>
-      <ModalProvider />
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          duration: TOAST_DURATION,
-          style: {
-            zIndex: 100,
-            maxWidth: '20rem',
-            overflow: 'hidden',
-            position: 'relative',
-            background: '#242C32',
-            boxShadow:
-              '0px 16px 24px 0px rgba(0, 0, 0, 0.14), 0px 6px 30px 0px rgba(0, 0, 0, 0.12), 0px 8px 10px 0px rgba(0, 0, 0, 0.20)',
+const Providers = ({ children }: { children: ReactNode }) => {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            staleTime: 5_000,
           },
-        }}
-      />
-      <SkeletonTheme baseColor="#FFFFFF0D" highlightColor="#FFFFFF1A">
-        <AppStateProvider />
-        <WalletRegistrationProvider />
-        <BackgroundProvider />
-        {children}
-      </SkeletonTheme>
-    </PrivyProviderWrapper>
-  </ErrorBoundary>
-);
+        },
+      })
+  );
+
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <PrivyProviderWrapper>
+          <ModalProvider />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              duration: TOAST_DURATION,
+              style: {
+                zIndex: 100,
+                maxWidth: '20rem',
+                overflow: 'hidden',
+                position: 'relative',
+                background: '#242C32',
+                boxShadow:
+                  '0px 16px 24px 0px rgba(0, 0, 0, 0.14), 0px 6px 30px 0px rgba(0, 0, 0, 0.12), 0px 8px 10px 0px rgba(0, 0, 0, 0.20)',
+              },
+            }}
+          />
+          <SkeletonTheme baseColor="#FFFFFF0D" highlightColor="#FFFFFF1A">
+            <AppStateProvider />
+            <WalletRegistrationProvider />
+            <BackgroundProvider />
+            {children}
+          </SkeletonTheme>
+        </PrivyProviderWrapper>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default Providers;

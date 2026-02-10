@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
   font-family: "PPNeuebit";
   src: url("https://cdn.prod.website-files.com/66a8b39f3ac043de2548ab05/66acb4a18a6ad9a9419941f3_PPNeueBit-Regular.otf")
@@ -16,15 +18,38 @@
   font-display: swap;
 }
 
+@theme {
+  --font-sans: "DM Sans", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-pixel: "PPNeuebit", monospace;
+
+  --color-accent: #a78bfa;
+  --color-accent-hover: #c4b5fd;
+  --color-accent-80: #a78bfa80;
+  --color-accent-4d: #a78bfa4d;
+  --color-accent-1a: #a78bfa1a;
+  --color-accent-2a: #a78bfa2a;
+  --color-accent-33: #a78bfa33;
+
+  --color-surface: #0c0f1d;
+  --color-surface-light: #ffffff0d;
+  --color-surface-lighter: #ffffff1a;
+  --color-surface-hover: #ffffff2a;
+  --color-surface-border: #ffffff1a;
+
+  --color-text: #ffffff;
+  --color-text-muted: #ffffff80;
+  --color-text-dim: #ffffff14;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "DM Sans", serif;
 }
 
 html {
-  background: #0c0f1d;
+  background: var(--color-surface);
   scroll-behavior: smooth;
 }
 

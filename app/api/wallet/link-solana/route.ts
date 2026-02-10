@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
-import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
-import { Registry, SolanaPubkey, createRegistrySdk } from '@/lib/registry';
+import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { createRegistrySdk, Registry, SolanaPubkey } from '@/lib/registry';
 
 const schema = z.object({
   userId: z.string(),

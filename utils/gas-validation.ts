@@ -1,6 +1,5 @@
-import BigNumber from 'bignumber.js';
-
 import { CHAIN_REGISTRY } from '@/constants/chains';
+import { parseUnits } from '@/lib/bigint-utils';
 import type { CurrencyAmount } from '@/lib/entities/currency-amount';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
@@ -29,7 +28,7 @@ export const validateAlphaLimit = (
 };
 
 interface GasValidationParams {
-  gasBalance: BigNumber;
+  gasBalance: bigint;
   gasDecimals: number;
   minGas: number;
   amount: number;
@@ -47,13 +46,11 @@ export const validateGasBalance = ({
   symbol,
   displayDecimals,
 }: GasValidationParams): ValidationResult | null => {
-  const gasNeeded = new BigNumber(minGas).times(10 ** gasDecimals);
-  const amountRaw = isGasToken
-    ? new BigNumber(amount).times(10 ** gasDecimals)
-    : new BigNumber(0);
-  const totalNeeded = gasNeeded.plus(amountRaw);
+  const gasNeeded = parseUnits(String(minGas), gasDecimals);
+  const amountRaw = isGasToken ? parseUnits(String(amount), gasDecimals) : 0n;
+  const totalNeeded = gasNeeded + amountRaw;
 
-  if (gasBalance.lt(totalNeeded)) {
+  if (gasBalance < totalNeeded) {
     const balanceDisplay = FixedPointMath.toNumber(gasBalance, gasDecimals);
     if (isGasToken) {
       return {
@@ -72,7 +69,7 @@ export const validateGasBalance = ({
 interface SwapInputParams {
   amount: string;
   token: 'SUI' | 'SOL';
-  gasBalance: BigNumber;
+  gasBalance: bigint;
   isGasToken?: boolean;
 }
 

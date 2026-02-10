@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { WalletSVG } from '@/components/ui/icons';
 import { useAppState } from '@/hooks/store/use-app-state';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { ZERO_BIG_NUMBER } from '@/utils';
+import { ZERO_BIG_INT } from '@/utils';
 
 import type { InputFieldGenericProps } from './input-field.types';
 
@@ -36,9 +36,9 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
         onClick: () => {
           setValue(
             `${name}.value`,
-            FixedPointMath.toNumber(balance ?? ZERO_BIG_NUMBER)
+            FixedPointMath.toNumber(balance ?? ZERO_BIG_INT)
           );
-          setValue(`${name}.valueBN`, balance ?? ZERO_BIG_NUMBER);
+          setValue(`${name}.valueBN`, balance ?? ZERO_BIG_INT);
         },
       })}
     >
@@ -47,9 +47,7 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
         {loadingCoins || loadingObjects ? (
           <Skeleton width="2rem" />
         ) : (
-          FixedPointMath.toNumber(
-            balance && !balance.isNaN() ? balance : ZERO_BIG_NUMBER
-          )
+          FixedPointMath.toNumber(balance ?? ZERO_BIG_INT)
         )}
       </Span>
     </Button>

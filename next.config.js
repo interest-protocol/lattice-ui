@@ -5,6 +5,7 @@ const nextConfig = {
     styledComponents: true,
   },
   transpilePackages: ['@privy-io/react-auth'],
+  reactCompiler: true,
 };
 
 module.exports = nextConfig;

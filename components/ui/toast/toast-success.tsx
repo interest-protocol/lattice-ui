@@ -1,37 +1,29 @@
-import { Div, P, Span } from '@stylin.js/elements';
 import Link from 'next/link';
 import type { FC } from 'react';
 
 import { CheckSVG } from '@/components/ui/icons';
-import ToastTimer from './toast-timer';
 import type { ToastProps, ToastSuccessProps } from './toast.types';
+import ToastTimer from './toast-timer';
 
 const ToastContent: FC<ToastProps> = ({ action, message }) => (
-  <Div display="flex" alignItems="center" gap="1rem">
-    <Div
-      width="2rem"
-      height="2rem"
-      color="#00DF80"
-      borderRadius="50%"
-      boxShadow="0 0 5rem 1rem #00DF80, inset 0 0 1rem 1rem #2C4A47"
+  <div className="flex items-center gap-4">
+    <div
+      className="w-8 h-8 rounded-full"
+      style={{
+        color: '#00DF80',
+        boxShadow: '0 0 5rem 1rem #00DF80, inset 0 0 1rem 1rem #2C4A47',
+      }}
     >
-      <Span
-        width="2rem"
-        height="2rem"
-        display="flex"
-        borderRadius="50%"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <span className="w-8 h-8 flex rounded-full items-center justify-center">
         <CheckSVG maxWidth="1.25rem" width="100%" />
-      </Span>
-    </Div>
-    <Div>
-      <P color="#FFFFFF">{action} Successfully!</P>
-      {message && <P color="#C8C5C5">{message}</P>}
-    </Div>
+      </span>
+    </div>
+    <div>
+      <p className="text-white">{action} Successfully!</p>
+      {message && <p className="text-[#C8C5C5]">{message}</p>}
+    </div>
     <ToastTimer color="#00DF80" />
-  </Div>
+  </div>
 );
 
 const ToastSuccess: FC<ToastSuccessProps> = ({ link, ...props }) => {

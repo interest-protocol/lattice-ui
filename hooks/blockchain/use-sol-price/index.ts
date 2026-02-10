@@ -1,15 +1,16 @@
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
 
 import { SOL_TYPE } from '@/constants/coins';
 import { fetchCoinPrices } from '@/lib/external/client';
-import { priceSwrConfig } from '@/lib/swr/config';
 
 export const useSolPrice = () =>
-  useSWR<number>(
-    [useSolPrice.name],
-    async () => {
+  useQuery<number>({
+    queryKey: [useSolPrice.name],
+    queryFn: async () => {
       const data = await fetchCoinPrices([SOL_TYPE]);
       return data[0]?.price ?? 0;
     },
-    priceSwrConfig
-  );
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: false,
+    staleTime: 5_000,
+  });

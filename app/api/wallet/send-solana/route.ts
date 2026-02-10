@@ -1,15 +1,25 @@
 import {
-  createTransferInstruction,
-  getAssociatedTokenAddress,
-} from '@solana/spl-token';
-import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+  type Address,
+  address,
+  appendTransactionMessageInstruction,
+  compileTransaction,
+  createNoopSigner,
+  createTransactionMessage,
+  getBase64EncodedWireTransaction,
+  type Instruction,
+  pipe,
+  setTransactionMessageFeePayer,
+  setTransactionMessageLifetimeUsingBlockhash,
+} from '@solana/kit';
+import { getTransferSolInstruction } from '@solana-program/system';
+import { getTransferInstruction } from '@solana-program/token';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
-import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
-import { getSolanaConnection } from '@/lib/solana/server';
+import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { getSolanaRpc } from '@/lib/solana/server';
 
 const schema = z.object({
   userId: z.string(),
@@ -18,6 +28,26 @@ const schema = z.object({
   mint: z.string().optional(),
 });
 
+async function findAta(
+  rpc: ReturnType<typeof getSolanaRpc>,
+  mint: Address,
+  owner: Address
+): Promise<Address> {
+  const { value: accounts } = await rpc
+    .getTokenAccountsByOwner(
+      owner,
+      { mint },
+      { encoding: 'jsonParsed', commitment: 'confirmed' }
+    )
+    .send();
+
+  if (accounts.length > 0) {
+    return accounts[0].pubkey;
+  }
+
+  throw new Error(`No token account found for mint ${mint}`);
+}
+
 export async function POST(request: NextRequest) {
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
@@ -25,47 +55,46 @@ export async function POST(request: NextRequest) {
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'solana');
-    const connection = getSolanaConnection();
-    const fromPubkey = new PublicKey(wallet.address);
-    const toPubkey = new PublicKey(body.recipient);
+    const rpc = getSolanaRpc();
+    const fromAddress = address(wallet.address);
+    const toAddress = address(body.recipient);
+    const fromSigner = createNoopSigner(fromAddress);
 
-    const tx = new Transaction();
+    let instruction: Instruction;
 
     if (!body.mint) {
-      tx.add(
-        SystemProgram.transfer({
-          fromPubkey,
-          toPubkey,
-          lamports: BigInt(body.amount),
-        })
-      );
+      instruction = getTransferSolInstruction({
+        source: fromSigner,
+        destination: toAddress,
+        amount: BigInt(body.amount),
+      });
     } else {
-      const mintPubkey = new PublicKey(body.mint);
-      const fromTokenAccount = await getAssociatedTokenAddress(
-        mintPubkey,
-        fromPubkey
-      );
-      const toTokenAccount = await getAssociatedTokenAddress(
-        mintPubkey,
-        toPubkey
-      );
-      tx.add(
-        createTransferInstruction(
-          fromTokenAccount,
-          toTokenAccount,
-          fromPubkey,
-          BigInt(body.amount)
-        )
-      );
+      const mintAddress = address(body.mint);
+      const fromTokenAccount = await findAta(rpc, mintAddress, fromAddress);
+      const toTokenAccount = await findAta(rpc, mintAddress, toAddress);
+
+      instruction = getTransferInstruction({
+        source: fromTokenAccount,
+        destination: toTokenAccount,
+        authority: fromSigner,
+        amount: BigInt(body.amount),
+      });
     }
 
-    const { blockhash } = await connection.getLatestBlockhash();
-    tx.recentBlockhash = blockhash;
-    tx.feePayer = fromPubkey;
+    const { value: latestBlockhash } = await rpc
+      .getLatestBlockhash({ commitment: 'confirmed' })
+      .send();
 
-    const serialized = tx
-      .serialize({ requireAllSignatures: false })
-      .toString('base64');
+    const transactionMessage = pipe(
+      createTransactionMessage({ version: 'legacy' }),
+      (msg) => setTransactionMessageFeePayer(fromAddress, msg),
+      (msg) =>
+        setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, msg),
+      (msg) => appendTransactionMessageInstruction(instruction, msg)
+    );
+
+    const compiledTransaction = compileTransaction(transactionMessage);
+    const serialized = getBase64EncodedWireTransaction(compiledTransaction);
 
     const result = await privy
       .wallets()

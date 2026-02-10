@@ -1,55 +1,50 @@
-import BigNumber from 'bignumber.js';
-
-import { parseBigNumberish } from '@/utils';
-
 export enum Rounding {
   ROUND_DOWN = 0,
   ROUND_HALF_UP = 1,
   ROUND_UP = 2,
 }
 
-const toBigNumberRounding: Record<Rounding, BigNumber.RoundingMode> = {
-  [Rounding.ROUND_DOWN]: BigNumber.ROUND_DOWN,
-  [Rounding.ROUND_HALF_UP]: BigNumber.ROUND_HALF_UP,
-  [Rounding.ROUND_UP]: BigNumber.ROUND_UP,
+export type BigIntish = bigint | number | string;
+
+const toBigInt = (value: BigIntish): bigint => {
+  if (typeof value === 'bigint') return value;
+  if (typeof value === 'number') return BigInt(Math.trunc(value));
+  return BigInt(value);
 };
 
 export class Fraction {
-  public readonly numerator: BigNumber;
-  public readonly denominator: BigNumber;
+  public readonly numerator: bigint;
+  public readonly denominator: bigint;
 
-  public constructor(
-    numerator: BigNumber.Value,
-    denominator: BigNumber.Value = 1
-  ) {
-    this.numerator = parseBigNumberish(numerator);
-    this.denominator = parseBigNumberish(denominator);
+  public constructor(numerator: BigIntish, denominator: BigIntish = 1n) {
+    this.numerator = toBigInt(numerator);
+    this.denominator = toBigInt(denominator);
   }
 
-  public get quotient(): BigNumber {
-    return this.numerator.div(this.denominator);
+  public get quotient(): bigint {
+    return this.numerator / this.denominator;
   }
 
   public get remainder(): Fraction {
-    return new Fraction(this.numerator.mod(this.denominator), this.denominator);
+    return new Fraction(this.numerator % this.denominator, this.denominator);
   }
 
   public invert(): Fraction {
-    return new Fraction(this.numerator, this.denominator);
+    return new Fraction(this.denominator, this.numerator);
   }
 
   public static from(
-    numerator: BigNumber.Value,
-    denominator: BigNumber.Value = 1
+    numerator: BigIntish,
+    denominator: BigIntish = 1n
   ): Fraction {
     return new Fraction(numerator, denominator);
   }
 
-  private static tryParseFraction(
-    fractionish: BigNumber.Value | Fraction
-  ): Fraction {
+  private static tryParseFraction(fractionish: BigIntish | Fraction): Fraction {
+    if (fractionish instanceof Fraction) return fractionish;
+
     if (
-      fractionish instanceof BigNumber ||
+      typeof fractionish === 'bigint' ||
       typeof fractionish === 'number' ||
       typeof fractionish === 'string'
     )
@@ -58,67 +53,65 @@ export class Fraction {
     throw new Error('Could not parse fraction');
   }
 
-  public plus(other: Fraction | BigNumber.Value): Fraction {
+  public plus(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
-    if (otherParsed.denominator.eq(this.denominator))
+    if (otherParsed.denominator === this.denominator)
       return new Fraction(
-        this.numerator.plus(otherParsed.numerator),
+        this.numerator + otherParsed.numerator,
         otherParsed.denominator
       );
 
     return new Fraction(
-      this.numerator
-        .multipliedBy(otherParsed.denominator)
-        .plus(this.denominator.multipliedBy(otherParsed.numerator)),
-      this.denominator.multipliedBy(otherParsed.denominator)
+      this.numerator * otherParsed.denominator +
+        this.denominator * otherParsed.numerator,
+      this.denominator * otherParsed.denominator
     );
   }
 
-  public minustract(other: Fraction | BigNumber.Value): Fraction {
+  public minustract(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
-    if (otherParsed.denominator.eq(this.denominator))
+    if (otherParsed.denominator === this.denominator)
       return new Fraction(
-        this.numerator.minus(otherParsed.numerator),
+        this.numerator - otherParsed.numerator,
         otherParsed.denominator
       );
 
     return new Fraction(
-      this.numerator
-        .multipliedBy(otherParsed.denominator)
-        .minus(this.denominator.multipliedBy(otherParsed.numerator)),
-      this.denominator.multipliedBy(otherParsed.denominator)
+      this.numerator * otherParsed.denominator -
+        this.denominator * otherParsed.numerator,
+      this.denominator * otherParsed.denominator
     );
   }
 
-  public lessThan(other: Fraction | BigNumber.Value): boolean {
+  public lessThan(other: Fraction | BigIntish): boolean {
     const otherParsed = Fraction.tryParseFraction(other);
-
-    return this.numerator
-      .multipliedBy(otherParsed.denominator)
-      .lt(otherParsed.numerator.multipliedBy(this.denominator));
-  }
-
-  public equalTo(other: Fraction | BigNumber.Value): boolean {
-    const otherParsed = Fraction.tryParseFraction(other);
-
-    return this.numerator
-      .multipliedBy(otherParsed.denominator)
-      .eq(otherParsed.numerator.multipliedBy(this.denominator));
-  }
-
-  public divide(other: Fraction | BigNumber.Value): Fraction {
-    const otherParsed = Fraction.tryParseFraction(other);
-    return new Fraction(
-      this.numerator.multipliedBy(otherParsed.denominator),
-      this.denominator.multipliedBy(otherParsed.numerator)
+    return (
+      this.numerator * otherParsed.denominator <
+      otherParsed.numerator * this.denominator
     );
   }
 
-  public multipliedBytiply(other: Fraction | BigNumber.Value): Fraction {
+  public equalTo(other: Fraction | BigIntish): boolean {
+    const otherParsed = Fraction.tryParseFraction(other);
+    return (
+      this.numerator * otherParsed.denominator ===
+      otherParsed.numerator * this.denominator
+    );
+  }
+
+  public divide(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
     return new Fraction(
-      this.numerator.multipliedBy(otherParsed.numerator),
-      this.denominator.multipliedBy(otherParsed.denominator)
+      this.numerator * otherParsed.denominator,
+      this.denominator * otherParsed.numerator
+    );
+  }
+
+  public multipliedBytiply(other: Fraction | BigIntish): Fraction {
+    const otherParsed = Fraction.tryParseFraction(other);
+    return new Fraction(
+      this.numerator * otherParsed.numerator,
+      this.denominator * otherParsed.denominator
     );
   }
 
@@ -127,20 +120,37 @@ export class Fraction {
     _format: Record<string, string> = { groupSeparator: '' },
     rounding: Rounding = Rounding.ROUND_HALF_UP
   ): string {
-    const quotient = this.numerator.div(this.denominator);
-    return quotient
-      .precision(significantDigits, toBigNumberRounding[rounding])
-      .toString();
+    const num = Number(this.numerator) / Number(this.denominator);
+    const raw = num.toPrecision(significantDigits);
+
+    if (rounding === Rounding.ROUND_DOWN) {
+      const factor =
+        10 **
+        (significantDigits - 1 - Math.floor(Math.log10(Math.abs(num) || 1)));
+      const truncated = Math.trunc(num * factor) / factor;
+      return truncated.toPrecision(significantDigits).replace(/\.?0+$/, '');
+    }
+    if (rounding === Rounding.ROUND_UP) {
+      const factor =
+        10 **
+        (significantDigits - 1 - Math.floor(Math.log10(Math.abs(num) || 1)));
+      const ceiled =
+        num >= 0
+          ? Math.ceil(num * factor) / factor
+          : Math.floor(num * factor) / factor;
+      return ceiled.toPrecision(significantDigits).replace(/\.?0+$/, '');
+    }
+
+    return raw.replace(/\.?0+$/, '');
   }
 
   public toFixed(
     decimalPlaces: number,
     options?: Intl.NumberFormatOptions
   ): string {
-    const value = this.numerator.div(this.denominator).toString();
-    const decimals = value.slice(value.length - decimalPlaces);
-    const nonDecimals = value.slice(0, value.length - decimalPlaces);
-    const num = Number(`${nonDecimals}.${decimals}`);
-    return new Intl.NumberFormat('en-IN', options).format(num);
+    const num = Number(this.numerator) / Number(this.denominator);
+    return new Intl.NumberFormat('en-IN', options).format(
+      Number(num.toFixed(decimalPlaces))
+    );
   }
 }

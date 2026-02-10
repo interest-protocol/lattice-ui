@@ -5,7 +5,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 
 import InputField from '@/components/composed/input-field';
 import { SOL_TYPE } from '@/constants/coins';
-import { ZERO_BIG_NUMBER } from '@/utils';
+import { ZERO_BIG_INT } from '@/utils';
 
 import SwapFormButton from './swap-form-button';
 
@@ -13,12 +13,12 @@ interface SwapFormValues {
   from: {
     type: string;
     value: string;
-    valueBN: typeof ZERO_BIG_NUMBER;
+    valueBN: bigint;
   };
   to: {
     type: string;
     value: string;
-    valueBN: typeof ZERO_BIG_NUMBER;
+    valueBN: bigint;
   };
 }
 
@@ -28,12 +28,12 @@ const SwapForm: FC = () => {
       from: {
         type: SUI_TYPE_ARG,
         value: '',
-        valueBN: ZERO_BIG_NUMBER,
+        valueBN: ZERO_BIG_INT,
       },
       to: {
         type: SOL_TYPE,
         value: '',
-        valueBN: ZERO_BIG_NUMBER,
+        valueBN: ZERO_BIG_INT,
       },
     },
   });

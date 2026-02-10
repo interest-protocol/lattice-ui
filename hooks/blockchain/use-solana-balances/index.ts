@@ -1,47 +1,61 @@
-import { PublicKey } from '@solana/web3.js';
-import BigNumber from 'bignumber.js';
-import { useMemo } from 'react';
-import useSWR from 'swr';
+import { address } from '@solana/kit';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 
 import { WSUI_SOLANA_MINT } from '@/constants';
-import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
+import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import { CurrencyAmount, Token } from '@/lib/entities';
-import { balanceSwrConfig } from '@/lib/swr/config';
 
 const DEFAULT_SOLANA_BALANCES = {
-  sol: new BigNumber(0),
-  wsui: new BigNumber(0),
+  sol: 0n,
+  wsui: 0n,
 };
 
-const useSolanaBalances = (address: string | null) => {
-  const connection = useSolanaConnection();
+const useSolanaBalances = (addr: string | null) => {
+  const rpc = useSolanaRpc();
+  const queryClient = useQueryClient();
 
-  const { data, isLoading, mutate } = useSWR(
-    address ? [useSolanaBalances.name, address] : null,
-    async ([, addr]) => {
-      const pubkey = new PublicKey(addr);
-      const wsuiMint = new PublicKey(WSUI_SOLANA_MINT);
+  const queryKey = useMemo(() => [useSolanaBalances.name, addr], [addr]);
 
-      const [solLamports, tokenAccounts] = await Promise.all([
-        connection.getBalance(pubkey),
-        connection.getParsedTokenAccountsByOwner(pubkey, { mint: wsuiMint }),
-      ]);
+  const fetchBalances = useCallback(async () => {
+    if (!addr) return DEFAULT_SOLANA_BALANCES;
+    const pubkey = address(addr);
+    const wsuiMint = address(WSUI_SOLANA_MINT);
 
-      let wsuiRaw = new BigNumber(0);
-      for (const { account } of tokenAccounts.value) {
-        const parsed = account.data.parsed;
-        if (parsed?.info?.tokenAmount?.amount) {
-          wsuiRaw = wsuiRaw.plus(parsed.info.tokenAmount.amount);
-        }
+    const [solResult, tokenResult] = await Promise.all([
+      rpc.getBalance(pubkey, { commitment: 'confirmed' }).send(),
+      rpc
+        .getTokenAccountsByOwner(
+          pubkey,
+          { mint: wsuiMint },
+          { encoding: 'jsonParsed', commitment: 'confirmed' }
+        )
+        .send(),
+    ]);
+
+    let wsuiRaw = 0n;
+    for (const { account } of tokenResult.value) {
+      const parsed = (account.data as any).parsed;
+      if (parsed?.info?.tokenAmount?.amount) {
+        wsuiRaw += BigInt(parsed.info.tokenAmount.amount);
       }
+    }
 
-      return {
-        sol: new BigNumber(solLamports),
-        wsui: wsuiRaw,
-      };
-    },
-    balanceSwrConfig
-  );
+    return {
+      sol: BigInt(solResult.value),
+      wsui: wsuiRaw,
+    };
+  }, [rpc, addr]);
+
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: fetchBalances,
+    enabled: !!addr,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: false,
+    staleTime: 5_000,
+    structuralSharing: false,
+  });
 
   const balances = useMemo(() => data ?? DEFAULT_SOLANA_BALANCES, [data]);
 
@@ -51,6 +65,15 @@ const useSolanaBalances = (address: string | null) => {
     }),
     [balances.sol]
   );
+
+  const mutate = useCallback(async () => {
+    const result = await queryClient.fetchQuery({
+      queryKey,
+      queryFn: fetchBalances,
+      staleTime: 0,
+    });
+    return result;
+  }, [queryClient, queryKey, fetchBalances]);
 
   return {
     balances,

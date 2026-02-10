@@ -1,16 +1,16 @@
 import { SolanaPubkey } from '@interest-protocol/registry-sdk';
-import type { Connection } from '@solana/web3.js';
-import type BigNumber from 'bignumber.js';
+import type { Signature } from '@solana/kit';
 
 import { NATIVE_SOL_MINT } from '@/constants/coins';
 import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
+import type { SolanaRpc } from '@/lib/solana/server';
 import { sendSolana } from '@/lib/wallet/client';
 
 import type { ChainAdapter, DepositParams } from './chain-adapter.types';
 
 export const createSolanaAdapter = (
-  connection: Connection,
-  mutateBalances: () => Promise<Record<string, BigNumber> | undefined>
+  rpc: SolanaRpc,
+  mutateBalances: () => Promise<Record<string, bigint> | undefined>
 ): ChainAdapter => ({
   chainKey: 'solana',
 
@@ -32,10 +32,10 @@ export const createSolanaAdapter = (
   },
 
   async confirmTransaction(txId: string) {
-    await confirmSolanaTransaction(connection, txId);
+    await confirmSolanaTransaction(rpc, txId as Signature);
   },
 
-  getBalanceForPolling(balances: Record<string, BigNumber>) {
+  getBalanceForPolling(balances: Record<string, bigint>) {
     return balances.sol;
   },
 

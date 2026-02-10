@@ -9,8 +9,8 @@ import { z } from 'zod';
 import { validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
-import { WalletNotFoundError, getFirstWallet } from '@/lib/privy/wallet';
-import { ENCLAVE_OBJECT_ID, createXBridgeSdk } from '@/lib/xbridge';
+import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
   userId: z.string(),

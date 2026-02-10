@@ -1,7 +1,7 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
-import type BigNumber from 'bignumber.js';
+import Image from 'next/image';
 import { type FC, useState } from 'react';
 
 import { toasting } from '@/components/ui/toast';
@@ -37,7 +37,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const { balances: solanaBalances, isLoading: solLoading } =
     useSolanaBalances(solanaAddress);
 
-  const getBalance = (): BigNumber => {
+  const getBalance = (): bigint => {
     if (network === 'sui') {
       return selectedTokenIndex === 0 ? suiBalances.sui : suiBalances.wsol;
     }
@@ -87,9 +87,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
       const rawAmount = FixedPointMath.toBigNumber(
         Number.parseFloat(amount),
         selectedToken.decimals
-      )
-        .toFixed(0)
-        .toString();
+      ).toString();
 
       await sendTokens(network, {
         userId: user.id,
@@ -150,11 +148,11 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
                 nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF0D' }}
               >
                 {token.iconUrl && (
-                  <img
+                  <Image
                     src={token.iconUrl}
                     alt={token.symbol}
-                    width="18"
-                    height="18"
+                    width={18}
+                    height={18}
                     style={{ borderRadius: '50%' }}
                   />
                 )}

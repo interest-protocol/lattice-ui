@@ -1,6 +1,6 @@
 import { Button, Div, Span } from '@stylin.js/elements';
-import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
 
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 

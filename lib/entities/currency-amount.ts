@@ -1,40 +1,48 @@
-import BigNumber from 'bignumber.js';
-
-import type { BigNumberish } from '@/interface';
-import { parseBigNumberish } from '@/utils';
+import { parseUnits, toSignificant } from '@/lib/bigint-utils';
 
 import { FixedPointMath } from './fixed-point-math';
 import { Fraction } from './fraction';
 import type { Token } from './token';
 
+export type BigIntish = bigint | number | string;
+
+const parseBigIntish = (value: BigIntish): bigint => {
+  if (typeof value === 'bigint') return value;
+  if (typeof value === 'number') return BigInt(Math.trunc(value));
+  try {
+    return BigInt(value);
+  } catch {
+    return 0n;
+  }
+};
+
 export class CurrencyAmount {
   readonly token: Token;
-  readonly raw: BigNumber;
+  readonly raw: bigint;
 
-  private constructor(token: Token, raw: BigNumber) {
+  private constructor(token: Token, raw: bigint) {
     this.token = token;
     this.raw = raw;
   }
 
   // --- Factories ---
 
-  static fromRawAmount(token: Token, raw: BigNumberish): CurrencyAmount {
-    return new CurrencyAmount(token, parseBigNumberish(raw));
+  static fromRawAmount(token: Token, raw: BigIntish): CurrencyAmount {
+    return new CurrencyAmount(token, parseBigIntish(raw));
   }
 
   static fromHumanAmount(
     token: Token,
     humanAmount: string | number
   ): CurrencyAmount {
-    const raw = FixedPointMath.toBigNumber(
-      typeof humanAmount === 'string' ? Number(humanAmount) || 0 : humanAmount,
-      token.decimals
-    );
+    const str =
+      typeof humanAmount === 'number' ? String(humanAmount) : humanAmount;
+    const raw = parseUnits(str || '0', token.decimals);
     return new CurrencyAmount(token, raw);
   }
 
   static zero(token: Token): CurrencyAmount {
-    return new CurrencyAmount(token, new BigNumber(0));
+    return new CurrencyAmount(token, 0n);
   }
 
   // --- Display ---
@@ -42,7 +50,7 @@ export class CurrencyAmount {
   toExact(): string {
     return Fraction.from(
       this.raw,
-      new BigNumber(10).pow(this.token.decimals)
+      10n ** BigInt(this.token.decimals)
     ).toSignificant(this.token.decimals, { groupSeparator: '' });
   }
 
@@ -52,10 +60,7 @@ export class CurrencyAmount {
   }
 
   toSignificant(sig = 6): string {
-    return Fraction.from(
-      this.raw,
-      new BigNumber(10).pow(this.token.decimals)
-    ).toSignificant(sig, { groupSeparator: '' });
+    return toSignificant(this.raw, this.token.decimals, sig);
   }
 
   toNumber(): number {
@@ -66,50 +71,47 @@ export class CurrencyAmount {
 
   add(other: CurrencyAmount): CurrencyAmount {
     this.assertSameToken(other);
-    return new CurrencyAmount(this.token, this.raw.plus(other.raw));
+    return new CurrencyAmount(this.token, this.raw + other.raw);
   }
 
   subtract(other: CurrencyAmount): CurrencyAmount {
     this.assertSameToken(other);
-    return new CurrencyAmount(this.token, this.raw.minus(other.raw));
+    return new CurrencyAmount(this.token, this.raw - other.raw);
   }
 
-  multiply(other: BigNumberish): CurrencyAmount {
-    const factor = parseBigNumberish(other);
-    return new CurrencyAmount(
-      this.token,
-      this.raw.multipliedBy(factor).decimalPlaces(0, BigNumber.ROUND_DOWN)
-    );
+  multiply(other: BigIntish): CurrencyAmount {
+    const factor = parseBigIntish(other);
+    return new CurrencyAmount(this.token, this.raw * factor);
   }
 
   // --- Comparisons ---
 
   greaterThan(other: CurrencyAmount): boolean {
     this.assertSameToken(other);
-    return this.raw.gt(other.raw);
+    return this.raw > other.raw;
   }
 
   lessThan(other: CurrencyAmount): boolean {
     this.assertSameToken(other);
-    return this.raw.lt(other.raw);
+    return this.raw < other.raw;
   }
 
   equalTo(other: CurrencyAmount): boolean {
     this.assertSameToken(other);
-    return this.raw.eq(other.raw);
+    return this.raw === other.raw;
   }
 
   isZero(): boolean {
-    return this.raw.isZero();
+    return this.raw === 0n;
   }
 
   isPositive(): boolean {
-    return this.raw.gt(0);
+    return this.raw > 0n;
   }
 
   exceedsBalance(balance: CurrencyAmount): boolean {
     this.assertSameToken(balance);
-    return this.raw.gt(balance.raw);
+    return this.raw > balance.raw;
   }
 
   // --- Internal ---

@@ -1,9 +1,8 @@
-import { Connection } from '@solana/web3.js';
+import { createSolanaRpc } from '@solana/kit';
 import { useMemo } from 'react';
 
 import { SOLANA_RPC_URL } from '@/constants';
 
-const useSolanaConnection = () =>
-  useMemo(() => new Connection(SOLANA_RPC_URL, 'confirmed'), []);
+const useSolanaRpc = () => useMemo(() => createSolanaRpc(SOLANA_RPC_URL), []);
 
-export default useSolanaConnection;
+export default useSolanaRpc;

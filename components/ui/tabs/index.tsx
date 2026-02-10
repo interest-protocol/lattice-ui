@@ -1,28 +1,24 @@
-import { Button, Div } from '@stylin.js/elements';
 import type { FC } from 'react';
 
 import type { TabsProps } from './tabs.types';
 
 const Tabs: FC<TabsProps> = ({ setTab, tab, tabs }) => (
-  <Div display="flex" gap="0.5rem">
+  <div className="flex gap-2">
     {tabs.map((text, index) => (
-      <Button
-        all="unset"
-        py="0.5rem"
-        px="0.75rem"
+      <button
+        type="button"
         key={text}
-        cursor="pointer"
-        border="1px solid"
-        borderRadius="0.75rem"
+        className={`py-2 px-3 cursor-pointer border rounded-xl ${
+          tab === index
+            ? 'text-[#292929] bg-accent border-accent'
+            : 'text-white bg-transparent border-accent-4d'
+        }`}
         onClick={() => setTab(index)}
-        color={tab === index ? '#292929' : 'white'}
-        bg={tab === index ? '#A78BFA' : 'transparent'}
-        borderColor={tab === index ? '#A78BFA' : '#A78BFA4D'}
       >
         {text}
-      </Button>
+      </button>
     ))}
-  </Div>
+  </div>
 );
 
 export default Tabs;

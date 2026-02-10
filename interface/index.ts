@@ -1,6 +1,4 @@
-import type BigNumber from 'bignumber.js';
-
-export type BigNumberish = BigNumber | bigint | string | number;
+export type BigNumberish = bigint | string | number;
 
 export interface AssetMetadata {
   name: string;

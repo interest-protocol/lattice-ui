@@ -1,4 +1,5 @@
 import { Button, Div, Label, Span } from '@stylin.js/elements';
+import Image from 'next/image';
 import type { FC } from 'react';
 
 import { CHAIN_KEYS, CHAIN_REGISTRY } from '@/constants/chains';
@@ -35,11 +36,11 @@ const BridgeNetworkSelector: FC<BridgeNetworkSelectorProps> = ({
             nHover={{ bg: isSelected ? '#A78BFA1A' : '#FFFFFF1A' }}
           >
             {config.nativeToken?.iconUrl && (
-              <img
+              <Image
                 src={config.nativeToken.iconUrl}
                 alt={config.displayName}
-                width="20"
-                height="20"
+                width={20}
+                height={20}
                 style={{ borderRadius: '50%' }}
               />
             )}

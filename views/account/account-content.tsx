@@ -1,7 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, H1, H2, Img, P } from '@stylin.js/elements';
-import type BigNumber from 'bignumber.js';
 import { type FC, useCallback, useState } from 'react';
 
 import { CopySVG } from '@/components/ui/icons';
@@ -29,7 +28,7 @@ const AssetRow: FC<{
   symbol: string;
   name: string;
   iconUrl?: string;
-  balance: BigNumber;
+  balance: bigint;
   decimals: number;
   isLoading: boolean;
 }> = ({ symbol, name, iconUrl, balance, decimals, isLoading }) => (
@@ -78,8 +77,8 @@ const AssetRow: FC<{
 const BalancesView: FC<{
   displaySuiAddress: string | null;
   solanaAddress: string | null;
-  suiBalances: { sui: BigNumber; wsol: BigNumber };
-  solanaBalances: { sol: BigNumber; wsui: BigNumber };
+  suiBalances: { sui: bigint; wsol: bigint };
+  solanaBalances: { sol: bigint; wsui: bigint };
   suiLoading: boolean;
   solLoading: boolean;
   creatingSuiWallet: boolean;

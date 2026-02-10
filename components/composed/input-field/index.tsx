@@ -4,12 +4,11 @@ import { useFormContext } from 'react-hook-form';
 
 import { CurrencyAmount, Token } from '@/lib/entities';
 import { parseInputEventToNumberString } from '@/utils';
-
+import type { InputFieldProps } from './input-field.types';
 import InputFieldAsset from './input-field-asset';
 import InputFieldBalance from './input-field-balance';
 import InputFieldBalances from './input-field-balances';
 import InputFieldPrice from './input-field-price';
-import type { InputFieldProps } from './input-field.types';
 
 const InputField: FC<InputFieldProps> = ({
   name,

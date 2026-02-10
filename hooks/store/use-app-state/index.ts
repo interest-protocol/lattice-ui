@@ -1,11 +1,10 @@
-import type BigNumber from 'bignumber.js';
 import { create } from 'zustand';
 
 interface AppState {
   mutate: () => void;
   loadingCoins: boolean;
   loadingObjects: boolean;
-  balances: Record<string, BigNumber>;
+  balances: Record<string, bigint>;
   update: {
     (
       partial:

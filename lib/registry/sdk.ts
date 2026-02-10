@@ -35,7 +35,7 @@ export const createRegistrySdk = (rpcUrl?: string): RegistryClients => {
 };
 
 export {
+  REGISTRY_SHARED_OBJECT_DATA,
   Registry,
   SolanaPubkey,
-  REGISTRY_SHARED_OBJECT_DATA,
 } from '@interest-protocol/registry-sdk';

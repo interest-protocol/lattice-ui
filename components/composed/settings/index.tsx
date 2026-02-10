@@ -1,10 +1,8 @@
 import { Button, Div, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { type FC, useState } from 'react';
-
-import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
-
 import { BarsSVG, CogSVG } from '@/components/ui/icons';
+import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
 import SettingsMenu from './settings-menu';
 
 const Settings: FC = () => {

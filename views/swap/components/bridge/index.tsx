@@ -1,6 +1,4 @@
 import { Div } from '@stylin.js/elements';
-import BigNumberJS from 'bignumber.js';
-import type BigNumber from 'bignumber.js';
 import { type FC, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -10,14 +8,14 @@ import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useBridge, { type BridgeDirection } from '@/hooks/domain/use-bridge';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { parseUnits } from '@/lib/bigint-utils';
 import { Token } from '@/lib/entities';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
-
+import type { TokenKey, TokenOption, ValidationResult } from './bridge.types';
 import BridgeDetails from './bridge-details';
 import BridgeForm from './bridge-form';
-import type { TokenKey, TokenOption, ValidationResult } from './bridge.types';
 
 const TOKEN_OPTIONS: Record<string, TokenOption> = {
   SUI: {
@@ -54,7 +52,7 @@ const Bridge: FC = () => {
   const { balances: solanaBalances, isLoading: solLoading } =
     useSolanaBalances(solanaAddress);
 
-  const getBalance = (): BigNumber => {
+  const getBalance = (): bigint => {
     if (sourceNetwork === 'sui') {
       if (selectedToken === 'SUI') return suiBalances.sui;
       return suiBalances.wsol;
@@ -135,9 +133,9 @@ const Bridge: FC = () => {
     }
 
     const direction = getBridgeDirection();
-    const amountBN = new BigNumberJS(amount).times(10 ** decimals);
+    const amountRaw = parseUnits(amount, decimals);
 
-    await bridge({ direction, amount: amountBN });
+    await bridge({ direction, amount: amountRaw });
 
     if (status === 'success') {
       setAmount('');

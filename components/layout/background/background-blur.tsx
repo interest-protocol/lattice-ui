@@ -1,9 +1,7 @@
 import type { FC } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-
-import { useBackgroundMotionTranslate } from '@/hooks/ui/use-background-motion-position';
-
 import Motion from '@/components/ui/motion';
+import { useBackgroundMotionTranslate } from '@/hooks/ui/use-background-motion-position';
 
 const BackgroundBlur: FC = () => {
   const { x, y } = useBackgroundMotionTranslate(

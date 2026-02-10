@@ -1,9 +1,7 @@
 import { AnimatePresence } from 'motion/react';
 import { type FC, useEffect, useState } from 'react';
-
-import { TOAST_DURATION } from '@/constants/toast';
-
 import Motion from '@/components/ui/motion';
+import { TOAST_DURATION } from '@/constants/toast';
 import type { ToastTimerProps } from './toast.types';
 
 const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {

@@ -1,13 +1,11 @@
 import { Div, Img, Input, Label, P, Span } from '@stylin.js/elements';
 import { type FC, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-
+import { SearchSVG } from '@/components/ui/icons';
 import { useAppState } from '@/hooks/store/use-app-state';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { ZERO_BIG_NUMBER } from '@/utils';
-
-import { SearchSVG } from '@/components/ui/icons';
+import { ZERO_BIG_INT } from '@/utils';
 import type { InputFieldModalProps } from './input-field.types';
 
 const InputFieldModal: FC<InputFieldModalProps> = ({
@@ -126,7 +124,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
                 <P fontSize="0.875rem" fontFamily="JetBrains Mono">
                   {
                     +FixedPointMath.toNumber(
-                      balances[type] ?? ZERO_BIG_NUMBER,
+                      balances[type] ?? ZERO_BIG_INT,
                       decimals
                     ).toFixed(4)
                   }

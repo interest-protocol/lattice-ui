@@ -2,14 +2,12 @@ import { Img, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
-
+import { ChevronDownSVG } from '@/components/ui/icons';
 import Motion from '@/components/ui/motion';
 import useMetadata from '@/hooks/domain/use-metadata';
 import { useModal } from '@/hooks/store/use-modal';
-
-import { ChevronDownSVG } from '@/components/ui/icons';
-import InputFieldModal from './input-field-modal';
 import type { InputFieldAssetProps } from './input-field.types';
+import InputFieldModal from './input-field-modal';
 
 const InputFieldAsset: FC<InputFieldAssetProps> = ({
   name,

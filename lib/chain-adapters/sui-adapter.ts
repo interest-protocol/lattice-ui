@@ -1,7 +1,6 @@
 import { SuiAddress } from '@interest-protocol/registry-sdk';
 import type { SuiClient } from '@mysten/sui/client';
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
-import type BigNumber from 'bignumber.js';
 
 import { sendSui } from '@/lib/wallet/client';
 
@@ -9,7 +8,7 @@ import type { ChainAdapter, DepositParams } from './chain-adapter.types';
 
 export const createSuiAdapter = (
   suiClient: SuiClient,
-  mutateBalances: () => Promise<Record<string, BigNumber> | undefined>
+  mutateBalances: () => Promise<Record<string, bigint> | undefined>
 ): ChainAdapter => ({
   chainKey: 'sui',
 
@@ -37,7 +36,7 @@ export const createSuiAdapter = (
     });
   },
 
-  getBalanceForPolling(balances: Record<string, BigNumber>) {
+  getBalanceForPolling(balances: Record<string, bigint>) {
     return balances.sui;
   },
 

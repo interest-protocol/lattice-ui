@@ -5,14 +5,13 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { ChevronRightSVG } from '@/components/ui/icons';
 import {
-  EXPLORERS,
   EXPLORER_DISPLAY,
   EXPLORER_STORAGE_KEY,
+  EXPLORERS,
   Explorer,
 } from '@/constants';
-
-import SettingsMenuItem from './settings-menu-item';
 import type { SettingsMenusProps } from './settings-menu.types';
+import SettingsMenuItem from './settings-menu-item';
 
 const Motion = motion.create(Div);
 

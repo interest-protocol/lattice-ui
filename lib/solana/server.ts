@@ -1,13 +1,15 @@
-import { Connection } from '@solana/web3.js';
+import { createSolanaRpc } from '@solana/kit';
 
 import { SOLANA_RPC_URL } from '@/constants';
 
-let cachedConnection: Connection | null = null;
+let cachedRpc: ReturnType<typeof createSolanaRpc> | null = null;
 
-export const getSolanaConnection = (): Connection => {
-  if (!cachedConnection) {
-    cachedConnection = new Connection(SOLANA_RPC_URL, 'confirmed');
+export type SolanaRpc = ReturnType<typeof createSolanaRpc>;
+
+export const getSolanaRpc = (): SolanaRpc => {
+  if (!cachedRpc) {
+    cachedRpc = createSolanaRpc(SOLANA_RPC_URL);
   }
 
-  return cachedConnection;
+  return cachedRpc;
 };

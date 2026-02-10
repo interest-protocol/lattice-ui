@@ -1,6 +1,5 @@
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
 import { usePrivy } from '@privy-io/react-auth';
-import type BigNumber from 'bignumber.js';
 import bs58 from 'bs58';
 import { useCallback, useState } from 'react';
 import invariant from 'tiny-invariant';
@@ -9,7 +8,7 @@ import { toasting } from '@/components/ui/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSolanaConnection from '@/hooks/blockchain/use-solana-connection';
+import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
@@ -39,7 +38,7 @@ export type BridgeDirection =
 
 interface BridgeParams {
   direction: BridgeDirection;
-  amount: BigNumber;
+  amount: bigint;
 }
 
 export const useBridge = () => {
@@ -47,19 +46,19 @@ export const useBridge = () => {
   const [status, setStatus] = useState<BridgeStatus>('idle');
   const [error, setError] = useState<string | null>(null);
 
-  const solanaConnection = useSolanaConnection();
+  const solanaRpc = useSolanaRpc();
   const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
   const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);
 
   const solanaAdapter = useCallback(
-    () => createSolanaAdapter(solanaConnection, mutateSolanaBalances),
-    [solanaConnection, mutateSolanaBalances]
+    () => createSolanaAdapter(solanaRpc, mutateSolanaBalances),
+    [solanaRpc, mutateSolanaBalances]
   );
 
   const bridgeSolToWsol = useCallback(
-    async (amount: BigNumber, toastId: string) => {
+    async (amount: bigint, toastId: string) => {
       invariant(user && solanaAddress && suiAddress, 'Wallets not connected');
 
       const dwalletAddress = DWalletAddress[ChainId.Solana];

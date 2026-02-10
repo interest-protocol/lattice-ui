@@ -1,144 +1,117 @@
-import BigNumber from 'bignumber.js';
-
-import type { BigNumberish } from '@/interface';
-import {
-  ZERO_BIG_NUMBER,
-  isBigNumberish,
-  parseToPositiveStringNumber,
-} from '@/utils';
+import { formatUnits, parseUnits } from '@/lib/bigint-utils';
 
 import { Fraction } from './fraction';
 
-const ONE_COIN = new BigNumber(1000000000);
+const ONE_COIN = 10n ** 9n;
 
-const parse = (_value: BigNumberish) => {
-  const value = isBigNumberish(_value) ? _value.toString() : 0;
-  return new BigNumber(value);
+const parseToBigInt = (value: bigint | number | string): bigint => {
+  if (typeof value === 'bigint') return value;
+  if (typeof value === 'number') return BigInt(Math.trunc(value));
+  try {
+    return BigInt(value);
+  } catch {
+    return 0n;
+  }
 };
 
+type BigIntish = bigint | number | string;
+
 export class FixedPointMath {
-  private _value = ZERO_BIG_NUMBER;
+  private _value = 0n;
 
-  protected constructor(_value: BigNumberish) {
-    this._value = parse(_value);
+  protected constructor(_value: BigIntish) {
+    this._value = parseToBigInt(_value);
   }
 
-  private parseValue(x: BigNumberish | FixedPointMath): BigNumber {
+  private parseValue(x: BigIntish | FixedPointMath): bigint {
     if (x instanceof FixedPointMath) return x.value();
-
-    return parse(x);
+    return parseToBigInt(x);
   }
 
-  private isZero(value: BigNumberish | FixedPointMath): boolean {
-    if (value instanceof BigNumber) return value.isZero();
-    if (value === 0) return true;
-    if (value instanceof FixedPointMath) return value.value().isZero();
-    return value === '0';
-  }
-
-  public static from(value: BigNumberish): FixedPointMath {
+  public static from(value: BigIntish): FixedPointMath {
     return new FixedPointMath(value);
   }
 
   public static toBigNumber(
     value: number | string,
     decimals = 9,
-    significant = 6
-  ): BigNumber {
+    _significant = 6
+  ): bigint {
     const safeValue =
       typeof value === 'number' && value > Number.MAX_SAFE_INTEGER
         ? Number.MAX_SAFE_INTEGER
         : value;
 
-    if (safeValue == null || Number.isNaN(+safeValue)) return ZERO_BIG_NUMBER;
+    if (safeValue == null || Number.isNaN(+safeValue)) return 0n;
+    if (+safeValue < 0) return 0n;
 
-    const factor = BigNumber(10).pow(significant);
-
-    const bnValue = BigNumber(safeValue).times(factor);
-
-    if (
-      (typeof safeValue === 'number' && ZERO_BIG_NUMBER.gt(bnValue)) ||
-      (typeof safeValue === 'string' &&
-        ZERO_BIG_NUMBER.gt(
-          BigNumber(parseToPositiveStringNumber(safeValue)).times(factor)
-        ))
-    )
-      return ZERO_BIG_NUMBER;
-
-    return bnValue.times(BigNumber(10).pow(decimals - significant));
+    return parseUnits(String(safeValue), decimals);
   }
 
   public static toNumber(
-    value: BigNumber,
+    value: bigint,
     decimals = 9,
     significant = decimals
   ): number {
-    if (value?.isZero()) return 0;
+    if (value === 0n) return 0;
 
-    const result = +Fraction.from(
-      value,
-      new BigNumber(10).pow(decimals)
-    ).toSignificant(significant, { groupSeparator: '' }, 0);
-
-    return !decimals ? Math.floor(result) : result;
+    const num = Number(formatUnits(value, decimals));
+    if (!decimals) return Math.floor(num);
+    return Number(num.toPrecision(significant));
   }
 
   public toNumber(decimals = 9, significant = 6): number {
     return FixedPointMath.toNumber(this._value, decimals, significant);
   }
 
-  public div(x: BigNumberish | FixedPointMath): FixedPointMath {
-    if (this.isZero(x)) return FixedPointMath.from(0);
-    return new FixedPointMath(
-      this._value.multipliedBy(ONE_COIN).div(this.parseValue(x))
-    );
+  public div(x: BigIntish | FixedPointMath): FixedPointMath {
+    const divisor = this.parseValue(x);
+    if (divisor === 0n) return FixedPointMath.from(0n);
+    return new FixedPointMath((this._value * ONE_COIN) / divisor);
   }
 
-  public mul(x: BigNumberish | FixedPointMath): FixedPointMath {
-    return new FixedPointMath(
-      this._value
-        .multipliedBy(this.parseValue(this.parseValue(x)))
-        .div(ONE_COIN)
-    );
+  public mul(x: BigIntish | FixedPointMath): FixedPointMath {
+    return new FixedPointMath((this._value * this.parseValue(x)) / ONE_COIN);
   }
 
-  public add(x: BigNumberish | FixedPointMath): FixedPointMath {
-    return new FixedPointMath(this._value.plus(this.parseValue(x)));
+  public add(x: BigIntish | FixedPointMath): FixedPointMath {
+    return new FixedPointMath(this._value + this.parseValue(x));
   }
 
-  public sub(x: BigNumberish | FixedPointMath): FixedPointMath {
-    return new FixedPointMath(this._value.minus(this.parseValue(x)));
+  public sub(x: BigIntish | FixedPointMath): FixedPointMath {
+    return new FixedPointMath(this._value - this.parseValue(x));
   }
 
-  public pow(x: BigNumberish | FixedPointMath): FixedPointMath {
-    return new FixedPointMath(this._value.pow(this.parseValue(x)));
+  public pow(x: BigIntish | FixedPointMath): FixedPointMath {
+    return new FixedPointMath(this._value ** this.parseValue(x));
   }
 
   public toPercentage(toSignificant = 2): string {
-    const fraction = Fraction.from(this._value, ONE_COIN.multipliedBy(100));
-
+    const fraction = Fraction.from(this._value, ONE_COIN * 100n);
     return `${fraction.toSignificant(toSignificant || 1)} %`;
   }
 
-  public gt(x: BigNumberish | FixedPointMath): boolean {
-    return this._value.gt(this.parseValue(x));
+  public gt(x: BigIntish | FixedPointMath): boolean {
+    return this._value > this.parseValue(x);
   }
 
-  public gte(x: BigNumberish | FixedPointMath): boolean {
-    return this._value.gte(this.parseValue(x));
-  }
-  public lt(x: BigNumberish | FixedPointMath): boolean {
-    return this._value.lt(this.parseValue(x));
-  }
-  public lte(x: BigNumberish | FixedPointMath): boolean {
-    return this._value.lte(this.parseValue(x));
+  public gte(x: BigIntish | FixedPointMath): boolean {
+    return this._value >= this.parseValue(x);
   }
 
-  public eq(x: BigNumberish | FixedPointMath): boolean {
-    return this._value.eq(this.parseValue(x));
+  public lt(x: BigIntish | FixedPointMath): boolean {
+    return this._value < this.parseValue(x);
   }
 
-  public value(): BigNumber {
+  public lte(x: BigIntish | FixedPointMath): boolean {
+    return this._value <= this.parseValue(x);
+  }
+
+  public eq(x: BigIntish | FixedPointMath): boolean {
+    return this._value === this.parseValue(x);
+  }
+
+  public value(): bigint {
     return this._value;
   }
 }

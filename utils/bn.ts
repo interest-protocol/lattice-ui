@@ -1,10 +1,11 @@
-import BigNumber from 'bignumber.js';
+export type BigIntish = bigint | number | string;
 
-import type { BigNumberish } from '@/interface';
+const MAX_BPS = 10000n;
 
-const MAX_BPS = 10000;
+export const ZERO_BIG_INT = 0n;
 
-export const ZERO_BIG_NUMBER = new BigNumber(0);
+/** @deprecated Use ZERO_BIG_INT instead */
+export const ZERO_BIG_NUMBER = ZERO_BIG_INT;
 
 export const isHexString = (value: unknown, length?: number): boolean => {
   if (typeof value !== 'string' || !/^0x[0-9A-Fa-f]*$/.test(value)) {
@@ -13,21 +14,20 @@ export const isHexString = (value: unknown, length?: number): boolean => {
   return !length || value.length === 2 + 2 * length;
 };
 
-export const isBigNumberish = (value: unknown): value is BigNumberish =>
+export const isBigNumberish = (value: unknown): value is BigIntish =>
   value != null &&
-  (BigNumber.isBigNumber(value) ||
+  (typeof value === 'bigint' ||
     (typeof value === 'number' && value % 1 === 0) ||
     (typeof value === 'string' && /^-?[0-9]+$/.test(value)) ||
-    isHexString(value) ||
-    typeof value === 'bigint');
+    isHexString(value));
 
-export const parseBigNumberish = (value: unknown): BigNumber => {
-  if (value == null) return ZERO_BIG_NUMBER;
+export const parseBigNumberish = (value: unknown): bigint => {
+  if (value == null) return 0n;
   try {
-    const bn = new BigNumber(String(value));
-    return bn.isFinite() ? bn : ZERO_BIG_NUMBER;
+    const str = String(value);
+    return BigInt(str);
   } catch {
-    return ZERO_BIG_NUMBER;
+    return 0n;
   }
 };
 
@@ -38,16 +38,13 @@ export const parseToPositiveStringNumber = (x: string): string => {
 
 export const feesCalcUp = (
   feeBps: number,
-  amount: BigNumber
-): [BigNumber, BigNumber] => {
-  const [fee, value, maxBps] = [
-    feeBps,
-    String(amount.decimalPlaces(0, 1)),
-    MAX_BPS,
-  ].map(BigInt);
+  amount: bigint
+): [bigint, bigint] => {
+  const fee = BigInt(feeBps);
+  const value = amount;
+  const maxBps = MAX_BPS;
 
-  const fees =
-    (fee * value) / maxBps + BigInt((fee * value) % maxBps > BigInt(0) ? 1 : 0);
+  const fees = (fee * value) / maxBps + ((fee * value) % maxBps > 0n ? 1n : 0n);
 
-  return [BigNumber(String(value - fees)), BigNumber(String(fees))];
+  return [value - fees, fees];
 };

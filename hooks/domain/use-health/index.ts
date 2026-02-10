@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
 
 import type { EnclaveHealthResponse } from '@/app/api/health/enclave/route';
 import type { SolverHealthResponse } from '@/app/api/health/solver/route';
@@ -16,15 +16,19 @@ const fetcher = async <T>(url: string): Promise<T> => {
 
 export const useHealth = (): HealthStatus => {
   const { data: enclave, isLoading: enclaveLoading } =
-    useSWR<EnclaveHealthResponse>('/api/health/enclave', fetcher, {
-      refreshInterval: 30_000,
-      revalidateOnFocus: false,
+    useQuery<EnclaveHealthResponse>({
+      queryKey: ['health', 'enclave'],
+      queryFn: () => fetcher<EnclaveHealthResponse>('/api/health/enclave'),
+      refetchInterval: 30_000,
+      refetchOnWindowFocus: false,
     });
 
   const { data: solver, isLoading: solverLoading } =
-    useSWR<SolverHealthResponse>('/api/health/solver', fetcher, {
-      refreshInterval: 30_000,
-      revalidateOnFocus: false,
+    useQuery<SolverHealthResponse>({
+      queryKey: ['health', 'solver'],
+      queryFn: () => fetcher<SolverHealthResponse>('/api/health/solver'),
+      refetchInterval: 30_000,
+      refetchOnWindowFocus: false,
     });
 
   return {

@@ -4,13 +4,11 @@ import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Img, Span } from '@stylin.js/elements';
 import { AnimatePresence } from 'motion/react';
 import { type FC, useMemo, useState } from 'react';
-
+import { useShallow } from 'zustand/react/shallow';
 import { ChevronDownSVG } from '@/components/ui/icons';
 import { useModal } from '@/hooks/store/use-modal';
 import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
 import { formatAddress } from '@/utils';
-
-import { useShallow } from 'zustand/react/shallow';
 
 import WalletProfileDropdown from './wallet-profile-dropdown';
 import WalletProfileModal from './wallet-profile-modal';
