@@ -4,9 +4,9 @@ import { Button, Div, H1, H2, Img, P } from '@stylin.js/elements';
 import type BigNumber from 'bignumber.js';
 import { type FC, useCallback, useState } from 'react';
 
-import { CopySVG } from '@/components/svg';
-import Tabs from '@/components/tabs';
-import { toasting } from '@/components/toast';
+import { CopySVG } from '@/components/ui/icons';
+import Tabs from '@/components/ui/tabs';
+import { toasting } from '@/components/ui/toast';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
@@ -15,9 +15,9 @@ import {
   XBRIDGE_DECIMALS,
 } from '@/constants';
 import { ASSET_METADATA } from '@/constants/coins';
-import useSolanaBalances from '@/hooks/use-solana-balances';
-import useSuiBalances from '@/hooks/use-sui-balances';
-import useWalletAddresses from '@/hooks/use-wallet-addresses';
+import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
+import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';

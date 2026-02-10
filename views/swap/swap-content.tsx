@@ -1,7 +1,7 @@
 import { Div, P, Span } from '@stylin.js/elements';
 import { type FC, useState } from 'react';
 
-import Tabs from '@/components/tabs';
+import Tabs from '@/components/ui/tabs';
 import { ALPHA_MAX_SOL, ALPHA_MAX_SUI } from '@/constants/alpha-limits';
 
 import { Bridge, Swap } from './components';

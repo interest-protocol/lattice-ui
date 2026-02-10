@@ -3,7 +3,7 @@ import { Div } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import InputField from '@/components/input-field';
+import InputField from '@/components/composed/input-field';
 import { SOL_TYPE } from '@/constants/coins';
 import { ZERO_BIG_NUMBER } from '@/utils';
 

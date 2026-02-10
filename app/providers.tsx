@@ -6,14 +6,14 @@ import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
 import { BackgroundProvider } from '@/components';
-import AppStateProvider from '@/components/app-state-provider';
-import ErrorBoundary from '@/components/error-boundary';
-import ModalProvider from '@/components/modal-provider';
-import WalletRegistrationProvider from '@/components/wallet-registration-provider';
+import AppStateProvider from '@/components/providers/app-state-provider';
+import ErrorBoundary from '@/components/providers/error-boundary';
+import ModalProvider from '@/components/providers/modal-provider';
+import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
 
 const PrivyProviderWrapper = dynamic(
-  import('@/components/privy-provider').then((m) => m.default),
+  import('@/components/providers/privy-provider').then((m) => m.default),
   { ssr: false }
 );
 

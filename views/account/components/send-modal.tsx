@@ -4,7 +4,7 @@ import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
 import type BigNumber from 'bignumber.js';
 import { type FC, useState } from 'react';
 
-import { toasting } from '@/components/toast';
+import { toasting } from '@/components/ui/toast';
 import {
   BRIDGED_ASSET_METADATA,
   SOL_DECIMALS,
@@ -13,10 +13,10 @@ import {
   XBRIDGE_DECIMALS,
 } from '@/constants';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
-import { useModal } from '@/hooks/use-modal';
-import useSolanaBalances from '@/hooks/use-solana-balances';
-import useSuiBalances from '@/hooks/use-sui-balances';
-import useWalletAddresses from '@/hooks/use-wallet-addresses';
+import { useModal } from '@/hooks/store/use-modal';
+import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
+import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';

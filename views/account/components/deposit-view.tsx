@@ -2,9 +2,9 @@ import { Div, P, Span } from '@stylin.js/elements';
 import { QRCodeSVG } from 'qrcode.react';
 import type { FC } from 'react';
 
-import { CopySVG } from '@/components/svg';
-import { toasting } from '@/components/toast';
-import useWalletAddresses from '@/hooks/use-wallet-addresses';
+import { CopySVG } from '@/components/ui/icons';
+import { toasting } from '@/components/ui/toast';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
 type NetworkType = 'sui' | 'solana';
 

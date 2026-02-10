@@ -13,9 +13,9 @@ import {
 } from '@/constants/alpha-limits';
 import { SOL_DECIMALS, SOL_TYPE } from '@/constants/coins';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
-import useSolanaBalances from '@/hooks/use-solana-balances';
-import useSuiBalances from '@/hooks/use-sui-balances';
-import useWalletAddresses from '@/hooks/use-wallet-addresses';
+import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
+import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
 const SUI_DECIMALS = 9;

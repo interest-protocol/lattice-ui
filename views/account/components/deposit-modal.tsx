@@ -2,8 +2,8 @@ import { Div, P, Span } from '@stylin.js/elements';
 import type { FC } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { CopySVG } from '@/components/svg';
-import useWalletAddresses from '@/hooks/use-wallet-addresses';
+import { CopySVG } from '@/components/ui/icons';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
 const DepositModal: FC = () => {
   const { suiAddress, solanaAddress } = useWalletAddresses();
