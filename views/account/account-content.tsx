@@ -17,6 +17,7 @@ import {
 import { ASSET_METADATA } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';
@@ -219,44 +220,14 @@ const BalancesView: FC<{
 
 const AccountContent: FC = () => {
   const { user, authenticated } = usePrivy();
+  const { suiAddress, solanaAddress } = useWalletAddresses();
   const [creatingSuiWallet, setCreatingSuiWallet] = useState(false);
   const [newSuiAddress, setNewSuiAddress] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [network, setNetwork] = useState<NetworkType>('solana');
 
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    if (
-      'walletClient' in a &&
-      typeof a.walletClient === 'string' &&
-      a.walletClient.toLowerCase().includes('sui')
-    )
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
+  // Use newly created address if the hook doesn't have one yet
   const displaySuiAddress = suiAddress ?? newSuiAddress;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(displaySuiAddress);

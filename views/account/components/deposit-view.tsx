@@ -1,10 +1,10 @@
-import { usePrivy } from '@privy-io/react-auth';
 import { Div, P, Span } from '@stylin.js/elements';
 import { QRCodeSVG } from 'qrcode.react';
 import type { FC } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/svg';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 
 type NetworkType = 'sui' | 'solana';
 
@@ -13,35 +13,7 @@ interface DepositViewProps {
 }
 
 const DepositView: FC<DepositViewProps> = ({ network }) => {
-  const { user } = usePrivy();
-
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
-
+  const { suiAddress, solanaAddress } = useWalletAddresses();
   const address = network === 'sui' ? suiAddress : solanaAddress;
   const networkName = network === 'sui' ? 'Sui' : 'Solana';
   const networkColor = network === 'sui' ? '#4DA2FF' : '#9945FF';

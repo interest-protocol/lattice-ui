@@ -1,5 +1,4 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
-import { usePrivy } from '@privy-io/react-auth';
 import { Button, Div, Input, Label, P, Span } from '@stylin.js/elements';
 import BigNumberJS from 'bignumber.js';
 import type BigNumber from 'bignumber.js';
@@ -19,13 +18,17 @@ import {
   MIN_GAS_SOL,
   MIN_GAS_SUI,
 } from '@/constants/alpha-limits';
-import useBridge, { type BridgeDirection, type BridgeStatus } from '@/hooks/use-bridge';
+import useBridge, {
+  type BridgeDirection,
+  type BridgeStatus,
+} from '@/hooks/use-bridge';
 
 const SUI_DECIMALS = 9;
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
 
@@ -64,8 +67,8 @@ const STATUS_LABELS: Record<BridgeStatus, string> = {
 };
 
 const Bridge: FC = () => {
-  const { user } = usePrivy();
-  const { bridge, reset, status, isLoading, error } = useBridge();
+  const { bridge, status, isLoading } = useBridge();
+  const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const [sourceNetwork, setSourceNetwork] = useState<NetworkType>('solana');
   const [selectedToken, setSelectedToken] = useState<TokenKey>('SOL');
@@ -73,34 +76,6 @@ const Bridge: FC = () => {
 
   const destNetwork = sourceNetwork === 'sui' ? 'Solana' : 'Sui';
   const token = TOKEN_OPTIONS[selectedToken];
-
-  // Find wallet addresses
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(suiAddress);

@@ -15,6 +15,7 @@ import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
 import useSuiBalances from '@/hooks/use-sui-balances';
 import useSuiClient from '@/hooks/use-sui-client';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
 import { fetchMetadata } from '@/lib/solver/client';
 import { sendSolana, sendSui } from '@/lib/wallet/client';
@@ -47,36 +48,12 @@ export const useSwap = () => {
 
   const suiClient = useSuiClient();
   const solanaConnection = useSolanaConnection();
+  const { suiAddress, solanaAddress } = useWalletAddresses();
 
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
-
-  const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
-  const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);
+  const { balances: suiBalances, mutate: mutateSuiBalances } =
+    useSuiBalances(suiAddress);
+  const { balances: solanaBalances, mutate: mutateSolanaBalances } =
+    useSolanaBalances(solanaAddress);
 
   const swap = useCallback(
     async ({ fromType, toType, fromAmount }: SwapParams) => {
@@ -198,15 +175,30 @@ export const useSwap = () => {
 
         setStatus('waiting');
 
+        // Capture initial balance to detect changes
+        const initialBalance = isSuiToSol
+          ? solanaBalances.sol
+          : suiBalances.sui;
+
+        // Poll for balance changes with early exit when change is detected
         for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
           await new Promise((resolve) =>
             setTimeout(resolve, BALANCE_POLL_INTERVAL_MS)
           );
 
+          // Poll the appropriate balance based on swap direction
+          let currentBalance: BigNumber | undefined;
           if (isSuiToSol) {
-            await mutateSolanaBalances();
+            const newBalances = await mutateSolanaBalances();
+            currentBalance = newBalances?.sol;
           } else {
-            await mutateSuiBalances();
+            const newBalances = await mutateSuiBalances();
+            currentBalance = newBalances?.sui;
+          }
+
+          // Exit early if balance has changed (swap completed)
+          if (currentBalance && !currentBalance.eq(initialBalance)) {
+            break;
           }
         }
 
@@ -225,6 +217,8 @@ export const useSwap = () => {
       solanaAddress,
       suiClient,
       solanaConnection,
+      suiBalances,
+      solanaBalances,
       mutateSuiBalances,
       mutateSolanaBalances,
     ]

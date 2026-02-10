@@ -16,6 +16,7 @@ import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import { useModal } from '@/hooks/use-modal';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendSolana, sendSui } from '@/lib/wallet/client';
 import { formatMoney } from '@/utils';
@@ -67,6 +68,7 @@ const SOLANA_TOKENS: TokenOption[] = [
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
   const { handleClose } = useModal();
+  const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const [network, setNetwork] = useState<NetworkType>('solana');
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
@@ -76,34 +78,6 @@ const SendModal: FC = () => {
 
   const tokens = network === 'sui' ? SUI_TOKENS : SOLANA_TOKENS;
   const selectedToken = tokens[selectedTokenIndex];
-
-  // Find wallet addresses
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(suiAddress);

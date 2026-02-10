@@ -4,8 +4,7 @@ import useSWR from 'swr';
 
 import { WSUI_SOLANA_MINT } from '@/constants';
 import useSolanaConnection from '@/hooks/use-solana-connection';
-
-const REFRESH_INTERVAL = 30_000;
+import { balanceSwrConfig } from '@/lib/swr/config';
 
 const useSolanaBalances = (address: string | null) => {
   const connection = useSolanaConnection();
@@ -34,7 +33,7 @@ const useSolanaBalances = (address: string | null) => {
         wsui: wsuiRaw,
       };
     },
-    { refreshInterval: REFRESH_INTERVAL }
+    balanceSwrConfig
   );
 
   return {

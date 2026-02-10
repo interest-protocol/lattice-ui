@@ -5,10 +5,11 @@ import bs58 from 'bs58';
 import { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { WSOL_SUI_TYPE, WSUI_SOLANA_MINT } from '@/constants/bridged-tokens';
+import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSolanaConnection from '@/hooks/use-solana-connection';
 import useSuiBalances from '@/hooks/use-sui-balances';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { sendSolana } from '@/lib/wallet/client';
 import {
   createMintRequest,
@@ -19,9 +20,6 @@ import {
 
 const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
 const SOL_DECIMALS = 9;
-const SUI_DECIMALS = 9;
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 60;
 
 export type BridgeStatus =
   | 'idle'
@@ -50,36 +48,10 @@ export const useBridge = () => {
   const [error, setError] = useState<string | null>(null);
 
   const solanaConnection = useSolanaConnection();
-
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
+  const { suiAddress, solanaAddress } = useWalletAddresses();
 
   const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
-  const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);
+  useSolanaBalances(solanaAddress);
 
   const bridgeSolToWsol = useCallback(
     async (amount: BigNumber) => {

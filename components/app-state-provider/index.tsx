@@ -6,6 +6,7 @@ import { useAppState } from '@/hooks/use-app-state';
 const AppStateProvider: FC = () => {
   const { update, loadingCoins, loadingObjects } = useAppState();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally runs only on mount
   useEffect(() => {
     // Only update if we're still in initial loading state
     if (loadingCoins || loadingObjects) {
@@ -16,7 +17,6 @@ const AppStateProvider: FC = () => {
         mutate: () => {},
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty deps - run only on mount
 
   return null;

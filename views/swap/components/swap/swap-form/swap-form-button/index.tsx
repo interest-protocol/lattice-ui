@@ -1,5 +1,4 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
-import { usePrivy } from '@privy-io/react-auth';
 import { Button } from '@stylin.js/elements';
 import BigNumber from 'bignumber.js';
 import type { FC } from 'react';
@@ -19,42 +18,17 @@ const SUI_DECIMALS = 9;
 import { ACCENT, ACCENT_HOVER } from '@/constants/colors';
 import useSolanaBalances from '@/hooks/use-solana-balances';
 import useSuiBalances from '@/hooks/use-sui-balances';
+import useWalletAddresses from '@/hooks/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
 const SwapFormButton: FC = () => {
-  const { user } = usePrivy();
   const { control } = useFormContext();
   const fromValue = useWatch({ control, name: 'from.value' }) as string;
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  // Get wallet addresses from Privy
-  const suiWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'sui')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      a.address.startsWith('0x') &&
-      a.address.length === 66
-    );
-  });
-  const suiAddress =
-    suiWallet && 'address' in suiWallet ? suiWallet.address : null;
-
-  const solanaWallet = user?.linkedAccounts?.find((a) => {
-    if (a.type !== 'wallet' || !('address' in a)) return false;
-    if ('chainType' in a && String(a.chainType).toLowerCase() === 'solana')
-      return true;
-    return (
-      typeof a.address === 'string' &&
-      !a.address.startsWith('0x') &&
-      a.address.length >= 32 &&
-      a.address.length <= 44
-    );
-  });
-  const solanaAddress =
-    solanaWallet && 'address' in solanaWallet ? solanaWallet.address : null;
+  // Get wallet addresses from centralized hook
+  const { suiAddress, solanaAddress } = useWalletAddresses();
 
   // Get balances
   const { balances: suiBalances } = useSuiBalances(suiAddress);

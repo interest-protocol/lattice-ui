@@ -3,8 +3,7 @@ import useSWR from 'swr';
 
 import { WSOL_SUI_TYPE } from '@/constants';
 import useSuiClient from '@/hooks/use-sui-client';
-
-const REFRESH_INTERVAL = 30_000;
+import { balanceSwrConfig } from '@/lib/swr/config';
 
 const useSuiBalances = (address: string | null) => {
   const suiClient = useSuiClient();
@@ -22,7 +21,7 @@ const useSuiBalances = (address: string | null) => {
         wsol: new BigNumber(wsolBalance.totalBalance),
       };
     },
-    { refreshInterval: REFRESH_INTERVAL }
+    balanceSwrConfig
   );
 
   return {
