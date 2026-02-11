@@ -1,4 +1,4 @@
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useUser } from '@privy-io/react-auth';
 import { createElement, useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -25,6 +25,7 @@ type LinkedUsers = Record<string, boolean>;
 
 const useWalletRegistration = () => {
   const { user, authenticated, ready } = usePrivy();
+  const { refreshUser } = useUser();
   const { hasWallet, getAddress } = useWalletAddresses();
   const hasSuiWallet = hasWallet('sui');
   const hasSolanaWallet = hasWallet('solana');
@@ -38,6 +39,7 @@ const useWalletRegistration = () => {
   const isRegistering = useRef(false);
   const isLinking = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const createdSuiAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -57,23 +59,32 @@ const useWalletRegistration = () => {
     const WALLET_SETUP_TOAST_ID = 'wallet-setup';
 
     try {
-      const promises: Promise<unknown>[] = [];
+      const needsSui = !hasSuiWallet;
+      const needsSolana = !hasSolanaWallet;
 
-      if (!hasSuiWallet) {
-        promises.push(createSuiWallet(user.id));
-      }
-
-      if (!hasSolanaWallet) {
-        promises.push(createSolanaWallet(user.id));
-      }
-
-      if (promises.length > 0) {
+      if (needsSui || needsSolana) {
         const message =
           retryCount > 0
             ? 'Retrying wallet setup...'
             : 'Setting up your wallets...';
         toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
-        await Promise.all(promises);
+
+        const [suiResult] = await Promise.all([
+          needsSui ? createSuiWallet(user.id) : null,
+          needsSolana ? createSolanaWallet(user.id) : null,
+        ]);
+
+        if (suiResult) {
+          createdSuiAddressRef.current = suiResult.address;
+        }
+
+        try {
+          await refreshUser();
+        } catch {
+          // Refresh failure is non-fatal — linking effect will still
+          // trigger once Privy eventually syncs on its own.
+        }
+
         toasting.dismiss(WALLET_SETUP_TOAST_ID);
         toasting.success({
           action: 'Wallet Setup',
@@ -129,7 +140,7 @@ const useWalletRegistration = () => {
         error instanceof ApiRequestError &&
         error.code === 'INSUFFICIENT_GAS'
       ) {
-        const suiAddress = getAddress('sui');
+        const suiAddress = getAddress('sui') || createdSuiAddressRef.current;
         if (suiAddress) {
           isLinking.current = false;
           openGasModal(suiAddress);
