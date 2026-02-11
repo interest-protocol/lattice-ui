@@ -28,12 +28,16 @@ const CopyButton: FC<CopyButtonProps> = ({
     };
   }, []);
 
-  const handleCopy = () => {
-    window.navigator.clipboard.writeText(text);
-    toasting.success({ action: 'Copy', message: 'Address copied' });
-    setCopied(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      await window.navigator.clipboard.writeText(text);
+      toasting.success({ action: 'Copy', message: 'Address copied' });
+      setCopied(true);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toasting.error({ action: 'Copy', message: 'Failed to copy' });
+    }
   };
 
   return (

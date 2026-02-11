@@ -1,15 +1,13 @@
 import { usePrivy, useUser } from '@privy-io/react-auth';
-import { createElement, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
-import GasRequiredModal from '@/components/composed/gas-required-modal';
-import { toasting } from '@/components/ui/toast';
 import {
   WALLETS_LINKED_KEY,
   WALLETS_REGISTERED_KEY,
 } from '@/constants/storage-keys';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
-import { useModal } from '@/hooks/store/use-modal';
+import { useOnboarding } from '@/hooks/store/use-onboarding';
 import { ApiRequestError } from '@/lib/api/client';
 import {
   createSolanaWallet,
@@ -41,6 +39,8 @@ const useWalletRegistration = () => {
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const createdSuiAddressRef = useRef<string | null>(null);
 
+  const onboarding = useOnboarding;
+
   useEffect(() => {
     setMounted(true);
     return () => {
@@ -56,19 +56,13 @@ const useWalletRegistration = () => {
     if (effectiveRegisteredUsers[user.id]) return;
 
     isRegistering.current = true;
-    const WALLET_SETUP_TOAST_ID = 'wallet-setup';
+    onboarding.getState().setStep('creating-wallets');
 
     try {
       const needsSui = !hasSuiWallet;
       const needsSolana = !hasSolanaWallet;
 
       if (needsSui || needsSolana) {
-        const message =
-          retryCount > 0
-            ? 'Retrying wallet setup...'
-            : 'Setting up your wallets...';
-        toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
-
         const [suiResult] = await Promise.all([
           needsSui ? createSuiWallet(user.id) : null,
           needsSolana ? createSolanaWallet(user.id) : null,
@@ -76,6 +70,7 @@ const useWalletRegistration = () => {
 
         if (suiResult) {
           createdSuiAddressRef.current = suiResult.address;
+          onboarding.getState().setSuiAddress(suiResult.address);
         }
 
         try {
@@ -84,17 +79,18 @@ const useWalletRegistration = () => {
           // Refresh failure is non-fatal — linking effect will still
           // trigger once Privy eventually syncs on its own.
         }
-
-        toasting.dismiss(WALLET_SETUP_TOAST_ID);
-        toasting.success({
-          action: 'Wallet Setup',
-          message: 'Your wallets are ready',
-        });
       }
 
       setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
+
+      // Always show funding step after wallet creation — gives Privy time
+      // to propagate wallets server-side before linking is attempted.
+      const suiAddr = getAddress('sui') || createdSuiAddressRef.current;
+      if (suiAddr) {
+        onboarding.getState().setSuiAddress(suiAddr);
+        onboarding.getState().setStep('funding');
+      }
     } catch (_error) {
-      toasting.dismiss(WALLET_SETUP_TOAST_ID);
       if (retryCount < MAX_RETRY_ATTEMPTS) {
         const delay = RETRY_DELAYS_MS[retryCount];
         isRegistering.current = false;
@@ -105,31 +101,16 @@ const useWalletRegistration = () => {
         return;
       }
 
-      toasting.error({
-        action: 'Wallet Setup',
-        message: 'Please refresh the page',
-      });
+      onboarding.getState().setError('Wallet setup failed. Please try again.');
     } finally {
       isRegistering.current = false;
     }
   };
 
-  const openGasModal = (suiAddress: string) => {
-    useModal.getState().setContent(
-      createElement(GasRequiredModal, {
-        chain: 'sui' as const,
-        address: suiAddress,
-        minAmount: 0.01,
-        onRefresh: () => linkWallets(0),
-        refreshing: false,
-        action: {
-          label: 'Retry Wallet Setup',
-          onClick: () => linkWallets(0),
-          loading: false,
-        },
-      }),
-      { title: 'SUI Gas Required', allowClose: false }
-    );
+  const retryLink = () => {
+    isLinking.current = false;
+    onboarding.getState().setStep('linking');
+    linkWallets(0);
   };
 
   const linkWallets = async (retryCount = 0) => {
@@ -138,11 +119,12 @@ const useWalletRegistration = () => {
     if (!(hasSuiWallet && hasSolanaWallet)) return;
 
     isLinking.current = true;
+    onboarding.getState().setStep('linking');
 
     try {
       await linkSolanaWallet(user.id);
       setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
-      useModal.getState().handleClose();
+      onboarding.getState().setStep('complete');
     } catch (error) {
       if (
         error instanceof ApiRequestError &&
@@ -151,7 +133,8 @@ const useWalletRegistration = () => {
         const suiAddress = getAddress('sui') || createdSuiAddressRef.current;
         if (suiAddress) {
           isLinking.current = false;
-          openGasModal(suiAddress);
+          onboarding.getState().setSuiAddress(suiAddress);
+          onboarding.getState().setStep('funding');
           return;
         }
       }
@@ -166,14 +149,18 @@ const useWalletRegistration = () => {
         return;
       }
 
-      toasting.error({
-        action: 'Wallet Link',
-        message: 'Please refresh the page',
-      });
+      onboarding
+        .getState()
+        .setError('Wallet linking failed. Please try again.');
     } finally {
       isLinking.current = false;
     }
   };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retryLink closes over wallet state — we re-set it when wallet deps change
+  useEffect(() => {
+    onboarding.getState().setRetryLink(retryLink);
+  }, [hasSuiWallet, hasSolanaWallet]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: registerWallets closes over deps already listed — React Compiler ensures stable reference
   useEffect(() => {
@@ -192,6 +179,10 @@ const useWalletRegistration = () => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: linkWallets closes over deps already listed — React Compiler ensures stable reference
   useEffect(() => {
     if (!mounted) return;
+    if (isRegistering.current) return;
+
+    // Don't auto-link if the user is at the funding step — let FundingStep trigger it via retryLink
+    if (onboarding.getState().step === 'funding') return;
 
     if (
       ready &&
