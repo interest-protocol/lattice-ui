@@ -6,7 +6,6 @@ import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
 import { BackgroundProvider } from '@/components';
-import AppStateProvider from '@/components/providers/app-state-provider';
 import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import GasGuardProvider from '@/components/providers/gas-guard-provider';
@@ -44,7 +43,6 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
         baseColor={skeleton.baseColor}
         highlightColor={skeleton.highlightColor}
       >
-        <AppStateProvider />
         <WalletRegistrationProvider />
         <GasGuardProvider />
         <BackgroundProvider />

@@ -8,9 +8,7 @@ import { toasting } from '@/components/ui/toast';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
 import { SOL_TYPE } from '@/constants/coins';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
@@ -23,9 +21,6 @@ interface WithdrawViewProps {
 
 const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const { authenticated, user } = usePrivy();
-  const { getAddress } = useWalletAddresses();
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
 
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
   const [recipient, setRecipient] = useState('');
@@ -36,10 +31,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const selectedToken = tokens[selectedTokenIndex];
   const config = CHAIN_REGISTRY[network];
 
-  const { balances: suiBalances, isLoading: suiLoading } =
-    useSuiBalances(suiAddress);
-  const { balances: solanaBalances, isLoading: solLoading } =
-    useSolanaBalances(solanaAddress);
+  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
 
   const setContent = useModal((s) => s.setContent);
 

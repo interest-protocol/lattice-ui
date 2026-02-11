@@ -6,9 +6,7 @@ import type { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import { FixedPointMath } from '@/lib/entities';
 import { formatMoney } from '@/utils/money';
 
@@ -16,15 +14,7 @@ const CHAINS: readonly ChainKey[] = ['sui', 'solana'];
 
 const GasBalances: FC = () => {
   const { authenticated } = usePrivy();
-  const { getAddress } = useWalletAddresses();
-
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
-
-  const { balances: suiBalances, isLoading: suiLoading } =
-    useSuiBalances(suiAddress);
-  const { balances: solanaBalances, isLoading: solLoading } =
-    useSolanaBalances(solanaAddress);
+  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
 
   const items = CHAINS.map((chain) => {
     const config = CHAIN_REGISTRY[chain];

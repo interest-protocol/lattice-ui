@@ -7,9 +7,8 @@ import {
   PizzaPart100PercentSVG,
 } from '@/components/ui/icons';
 import type { SVGProps } from '@/components/ui/icons/icons.types';
-import { useAppState } from '@/hooks/store/use-app-state';
+import useBalances from '@/hooks/domain/use-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { ZERO_BIG_INT } from '@/utils';
 import type { InputFieldGenericProps } from './input-field.types';
 
 const PIZZA_ICONS: Record<number, FC<SVGProps>> = {
@@ -25,11 +24,11 @@ const FACTOR_DIVISORS: Record<number, bigint> = {
 };
 
 const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
-  const balances = useAppState((s) => s.balances);
+  const { getBalance } = useBalances();
   const { control, setValue } = useFormContext();
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
-  const balance = balances[type] ?? ZERO_BIG_INT;
+  const balance = getBalance(type);
 
   return (
     <div className="flex gap-2">

@@ -2,9 +2,7 @@ import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import { CurrencyAmount, Token } from '@/lib/entities';
 import { validateSwapAmount } from '@/utils/gas-validation';
 
@@ -14,12 +12,7 @@ const SwapFormButton: FC = () => {
   const fromType = useWatch({ control, name: 'from.type' }) as string;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
-  const { getAddress } = useWalletAddresses();
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
-
-  const { amounts: suiAmounts } = useSuiBalances(suiAddress);
-  const { amounts: solanaAmounts } = useSolanaBalances(solanaAddress);
+  const { suiAmounts, solanaAmounts } = useBalances();
 
   const sourceToken = Token.fromType(fromType);
   const destToken = Token.fromType(toType);

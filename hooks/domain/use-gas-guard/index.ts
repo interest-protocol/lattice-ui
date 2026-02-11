@@ -5,9 +5,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import GasRequiredModal from '@/components/composed/gas-required-modal';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { WALLETS_LINKED_KEY } from '@/constants/storage-keys';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
 
@@ -18,23 +16,19 @@ const SOL_THRESHOLD = parseUnits('0.01', CHAIN_REGISTRY.solana.decimals);
 
 const useGasGuard = () => {
   const { authenticated, ready, user } = usePrivy();
-  const { getAddress } = useWalletAddresses();
   const [mounted, setMounted] = useState(false);
   const [linkedUsers] = useLocalStorage<LinkedUsers>(WALLETS_LINKED_KEY, {});
 
-  const suiAddress = getAddress('sui');
-  const solAddress = getAddress('solana');
-
   const {
-    balances: suiBalances,
-    isLoading: suiLoading,
-    mutate: mutateSui,
-  } = useSuiBalances(suiAddress);
-  const {
-    balances: solBalances,
-    isLoading: solLoading,
-    mutate: mutateSol,
-  } = useSolanaBalances(solAddress);
+    suiAddress,
+    solanaAddress: solAddress,
+    suiBalances,
+    solanaBalances: solBalances,
+    suiLoading,
+    solLoading,
+    mutateSuiBalances: mutateSui,
+    mutateSolanaBalances: mutateSol,
+  } = useBalances();
 
   const dismissedRef = useRef(false);
   const activeChainRef = useRef<ChainKey | null>(null);

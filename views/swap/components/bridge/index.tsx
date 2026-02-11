@@ -3,10 +3,8 @@
 import { type FC, useState } from 'react';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
+import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
@@ -31,22 +29,14 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
 
 const Bridge: FC = () => {
   const { bridge, status, isLoading, reset } = useBridge();
-  const { getAddress } = useWalletAddresses();
+  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
   const setContent = useModal((s) => s.setContent);
   const handleClose = useModal((s) => s.handleClose);
-
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
 
   const [selectedRoute, setSelectedRoute] = useState<BridgeRoute>(
     BRIDGE_ROUTES[0] as BridgeRoute
   );
   const [amount, setAmount] = useState('');
-
-  const { balances: suiBalances, isLoading: suiLoading } =
-    useSuiBalances(suiAddress);
-  const { balances: solanaBalances, isLoading: solLoading } =
-    useSolanaBalances(solanaAddress);
 
   const routeBalances: Record<string, bigint> = {
     'sol-to-wsol': solanaBalances.sol,

@@ -15,8 +15,7 @@ import {
 } from '@/constants';
 import type { ChainKey } from '@/constants/chains';
 import { ASSET_METADATA } from '@/constants/coins';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
+import useBalances from '@/hooks/domain/use-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { createSuiWallet as createSuiWalletApi } from '@/lib/wallet/client';
@@ -194,10 +193,9 @@ const AccountContent: FC = () => {
   // Use newly created address if the hook doesn't have one yet
   const displaySuiAddress = suiAddress ?? newSuiAddress;
 
-  const { balances: suiBalances, isLoading: suiLoading } =
-    useSuiBalances(displaySuiAddress);
-  const { balances: solanaBalances, isLoading: solLoading } =
-    useSolanaBalances(solanaAddress);
+  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances({
+    suiAddress: displaySuiAddress,
+  });
 
   const createSuiWallet = async () => {
     if (!user?.id) return;

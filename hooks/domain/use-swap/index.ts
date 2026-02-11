@@ -10,12 +10,10 @@ import {
   BALANCE_POLL_MAX_ATTEMPTS,
   REQUEST_DEADLINE_MS,
 } from '@/constants/coins';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import type { ChainAdapter } from '@/lib/chain-adapters';
 import { sdkChainIdFromKey } from '@/lib/chain-adapters';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
@@ -48,14 +46,14 @@ export const useSwap = () => {
 
   const suiClient = useSuiClient();
   const solanaRpc = useSolanaRpc();
-  const { getAddress } = useWalletAddresses();
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
-
-  const { balances: suiBalances, mutate: mutateSuiBalances } =
-    useSuiBalances(suiAddress);
-  const { balances: solanaBalances, mutate: mutateSolanaBalances } =
-    useSolanaBalances(solanaAddress);
+  const {
+    suiAddress,
+    solanaAddress,
+    suiBalances,
+    solanaBalances,
+    mutateSuiBalances,
+    mutateSolanaBalances,
+  } = useBalances();
 
   const { getPrice } = useTokenPrices();
   const abortRef = useRef<AbortController | null>(null);

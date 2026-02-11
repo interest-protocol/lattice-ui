@@ -7,10 +7,8 @@ import invariant from 'tiny-invariant';
 import { toasting } from '@/components/ui/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
-import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
-import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
-import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import useBalances from '@/hooks/domain/use-balances';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import {
   createMintRequest,
@@ -47,12 +45,8 @@ export const useBridge = () => {
   const [error, setError] = useState<string | null>(null);
 
   const solanaRpc = useSolanaRpc();
-  const { getAddress } = useWalletAddresses();
-  const suiAddress = getAddress('sui');
-  const solanaAddress = getAddress('solana');
-
-  const { mutate: mutateSuiBalances } = useSuiBalances(suiAddress);
-  const { mutate: mutateSolanaBalances } = useSolanaBalances(solanaAddress);
+  const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
+    useBalances();
 
   const getSolanaAdapter = () =>
     createSolanaAdapter(solanaRpc, mutateSolanaBalances);

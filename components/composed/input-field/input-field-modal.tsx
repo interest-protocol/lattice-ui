@@ -2,10 +2,9 @@ import Image from 'next/image';
 import { type FC, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { SearchSVG } from '@/components/ui/icons';
-import { useAppState } from '@/hooks/store/use-app-state';
+import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { ZERO_BIG_INT } from '@/utils';
 import type { InputFieldModalProps } from './input-field.types';
 
 const InputFieldModal: FC<InputFieldModalProps> = ({
@@ -13,7 +12,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
   oppositeName,
   name: fieldName,
 }) => {
-  const balances = useAppState((s) => s.balances);
+  const { getBalance } = useBalances();
   const handleClose = useModal((s) => s.handleClose);
   const { control, setValue } = useFormContext();
   const [search, setSearch] = useState('');
@@ -76,7 +75,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
                 <p className="text-sm font-mono">
                   {
                     +FixedPointMath.toNumber(
-                      balances[type] ?? ZERO_BIG_INT,
+                      getBalance(type),
                       decimals
                     ).toFixed(4)
                   }
