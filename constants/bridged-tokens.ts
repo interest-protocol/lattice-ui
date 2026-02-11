@@ -20,7 +20,7 @@ export const BRIDGED_ASSET_METADATA: Record<string, AssetMetadata> = {
     decimals: XBRIDGE_DECIMALS,
     symbol: 'wSOL',
     type: WSOL_SUI_TYPE,
-    iconUrl: 'https://cryptologos.cc/logos/solana-sol-logo.png?v=035',
+    iconUrl: '/sol-logo.svg',
   },
   [WSUI_SOLANA_MINT]: {
     name: 'Wrapped SUI (XBridge)',

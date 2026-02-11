@@ -12,22 +12,29 @@ import { Token } from '@/lib/entities';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { formatMoney } from '@/utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
-import type { TokenKey, TokenOption, ValidationResult } from './bridge.types';
+import type {
+  TokenKey,
+  TokenOption,
+  TokenOptionListItem,
+  ValidationResult,
+} from './bridge.types';
 import BridgeDetails from './bridge-details';
 import BridgeForm from './bridge-form';
 
-const TOKEN_OPTIONS: Record<string, TokenOption> = {
+const getTokenOptions = (
+  sourceNetwork: ChainKey
+): Record<TokenKey, TokenOption> => ({
   SUI: {
-    symbol: Token.SUI.symbol,
+    symbol: sourceNetwork === 'solana' ? 'wSUI' : 'SUI',
     iconUrl: Token.SUI.iconUrl,
     decimals: Token.SUI.decimals,
   },
   SOL: {
-    symbol: Token.SOL.symbol,
+    symbol: sourceNetwork === 'sui' ? 'wSOL' : 'SOL',
     iconUrl: Token.SOL.iconUrl,
     decimals: Token.SOL.decimals,
   },
-};
+});
 
 const OPPOSITE_CHAIN: Record<ChainKey, ChainKey> = {
   sui: 'solana',
@@ -45,8 +52,17 @@ const Bridge: FC = () => {
   const [amount, setAmount] = useState('');
 
   const destNetwork = CHAIN_REGISTRY[OPPOSITE_CHAIN[sourceNetwork]].displayName;
-  const token = TOKEN_OPTIONS[selectedToken];
+  const tokenOptions = getTokenOptions(sourceNetwork);
+  const token = tokenOptions[selectedToken];
   const sourceConfig = CHAIN_REGISTRY[sourceNetwork];
+
+  const tokenOptionsList: TokenOptionListItem[] = (['SUI', 'SOL'] as const).map(
+    (key) => ({
+      key,
+      iconUrl: tokenOptions[key].iconUrl,
+      symbol: tokenOptions[key].symbol,
+    })
+  );
 
   const { balances: suiBalances, isLoading: suiLoading } =
     useSuiBalances(suiAddress);
@@ -158,6 +174,7 @@ const Bridge: FC = () => {
         validationMessage={validation.message}
         destNetwork={destNetwork}
         token={token}
+        tokenOptionsList={tokenOptionsList}
         balanceLoading={balanceLoading}
         balanceFormatted={balanceFormatted}
         setMaxAmount={setMaxAmount}

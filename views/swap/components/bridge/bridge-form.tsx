@@ -1,20 +1,9 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import Image from 'next/image';
 import type { FC } from 'react';
 
-import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
-import type { BridgeFormProps, TokenKey } from './bridge.types';
+import type { BridgeFormProps } from './bridge.types';
 import BridgeButton from './bridge-button';
 import BridgeNetworkSelector from './bridge-network-selector';
-
-const TOKEN_OPTIONS_LIST: {
-  key: TokenKey;
-  iconUrl?: string;
-  symbol: string;
-}[] = [
-  { key: 'SUI', iconUrl: ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl, symbol: 'SUI' },
-  { key: 'SOL', iconUrl: ASSET_METADATA[SOL_TYPE]?.iconUrl, symbol: 'SOL' },
-];
 
 const BridgeForm: FC<BridgeFormProps> = ({
   sourceNetwork,
@@ -29,6 +18,7 @@ const BridgeForm: FC<BridgeFormProps> = ({
   validationMessage,
   destNetwork,
   token,
+  tokenOptionsList,
   balanceLoading,
   balanceFormatted,
   setMaxAmount,
@@ -51,7 +41,7 @@ const BridgeForm: FC<BridgeFormProps> = ({
     <div>
       <span className="text-text-muted text-sm mb-2 block">Token</span>
       <div className="flex gap-2">
-        {TOKEN_OPTIONS_LIST.map(({ key: tk, iconUrl, symbol }) => {
+        {tokenOptionsList.map(({ key: tk, iconUrl, symbol }) => {
           const isSelected = tk === selectedToken;
           return (
             <button

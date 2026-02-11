@@ -45,6 +45,7 @@ const SwapForm: FC = () => {
           label="From"
           types={[SUI_TYPE_ARG, SOL_TYPE]}
           topContent="balance"
+          oppositeName="to"
         />
 
         <button
@@ -68,6 +69,7 @@ const SwapForm: FC = () => {
           types={[SUI_TYPE_ARG, SOL_TYPE]}
           disabled
           topContent="balance"
+          oppositeName="from"
         />
 
         <SwapFormButton />

@@ -27,6 +27,6 @@ export const ASSET_METADATA: Record<string, AssetMetadata> = {
     decimals: 9,
     symbol: 'SOL',
     type: SOL_TYPE,
-    iconUrl: 'https://cryptologos.cc/logos/solana-sol-logo.png?v=035',
+    iconUrl: '/sol-logo.svg',
   },
 };

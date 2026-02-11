@@ -51,26 +51,37 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       { title: 'Select Asset' }
     );
 
+  const handleClick = () => {
+    if (availableTypes.length > 1) {
+      openAssetModal();
+      return;
+    }
+
+    if (availableTypes.length === 1 && oppositeName) {
+      const fromValue = form.getValues(name);
+      const toValue = form.getValues(oppositeName);
+      form.setValue(name, toValue);
+      form.setValue(oppositeName, fromValue);
+    }
+  };
+
   return (
     <Motion
-      className="gap-2 text-white flex text-base overflow-hidden items-center justify-center"
-      style={{ cursor: availableTypes.length > 1 ? 'pointer' : 'default' }}
+      className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center"
       whileHover="hover"
-      onClick={() => availableTypes.length > 1 && openAssetModal()}
+      onClick={handleClick}
     >
-      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 bg-surface-lighter items-center justify-center p-1">
+      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center">
         <Image
           className="object-contain"
           alt={metadata[type]?.symbol ?? ''}
           src={metadata[type]?.iconUrl ?? ''}
-          width={24}
-          height={24}
+          width={32}
+          height={32}
         />
       </span>
       {metadata?.[type]?.symbol ?? 'Select Coin'}
-      {availableTypes.length > 1 && (
-        <ChevronDownSVG maxWidth="1rem" width="100%" />
-      )}
+      <ChevronDownSVG maxWidth="1rem" width="100%" />
     </Motion>
   );
 };

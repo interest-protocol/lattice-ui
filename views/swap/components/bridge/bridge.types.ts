@@ -22,10 +22,17 @@ export interface BridgeFormProps {
   validationMessage: string | null;
   destNetwork: string;
   token: TokenOption;
+  tokenOptionsList: TokenOptionListItem[];
   balanceLoading: boolean;
   balanceFormatted: string;
   setMaxAmount: () => void;
   onBridge: () => void;
+}
+
+export interface TokenOptionListItem {
+  key: TokenKey;
+  iconUrl?: string;
+  symbol: string;
 }
 
 export interface BridgeNetworkSelectorProps {
