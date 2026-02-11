@@ -1,6 +1,5 @@
 import { address } from '@solana/kit';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
 
 import { WSUI_SOLANA_MINT } from '@/constants';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
@@ -15,9 +14,9 @@ const useSolanaBalances = (addr: string | null) => {
   const rpc = useSolanaRpc();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => [useSolanaBalances.name, addr], [addr]);
+  const queryKey = [useSolanaBalances.name, addr];
 
-  const fetchBalances = useCallback(async () => {
+  const fetchBalances = async () => {
     if (!addr) return DEFAULT_SOLANA_BALANCES;
     const pubkey = address(addr);
     const wsuiMint = address(WSUI_SOLANA_MINT);
@@ -42,7 +41,7 @@ const useSolanaBalances = (addr: string | null) => {
       sol: BigInt(solResult.value),
       wsui: wsuiRaw,
     };
-  }, [rpc, addr]);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey,
@@ -54,23 +53,20 @@ const useSolanaBalances = (addr: string | null) => {
     structuralSharing: false,
   });
 
-  const balances = useMemo(() => data ?? DEFAULT_SOLANA_BALANCES, [data]);
+  const balances = data ?? DEFAULT_SOLANA_BALANCES;
 
-  const amounts = useMemo(
-    () => ({
-      sol: CurrencyAmount.fromRawAmount(Token.SOL, balances.sol),
-    }),
-    [balances.sol]
-  );
+  const amounts = {
+    sol: CurrencyAmount.fromRawAmount(Token.SOL, balances.sol),
+  };
 
-  const mutate = useCallback(async () => {
+  const mutate = async () => {
     const result = await queryClient.fetchQuery({
       queryKey,
       queryFn: fetchBalances,
       staleTime: 0,
     });
     return result;
-  }, [queryClient, queryKey, fetchBalances]);
+  };
 
   return {
     balances,

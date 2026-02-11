@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
 
 import { WSOL_SUI_TYPE } from '@/constants';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
@@ -11,9 +10,9 @@ const useSuiBalances = (address: string | null) => {
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => [useSuiBalances.name, address], [address]);
+  const queryKey = [useSuiBalances.name, address];
 
-  const fetchBalances = useCallback(async () => {
+  const fetchBalances = async () => {
     if (!address) return DEFAULT_SUI_BALANCES;
     const [suiBalance, wsolBalance] = await Promise.all([
       suiClient.getBalance({ owner: address }),
@@ -24,7 +23,7 @@ const useSuiBalances = (address: string | null) => {
       sui: BigInt(suiBalance.totalBalance),
       wsol: BigInt(wsolBalance.totalBalance),
     };
-  }, [suiClient, address]);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey,
@@ -36,23 +35,20 @@ const useSuiBalances = (address: string | null) => {
     structuralSharing: false,
   });
 
-  const balances = useMemo(() => data ?? DEFAULT_SUI_BALANCES, [data]);
+  const balances = data ?? DEFAULT_SUI_BALANCES;
 
-  const amounts = useMemo(
-    () => ({
-      sui: CurrencyAmount.fromRawAmount(Token.SUI, balances.sui),
-    }),
-    [balances.sui]
-  );
+  const amounts = {
+    sui: CurrencyAmount.fromRawAmount(Token.SUI, balances.sui),
+  };
 
-  const mutate = useCallback(async () => {
+  const mutate = async () => {
     const result = await queryClient.fetchQuery({
       queryKey,
       queryFn: fetchBalances,
       staleTime: 0,
     });
     return result;
-  }, [queryClient, queryKey, fetchBalances]);
+  };
 
   return {
     balances,

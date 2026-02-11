@@ -1,5 +1,5 @@
 import { usePrivy } from '@privy-io/react-auth';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { toasting } from '@/components/ui/toast';
@@ -42,102 +42,85 @@ const useWalletRegistration = () => {
   const effectiveRegisteredUsers = mounted ? registeredUsers : {};
   const effectiveLinkedUsers = mounted ? linkedUsers : {};
 
-  const registerWallets = useCallback(
-    async (retryCount = 0) => {
-      if (!user?.id || isRegistering.current) return;
-      if (effectiveRegisteredUsers[user.id]) return;
+  const registerWallets = async (retryCount = 0) => {
+    if (!user?.id || isRegistering.current) return;
+    if (effectiveRegisteredUsers[user.id]) return;
 
-      isRegistering.current = true;
-      const WALLET_SETUP_TOAST_ID = 'wallet-setup';
+    isRegistering.current = true;
+    const WALLET_SETUP_TOAST_ID = 'wallet-setup';
 
-      try {
-        const promises: Promise<unknown>[] = [];
+    try {
+      const promises: Promise<unknown>[] = [];
 
-        if (!hasSuiWallet) {
-          promises.push(createSuiWallet(user.id));
-        }
+      if (!hasSuiWallet) {
+        promises.push(createSuiWallet(user.id));
+      }
 
-        if (!hasSolanaWallet) {
-          promises.push(createSolanaWallet(user.id));
-        }
+      if (!hasSolanaWallet) {
+        promises.push(createSolanaWallet(user.id));
+      }
 
-        if (promises.length > 0) {
-          const message =
-            retryCount > 0
-              ? 'Retrying wallet setup...'
-              : 'Setting up your wallets...';
-          toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
-          await Promise.all(promises);
-          toasting.dismiss(WALLET_SETUP_TOAST_ID);
-          toasting.success({
-            action: 'Wallet Setup',
-            message: 'Your wallets are ready',
-          });
-        }
-
-        setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
-      } catch (_error) {
+      if (promises.length > 0) {
+        const message =
+          retryCount > 0
+            ? 'Retrying wallet setup...'
+            : 'Setting up your wallets...';
+        toasting.loadingWithId({ message }, WALLET_SETUP_TOAST_ID);
+        await Promise.all(promises);
         toasting.dismiss(WALLET_SETUP_TOAST_ID);
-        if (retryCount < MAX_RETRY_ATTEMPTS) {
-          const delay = RETRY_DELAYS_MS[retryCount];
-          isRegistering.current = false;
-          setTimeout(() => registerWallets(retryCount + 1), delay);
-          return;
-        }
-
-        toasting.error({
+        toasting.success({
           action: 'Wallet Setup',
-          message: 'Please refresh the page',
+          message: 'Your wallets are ready',
         });
-      } finally {
+      }
+
+      setRegisteredUsers((prev) => ({ ...prev, [user.id]: true }));
+    } catch (_error) {
+      toasting.dismiss(WALLET_SETUP_TOAST_ID);
+      if (retryCount < MAX_RETRY_ATTEMPTS) {
+        const delay = RETRY_DELAYS_MS[retryCount];
         isRegistering.current = false;
+        setTimeout(() => registerWallets(retryCount + 1), delay);
+        return;
       }
-    },
-    [
-      user?.id,
-      hasSuiWallet,
-      hasSolanaWallet,
-      effectiveRegisteredUsers,
-      setRegisteredUsers,
-    ]
-  );
 
-  const linkWallets = useCallback(
-    async (retryCount = 0) => {
-      if (!user?.id || isLinking.current) return;
-      if (effectiveLinkedUsers[user.id]) return;
-      if (!hasSuiWallet || !hasSolanaWallet) return;
+      toasting.error({
+        action: 'Wallet Setup',
+        message: 'Please refresh the page',
+      });
+    } finally {
+      isRegistering.current = false;
+    }
+  };
 
-      isLinking.current = true;
+  const linkWallets = async (retryCount = 0) => {
+    if (!user?.id || isLinking.current) return;
+    if (effectiveLinkedUsers[user.id]) return;
+    if (!hasSuiWallet || !hasSolanaWallet) return;
 
-      try {
-        await linkSolanaWallet(user.id);
-        setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
-      } catch (_error) {
-        if (retryCount < MAX_RETRY_ATTEMPTS) {
-          const delay = RETRY_DELAYS_MS[retryCount];
-          isLinking.current = false;
-          setTimeout(() => linkWallets(retryCount + 1), delay);
-          return;
-        }
+    isLinking.current = true;
 
-        toasting.error({
-          action: 'Wallet Link',
-          message: 'Please refresh the page',
-        });
-      } finally {
+    try {
+      await linkSolanaWallet(user.id);
+      setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
+    } catch (_error) {
+      if (retryCount < MAX_RETRY_ATTEMPTS) {
+        const delay = RETRY_DELAYS_MS[retryCount];
         isLinking.current = false;
+        setTimeout(() => linkWallets(retryCount + 1), delay);
+        return;
       }
-    },
-    [
-      user?.id,
-      hasSuiWallet,
-      hasSolanaWallet,
-      effectiveLinkedUsers,
-      setLinkedUsers,
-    ]
-  );
 
+      toasting.error({
+        action: 'Wallet Link',
+        message: 'Please refresh the page',
+      });
+    } finally {
+      isLinking.current = false;
+    }
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: registerWallets closes over deps already listed — React Compiler ensures stable reference
   useEffect(() => {
     if (!mounted) return;
 
@@ -149,15 +132,9 @@ const useWalletRegistration = () => {
     ) {
       registerWallets();
     }
-  }, [
-    mounted,
-    ready,
-    authenticated,
-    user?.id,
-    effectiveRegisteredUsers,
-    registerWallets,
-  ]);
+  }, [mounted, ready, authenticated, user?.id, effectiveRegisteredUsers]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: linkWallets closes over deps already listed — React Compiler ensures stable reference
   useEffect(() => {
     if (!mounted) return;
 
@@ -179,7 +156,6 @@ const useWalletRegistration = () => {
     hasSuiWallet,
     hasSolanaWallet,
     effectiveLinkedUsers,
-    linkWallets,
   ]);
 
   return {
