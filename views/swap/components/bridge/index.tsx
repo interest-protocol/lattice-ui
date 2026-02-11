@@ -9,6 +9,8 @@ import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
 
+import { SwapSVG } from '@/components/ui/icons';
+
 import {
   BRIDGE_ROUTES,
   type BridgeRoute,
@@ -146,18 +148,22 @@ const Bridge: FC = () => {
           onOpenRouteSelector={openRouteSelector}
         />
 
-        <div className="flex items-center justify-center">
-          <button
-            type="button"
-            aria-label="Reverse bridge direction"
-            className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
-            onClick={handleFlip}
+        <button
+          type="button"
+          aria-label="Reverse bridge direction"
+          className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0 self-center"
+          onClick={handleFlip}
+        >
+          <div
+            className="w-10 h-10 rounded-full flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
+            style={{
+              background: 'var(--color-surface-light)',
+              border: '1px solid var(--color-surface-border)',
+            }}
           >
-            <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover transition-colors duration-150">
-              &#x2193;&#x2191;
-            </div>
-          </button>
-        </div>
+            <SwapSVG maxHeight="1rem" />
+          </div>
+        </button>
 
         <BridgeToCard route={selectedRoute} amount={amount} />
 

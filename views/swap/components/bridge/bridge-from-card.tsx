@@ -93,20 +93,21 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
         />
         <button
           type="button"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer bg-surface-lighter border-none hover:bg-surface-hover"
+          className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0 text-text text-base"
           onClick={onOpenRouteSelector}
+          aria-label={`Select ${route.sourceToken.symbol}`}
         >
-          <Image
-            src={route.sourceToken.iconUrl}
-            alt={route.sourceToken.symbol}
-            width={20}
-            height={20}
-            className="rounded-full"
-          />
-          <span className="text-text font-semibold text-sm">
-            {route.sourceToken.symbol}
+          <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center ring-1 ring-surface-border">
+            <Image
+              className="object-contain"
+              src={route.sourceToken.iconUrl}
+              alt={route.sourceToken.symbol}
+              width={32}
+              height={32}
+            />
           </span>
-          <ChevronDownSVG maxWidth="0.75rem" width="100%" />
+          {route.sourceToken.symbol}
+          <ChevronDownSVG maxWidth="1rem" width="100%" />
         </button>
       </div>
 

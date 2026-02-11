@@ -29,17 +29,17 @@ const BridgeToCard: FC<BridgeToCardProps> = ({ route, amount }) => {
         <span className="text-text text-2xl">
           {amountNum > 0 ? amount : '0'}
         </span>
-        <div className="flex items-center gap-2 px-3 py-1.5">
-          <Image
-            src={route.destToken.iconUrl}
-            alt={route.destToken.symbol}
-            width={20}
-            height={20}
-            className="rounded-full"
-          />
-          <span className="text-text font-semibold text-sm">
-            {route.destToken.symbol}
+        <div className="flex items-center gap-2 text-text text-base">
+          <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center ring-1 ring-surface-border">
+            <Image
+              className="object-contain"
+              src={route.destToken.iconUrl}
+              alt={route.destToken.symbol}
+              width={32}
+              height={32}
+            />
           </span>
+          {route.destToken.symbol}
         </div>
       </div>
 
