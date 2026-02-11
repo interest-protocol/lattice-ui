@@ -43,7 +43,11 @@ export const viewport: Viewport = {
 };
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
-  <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
+  <html
+    lang="en"
+    data-scroll-behavior="smooth"
+    className={`${dmSans.variable} ${jetbrainsMono.variable}`}
+  >
     <body>
       <Providers>{children}</Providers>
       <Analytics />

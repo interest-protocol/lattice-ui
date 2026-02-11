@@ -41,7 +41,6 @@
 @layer base {
   html {
     background: var(--color-surface);
-    scroll-behavior: smooth;
   }
 
   body,
