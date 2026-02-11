@@ -724,27 +724,25 @@ Tailwind v4 is configured via CSS, not `tailwind.config.js`. Custom theme tokens
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "DM Sans", serif;
-  --font-mono: "JetBrains Mono", monospace;
-  --font-pixel: "PPNeuebit", monospace;
+  /* Accent: sky-500 (dark), cyan-600 (light override in @layer base) */
+  --color-accent: #0ea5e9;
+  --color-accent-hover: #38bdf8;
+  --color-accent-muted: #0ea5e980;
+  --color-accent-subtle: #0ea5e933;
+  --color-accent-wash: #0ea5e914;
+  --color-accent-border: #0ea5e94d;
 
-  --color-accent: #a78bfa;
-  --color-accent-hover: #c4b5fd;
-  --color-accent-80: #a78bfa80;
-  --color-accent-4d: #a78bfa4d;
-  --color-accent-1a: #a78bfa1a;
-  --color-accent-2a: #a78bfa2a;
-  --color-accent-33: #a78bfa33;
+  /* Surfaces, text, status, component tokens... */
+  --color-surface: #0a0e1a;
+  --color-surface-raised: #111827;
+  --color-text: #f0f0f5;
+  --color-text-muted: #6b7280;
+  /* ... see globals.css for full token list */
+}
 
-  --color-surface: #0c0f1d;
-  --color-surface-light: #ffffff0d;
-  --color-surface-lighter: #ffffff1a;
-  --color-surface-hover: #ffffff2a;
-  --color-surface-border: #ffffff1a;
-  --color-text: #ffffff;
-  --color-text-muted: #ffffff80;
-  --color-text-dimmed: #ffffff40;
-  --color-text-dim: #ffffff14;
+@layer base {
+  :root { /* Complex tokens (gradients, shadows) */ }
+  [data-theme="light"] { /* Light theme overrides */ }
 }
 ```
 
@@ -777,14 +775,14 @@ Use native HTML elements with Tailwind utility classes:
 
 ### Dynamic Styles
 
-For runtime-dependent values (conditional colors, computed dimensions), use `style` prop:
+For runtime-dependent values (conditional colors, computed dimensions), use `style` prop with CSS variables:
 
 ```typescript
 <button
   className="flex-1 p-3 rounded-lg cursor-pointer"
   style={{
-    border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
-    background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+    border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
+    background: isSelected ? 'var(--color-accent-wash)' : 'var(--color-surface-light)',
   }}
 >
 
@@ -961,11 +959,13 @@ if (hasWallet('sui')) {
 ### 1. Hard-Coded Colors
 
 ```typescript
-// BAD - hard-coded hex in className
-<div className="bg-[#A78BFA]" />
+// BAD - hard-coded hex in className or inline style
+<div className="bg-[#0ea5e9]" />
+<div style={{ background: '#111827' }} />
 
-// GOOD - use theme tokens
+// GOOD - use Tailwind theme classes or CSS variables
 <div className="bg-accent" />
+<div style={{ background: 'var(--color-toast-bg)' }} />
 ```
 
 ### 2. Direct Zustand Destructuring
@@ -1094,6 +1094,29 @@ useEffect(() => {
 const fullName = `${firstName} ${lastName}`;
 ```
 
+### 12. Using `text-white` for Theme-Dependent Text
+
+```typescript
+// BAD — white text is invisible on light backgrounds
+<p className="text-white">{title}</p>
+
+// GOOD — use semantic text token (adapts to theme)
+<p className="text-text">{title}</p>
+
+// OK — text-white on colored-background buttons (always readable)
+<button className="bg-accent text-white">Submit</button>
+```
+
+### 13. Inline `rgba()` Instead of CSS Variables
+
+```typescript
+// BAD — hardcoded rgba doesn't adapt to theme
+style={{ background: 'rgba(0,0,0,0.7)' }}
+
+// GOOD — use CSS variable that switches per theme
+style={{ background: 'var(--color-overlay-bg)' }}
+```
+
 ---
 
 ## Accessibility Checklist
@@ -1182,6 +1205,62 @@ Git hooks are managed by Husky (`prepare: husky`).
 
 ---
 
+## Design System
+
+### Theme Architecture
+
+The app supports **light + dark themes** with system preference as default. Powered by `next-themes`:
+
+- **Theme provider**: `components/providers/theme-provider/index.tsx`
+- **Storage key**: `lattice-theme` (localStorage)
+- **HTML attribute**: `data-theme="light" | "dark"`
+- **Settings UI**: Theme selector in Settings menu (System / Dark / Light)
+
+### Token Naming Convention
+
+All design tokens follow `--color-{category}-{variant}` for simple colors and `--{component}-{property}` for complex values (gradients, shadows).
+
+**Simple color tokens** (in `@theme`, generate Tailwind utilities like `bg-accent`, `text-text-muted`):
+- Accent: `accent`, `accent-hover`, `accent-muted`, `accent-subtle`, `accent-wash`, `accent-border`
+- Surface: `surface`, `surface-raised`, `surface-overlay`, `surface-inset`, `surface-light`, `surface-lighter`, `surface-hover`, `surface-border`, `surface-border-hover`
+- Text: `text`, `text-secondary`, `text-muted`, `text-dimmed`, `text-dim`
+- Status: `success`, `error`, `warning`
+- Component: `toast-bg`, `toast-border`, `toast-success`, `toast-error`, `modal-border`, `overlay-bg`, `footer-bg`, `header-border`, `toggle-inactive`, `toggle-thumb`, `toggle-thumb-disabled`, `tooltip-text`, `skeleton-base`, `skeleton-highlight`, `scrollbar-track`, `scrollbar-thumb`, `warning-bg`, `warning-border`, `error-wash`
+
+**Complex tokens** (in `@layer base :root` / `[data-theme="light"]`, used as `var(--token-name)` in inline styles):
+- `--toast-shadow`, `--toast-success-glow`, `--toast-error-glow`
+- `--modal-bg`, `--modal-shadow`, `--settings-shadow`
+- `--btn-primary-bg`, `--btn-primary-shadow`
+- `--card-bg`, `--card-shadow`
+- `--tooltip-shadow`, `--bg-blur`
+
+### Color Palette Identity
+
+| Theme | Accent | Surfaces | Text |
+|-------|--------|----------|------|
+| **Dark** | Sky-500 `#0ea5e9` | Navy (`#0a0e1a` → `#1a2233`) | White scale (`#f0f0f5` → `#404759`) |
+| **Light** | Cyan-600 `#0891b2` (WCAG AA) | Slate (`#f8fafc` → `#e2e8f0`) | Slate (`#0f172a` → `#94a3b8`) |
+
+### How to Use Tokens
+
+| Context | Method | Example |
+|---------|--------|---------|
+| **Tailwind classes** | Use utility classes | `bg-surface`, `text-text-muted`, `border-accent` |
+| **Inline styles** (simple) | `var(--color-*)` | `style={{ color: 'var(--color-accent)' }}` |
+| **Inline styles** (complex) | `var(--*)` | `style={{ background: 'var(--card-bg)' }}` |
+| **JS-only** (canvas, third-party) | `useThemeColors()` hook | `const { particlePalette, isDark } = useThemeColors()` |
+| **Theme detection** | `useTheme()` from `next-themes` | `const { theme, setTheme, resolvedTheme } = useTheme()` |
+
+### Rules
+
+1. **Never use hardcoded hex colors** in components — always use CSS variables or Tailwind theme classes
+2. **Use `text-text`** for theme-dependent text, not `text-white` (exception: text on colored-background buttons)
+3. **Status colors** (`success`, `error`, `warning`) are semantic — only use them for their intended purpose
+4. **Component tokens** (`toast-bg`, `modal-bg`, etc.) are scoped — only use them in their intended component
+5. **Chain brand colors** in `constants/chains/` are intentionally theme-independent (they represent external brands)
+
+---
+
 ## Quick Reference
 
 ### Imports Template
@@ -1193,6 +1272,10 @@ import { FC, useState, useEffect, useRef } from 'react';
 // Next.js
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+
+// Theme
+import { useTheme } from 'next-themes';
+import useThemeColors from '@/hooks/ui/use-theme-colors';
 
 // Animation
 import { motion, AnimatePresence } from 'motion/react';

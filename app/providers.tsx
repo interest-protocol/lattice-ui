@@ -11,8 +11,46 @@ import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import ModalProvider from '@/components/providers/modal-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
+import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
+import useThemeColors from '@/hooks/ui/use-theme-colors';
+
+const ThemedProviders = ({ children }: { children: ReactNode }) => {
+  const { toast, skeleton } = useThemeColors();
+
+  return (
+    <>
+      <AuthInitializer />
+      <ModalProvider />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: TOAST_DURATION,
+          style: {
+            zIndex: 100,
+            maxWidth: '20rem',
+            overflow: 'hidden',
+            position: 'relative',
+            background: toast.background,
+            border: `1px solid ${toast.border}`,
+            borderRadius: '12px',
+            boxShadow: toast.shadow,
+          },
+        }}
+      />
+      <SkeletonTheme
+        baseColor={skeleton.baseColor}
+        highlightColor={skeleton.highlightColor}
+      >
+        <AppStateProvider />
+        <WalletRegistrationProvider />
+        <BackgroundProvider />
+        {children}
+      </SkeletonTheme>
+    </>
+  );
+};
 
 const Providers = ({ children }: { children: ReactNode }) => {
   const [queryClient] = useState(
@@ -29,34 +67,13 @@ const Providers = ({ children }: { children: ReactNode }) => {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <PrivyProviderWrapper>
-          <AuthInitializer />
-          <ModalProvider />
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              duration: TOAST_DURATION,
-              style: {
-                zIndex: 100,
-                maxWidth: '20rem',
-                overflow: 'hidden',
-                position: 'relative',
-                background: '#111827',
-                border: '1px solid #ffffff0d',
-                borderRadius: '12px',
-                boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
-              },
-            }}
-          />
-          <SkeletonTheme baseColor="#FFFFFF0D" highlightColor="#FFFFFF1A">
-            <AppStateProvider />
-            <WalletRegistrationProvider />
-            <BackgroundProvider />
-            {children}
-          </SkeletonTheme>
-        </PrivyProviderWrapper>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <PrivyProviderWrapper>
+            <ThemedProviders>{children}</ThemedProviders>
+          </PrivyProviderWrapper>
+        </QueryClientProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 };

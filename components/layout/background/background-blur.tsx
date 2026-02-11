@@ -21,8 +21,7 @@ const BackgroundBlur: FC = () => {
         scale: 1.5,
         position: 'fixed',
         filter: 'blur(50px)',
-        background:
-          'radial-gradient(ellipse at 50% 0%, #6366f108 0%, transparent 60%), linear-gradient(180deg, rgba(10,14,26,0.75), rgba(10,14,26,0.95)), url(/bg.png)',
+        background: 'var(--bg-blur)',
         backgroundPosition: 'top left',
         backgroundSize: 'cover',
       }}

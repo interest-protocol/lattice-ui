@@ -45,8 +45,8 @@ const SwapFormButton: FC = () => {
       style={{
         cursor: validation.isDisabled ? 'not-allowed' : 'pointer',
         opacity: validation.isDisabled ? 0.5 : 1,
-        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-        boxShadow: '0 0 20px #6366f11a',
+        background: 'var(--btn-primary-bg)',
+        boxShadow: 'var(--btn-primary-shadow)',
       }}
       onClick={handleSwap}
       disabled={validation.isDisabled}

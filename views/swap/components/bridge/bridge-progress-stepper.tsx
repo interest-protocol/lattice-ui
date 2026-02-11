@@ -78,10 +78,10 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                     <motion.div
                       className="w-7 h-7 rounded-full flex items-center justify-center"
                       style={{
-                        border: `2px solid ${isErrorStep ? '#ef4444' : 'var(--color-accent)'}`,
+                        border: `2px solid ${isErrorStep ? 'var(--color-error)' : 'var(--color-accent)'}`,
                         background: isErrorStep
-                          ? '#ef44441a'
-                          : 'var(--color-accent-1a)',
+                          ? 'var(--color-error-wash)'
+                          : 'var(--color-accent-wash)',
                       }}
                       animate={
                         isErrorStep ? undefined : { scale: [1, 1.15, 1] }
@@ -96,7 +96,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                         className="w-2.5 h-2.5 rounded-full"
                         style={{
                           background: isErrorStep
-                            ? '#ef4444'
+                            ? 'var(--color-error)'
                             : 'var(--color-accent)',
                         }}
                       />
@@ -121,7 +121,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                         : isActive
                           ? 'var(--color-text)'
                           : isErrorStep
-                            ? '#ef4444'
+                            ? 'var(--color-error)'
                             : 'var(--color-text-dimmed)',
                     }}
                   >
@@ -148,7 +148,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
         <span
           className="text-sm"
           style={{
-            color: isError ? '#ef4444' : 'var(--color-text-muted)',
+            color: isError ? 'var(--color-error)' : 'var(--color-text-muted)',
           }}
         >
           {STATUS_MESSAGES[status] ?? ''}

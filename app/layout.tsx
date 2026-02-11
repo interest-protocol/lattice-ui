@@ -45,6 +45,7 @@ export const viewport: Viewport = {
 const RootLayout = ({ children }: { children: ReactNode }) => (
   <html
     lang="en"
+    suppressHydrationWarning
     data-scroll-behavior="smooth"
     className={`${dmSans.variable} ${jetbrainsMono.variable}`}
   >

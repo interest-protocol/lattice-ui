@@ -16,7 +16,7 @@ const Footer: FC = () => {
   return (
     <footer
       className="sticky bottom-0 z-40 mt-auto backdrop-blur-md border-t border-surface-border"
-      style={{ background: 'rgba(10,14,26,0.85)' }}
+      style={{ background: 'var(--color-footer-bg)' }}
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-4 px-4 py-2">
         {CHAINS.map((chain, i) => {

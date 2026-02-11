@@ -42,8 +42,8 @@ const SwapForm: FC = () => {
       <div
         className="flex flex-col gap-4 p-6 rounded-2xl border border-surface-border"
         style={{
-          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
-          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+          background: 'var(--card-bg)',
+          boxShadow: 'var(--card-shadow)',
         }}
       >
         <InputField

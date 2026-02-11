@@ -256,8 +256,8 @@ const SendModal: FC = () => {
         style={{
           cursor: sending ? 'wait' : 'pointer',
           opacity: sending ? 0.6 : 1,
-          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-          boxShadow: '0 0 20px #6366f11a',
+          background: 'var(--btn-primary-bg)',
+          boxShadow: 'var(--btn-primary-shadow)',
         }}
         onClick={handleSend}
         disabled={sending}

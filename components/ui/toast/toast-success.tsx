@@ -10,8 +10,8 @@ const ToastContent: FC<ToastProps> = ({ action, message }) => (
     <div
       className="w-8 h-8 rounded-full"
       style={{
-        color: '#00DF80',
-        boxShadow: '0 0 5rem 1rem #00DF80, inset 0 0 1rem 1rem #2C4A47',
+        color: 'var(--color-toast-success)',
+        boxShadow: 'var(--toast-success-glow)',
       }}
     >
       <span className="w-8 h-8 flex rounded-full items-center justify-center">
@@ -19,10 +19,10 @@ const ToastContent: FC<ToastProps> = ({ action, message }) => (
       </span>
     </div>
     <div>
-      <p className="text-white">{action} Successfully!</p>
+      <p className="text-text">{action} Successfully!</p>
       {message && <p className="text-text-secondary">{message}</p>}
     </div>
-    <ToastTimer color="#00DF80" />
+    <ToastTimer color="var(--color-toast-success)" />
   </div>
 );
 

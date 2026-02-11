@@ -14,7 +14,7 @@ const SwapDetails: FC = () => {
   const rate = hasRates ? (suiPrice / solPrice).toFixed(6) : '...';
 
   return (
-    <div className="p-6 bg-[#ffffff04] rounded-2xl flex flex-col gap-4 border border-surface-border">
+    <div className="p-6 bg-surface-light rounded-2xl flex flex-col gap-4 border border-surface-border">
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Exchange Rate</span>
         <span className="text-sm font-medium text-text">

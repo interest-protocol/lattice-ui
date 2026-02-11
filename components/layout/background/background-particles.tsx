@@ -1,12 +1,6 @@
 import { type FC, useEffect, useRef } from 'react';
 
-const PALETTE = [
-  'rgba(99, 102, 241, 0.6)', // indigo-500
-  'rgba(129, 140, 248, 0.5)', // indigo-400
-  'rgba(165, 180, 252, 0.4)', // indigo-300
-  'rgba(79, 70, 229, 0.5)', // indigo-600
-  'rgba(199, 210, 254, 0.3)', // indigo-200
-];
+import useThemeColors from '@/hooks/ui/use-theme-colors';
 
 interface Particle {
   x: number;
@@ -20,6 +14,7 @@ interface Particle {
 
 const BackgroundParticles: FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { particlePalette, particleStrokeRgb } = useThemeColors();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,7 +50,8 @@ const BackgroundParticles: FC = () => {
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         radius: 0.5 + Math.random() * 1.5,
-        color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+        color:
+          particlePalette[Math.floor(Math.random() * particlePalette.length)],
         opacity: 0.15 + Math.random() * 0.35,
       }));
     };
@@ -89,7 +85,7 @@ const BackgroundParticles: FC = () => {
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             const alpha = (1 - dist / 80) * 0.06;
-            ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+            ctx.strokeStyle = `rgba(${particleStrokeRgb}, ${alpha})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -111,7 +107,7 @@ const BackgroundParticles: FC = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationId);
     };
-  }, []);
+  }, [particlePalette, particleStrokeRgb]);
 
   return (
     <canvas

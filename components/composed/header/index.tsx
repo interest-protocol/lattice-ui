@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 
+import Settings from '@/components/composed/settings';
 import WalletButton from '@/components/composed/wallet-button';
 import { LogoSVG } from '@/components/ui/icons';
 import GasBalances from './gas-balances';
@@ -8,7 +9,7 @@ import Navbar from './navbar';
 const Header: FC = () => (
   <header
     className="mx-auto w-full flex max-w-[1440px] relative items-center px-4 sm:px-6 py-3 sm:py-4 justify-between"
-    style={{ borderBottom: '1px solid #ffffff08' }}
+    style={{ borderBottom: '1px solid var(--color-header-border)' }}
   >
     <div className="flex items-center gap-2 sm:gap-4 md:gap-8">
       <div className="flex items-center gap-4">
@@ -21,6 +22,7 @@ const Header: FC = () => (
     </div>
     <div className="flex items-center gap-2">
       <GasBalances />
+      <Settings />
       <WalletButton />
     </div>
   </header>

@@ -20,10 +20,10 @@ const getOverallState = (
 };
 
 const stateColors: Record<HealthState, string> = {
-  healthy: '#22c55e',
-  degraded: '#eab308',
-  unhealthy: '#ef4444',
-  loading: '#6b7280',
+  healthy: 'var(--color-success)',
+  degraded: 'var(--color-warning)',
+  unhealthy: 'var(--color-error)',
+  loading: 'var(--color-text-muted)',
 };
 
 const HealthIndicator: FC = () => {

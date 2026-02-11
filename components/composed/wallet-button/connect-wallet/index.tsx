@@ -11,8 +11,8 @@ const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => (
     type="button"
     className="flex text-white cursor-pointer relative items-center rounded-xl gap-2 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 border-none font-semibold transition-all duration-200"
     style={{
-      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-      boxShadow: '0 0 20px #6366f11a',
+      background: 'var(--btn-primary-bg)',
+      boxShadow: 'var(--btn-primary-shadow)',
       backdropFilter: 'blur(16px)',
     }}
     onClick={onConnect}

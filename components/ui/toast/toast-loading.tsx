@@ -4,8 +4,8 @@ import ToastTimer from './toast-timer';
 
 const ToastLoading: FC<ToastLoadingProps> = ({ message }) => (
   <>
-    <p className="text-white py-2">{message ?? 'Loading...'}</p>
-    <ToastTimer loading color="#DDDDDD" />
+    <p className="text-text py-2">{message ?? 'Loading...'}</p>
+    <ToastTimer loading color="var(--color-text-secondary)" />
   </>
 );
 

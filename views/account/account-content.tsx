@@ -99,8 +99,8 @@ const BalancesView: FC<{
       <div
         className="p-6 rounded-2xl border border-surface-border"
         style={{
-          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
-          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+          background: 'var(--card-bg)',
+          boxShadow: 'var(--card-shadow)',
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Sui Wallet</h2>
@@ -145,8 +145,8 @@ const BalancesView: FC<{
       <div
         className="p-6 rounded-2xl border border-surface-border"
         style={{
-          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
-          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+          background: 'var(--card-bg)',
+          boxShadow: 'var(--card-shadow)',
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Solana Wallet</h2>
@@ -236,8 +236,8 @@ const AccountContent: FC = () => {
         <div
           className="p-8 rounded-2xl text-center border border-surface-border w-full"
           style={{
-            background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
-            boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+            background: 'var(--card-bg)',
+            boxShadow: 'var(--card-shadow)',
           }}
         >
           <h2 className="text-text mb-4">Connect Your Wallet</h2>
@@ -281,8 +281,8 @@ const AccountContent: FC = () => {
         <div
           className="p-6 rounded-2xl border border-surface-border flex flex-col gap-5"
           style={{
-            background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
-            boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+            background: 'var(--card-bg)',
+            boxShadow: 'var(--card-shadow)',
           }}
         >
           <NetworkTabs network={network} setNetwork={setNetwork} />

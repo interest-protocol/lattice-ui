@@ -4,13 +4,13 @@
   --font-sans: "DM Sans", serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* Accent: indigo-500 base */
-  --color-accent: #6366f1;
-  --color-accent-hover: #818cf8;
-  --color-accent-muted: #6366f180;
-  --color-accent-subtle: #6366f133;
-  --color-accent-wash: #6366f114;
-  --color-accent-border: #6366f14d;
+  /* Accent: sky-500 base (dark), cyan-600 base (light override below) */
+  --color-accent: #0ea5e9;
+  --color-accent-hover: #38bdf8;
+  --color-accent-muted: #0ea5e980;
+  --color-accent-subtle: #0ea5e933;
+  --color-accent-wash: #0ea5e914;
+  --color-accent-border: #0ea5e94d;
 
   /* Layered surfaces */
   --color-surface: #0a0e1a;
@@ -36,9 +36,69 @@
   --color-success: #22c55e;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
+
+  /* Component: Toast */
+  --color-toast-bg: #111827;
+  --color-toast-border: #ffffff0d;
+  --color-toast-success: #00df80;
+  --color-toast-error: #f04248;
+
+  /* Component: Modal */
+  --color-modal-border: #ffffff0d;
+  --color-overlay-bg: rgba(0, 0, 0, 0.7);
+
+  /* Component: Footer */
+  --color-footer-bg: rgba(10, 14, 26, 0.85);
+
+  /* Component: Header */
+  --color-header-border: #ffffff08;
+
+  /* Component: Toggle */
+  --color-toggle-inactive: #ffffff14;
+  --color-toggle-thumb: #ffffff;
+  --color-toggle-thumb-disabled: #d0d0d0;
+
+  /* Component: Tooltip */
+  --color-tooltip-text: #ffffff;
+
+  /* Component: Skeleton */
+  --color-skeleton-base: #ffffff0d;
+  --color-skeleton-highlight: #ffffff1a;
+
+  /* Component: Scrollbar */
+  --color-scrollbar-track: rgba(0, 0, 0, 0.47);
+  --color-scrollbar-thumb: #888;
+
+  /* Component: Warning/Error */
+  --color-warning-bg: #f59e0b1a;
+  --color-warning-border: #f59e0b4d;
+  --color-error-wash: #ef44441a;
 }
 
 @layer base {
+  :root {
+    /* Complex tokens: gradients, shadows (cannot be Tailwind utilities) */
+    --toast-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    --toast-success-glow: 0 0 5rem 1rem #00df80, inset 0 0 1rem 1rem #2c4a47;
+    --toast-error-glow: 0 0 5rem 1rem #f04248, inset 0 0 1rem 1rem #463846;
+    --modal-bg: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    --modal-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    --settings-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --btn-primary-bg: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    --btn-primary-shadow: 0 0 20px #0ea5e91a;
+    --card-bg: linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%);
+    --card-shadow: 0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040;
+    --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --bg-blur:
+      radial-gradient(ellipse at 50% 0%, #0ea5e908 0%, transparent 60%),
+      linear-gradient(180deg, rgba(10, 14, 26, 0.75), rgba(10, 14, 26, 0.95)),
+      url(/bg.png);
+  }
+
   html {
     background: var(--color-surface);
   }
@@ -47,36 +107,111 @@
   html {
     overflow-x: hidden;
   }
+
+  /* ─── Light theme ─── */
+  [data-theme="light"] {
+    --color-accent: #0891b2;
+    --color-accent-hover: #0e7490;
+    --color-accent-muted: #0891b280;
+    --color-accent-subtle: #0891b233;
+    --color-accent-wash: #0891b20f;
+    --color-accent-border: #0891b24d;
+
+    --color-surface: #f8fafc;
+    --color-surface-raised: #ffffff;
+    --color-surface-overlay: #f1f5f9;
+    --color-surface-inset: #e2e8f0;
+
+    --color-surface-light: #0000000a;
+    --color-surface-lighter: #00000012;
+    --color-surface-hover: #0000001a;
+    --color-surface-border: #00000014;
+    --color-surface-border-hover: #00000022;
+
+    --color-text: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+    --color-text-dimmed: #94a3b8;
+    --color-text-dim: #0000000a;
+
+    --color-toast-bg: #ffffff;
+    --color-toast-border: #00000014;
+    --color-toast-success: #16a34a;
+    --color-toast-error: #dc2626;
+
+    --color-modal-border: #00000014;
+    --color-overlay-bg: rgba(0, 0, 0, 0.4);
+
+    --color-footer-bg: rgba(248, 250, 252, 0.85);
+    --color-header-border: #00000010;
+
+    --color-toggle-inactive: #00000014;
+    --color-toggle-thumb: #ffffff;
+    --color-toggle-thumb-disabled: #a0a0a0;
+
+    --color-tooltip-text: #0f172a;
+
+    --color-skeleton-base: #0000000d;
+    --color-skeleton-highlight: #00000014;
+
+    --color-scrollbar-track: rgba(0, 0, 0, 0.06);
+    --color-scrollbar-thumb: #999;
+
+    --color-warning-bg: #fef3c7;
+    --color-warning-border: #f59e0b4d;
+    --color-error-wash: #fef2f2;
+
+    /* Complex tokens (light) */
+    --toast-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+    --toast-success-glow:
+      0 0 3rem 0.5rem #00df8040, inset 0 0 0.5rem 0.5rem #d1fae5;
+    --toast-error-glow:
+      0 0 3rem 0.5rem #f0424840, inset 0 0 0.5rem 0.5rem #fee2e2;
+    --modal-bg: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(241, 245, 249, 0.95) 100%
+    );
+    --modal-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+    --settings-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    --btn-primary-bg: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    --btn-primary-shadow: 0 0 20px #0891b21a;
+    --card-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --card-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 4px 24px 0 rgba(0, 0, 0, 0.04);
+    --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --bg-blur: linear-gradient(
+      180deg,
+      rgba(248, 250, 252, 0.9),
+      rgba(248, 250, 252, 0.98)
+    );
+  }
 }
 
-/* width */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 3px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
-  background: #0007;
+  background: var(--color-scrollbar-track);
   padding-left: 2px;
   border-radius: 0.5rem;
   transition: all 300ms ease-in-out;
 }
 
-/* Track on hover */
 ::-webkit-scrollbar-track:hover {
-  background: #0003;
+  background: rgba(0, 0, 0, 0.2);
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--color-scrollbar-thumb);
   border-radius: 0.5rem;
   border: 5px solid transparent;
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f180;
+  background: var(--color-accent-muted);
 }
 
 /* React hot toast */
