@@ -61,7 +61,11 @@ const WalletProfile: FC = () => {
           className="py-3 gap-2 flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200"
           onClick={handleOpenProfileDropdown}
         >
-          <LogoSVG maxWidth="1.25rem" maxHeight="1.25rem" className="text-accent" />
+          <LogoSVG
+            maxWidth="1.25rem"
+            maxHeight="1.25rem"
+            className="text-accent"
+          />
           <span className="whitespace-nowrap">{displayAddress}</span>
           <span className="hidden sm:flex items-center ml-1">
             <ChevronDownSVG

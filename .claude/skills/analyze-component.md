@@ -48,10 +48,8 @@ Analyze the specified component(s) against Lattice UI project conventions and re
 - [ ] Complex state extracted into custom hook
 
 ### Memoization
-- [ ] `useMemo` for expensive calculations only
-- [ ] `useCallback` for handlers passed to children
-- [ ] No over-memoization (simple booleans, string concatenation)
-- [ ] Proper dependency arrays (no missing deps, no unnecessary deps)
+- [ ] No `useMemo`, `useCallback`, or `React.memo` — React Compiler handles memoization automatically
+- [ ] No manual dependency arrays — write plain code and let the compiler optimize
 
 ### Error Handling
 - [ ] Async operations have try/catch

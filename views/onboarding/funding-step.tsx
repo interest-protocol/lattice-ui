@@ -3,8 +3,8 @@
 import { type FC, useEffect, useRef } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
-import Spinner from '@/components/ui/spinner';
 import { WalletSVG } from '@/components/ui/icons';
+import Spinner from '@/components/ui/spinner';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
