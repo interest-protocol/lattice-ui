@@ -21,9 +21,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://lattice.trade'),
+  applicationName: 'Lattice',
   title: 'Lattice',
   description: 'Cross-chain swap between SUI and SOL tokens.',
-  icons: { icon: '/icon.svg' },
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
   openGraph: {
     title: 'Lattice',
     description: 'Cross-chain swap between SUI and SOL tokens.',
@@ -40,6 +45,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0891b2' },
+    { media: '(prefers-color-scheme: dark)', color: '#0ea5e9' },
+  ],
 };
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
