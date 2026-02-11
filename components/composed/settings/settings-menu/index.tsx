@@ -19,7 +19,7 @@ const SettingsMenu: FC = () => {
           show={menu === 'explorer'}
           toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
         />
-        <hr className="border-none border-b border-b-[#242424] mx-4" />
+        <hr className="border-b border-b-surface-separator mx-4 border-t-0 border-x-0" />
         <SettingsMenuRPC
           show={menu === 'rpc'}
           toggleShow={() => setMenu(menu === 'rpc' ? null : 'rpc')}

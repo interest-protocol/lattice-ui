@@ -15,6 +15,8 @@ const Settings: FC = () => {
     <div ref={menuRef} className="flex relative items-end flex-col">
       <button
         type="button"
+        aria-label="Settings"
+        aria-expanded={show}
         className="text-white leading-none flex cursor-pointer items-center justify-center w-8 sm:w-auto h-8 sm:h-auto border border-accent-4d rounded-lg sm:rounded-xl bg-transparent hover:bg-accent-80 hover:border-accent-4d"
         onClick={() => setShow((prev) => !prev)}
       >

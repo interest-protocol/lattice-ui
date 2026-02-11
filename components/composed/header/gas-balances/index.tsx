@@ -2,7 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
-import { type FC, useMemo } from 'react';
+import type { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
@@ -26,19 +26,15 @@ const GasBalances: FC = () => {
   const { balances: solanaBalances, isLoading: solLoading } =
     useSolanaBalances(solanaAddress);
 
-  const items = useMemo(
-    () =>
-      CHAINS.map((chain) => {
-        const config = CHAIN_REGISTRY[chain];
-        const raw = chain === 'sui' ? suiBalances.sui : solanaBalances.sol;
-        const amount = FixedPointMath.toNumber(raw, config.decimals);
-        const display = formatMoney(amount, config.displayPrecision);
-        const loading = chain === 'sui' ? suiLoading : solLoading;
+  const items = CHAINS.map((chain) => {
+    const config = CHAIN_REGISTRY[chain];
+    const raw = chain === 'sui' ? suiBalances.sui : solanaBalances.sol;
+    const amount = FixedPointMath.toNumber(raw, config.decimals);
+    const display = formatMoney(amount, config.displayPrecision);
+    const loading = chain === 'sui' ? suiLoading : solLoading;
 
-        return { chain, config, display, loading };
-      }),
-    [suiBalances.sui, solanaBalances.sol, suiLoading, solLoading]
-  );
+    return { chain, config, display, loading };
+  });
 
   if (!authenticated) return null;
 

@@ -79,7 +79,6 @@ export const createMintRequest = (params: {
   sourceAddress: number[];
   sourceAmount: string;
   coinType: string;
-  rpcUrl?: string;
 }) => post<CreateMintRequestResult>('/api/xbridge/create-mint-request', params);
 
 export const setMintDigest = (params: {
@@ -87,14 +86,12 @@ export const setMintDigest = (params: {
   requestId: string;
   mintCapId: string;
   depositSignature: string;
-  rpcUrl?: string;
 }) => post<SetMintDigestResult>('/api/xbridge/set-mint-digest', params);
 
 export const voteMint = (params: {
   userId: string;
   requestId: string;
   depositSignature: string;
-  rpcUrl?: string;
 }) => post<VoteMintResult>('/api/xbridge/vote-mint', params);
 
 export const executeMint = (params: {
@@ -102,5 +99,4 @@ export const executeMint = (params: {
   requestId: string;
   mintCapId: string;
   coinType?: string;
-  rpcUrl?: string;
 }) => post<ExecuteMintResult>('/api/xbridge/execute-mint', params);

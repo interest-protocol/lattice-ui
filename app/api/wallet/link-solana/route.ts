@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
@@ -12,8 +13,14 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();

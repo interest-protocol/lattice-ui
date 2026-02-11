@@ -37,7 +37,9 @@ export const fulfill = (params: {
 }) => post<FulfillResult>('/api/solver/fulfill', params);
 
 export const fetchStatus = (requestId: string) =>
-  get<RequestStatus>(`/api/solver/status?requestId=${requestId}`);
+  get<RequestStatus>(
+    `/api/solver/status?requestId=${encodeURIComponent(requestId)}`
+  );
 
 export const waitForSettlement = async (
   requestId: string,

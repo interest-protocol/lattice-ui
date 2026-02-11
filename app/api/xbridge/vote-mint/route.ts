@@ -6,6 +6,7 @@ import {
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { ENCLAVE_URL } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
@@ -17,17 +18,22 @@ const schema = z.object({
   userId: z.string(),
   requestId: z.string(),
   depositSignature: z.string(),
-  rpcUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
-    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk();
 
     const enclaveResponse = await fetch(`${ENCLAVE_URL}/xbridge/vote_mint`, {
       method: 'POST',
@@ -43,8 +49,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!enclaveResponse.ok) {
-      const err = await enclaveResponse.text();
-      throw new Error(`Enclave error: ${err}`);
+      throw new Error('Enclave verification failed');
     }
 
     const proofRaw = await enclaveResponse.json();

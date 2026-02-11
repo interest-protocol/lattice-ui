@@ -8,7 +8,7 @@ interface NetworkTabsProps {
 }
 
 const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
-  <div className="flex gap-2">
+  <div className="flex gap-2" role="tablist">
     {CHAIN_KEYS.map((net) => {
       const isSelected = net === network;
       const { color, displayName } = CHAIN_REGISTRY[net];
@@ -17,6 +17,8 @@ const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
         <button
           key={net}
           type="button"
+          role="tab"
+          aria-selected={isSelected}
           className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
           style={{
             border: `2px solid ${isSelected ? color : '#FFFFFF1A'}`,

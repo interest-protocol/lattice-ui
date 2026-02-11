@@ -69,11 +69,11 @@ describe('Fraction', () => {
     });
   });
 
-  describe('minustract', () => {
+  describe('subtract', () => {
     it('subtracts fractions with same denominator', () => {
       const a = new Fraction(3, 4);
       const b = new Fraction(1, 4);
-      const result = a.minustract(b);
+      const result = a.subtract(b);
       expect(result.numerator).toBe(2n);
       expect(result.denominator).toBe(4n);
     });
@@ -81,7 +81,7 @@ describe('Fraction', () => {
     it('subtracts fractions with different denominators', () => {
       const a = new Fraction(1, 2);
       const b = new Fraction(1, 3);
-      const result = a.minustract(b);
+      const result = a.subtract(b);
       // 1/2 - 1/3 = 3/6 - 2/6 = 1/6
       expect(result.numerator).toBe(1n);
       expect(result.denominator).toBe(6n);
@@ -122,11 +122,11 @@ describe('Fraction', () => {
     });
   });
 
-  describe('multipliedBytiply', () => {
+  describe('multiply', () => {
     it('multiplies two fractions', () => {
       const a = new Fraction(1, 2);
       const b = new Fraction(2, 3);
-      const result = a.multipliedBytiply(b);
+      const result = a.multiply(b);
       // (1*2)/(2*3) = 2/6
       expect(result.numerator).toBe(2n);
       expect(result.denominator).toBe(6n);
@@ -141,8 +141,8 @@ describe('Fraction', () => {
 
     it('respects rounding mode', () => {
       const f = new Fraction(2, 3);
-      expect(f.toSignificant(2, {}, Rounding.ROUND_DOWN)).toBe('0.66');
-      expect(f.toSignificant(2, {}, Rounding.ROUND_UP)).toBe('0.67');
+      expect(f.toSignificant(2, Rounding.ROUND_DOWN)).toBe('0.66');
+      expect(f.toSignificant(2, Rounding.ROUND_UP)).toBe('0.67');
     });
   });
 

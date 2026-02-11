@@ -26,6 +26,21 @@ const DEFAULT_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
 };
 
+type TokenGetter = () => Promise<string | null>;
+
+let _getAccessToken: TokenGetter | null = null;
+
+export const setAccessTokenGetter = (getter: TokenGetter): void => {
+  _getAccessToken = getter;
+};
+
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  if (!_getAccessToken) return {};
+  const token = await _getAccessToken();
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
+};
+
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 0;
 const RETRY_DELAY = 1000;
@@ -92,11 +107,12 @@ export const post = async <TResponse, TBody = unknown>(
   const retries = options?.retries ?? DEFAULT_RETRIES;
 
   return executeWithRetry(async () => {
+    const authHeaders = await getAuthHeaders();
     const response = await fetchWithTimeout(
       url,
       {
         method: 'POST',
-        headers: { ...DEFAULT_HEADERS, ...options?.headers },
+        headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
         body: JSON.stringify(body),
       },
       timeout
@@ -114,11 +130,12 @@ export const get = async <TResponse>(
   const retries = options?.retries ?? DEFAULT_RETRIES;
 
   return executeWithRetry(async () => {
+    const authHeaders = await getAuthHeaders();
     const response = await fetchWithTimeout(
       url,
       {
         method: 'GET',
-        headers: { ...DEFAULT_HEADERS, ...options?.headers },
+        headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
       },
       timeout
     );

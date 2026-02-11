@@ -5,10 +5,7 @@ import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET() {
   if (!SOLVER_API_URL)
-    return NextResponse.json(
-      { error: 'SOLVER_API_URL not configured' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
 
   try {
     const response = await fetch(`${SOLVER_API_URL}/api/v1/metadata`, {
@@ -16,9 +13,8 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText },
+        { error: 'Failed to fetch metadata' },
         { status: response.status }
       );
     }

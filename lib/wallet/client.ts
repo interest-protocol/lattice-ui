@@ -32,7 +32,6 @@ export const sendSui = (params: {
   recipient: string;
   amount: string;
   coinType?: string;
-  rpcUrl?: string;
 }) => post<SendSuiResult>('/api/wallet/send-sui', params);
 
 export const sendSolana = (params: {

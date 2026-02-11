@@ -36,8 +36,11 @@ export const signAndExecuteSuiTransaction = async (
   );
 
   const walletInfo = await privy.wallets().get(walletId);
+  if (!walletInfo.public_key) {
+    throw new Error(`Wallet ${walletId} has no public key`);
+  }
   const publicKeyBytes = Uint8Array.from(
-    Buffer.from(walletInfo.public_key ?? '', 'base64')
+    Buffer.from(walletInfo.public_key, 'base64')
   );
   const publicKey = new Ed25519PublicKey(publicKeyBytes);
 

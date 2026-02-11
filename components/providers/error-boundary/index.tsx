@@ -22,6 +22,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    // TODO: Send to error reporting service (e.g. Sentry)
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
@@ -40,7 +41,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-[#0D1117] text-white">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-surface-dark text-white">
           <div className="flex flex-col items-center max-w-[400px] text-center gap-6">
             <span className="text-5xl" role="img" aria-label="Error">
               &#x26A0;
@@ -56,7 +57,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <div className="w-full p-4 bg-surface-light rounded-lg overflow-auto max-h-[200px]">
-                <span className="text-xs font-mono text-[#FF6B6B] whitespace-pre-wrap break-all">
+                <span className="text-xs font-mono text-error whitespace-pre-wrap break-all">
                   {this.state.error.message}
                 </span>
               </div>

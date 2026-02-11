@@ -3,7 +3,6 @@ import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 import { ChevronDownSVG } from '@/components/ui/icons';
-import Motion from '@/components/ui/motion';
 import useMetadata from '@/hooks/domain/use-metadata';
 import { useModal } from '@/hooks/store/use-modal';
 import type { InputFieldAssetProps } from './input-field.types';
@@ -30,13 +29,10 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
 
   if (isLoading || !metadata?.[type])
     return (
-      <Motion
-        className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center"
-        whileHover="hover"
-      >
+      <div className="gap-2 text-white flex text-base overflow-hidden items-center justify-center">
         <Skeleton width="2rem" height="2rem" />
         <Skeleton width="4rem" />
-      </Motion>
+      </div>
     );
 
   const openAssetModal = () =>
@@ -66,10 +62,11 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   };
 
   return (
-    <Motion
-      className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center"
-      whileHover="hover"
+    <button
+      type="button"
+      className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center bg-transparent border-none p-0"
       onClick={handleClick}
+      aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
     >
       <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center">
         <Image
@@ -82,7 +79,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       </span>
       {metadata?.[type]?.symbol ?? 'Select Coin'}
       <ChevronDownSVG maxWidth="1rem" width="100%" />
-    </Motion>
+    </button>
   );
 };
 

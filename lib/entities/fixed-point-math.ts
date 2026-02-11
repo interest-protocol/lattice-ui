@@ -32,18 +32,18 @@ export class FixedPointMath {
     return new FixedPointMath(value);
   }
 
-  public static toBigNumber(
-    value: number | string,
-    decimals = 9,
-    _significant = 6
-  ): bigint {
+  public static toBigNumber(value: number | string, decimals = 9): bigint {
     const safeValue =
       typeof value === 'number' && value > Number.MAX_SAFE_INTEGER
         ? Number.MAX_SAFE_INTEGER
         : value;
 
     if (safeValue == null || Number.isNaN(+safeValue)) return 0n;
-    if (+safeValue < 0) return 0n;
+    if (+safeValue < 0) {
+      throw new RangeError(
+        `FixedPointMath.toBigNumber received negative value: ${value}`
+      );
+    }
 
     return parseUnits(String(safeValue), decimals);
   }
@@ -80,10 +80,6 @@ export class FixedPointMath {
 
   public sub(x: BigIntish | FixedPointMath): FixedPointMath {
     return new FixedPointMath(this._value - this.parseValue(x));
-  }
-
-  public pow(x: BigIntish | FixedPointMath): FixedPointMath {
-    return new FixedPointMath(this._value ** this.parseValue(x));
   }
 
   public toPercentage(toSignificant = 2): string {

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { type FC, useCallback } from 'react';
+import type { FC } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useModal } from '@/hooks/store/use-modal';
@@ -34,12 +34,12 @@ const ModalProvider: FC = () => {
   );
   const safeHeight = useSafeHeight();
 
-  const onHandleClose = useCallback(() => {
+  const onHandleClose = () => {
     if (!allowClose) return;
 
     handleClose();
     onClose?.();
-  }, [allowClose, handleClose, onClose]);
+  };
 
   useEventListener(
     'keydown',
@@ -91,6 +91,7 @@ const ModalProvider: FC = () => {
                 <p className="text-xl font-semibold">{title}</p>
                 <button
                   type="button"
+                  aria-label="Close modal"
                   className="py-1 px-3 bg-surface-lighter flex font-medium cursor-pointer rounded-lg border-none text-inherit"
                   onClick={handleClose}
                 >

@@ -4,11 +4,6 @@ import { ENCLAVE_URL } from '@/lib/config.server';
 
 export interface EnclaveHealthResponse {
   healthy: boolean;
-  pk?: string;
-  rpcStatus?: {
-    sui: Record<string, boolean>;
-    solana: Record<string, boolean>;
-  };
 }
 
 export async function GET() {
@@ -21,12 +16,8 @@ export async function GET() {
       return NextResponse.json({ healthy: false });
     }
 
-    const data = await response.json();
-    return NextResponse.json({
-      healthy: true,
-      pk: data.pk,
-      rpcStatus: data.rpc_status,
-    });
+    await response.json();
+    return NextResponse.json({ healthy: true });
   } catch {
     return NextResponse.json({ healthy: false });
   }

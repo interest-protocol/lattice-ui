@@ -10,10 +10,9 @@ export interface EnclaveClients {
 
 export const createEnclaveSdk = (
   enclaveCapId: string,
-  witnessType: string,
-  rpcUrl?: string
+  witnessType: string
 ): EnclaveClients => {
-  const suiClient = new SuiClient({ url: rpcUrl || SUI_RPC_URL });
+  const suiClient = new SuiClient({ url: SUI_RPC_URL });
   const enclave = new Enclave({
     suiClient,
     packageId: MAINNET_PACKAGE_ID,

@@ -40,6 +40,9 @@ export class Trade {
     outputPriceUsd,
     slippage = DEFAULT_SLIPPAGE,
   }: TradeParams): Trade {
+    if (inputPriceUsd <= 0) {
+      throw new Error('Input price must be positive');
+    }
     if (outputPriceUsd <= 0) {
       throw new Error('Output price must be positive');
     }

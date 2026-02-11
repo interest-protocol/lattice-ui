@@ -4,14 +4,6 @@ import { SOLVER_API_URL } from '@/lib/config';
 
 export interface SolverHealthResponse {
   healthy: boolean;
-  status?: 'healthy' | 'degraded' | 'unhealthy';
-  checks?: {
-    database: boolean;
-    redis: boolean;
-    sui: boolean;
-    solana: boolean;
-    enclave: boolean;
-  };
 }
 
 export async function GET() {
@@ -27,11 +19,7 @@ export async function GET() {
     }
 
     const data = await response.json();
-    return NextResponse.json({
-      healthy: data.status === 'healthy',
-      status: data.status,
-      checks: data.checks,
-    });
+    return NextResponse.json({ healthy: data.status === 'healthy' });
   } catch {
     return NextResponse.json({ healthy: false });
   }

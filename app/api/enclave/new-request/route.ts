@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { ENCLAVE_URL } from '@/lib/config.server';
 
@@ -23,6 +24,9 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
 
@@ -38,9 +42,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText },
+        { error: 'Enclave request failed' },
         { status: response.status }
       );
     }

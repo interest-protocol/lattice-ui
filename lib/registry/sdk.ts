@@ -17,8 +17,8 @@ export interface RegistryClients {
   registry: Registry;
 }
 
-export const createRegistrySdk = (rpcUrl?: string): RegistryClients => {
-  const url = rpcUrl || SUI_RPC_URL;
+export const createRegistrySdk = (): RegistryClients => {
+  const url = SUI_RPC_URL;
 
   if (cachedClient && cachedClient.url === url) {
     return cachedClient;

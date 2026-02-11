@@ -1,5 +1,4 @@
 import { usePrivy } from '@privy-io/react-auth';
-import { useMemo } from 'react';
 
 import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 
@@ -39,24 +38,22 @@ const findWalletAddress = (
 export const useWalletAddresses = (): WalletAddresses => {
   const { user } = usePrivy();
 
-  return useMemo(() => {
-    const accounts = user?.linkedAccounts as
-      | Array<Record<string, unknown>>
-      | undefined;
+  const accounts = user?.linkedAccounts as
+    | Array<Record<string, unknown>>
+    | undefined;
 
-    const addresses = Object.fromEntries(
-      CHAIN_KEYS.map((key) => [key, findWalletAddress(accounts, key)])
-    ) as Record<ChainKey, string | null>;
+  const addresses = Object.fromEntries(
+    CHAIN_KEYS.map((key) => [key, findWalletAddress(accounts, key)])
+  ) as Record<ChainKey, string | null>;
 
-    const getAddress = (chain: ChainKey) => addresses[chain];
-    const hasWallet = (chain: ChainKey) => Boolean(addresses[chain]);
+  const getAddress = (chain: ChainKey) => addresses[chain];
+  const hasWallet = (chain: ChainKey) => Boolean(addresses[chain]);
 
-    return {
-      addresses,
-      getAddress,
-      hasWallet,
-    };
-  }, [user]);
+  return {
+    addresses,
+    getAddress,
+    hasWallet,
+  };
 };
 
 export default useWalletAddresses;

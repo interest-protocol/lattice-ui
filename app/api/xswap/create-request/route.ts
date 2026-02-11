@@ -2,21 +2,26 @@ import type { ChainId } from '@interest-protocol/xswap-sdk';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { createXSwapSdk } from '@/lib/xswap';
 
+const bigintString = z
+  .string()
+  .regex(/^\d+$/, 'Must be a non-negative integer');
+
 const proofSchema = z.object({
   signature: z.array(z.number()),
   digest: z.array(z.number()),
-  timestampMs: z.string(),
+  timestampMs: bigintString,
   dwalletAddress: z.array(z.number()),
   user: z.array(z.number()),
   chainId: z.number(),
   token: z.array(z.number()),
-  amount: z.string(),
+  amount: bigintString,
 });
 
 const schema = z.object({
@@ -28,23 +33,28 @@ const schema = z.object({
   destinationChain: z.number(),
   destinationAddress: z.array(z.number()),
   destinationToken: z.array(z.number()),
-  minDestinationAmount: z.string(),
+  minDestinationAmount: bigintString,
   minConfirmations: z.number(),
-  deadline: z.string(),
+  deadline: bigintString,
   solverSender: z.array(z.number()),
   solverRecipient: z.array(z.number()),
-  rpcUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
 
-    const { suiClient, xswap } = createXSwapSdk(body.rpcUrl);
+    const { suiClient, xswap } = createXSwapSdk();
 
     const { tx, result } = xswap.newRequest({
       params: {

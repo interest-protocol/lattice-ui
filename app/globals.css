@@ -41,6 +41,12 @@
   --color-text-muted: #ffffff80;
   --color-text-dimmed: #ffffff40;
   --color-text-dim: #ffffff14;
+
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #eab308;
+  --color-surface-dark: #0d1117;
+  --color-surface-separator: #242424;
 }
 
 @layer base {

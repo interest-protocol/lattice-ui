@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
@@ -27,14 +26,9 @@ const SwapFormButton: FC = () => {
   const sourceConfig = CHAIN_REGISTRY[sourceToken.chainId];
   const destConfig = CHAIN_REGISTRY[destToken.chainId];
 
-  const validation = useMemo(() => {
-    const amount = CurrencyAmount.fromHumanAmount(
-      sourceToken,
-      fromValue || '0'
-    );
-    const gasBalance = sourceToken.isSui() ? suiAmounts.sui : solanaAmounts.sol;
-    return validateSwapAmount(amount, gasBalance);
-  }, [fromValue, sourceToken, suiAmounts.sui, solanaAmounts.sol]);
+  const amount = CurrencyAmount.fromHumanAmount(sourceToken, fromValue || '0');
+  const gasBalance = sourceToken.isSui() ? suiAmounts.sui : solanaAmounts.sol;
+  const validation = validateSwapAmount(amount, gasBalance);
 
   const handleSwap = () => {
     // Swap execution handled by parent form submission

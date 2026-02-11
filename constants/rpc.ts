@@ -24,7 +24,8 @@ export const RPC_DISPLAY = {
 
 export const RPC_MAP: Record<RPC, string> = {
   [RPC.Shinami]:
-    'https://api.shinami.com/node/v1/us1_sui_mainnet_117c254f84cd45349d9602ac13d5a995',
+    process.env.NEXT_PUBLIC_SHINAMI_RPC_URL ||
+    'https://api.shinami.com/node/v1/sui_mainnet',
   [RPC.Mysten]: 'https://fullnode.mainnet.sui.io:443',
   [RPC.Blockvision]: 'https://sui-mainnet-endpoint.blockvision.org',
   [RPC.SuiScan]: 'https://rpc-mainnet.suiscan.xyz',

@@ -11,6 +11,9 @@ export interface HealthStatus {
 
 const fetcher = async <T>(url: string): Promise<T> => {
   const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Health check failed: ${response.status}`);
+  }
   return response.json();
 };
 

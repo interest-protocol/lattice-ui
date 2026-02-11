@@ -1,7 +1,7 @@
 import type { FC } from 'react';
-import { toast } from 'react-hot-toast';
 
 import { CopySVG } from '@/components/ui/icons';
+import { toasting } from '@/components/ui/toast';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
 const DepositModal: FC = () => {
@@ -11,7 +11,7 @@ const DepositModal: FC = () => {
 
   const copyAddress = (addr: string) => {
     window.navigator.clipboard.writeText(addr);
-    toast.success('Address copied');
+    toasting.success({ action: 'Copy', message: 'Address copied' });
   };
 
   return (

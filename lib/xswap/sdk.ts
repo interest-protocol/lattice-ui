@@ -19,8 +19,8 @@ export interface XSwapClients {
   xswap: XSwap;
 }
 
-export const createXSwapSdk = (rpcUrl?: string): XSwapClients => {
-  const url = rpcUrl || SUI_RPC_URL;
+export const createXSwapSdk = (): XSwapClients => {
+  const url = SUI_RPC_URL;
 
   if (cachedClient && cachedClient.url === url) {
     return cachedClient;

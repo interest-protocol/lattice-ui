@@ -20,6 +20,16 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
       role="switch"
       aria-checked={active}
       tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          if (!disabled) {
+            onChange?.({
+              target: { checked: !active },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }
+        }
+      }}
     >
       <label className="ml-1.5 flex relative rounded-full">
         <input

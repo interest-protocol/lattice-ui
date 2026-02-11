@@ -1,7 +1,7 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useState } from 'react';
 
 import { CopySVG } from '@/components/ui/icons';
 import Tabs from '@/components/ui/tabs';
@@ -195,7 +195,7 @@ const AccountContent: FC = () => {
   const { balances: solanaBalances, isLoading: solLoading } =
     useSolanaBalances(solanaAddress);
 
-  const createSuiWallet = useCallback(async () => {
+  const createSuiWallet = async () => {
     if (!user?.id) return;
     setCreatingSuiWallet(true);
     const dismiss = toasting.loading({ message: 'Creating Sui wallet...' });
@@ -216,7 +216,7 @@ const AccountContent: FC = () => {
     } finally {
       setCreatingSuiWallet(false);
     }
-  }, [user?.id]);
+  };
 
   if (!authenticated) {
     return (

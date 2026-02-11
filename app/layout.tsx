@@ -22,7 +22,18 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'Lattice',
+  description: 'Cross-chain swap between SUI and SOL tokens.',
   icons: { icon: '/icon.svg' },
+  openGraph: {
+    title: 'Lattice',
+    description: 'Cross-chain swap between SUI and SOL tokens.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Lattice',
+    description: 'Cross-chain swap between SUI and SOL tokens.',
+  },
 };
 
 export const viewport: Viewport = {

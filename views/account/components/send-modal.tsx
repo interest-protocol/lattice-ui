@@ -199,9 +199,21 @@ const SendModal: FC = () => {
           <input
             className="w-full p-4 pr-16 text-white bg-black rounded-lg border border-surface-border font-mono text-base outline-none"
             placeholder="0.0"
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const filtered = e.target.value.replace(/[^0-9.]/g, '');
+              const firstDot = filtered.indexOf('.');
+              if (firstDot !== -1) {
+                setAmount(
+                  filtered.slice(0, firstDot + 1) +
+                    filtered.slice(firstDot + 1).replace(/\./g, '')
+                );
+              } else {
+                setAmount(filtered);
+              }
+            }}
           />
           <button
             type="button"

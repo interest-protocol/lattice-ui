@@ -34,9 +34,13 @@ const useWalletRegistration = () => {
   );
   const isRegistering = useRef(false);
   const isLinking = useRef(false);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     setMounted(true);
+    return () => {
+      clearTimeout(retryTimerRef.current);
+    };
   }, []);
 
   const effectiveRegisteredUsers = mounted ? registeredUsers : {};
@@ -80,7 +84,10 @@ const useWalletRegistration = () => {
       if (retryCount < MAX_RETRY_ATTEMPTS) {
         const delay = RETRY_DELAYS_MS[retryCount];
         isRegistering.current = false;
-        setTimeout(() => registerWallets(retryCount + 1), delay);
+        retryTimerRef.current = setTimeout(
+          () => registerWallets(retryCount + 1),
+          delay
+        );
         return;
       }
 
@@ -107,7 +114,10 @@ const useWalletRegistration = () => {
       if (retryCount < MAX_RETRY_ATTEMPTS) {
         const delay = RETRY_DELAYS_MS[retryCount];
         isLinking.current = false;
-        setTimeout(() => linkWallets(retryCount + 1), delay);
+        retryTimerRef.current = setTimeout(
+          () => linkWallets(retryCount + 1),
+          delay
+        );
         return;
       }
 

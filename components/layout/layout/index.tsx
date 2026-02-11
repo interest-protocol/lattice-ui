@@ -1,4 +1,4 @@
-import { type FC, type PropsWithChildren, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import Footer from '@/components/composed/footer';
 import Header from '@/components/composed/header';
@@ -13,19 +13,16 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
   );
   const setTranslate = useBackgroundTranslate((s) => s.setTranslate);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      setTranslate({ X: e.clientX, Y: e.clientY });
-      x?.set(-(e.nativeEvent.x - window.innerWidth / 2) * 0.1);
-      y?.set(-(e.nativeEvent.y - window.innerHeight / 2) * 0.1);
-    },
-    [setTranslate, x, y]
-  );
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    setTranslate({ X: e.clientX, Y: e.clientY });
+    x?.set(-(e.nativeEvent.x - window.innerWidth / 2) * 0.1);
+    y?.set(-(e.nativeEvent.y - window.innerHeight / 2) * 0.1);
+  };
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = () => {
     x?.set(0);
     y?.set(0);
-  }, [x, y]);
+  };
 
   return (
     <main

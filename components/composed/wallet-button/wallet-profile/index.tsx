@@ -3,7 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { AnimatePresence } from 'motion/react';
 import Image from 'next/image';
-import { type FC, useMemo, useState } from 'react';
+import { type FC, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ChevronDownSVG } from '@/components/ui/icons';
 import { useModal } from '@/hooks/store/use-modal';
@@ -26,22 +26,19 @@ const WalletProfile: FC = () => {
     setOpen(false)
   );
 
-  const displayAddress = useMemo(() => {
+  const userWallet =
+    user?.wallet ?? user?.linkedAccounts?.find((a) => a.type === 'wallet');
+  const walletAddr =
+    userWallet && 'address' in userWallet ? userWallet.address : null;
+
+  const displayAddress = (() => {
     if (!user) return '';
-    const wallet =
-      user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
-    const addr = wallet && 'address' in wallet ? wallet.address : null;
-    if (addr) return formatAddress(addr);
+    if (walletAddr) return formatAddress(walletAddr);
     const email = user.email?.address ?? user.google?.email;
     return email ?? 'Logged in';
-  }, [user]);
+  })();
 
-  const fullAddress = useMemo(() => {
-    if (!user) return '';
-    const wallet =
-      user.wallet ?? user.linkedAccounts?.find((a) => a.type === 'wallet');
-    return wallet && 'address' in wallet ? wallet.address : '';
-  }, [user]);
+  const fullAddress = walletAddr ?? '';
 
   const handleOpenProfileDropdown = () => setOpen((prev) => !prev);
   const handleOpenProfileModal = () =>

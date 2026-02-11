@@ -16,6 +16,7 @@ import { getTransferInstruction } from '@solana-program/token';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -23,8 +24,12 @@ import { getSolanaRpc } from '@/lib/solana/server';
 
 const schema = z.object({
   userId: z.string(),
-  recipient: z.string(),
-  amount: z.string(),
+  recipient: z
+    .string()
+    .regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, 'Invalid Solana address'),
+  amount: z
+    .string()
+    .regex(/^\d+$/, 'Amount must be a non-negative integer string'),
   mint: z.string().optional(),
 });
 
@@ -49,8 +54,14 @@ async function findAta(
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();

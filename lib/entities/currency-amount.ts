@@ -51,7 +51,7 @@ export class CurrencyAmount {
     return Fraction.from(
       this.raw,
       10n ** BigInt(this.token.decimals)
-    ).toSignificant(this.token.decimals, { groupSeparator: '' });
+    ).toSignificant(this.token.decimals);
   }
 
   toFixed(dp = 4): string {

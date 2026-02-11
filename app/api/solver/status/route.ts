@@ -10,10 +10,7 @@ export async function GET(request: NextRequest) {
   if (invalid) return invalid;
 
   if (!SOLVER_API_URL)
-    return NextResponse.json(
-      { error: 'SOLVER_API_URL not configured' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
 
   try {
     const response = await fetch(
@@ -22,9 +19,8 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText },
+        { error: 'Failed to fetch status' },
         { status: response.status }
       );
     }

@@ -7,6 +7,7 @@ import { SkeletonTheme } from 'react-loading-skeleton';
 
 import { BackgroundProvider } from '@/components';
 import AppStateProvider from '@/components/providers/app-state-provider';
+import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import ModalProvider from '@/components/providers/modal-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
@@ -30,6 +31,7 @@ const Providers = ({ children }: { children: ReactNode }) => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <PrivyProviderWrapper>
+          <AuthInitializer />
           <ModalProvider />
           <Toaster
             position="bottom-right"

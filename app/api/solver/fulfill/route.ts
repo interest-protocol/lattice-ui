@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { SOLVER_API_URL } from '@/lib/config';
 
@@ -11,14 +12,21 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const { data: body, error } = validateBody(await request.json(), schema);
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { data: body, error } = validateBody(rawBody, schema);
   if (error) return error;
 
   if (!SOLVER_API_URL)
-    return NextResponse.json(
-      { error: 'SOLVER_API_URL not configured' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
 
   try {
     const response = await fetch(`${SOLVER_API_URL}/api/v1/fulfill`, {
@@ -33,9 +41,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       return NextResponse.json(
-        { error: errorText },
+        { error: 'Fulfillment request failed' },
         { status: response.status }
       );
     }

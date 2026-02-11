@@ -25,7 +25,6 @@ export interface CreateRequestParams {
   deadline: string;
   solverSender: number[];
   solverRecipient: number[];
-  rpcUrl?: string;
 }
 
 export interface CreateRequestResult {

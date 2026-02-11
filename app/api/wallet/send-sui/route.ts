@@ -2,6 +2,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
@@ -10,21 +11,28 @@ import { getSuiClient } from '@/lib/sui/client';
 
 const schema = z.object({
   userId: z.string(),
-  recipient: z.string(),
-  amount: z.string(),
+  recipient: z.string().regex(/^0x[a-fA-F0-9]{64}$/, 'Invalid Sui address'),
+  amount: z
+    .string()
+    .regex(/^\d+$/, 'Amount must be a non-negative integer string'),
   coinType: z.string().optional(),
-  rpcUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
 
-    const client = getSuiClient(body.rpcUrl);
+    const client = getSuiClient();
 
     const tx = new Transaction();
     tx.setSender(wallet.address);

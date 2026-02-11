@@ -1,6 +1,6 @@
 import { DWalletAddress, WalletKey } from '@interest-protocol/xswap-sdk';
 import { usePrivy } from '@privy-io/react-auth';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/ui/toast';
@@ -58,8 +58,15 @@ export const useSwap = () => {
     useSolanaBalances(solanaAddress);
 
   const { getPrice } = useTokenPrices();
+  const abortRef = useRef<AbortController | null>(null);
   const getPriceRef = useRef(getPrice);
   getPriceRef.current = getPrice;
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const suiBalancesRef = useRef(suiBalances);
   suiBalancesRef.current = suiBalances;
@@ -95,6 +102,10 @@ export const useSwap = () => {
       toasting.error({ action: 'Swap', message: 'Invalid swap direction' });
       return;
     }
+
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
 
     const sourceChain = sdkChainIdFromKey(sourceChainKey);
     const destinationChain = sdkChainIdFromKey(destChainKey);
@@ -201,9 +212,11 @@ export const useSwap = () => {
       );
 
       for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
+        if (signal.aborted) break;
         await new Promise((resolve) =>
           setTimeout(resolve, BALANCE_POLL_INTERVAL_MS)
         );
+        if (signal.aborted) break;
 
         const newBalances = await destAdapter.refetchBalance();
         const currentBalance = newBalances

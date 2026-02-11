@@ -2,6 +2,7 @@ import bs58 from 'bs58';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
@@ -13,17 +14,22 @@ const schema = z.object({
   requestId: z.string(),
   mintCapId: z.string(),
   depositSignature: z.string(),
-  rpcUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
-    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk();
 
     const digest = bs58.decode(body.depositSignature);
 

@@ -22,8 +22,8 @@ export interface XBridgeClients {
   xbridge: XBridgeInbound;
 }
 
-export const createXBridgeSdk = (rpcUrl?: string): XBridgeClients => {
-  const url = rpcUrl || SUI_RPC_URL;
+export const createXBridgeSdk = (): XBridgeClients => {
+  const url = SUI_RPC_URL;
 
   if (cachedClient && cachedClient.url === url) {
     return cachedClient;

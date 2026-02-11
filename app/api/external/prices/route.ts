@@ -67,8 +67,10 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${PYTH_HERMES_URL}?${params.toString()}`);
 
     if (!response.ok) {
-      const text = await response.text();
-      return NextResponse.json({ error: text }, { status: response.status });
+      return NextResponse.json(
+        { error: 'Failed to fetch prices' },
+        { status: response.status }
+      );
     }
 
     const json = await response.json();

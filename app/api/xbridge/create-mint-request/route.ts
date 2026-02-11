@@ -3,6 +3,7 @@ import { Transaction } from '@mysten/sui/transactions';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
@@ -15,19 +16,24 @@ const schema = z.object({
   sourceToken: z.array(z.number()),
   sourceDecimals: z.number(),
   sourceAddress: z.array(z.number()),
-  sourceAmount: z.string(),
+  sourceAmount: z.string().regex(/^\d+$/, 'Must be a non-negative integer'),
   coinType: z.string(),
-  rpcUrl: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
+  const auth = await authenticateRequest(request);
+  if (auth instanceof NextResponse) return auth;
+
   const { data: body, error } = validateBody(await request.json(), schema);
   if (error) return error;
+
+  const mismatch = verifyUserMatch(auth.userId, body.userId);
+  if (mismatch) return mismatch;
 
   try {
     const privy = getPrivyClient();
     const wallet = await getFirstWallet(privy, body.userId, 'sui');
-    const { suiClient, xbridge } = createXBridgeSdk(body.rpcUrl);
+    const { suiClient, xbridge } = createXBridgeSdk();
 
     const tx = new Transaction();
     tx.setSender(wallet.address);

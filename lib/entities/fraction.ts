@@ -19,6 +19,9 @@ export class Fraction {
   public constructor(numerator: BigIntish, denominator: BigIntish = 1n) {
     this.numerator = toBigInt(numerator);
     this.denominator = toBigInt(denominator);
+    if (this.denominator === 0n) {
+      throw new Error('Fraction: denominator must not be zero');
+    }
   }
 
   public get quotient(): bigint {
@@ -68,7 +71,7 @@ export class Fraction {
     );
   }
 
-  public minustract(other: Fraction | BigIntish): Fraction {
+  public subtract(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
     if (otherParsed.denominator === this.denominator)
       return new Fraction(
@@ -107,7 +110,7 @@ export class Fraction {
     );
   }
 
-  public multipliedBytiply(other: Fraction | BigIntish): Fraction {
+  public multiply(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
     return new Fraction(
       this.numerator * otherParsed.numerator,
@@ -115,13 +118,33 @@ export class Fraction {
     );
   }
 
+  /**
+   * Performs bigint-based decimal division to avoid Number precision loss
+   * for values exceeding Number.MAX_SAFE_INTEGER.
+   */
+  private toBigIntDecimal(decimalPlaces: number): string {
+    const negative = this.numerator < 0n;
+    const abs = negative ? -this.numerator : this.numerator;
+    const scale = 10n ** BigInt(decimalPlaces);
+    const scaled = (abs * scale) / this.denominator;
+    const intPart = scaled / scale;
+    const fracPart = scaled % scale;
+    const fracStr = fracPart.toString().padStart(decimalPlaces, '0');
+    const sign = negative ? '-' : '';
+    if (decimalPlaces === 0) return `${sign}${intPart}`;
+    return `${sign}${intPart}.${fracStr}`;
+  }
+
   public toSignificant(
     significantDigits: number,
-    _format: Record<string, string> = { groupSeparator: '' },
     rounding: Rounding = Rounding.ROUND_HALF_UP
   ): string {
-    const num = Number(this.numerator) / Number(this.denominator);
-    const raw = num.toPrecision(significantDigits);
+    // Use bigint-safe path for large values
+    const safeDecimalPlaces = significantDigits + 4;
+    const raw = this.toBigIntDecimal(safeDecimalPlaces);
+    const num = Number(raw);
+
+    const result = num.toPrecision(significantDigits);
 
     if (rounding === Rounding.ROUND_DOWN) {
       const factor =
@@ -141,16 +164,14 @@ export class Fraction {
       return ceiled.toPrecision(significantDigits).replace(/\.?0+$/, '');
     }
 
-    return raw.replace(/\.?0+$/, '');
+    return result.replace(/\.?0+$/, '');
   }
 
   public toFixed(
     decimalPlaces: number,
     options?: Intl.NumberFormatOptions
   ): string {
-    const num = Number(this.numerator) / Number(this.denominator);
-    return new Intl.NumberFormat('en-IN', options).format(
-      Number(num.toFixed(decimalPlaces))
-    );
+    const raw = this.toBigIntDecimal(decimalPlaces);
+    return new Intl.NumberFormat('en-US', options).format(Number(raw));
   }
 }

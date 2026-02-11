@@ -19,8 +19,8 @@ const useTokenPrices = () => {
       );
 
       return {
-        [SUI_TYPE_ARG]: byNormalized.sui || undefined,
-        [SOL_TYPE]: byNormalized.sol || undefined,
+        [SUI_TYPE_ARG]: byNormalized.sui ?? undefined,
+        [SOL_TYPE]: byNormalized.sol ?? undefined,
       } as TokenPrices;
     },
     refetchInterval: 60_000,

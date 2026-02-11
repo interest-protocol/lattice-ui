@@ -50,6 +50,7 @@ const SwapForm: FC = () => {
 
         <button
           type="button"
+          aria-label="Reverse swap direction"
           className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
           onClick={() => {
             const fromValue = form.getValues('from');
