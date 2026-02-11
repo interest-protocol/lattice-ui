@@ -3,7 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
-import { InfoSVG, WalletSVG } from '@/components/ui/icons';
+import { ChevronDownSVG, InfoSVG, WalletSVG } from '@/components/ui/icons';
 import { toasting } from '@/components/ui/toast';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
@@ -11,9 +11,11 @@ import { SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
 import { extractErrorMessage, formatMoney } from '@/utils';
+import WithdrawTokenModal from './withdraw-token-modal';
 
 interface WithdrawViewProps {
   network: ChainKey;
@@ -39,15 +41,17 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const { balances: solanaBalances, isLoading: solLoading } =
     useSolanaBalances(solanaAddress);
 
-  const getBalance = (): bigint => {
+  const setContent = useModal((s) => s.setContent);
+
+  const getBalanceByIndex = (index: number): bigint => {
     if (network === 'sui') {
-      return selectedTokenIndex === 0 ? suiBalances.sui : suiBalances.wsol;
+      return index === 0 ? suiBalances.sui : suiBalances.wsol;
     }
-    return selectedTokenIndex === 0 ? solanaBalances.sol : solanaBalances.wsui;
+    return index === 0 ? solanaBalances.sol : solanaBalances.wsui;
   };
 
   const isLoading = network === 'sui' ? suiLoading : solLoading;
-  const balance = getBalance();
+  const balance = getBalanceByIndex(selectedTokenIndex);
   const balanceFormatted = formatMoney(
     FixedPointMath.toNumber(balance, selectedToken.decimals)
   );
@@ -122,40 +126,43 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
     <div className="flex flex-col gap-4">
       <div>
         <span className="text-text-secondary text-sm font-medium opacity-80 mb-2 block">
-          Select Token
+          Token
         </span>
-        <div className="flex gap-2">
-          {tokens.map((token, index) => {
-            const isSelected = index === selectedTokenIndex;
-            return (
-              <button
-                key={token.type}
-                type="button"
-                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
-                style={{
-                  border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
-                  background: isSelected
-                    ? 'var(--color-accent-wash)'
-                    : 'var(--color-surface-light)',
-                }}
-                onClick={() => setSelectedTokenIndex(index)}
-              >
-                {token.iconUrl && (
-                  <Image
-                    src={token.iconUrl}
-                    alt={token.symbol}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                )}
-                <span className="text-text font-semibold text-sm">
-                  {token.symbol}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <button
+          type="button"
+          className="w-full p-3 flex items-center gap-3 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
+          style={{
+            border: '1px solid var(--color-surface-border)',
+            background: 'var(--color-surface-light)',
+          }}
+          onClick={() =>
+            setContent(
+              <WithdrawTokenModal
+                tokens={tokens}
+                selectedType={selectedToken.type}
+                getBalance={getBalanceByIndex}
+                onSelect={setSelectedTokenIndex}
+              />,
+              { title: 'Select Token' }
+            )
+          }
+        >
+          {selectedToken.iconUrl && (
+            <Image
+              src={selectedToken.iconUrl}
+              alt={selectedToken.symbol}
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
+          )}
+          <span className="text-text font-semibold text-sm flex-1 text-left">
+            {selectedToken.symbol}
+          </span>
+          <span className="text-text-muted">
+            <ChevronDownSVG maxWidth="1rem" width="100%" />
+          </span>
+        </button>
       </div>
 
       <div>
