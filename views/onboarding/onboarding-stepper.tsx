@@ -37,14 +37,18 @@ const OnboardingStepper: FC<OnboardingStepperProps> = ({ step, hasError }) => {
   const isComplete = step === 'complete';
 
   return (
-    <div className="flex items-center w-full px-4">
+    <ol className="flex items-center w-full px-4 list-none m-0 p-0">
       {STEPS.map((s, i) => {
         const isCompleted = isComplete || activeIndex > i;
         const isActive = !isComplete && activeIndex === i;
         const isErrorStep = hasError && isActive;
 
         return (
-          <div key={s.key} className="flex items-center flex-1 last:flex-none">
+          <li
+            key={s.key}
+            className="flex items-center flex-1 last:flex-none"
+            aria-current={isActive ? 'step' : undefined}
+          >
             <div className="flex flex-col items-center gap-1">
               {isCompleted ? (
                 <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center">
@@ -114,10 +118,10 @@ const OnboardingStepper: FC<OnboardingStepperProps> = ({ step, hasError }) => {
                 }}
               />
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 };
 

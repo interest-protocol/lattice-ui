@@ -27,6 +27,9 @@ vi.mock('@/lib/privy/wallet', () => ({
 vi.mock('@/lib/privy/signing', () => ({
   signAndExecuteSuiTransaction: (...args: unknown[]) =>
     mockSignAndExecuteSuiTransaction(...args),
+  authorizationContext: {
+    authorization_private_keys: ['test-auth-key'],
+  },
 }));
 
 vi.mock('@/lib/registry', () => ({
@@ -45,6 +48,21 @@ vi.mock('@/lib/api/auth', () => ({
 
 vi.mock('@/lib/config.server', () => ({
   PRIVY_AUTHORIZATION_KEY: 'test-auth-key',
+}));
+
+vi.mock('@/constants/chains', () => ({
+  CHAIN_REGISTRY: {
+    sui: { minGas: 1, decimals: 9 },
+    solana: { minGas: 0.00001, decimals: 9 },
+  },
+}));
+
+vi.mock('@/lib/bigint-utils', () => ({
+  parseUnits: (value: string, decimals: number) => {
+    const [intPart = '0', fracPart = ''] = value.split('.');
+    const trimmedFrac = fracPart.slice(0, decimals).padEnd(decimals, '0');
+    return BigInt(intPart) * 10n ** BigInt(decimals) + BigInt(trimmedFrac);
+  },
 }));
 
 // Import after mocks
@@ -214,6 +232,17 @@ describe('POST /api/wallet/link-solana', () => {
 
     expect(res.status).toBe(402);
     expect(body.code).toBe('INSUFFICIENT_GAS');
+  });
+
+  it('returns 500 when local signature verification fails', async () => {
+    const { ed25519 } = await import('@noble/curves/ed25519');
+    vi.mocked(ed25519.verify).mockReturnValueOnce(false);
+
+    const res = await POST(makeRequest({ userId: 'user-123' }));
+    const body = await res.json();
+
+    expect(res.status).toBe(500);
+    expect(body.error).toBe('Solana signature verification failed locally');
   });
 
   it('returns 500 on unexpected error', async () => {

@@ -20,7 +20,12 @@ const OnboardingView: FC = () => {
   const hasError = Boolean(error);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Account setup"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+    >
       <motion.div
         className="w-full max-w-md flex flex-col items-center gap-6 rounded-2xl p-8"
         style={{
@@ -44,7 +49,7 @@ const OnboardingView: FC = () => {
 
         <OnboardingStepper step={step} hasError={hasError} />
 
-        <div className="w-full min-h-[7rem]">
+        <div className="w-full min-h-[7rem]" aria-live="polite">
           <AnimatePresence mode="wait">
             {step === 'checking' && !hasError && (
               <motion.div

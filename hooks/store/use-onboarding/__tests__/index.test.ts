@@ -207,6 +207,102 @@ describe('useOnboarding store', () => {
     });
   });
 
+  describe('retry with exponential backoff', () => {
+    it('retries wallet creation 3 times at 2s/5s/10s then errors', async () => {
+      mockCheckRegistration.mockResolvedValue({
+        registered: false,
+        suiAddress: null,
+        solanaAddress: null,
+        hasWallets: false,
+      });
+
+      mockCreateSuiWallet.mockRejectedValue(new Error('Network error'));
+      mockCreateSolanaWallet.mockRejectedValue(new Error('Network error'));
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      // Wait for creating-wallets step (first attempt)
+      await waitForState(
+        () => useOnboarding.getState().step === 'creating-wallets'
+      );
+
+      // First attempt fails, retry at 2s
+      await vi.advanceTimersByTimeAsync(2100);
+      expect(mockCreateSuiWallet).toHaveBeenCalledTimes(2);
+
+      // Second retry at 5s
+      await vi.advanceTimersByTimeAsync(5100);
+      expect(mockCreateSuiWallet).toHaveBeenCalledTimes(3);
+
+      // Third retry at 10s
+      await vi.advanceTimersByTimeAsync(10100);
+      expect(mockCreateSuiWallet).toHaveBeenCalledTimes(4);
+
+      // After all retries exhausted, should show error
+      await waitForState(() => useOnboarding.getState().error !== null);
+      expect(useOnboarding.getState().error).toBe(
+        'Wallet setup failed. Please try again.'
+      );
+    });
+  });
+
+  describe('cleanup', () => {
+    it('cancels pending retry timers', async () => {
+      useOnboarding.setState({
+        userId: 'user-1',
+        step: 'funding',
+        _isProcessing: false,
+      });
+
+      mockLinkSolanaWallet.mockRejectedValue(new Error('Temporary error'));
+
+      useOnboarding.getState().startLinking();
+
+      // Wait for linking attempt to fail and schedule retry
+      await waitForState(() => !useOnboarding.getState()._isProcessing);
+
+      // Cleanup before retry fires
+      useOnboarding.getState().cleanup();
+
+      const callsBefore = mockLinkSolanaWallet.mock.calls.length;
+
+      // Advance past all retry delays
+      await vi.advanceTimersByTimeAsync(20000);
+
+      // No new calls should have been made
+      expect(mockLinkSolanaWallet).toHaveBeenCalledTimes(callsBefore);
+    });
+  });
+
+  describe('alreadyLinked with null addresses', () => {
+    it('falls back to existing store values when response has null addresses', async () => {
+      useOnboarding.setState({
+        userId: 'user-1',
+        step: 'funding',
+        suiAddress: '0xexisting',
+        solanaAddress: 'solExisting',
+        _isProcessing: false,
+      });
+
+      mockLinkSolanaWallet.mockResolvedValue({
+        alreadyLinked: true,
+        digest: null,
+        suiAddress: null,
+        solanaAddress: null,
+        code: 'ALREADY_LINKED',
+      });
+
+      useOnboarding.getState().startLinking();
+
+      await waitForState(() => useOnboarding.getState().step === 'complete');
+
+      const state = useOnboarding.getState();
+      expect(state.step).toBe('complete');
+      expect(state.suiAddress).toBe('0xexisting');
+      expect(state.solanaAddress).toBe('solExisting');
+    });
+  });
+
   describe('reset', () => {
     it('clears all state', () => {
       useOnboarding.setState({

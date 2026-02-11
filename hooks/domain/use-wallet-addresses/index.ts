@@ -1,3 +1,5 @@
+import { useShallow } from 'zustand/react/shallow';
+
 import type { ChainKey } from '@/constants/chains';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 
@@ -8,8 +10,12 @@ export interface WalletAddresses {
 }
 
 export const useWalletAddresses = (): WalletAddresses => {
-  const suiAddress = useOnboarding((s) => s.suiAddress);
-  const solanaAddress = useOnboarding((s) => s.solanaAddress);
+  const { suiAddress, solanaAddress } = useOnboarding(
+    useShallow((s) => ({
+      suiAddress: s.suiAddress,
+      solanaAddress: s.solanaAddress,
+    }))
+  );
 
   const addresses: Record<ChainKey, string | null> = {
     sui: suiAddress,

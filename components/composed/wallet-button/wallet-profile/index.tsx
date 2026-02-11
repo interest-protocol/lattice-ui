@@ -58,6 +58,8 @@ const WalletProfile: FC = () => {
       <div ref={menuRef} className="items-end flex-col hidden md:flex">
         <button
           type="button"
+          aria-expanded={isOpen}
+          aria-haspopup="menu"
           className="py-3 gap-2 flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200"
           onClick={handleOpenProfileDropdown}
         >
@@ -88,6 +90,7 @@ const WalletProfile: FC = () => {
       </div>
       <button
         type="button"
+        aria-label="Open account menu"
         className="flex md:hidden gap-1 bg-surface-raised text-text cursor-pointer items-center rounded-lg py-2.5 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200"
         onClick={handleOpenProfileModal}
       >

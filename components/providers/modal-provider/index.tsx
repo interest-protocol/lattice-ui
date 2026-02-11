@@ -80,6 +80,9 @@ const ModalProvider: FC = () => {
             }}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={title || undefined}
               className="p-4 gap-6 w-[27rem] flex text-text max-h-full flex-col rounded-t-[1rem] md:rounded-[1rem] border border-modal-border"
               style={{
                 backdropFilter: 'blur(50px)',

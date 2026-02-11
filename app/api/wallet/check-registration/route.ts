@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
+import { walletAddressKey } from '@/lib/privy/wallet';
 import { createRegistrySdk, SuiAddress } from '@/lib/registry';
 
 export async function GET(request: NextRequest) {
@@ -13,12 +14,10 @@ export async function GET(request: NextRequest) {
     const privy = getPrivyClient();
 
     const user = await privy.users()._get(auth.userId);
-    const suiAddress = user.custom_metadata?.suiAddress
-      ? String(user.custom_metadata.suiAddress)
-      : null;
-    const solanaAddress = user.custom_metadata?.solanaAddress
-      ? String(user.custom_metadata.solanaAddress)
-      : null;
+    const rawSui = user.custom_metadata?.[walletAddressKey('sui')];
+    const rawSol = user.custom_metadata?.[walletAddressKey('solana')];
+    const suiAddress = typeof rawSui === 'string' ? rawSui : null;
+    const solanaAddress = typeof rawSol === 'string' ? rawSol : null;
 
     const hasWallets = Boolean(suiAddress && solanaAddress);
 

@@ -8,7 +8,7 @@ import type { PrivyClient } from '@privy-io/node';
 
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 
-const authorizationContext = {
+export const authorizationContext = {
   authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
 };
 

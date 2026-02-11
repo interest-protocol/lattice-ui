@@ -210,15 +210,17 @@ const doStartLinking = async (retryCount = 0) => {
   });
 
   try {
-    useOnboarding.setState({ step: 'confirming' });
     const result = await linkSolanaWallet(userId);
+    useOnboarding.setState({ step: 'confirming' });
 
-    if ('alreadyLinked' in result && result.alreadyLinked) {
+    if (result.alreadyLinked) {
+      const { suiAddress: existingSui, solanaAddress: existingSol } =
+        useOnboarding.getState();
       writeCache(userId);
       useOnboarding.setState({
         step: 'complete',
-        suiAddress: result.suiAddress,
-        solanaAddress: result.solanaAddress,
+        suiAddress: result.suiAddress ?? existingSui,
+        solanaAddress: result.solanaAddress ?? existingSol,
         _isProcessing: false,
       });
       return;

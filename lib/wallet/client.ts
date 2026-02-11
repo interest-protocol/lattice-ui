@@ -15,11 +15,32 @@ export interface SendSolanaResult {
   signature: string;
 }
 
-export interface LinkSolanaResult {
+export interface LinkSolanaSuccess {
   digest: string;
   suiAddress: string;
   solanaAddress: string;
+  alreadyLinked?: undefined;
 }
+
+export interface LinkSolanaAlreadyLinked {
+  alreadyLinked: true;
+  digest: null;
+  suiAddress: string;
+  solanaAddress: string;
+}
+
+export interface LinkSolanaAlreadyLinkedFromError {
+  alreadyLinked: true;
+  digest: null;
+  suiAddress: null;
+  solanaAddress: null;
+  code: 'ALREADY_LINKED';
+}
+
+export type LinkSolanaResult =
+  | LinkSolanaSuccess
+  | LinkSolanaAlreadyLinked
+  | LinkSolanaAlreadyLinkedFromError;
 
 export const createSuiWallet = (userId: string) =>
   post<CreateWalletResult>('/api/wallet/create-sui', { userId });

@@ -4,11 +4,15 @@ import bs58 from 'bs58';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { CHAIN_REGISTRY } from '@/constants/chains';
 import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
-import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
+import { parseUnits } from '@/lib/bigint-utils';
 import { getPrivyClient } from '@/lib/privy/server';
-import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
+import {
+  authorizationContext,
+  signAndExecuteSuiTransaction,
+} from '@/lib/privy/signing';
 import { getOrCreateWallet } from '@/lib/privy/wallet';
 import {
   createRegistrySdk,
@@ -16,6 +20,11 @@ import {
   SolanaPubkey,
   SuiAddress,
 } from '@/lib/registry';
+
+const MIN_GAS_BALANCE = parseUnits(
+  String(CHAIN_REGISTRY.sui.minGas),
+  CHAIN_REGISTRY.sui.decimals
+);
 
 const schema = z.object({
   userId: z.string(),
@@ -61,7 +70,7 @@ export async function POST(request: NextRequest) {
       coinType: SUI_TYPE_ARG,
     });
 
-    if (BigInt(totalBalance) < 1_000_000_000n) {
+    if (BigInt(totalBalance) < MIN_GAS_BALANCE) {
       return NextResponse.json(
         { error: 'Insufficient SUI for gas', code: 'INSUFFICIENT_GAS' },
         { status: 402 }
@@ -76,9 +85,7 @@ export async function POST(request: NextRequest) {
       .solana()
       .signMessage(solanaWallet.id, {
         message: messageBytes,
-        authorization_context: {
-          authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
-        },
+        authorization_context: authorizationContext,
       });
     const solanaSignature = Uint8Array.from(
       Buffer.from(signResult.signature, 'base64')
