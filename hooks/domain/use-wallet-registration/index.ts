@@ -117,8 +117,16 @@ const useWalletRegistration = () => {
   const openGasModal = (suiAddress: string) => {
     useModal.getState().setContent(
       createElement(GasRequiredModal, {
-        suiAddress,
-        onRetry: () => linkWallets(0),
+        chain: 'sui' as const,
+        address: suiAddress,
+        minAmount: 0.01,
+        onRefresh: () => linkWallets(0),
+        refreshing: false,
+        action: {
+          label: 'Retry Wallet Setup',
+          onClick: () => linkWallets(0),
+          loading: false,
+        },
       }),
       { title: 'SUI Gas Required', allowClose: false }
     );

@@ -9,6 +9,7 @@ import { BackgroundProvider } from '@/components';
 import AppStateProvider from '@/components/providers/app-state-provider';
 import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
+import GasGuardProvider from '@/components/providers/gas-guard-provider';
 import ModalProvider from '@/components/providers/modal-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
@@ -45,6 +46,7 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
       >
         <AppStateProvider />
         <WalletRegistrationProvider />
+        <GasGuardProvider />
         <BackgroundProvider />
         {children}
       </SkeletonTheme>

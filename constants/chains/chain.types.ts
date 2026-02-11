@@ -14,6 +14,7 @@ export interface ChainConfig {
   noWalletMessage: string;
   alphaMax: number;
   minGas: number;
+  minGasThreshold: number;
   decimals: number;
   displayPrecision: number;
 }
