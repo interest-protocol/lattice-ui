@@ -21,7 +21,7 @@ export const CHAIN_REGISTRY: Record<ChainKey, ChainConfig> = {
     noWalletMessage:
       'No Sui wallet connected. Create one from the Account page.',
     alphaMax: 0.5,
-    minGas: 0.01,
+    minGas: 1,
     minGasThreshold: 1,
     decimals: 9,
     displayPrecision: 4,

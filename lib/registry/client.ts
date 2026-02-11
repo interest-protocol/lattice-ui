@@ -6,5 +6,8 @@ export interface LinkSolanaResult {
   solanaAddress: string;
 }
 
-export const linkSolanaWallet = (userId: string) =>
-  post<LinkSolanaResult>('/api/wallet/link-solana', { userId });
+export const linkSolanaWallet = (userId: string, solanaSignature: string) =>
+  post<LinkSolanaResult>('/api/wallet/link-solana', {
+    userId,
+    solanaSignature,
+  });

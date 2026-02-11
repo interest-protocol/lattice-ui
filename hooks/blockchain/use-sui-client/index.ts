@@ -6,7 +6,7 @@ import { RPC, RPC_MAP, RPC_STORAGE_KEY } from '@/constants';
 const clientCache = new Map<string, SuiClient>();
 
 const useSuiClient = () => {
-  const localRPC = useReadLocalStorage<RPC>(RPC_STORAGE_KEY) ?? RPC.Shinami;
+  const localRPC = useReadLocalStorage<RPC>(RPC_STORAGE_KEY) ?? RPC.Mysten;
   const url = RPC_MAP[localRPC];
 
   let client = clientCache.get(url);

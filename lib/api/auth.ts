@@ -5,6 +5,7 @@ import { getPrivyClient } from '@/lib/privy/server';
 
 interface AuthResult {
   userId: string;
+  accessToken: string;
 }
 
 /**
@@ -32,7 +33,7 @@ export const authenticateRequest = async (
   try {
     const privy = getPrivyClient();
     const { user_id } = await privy.utils().auth().verifyAccessToken(token);
-    return { userId: user_id };
+    return { userId: user_id, accessToken: token };
   } catch {
     return NextResponse.json(
       { error: 'Invalid or expired token' },

@@ -23,3 +23,21 @@ export const getFirstWallet = async (
 
   throw new WalletNotFoundError(chainType);
 };
+
+export const getOrCreateWallet = async (
+  privy: PrivyClient,
+  userId: string,
+  chainType: ChainKey
+) => {
+  for await (const wallet of privy.wallets().list({
+    user_id: userId,
+    chain_type: chainType,
+  })) {
+    return wallet;
+  }
+
+  return privy.wallets().create({
+    chain_type: chainType,
+    owner: { user_id: userId },
+  });
+};

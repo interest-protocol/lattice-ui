@@ -16,8 +16,11 @@ const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
         accentColor: '#0EA5E9',
       },
       embeddedWallets: {
+        ethereum: {
+          createOnLogin: 'off',
+        },
         solana: {
-          createOnLogin: 'users-without-wallets',
+          createOnLogin: 'off',
         },
       },
       externalWallets: {
