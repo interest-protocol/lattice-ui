@@ -16,14 +16,17 @@ const BridgeToCard: FC<BridgeToCardProps> = ({ route, amount }) => {
   const chainName = CHAIN_REGISTRY[route.destChain].displayName;
 
   return (
-    <div className="p-4 gap-4 bg-surface-light flex text-text-muted rounded-2xl text-sm flex-col border border-surface-border">
+    <div
+      className="p-4 gap-4 flex text-text-secondary rounded-2xl text-sm flex-col border border-surface-border"
+      style={{ background: 'var(--color-surface-inset)' }}
+    >
       <div className="flex justify-between items-center">
         <span className="opacity-80">You receive</span>
         <span className="text-text-dimmed text-xs">on {chainName}</span>
       </div>
 
       <div className="grid max-w-full items-center font-mono grid-cols-[1fr_auto]">
-        <span className="text-white text-2xl">
+        <span className="text-text text-2xl">
           {amountNum > 0 ? amount : '0'}
         </span>
         <div className="flex items-center gap-2 px-3 py-1.5">
@@ -34,7 +37,7 @@ const BridgeToCard: FC<BridgeToCardProps> = ({ route, amount }) => {
             height={20}
             className="rounded-full"
           />
-          <span className="text-white font-semibold text-sm">
+          <span className="text-text font-semibold text-sm">
             {route.destToken.symbol}
           </span>
         </div>

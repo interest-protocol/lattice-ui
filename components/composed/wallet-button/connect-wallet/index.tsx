@@ -9,8 +9,12 @@ interface ConnectWalletProps {
 const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => (
   <button
     type="button"
-    className="bg-accent flex text-black cursor-pointer relative items-center rounded-xl gap-2 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 border-none"
-    style={{ backdropFilter: 'blur(16px)' }}
+    className="flex text-white cursor-pointer relative items-center rounded-xl gap-2 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 border-none font-semibold transition-all duration-200"
+    style={{
+      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+      boxShadow: '0 0 20px #6366f11a',
+      backdropFilter: 'blur(16px)',
+    }}
     onClick={onConnect}
   >
     <WalletSVG maxWidth="1rem" maxHeight="1rem" width="100%" />

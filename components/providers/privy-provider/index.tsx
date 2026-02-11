@@ -13,7 +13,7 @@ const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
       loginMethods: ['email', 'wallet'],
       appearance: {
         theme: 'dark',
-        accentColor: '#A78BFA',
+        accentColor: '#6366F1',
       },
       embeddedWallets: {
         solana: {

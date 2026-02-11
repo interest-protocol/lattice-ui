@@ -16,7 +16,7 @@ const Navbar: FC = () => {
         return (
           <Link key={item} href={Routes[item]}>
             <span
-              className={`cursor-pointer hover:text-accent ${isActive ? 'text-accent' : 'text-text-muted'}`}
+              className={`cursor-pointer text-sm font-medium tracking-[0.04em] uppercase transition-colors duration-200 ${isActive ? 'text-accent' : 'text-text-secondary hover:text-text'}`}
             >
               {NAV_ITEMS_TITLE[item]}
             </span>

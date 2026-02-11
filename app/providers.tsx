@@ -42,9 +42,10 @@ const Providers = ({ children }: { children: ReactNode }) => {
                 maxWidth: '20rem',
                 overflow: 'hidden',
                 position: 'relative',
-                background: '#242C32',
-                boxShadow:
-                  '0px 16px 24px 0px rgba(0, 0, 0, 0.14), 0px 6px 30px 0px rgba(0, 0, 0, 0.12), 0px 8px 10px 0px rgba(0, 0, 0, 0.20)',
+                background: '#111827',
+                border: '1px solid #ffffff0d',
+                borderRadius: '12px',
+                boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
               },
             }}
           />

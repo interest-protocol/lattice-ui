@@ -1,11 +1,11 @@
 import { type FC, useEffect, useRef } from 'react';
 
-const PURPLE_PALETTE = [
-  'rgba(139, 92, 246, 0.8)', // violet-500
-  'rgba(167, 139, 250, 0.6)', // violet-400
-  'rgba(196, 181, 253, 0.5)', // violet-300
-  'rgba(124, 58, 237, 0.7)', // violet-600
-  'rgba(221, 214, 254, 0.4)', // violet-200
+const PALETTE = [
+  'rgba(99, 102, 241, 0.6)', // indigo-500
+  'rgba(129, 140, 248, 0.5)', // indigo-400
+  'rgba(165, 180, 252, 0.4)', // indigo-300
+  'rgba(79, 70, 229, 0.5)', // indigo-600
+  'rgba(199, 210, 254, 0.3)', // indigo-200
 ];
 
 interface Particle {
@@ -47,17 +47,16 @@ const BackgroundParticles: FC = () => {
     const initParticles = () => {
       const count = Math.min(
         80,
-        Math.floor((window.innerWidth * window.innerHeight) / 15000)
+        Math.floor((window.innerWidth * window.innerHeight) / 25000)
       );
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        radius: 1 + Math.random() * 2,
-        color:
-          PURPLE_PALETTE[Math.floor(Math.random() * PURPLE_PALETTE.length)],
-        opacity: 0.3 + Math.random() * 0.5,
+        radius: 0.5 + Math.random() * 1.5,
+        color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+        opacity: 0.15 + Math.random() * 0.35,
       }));
     };
 
@@ -85,12 +84,12 @@ const BackgroundParticles: FC = () => {
           const dx = a.x - b.x;
           const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          if (dist < 80) {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            const alpha = (1 - dist / 120) * 0.12;
-            ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+            const alpha = (1 - dist / 80) * 0.06;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }

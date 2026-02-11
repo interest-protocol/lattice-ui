@@ -58,7 +58,10 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
   };
 
   return (
-    <div className="p-4 gap-4 bg-surface-light flex text-text-muted rounded-2xl text-sm flex-col border border-surface-border">
+    <div
+      className="p-4 gap-4 flex text-text-secondary rounded-2xl text-sm flex-col border border-surface-border"
+      style={{ background: 'var(--color-surface-inset)' }}
+    >
       <div className="flex justify-between items-center">
         <span className="opacity-80">You send</span>
         <div className="flex gap-2">
@@ -82,7 +85,7 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
 
       <div className="grid max-w-full items-center font-mono grid-cols-[1fr_auto]">
         <input
-          className="appearance-none bg-transparent border-none outline-none text-white min-w-full text-2xl"
+          className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-2xl"
           placeholder="0"
           autoComplete="off"
           value={amount}
@@ -100,7 +103,7 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
             height={20}
             className="rounded-full"
           />
-          <span className="text-white font-semibold text-sm">
+          <span className="text-text font-semibold text-sm">
             {route.sourceToken.symbol}
           </span>
           <ChevronDownSVG maxWidth="0.75rem" width="100%" />

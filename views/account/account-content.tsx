@@ -32,7 +32,7 @@ const AssetRow: FC<{
   decimals: number;
   isLoading: boolean;
 }> = ({ symbol, name, iconUrl, balance, decimals, isLoading }) => (
-  <div className="p-4 bg-surface-light flex items-center rounded-lg hover:bg-surface-hover justify-between">
+  <div className="p-4 bg-surface-light flex items-center rounded-xl hover:bg-surface-hover transition-colors duration-150 justify-between">
     <div className="flex items-center gap-4">
       {iconUrl && (
         <Image
@@ -44,12 +44,12 @@ const AssetRow: FC<{
         />
       )}
       <div>
-        <p className="text-white font-semibold mb-1">{symbol}</p>
-        <p className="text-text-muted text-sm">{name}</p>
+        <p className="text-text font-semibold mb-1">{symbol}</p>
+        <p className="text-text-secondary text-sm">{name}</p>
       </div>
     </div>
     <div className="text-right">
-      <p className="text-white font-mono font-semibold">
+      <p className="text-text font-mono font-semibold">
         {isLoading
           ? '...'
           : formatMoney(FixedPointMath.toNumber(balance, decimals))}
@@ -84,9 +84,9 @@ const BalancesView: FC<{
         type="button"
         className="w-full p-4 rounded-lg font-semibold text-sm text-center border-none hover:opacity-80"
         style={{
-          background: '#A78BFA1A',
-          color: '#A78BFA',
-          border: '1px solid #A78BFA4D',
+          background: 'var(--color-accent-wash)',
+          color: 'var(--color-accent)',
+          border: '1px solid var(--color-accent-border)',
           cursor: creatingSuiWallet ? 'wait' : 'pointer',
           opacity: creatingSuiWallet ? 0.6 : 1,
         }}
@@ -96,8 +96,14 @@ const BalancesView: FC<{
         {creatingSuiWallet ? 'Creating...' : 'Create Sui Wallet'}
       </button>
     ) : (
-      <div className="p-6 bg-surface-light rounded-2xl border border-surface-border">
-        <h2 className="text-white text-xl mb-2">Sui Wallet</h2>
+      <div
+        className="p-6 rounded-2xl border border-surface-border"
+        style={{
+          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+        }}
+      >
+        <h2 className="text-text text-lg font-semibold mb-2">Sui Wallet</h2>
         <button
           type="button"
           className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
@@ -136,8 +142,14 @@ const BalancesView: FC<{
     )}
 
     {solanaAddress && (
-      <div className="p-6 bg-surface-light rounded-2xl border border-surface-border">
-        <h2 className="text-white text-xl mb-2">Solana Wallet</h2>
+      <div
+        className="p-6 rounded-2xl border border-surface-border"
+        style={{
+          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+        }}
+      >
+        <h2 className="text-text text-lg font-semibold mb-2">Solana Wallet</h2>
         <button
           type="button"
           className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
@@ -221,9 +233,15 @@ const AccountContent: FC = () => {
   if (!authenticated) {
     return (
       <div className="flex-1 mx-auto gap-4 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12 justify-center items-center">
-        <div className="p-8 bg-surface-light rounded-2xl text-center border border-surface-border w-full">
-          <h2 className="text-white mb-4">Connect Your Wallet</h2>
-          <p className="text-text-muted">
+        <div
+          className="p-8 rounded-2xl text-center border border-surface-border w-full"
+          style={{
+            background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+            boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+          }}
+        >
+          <h2 className="text-text mb-4">Connect Your Wallet</h2>
+          <p className="text-text-secondary">
             Please connect your wallet to view your account
           </p>
         </div>
@@ -234,8 +252,10 @@ const AccountContent: FC = () => {
   return (
     <div className="flex-1 mx-auto gap-6 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12">
       <div>
-        <h1 className="text-white text-4xl mb-2">Account</h1>
-        <p className="text-text-muted">Manage your wallet and assets</p>
+        <h1 className="text-text text-[2rem] font-bold tracking-tight mb-2">
+          Account
+        </h1>
+        <p className="text-text-secondary">Manage your wallet and assets</p>
       </div>
 
       <Tabs
@@ -258,7 +278,13 @@ const AccountContent: FC = () => {
       )}
 
       {(activeTab === 1 || activeTab === 2) && (
-        <div className="p-6 bg-surface-light rounded-2xl border border-surface-border flex flex-col gap-5">
+        <div
+          className="p-6 rounded-2xl border border-surface-border flex flex-col gap-5"
+          style={{
+            background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+            boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+          }}
+        >
           <NetworkTabs network={network} setNetwork={setNetwork} />
 
           {activeTab === 1 ? (

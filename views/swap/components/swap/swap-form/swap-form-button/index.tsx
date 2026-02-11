@@ -41,10 +41,12 @@ const SwapFormButton: FC = () => {
   return (
     <button
       type="button"
-      className="w-full py-4 px-6 bg-accent text-white text-base font-semibold rounded-xl border-none hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
       style={{
         cursor: validation.isDisabled ? 'not-allowed' : 'pointer',
         opacity: validation.isDisabled ? 0.5 : 1,
+        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+        boxShadow: '0 0 20px #6366f11a',
       }}
       onClick={handleSwap}
       disabled={validation.isDisabled}

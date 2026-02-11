@@ -9,8 +9,13 @@ const SettingsMenu: FC = () => {
 
   return (
     <motion.div
-      className="gap-8 z-[1] mt-[4.25rem] bg-surface-light flex text-white overflow-hidden absolute rounded-2xl flex-col border border-surface-border"
-      style={{ backdropFilter: 'blur(50px)', originY: 0 }}
+      className="gap-8 z-[1] mt-[4.25rem] flex text-white overflow-hidden absolute rounded-2xl flex-col border border-surface-border"
+      style={{
+        backdropFilter: 'blur(24px)',
+        originY: 0,
+        background: 'var(--color-surface-overlay)',
+        boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+      }}
       exit={{ scaleY: 0 }}
       animate={{ scaleY: [0, 1] }}
     >
@@ -19,7 +24,7 @@ const SettingsMenu: FC = () => {
           show={menu === 'explorer'}
           toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
         />
-        <hr className="border-b border-b-surface-separator mx-4 border-t-0 border-x-0" />
+        <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
         <SettingsMenuRPC
           show={menu === 'rpc'}
           toggleShow={() => setMenu(menu === 'rpc' ? null : 'rpc')}

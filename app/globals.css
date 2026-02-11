@@ -1,52 +1,41 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "PPNeuebit";
-  src: url("https://cdn.prod.website-files.com/66a8b39f3ac043de2548ab05/66acb4a18a6ad9a9419941f3_PPNeueBit-Regular.otf")
-    format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "PPNeuebit";
-  src: url("https://cdn.prod.website-files.com/66a8b39f3ac043de2548ab05/66acb4a1a51187e0be57c059_PPNeueBit-Bold.otf")
-    format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme {
   --font-sans: "DM Sans", serif;
   --font-mono: "JetBrains Mono", monospace;
-  --font-pixel: "PPNeuebit", monospace;
 
-  --color-accent: #a78bfa;
-  --color-accent-hover: #c4b5fd;
-  --color-accent-80: #a78bfa80;
-  --color-accent-4d: #a78bfa4d;
-  --color-accent-1a: #a78bfa1a;
-  --color-accent-2a: #a78bfa2a;
-  --color-accent-33: #a78bfa33;
+  /* Accent: indigo-500 base */
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-muted: #6366f180;
+  --color-accent-subtle: #6366f133;
+  --color-accent-wash: #6366f114;
+  --color-accent-border: #6366f14d;
 
-  --color-surface: #0c0f1d;
-  --color-surface-light: #ffffff0d;
-  --color-surface-lighter: #ffffff1a;
-  --color-surface-hover: #ffffff2a;
-  --color-surface-border: #ffffff1a;
+  /* Layered surfaces */
+  --color-surface: #0a0e1a;
+  --color-surface-raised: #111827;
+  --color-surface-overlay: #1a2233;
+  --color-surface-inset: #080c16;
 
-  --color-text: #ffffff;
-  --color-text-muted: #ffffff80;
-  --color-text-dimmed: #ffffff40;
-  --color-text-dim: #ffffff14;
+  /* White-alpha surface modifiers */
+  --color-surface-light: #ffffff08;
+  --color-surface-lighter: #ffffff12;
+  --color-surface-hover: #ffffff1a;
+  --color-surface-border: #ffffff10;
+  --color-surface-border-hover: #ffffff22;
 
+  /* Text */
+  --color-text: #f0f0f5;
+  --color-text-secondary: #9ca3b4;
+  --color-text-muted: #6b7280;
+  --color-text-dimmed: #404759;
+  --color-text-dim: #ffffff0a;
+
+  /* Status */
   --color-success: #22c55e;
   --color-error: #ef4444;
-  --color-warning: #eab308;
-  --color-surface-dark: #0d1117;
-  --color-surface-separator: #242424;
+  --color-warning: #f59e0b;
 }
 
 @layer base {
@@ -88,7 +77,7 @@
 
 /* Handle */
 ::-webkit-scrollbar-thumb:hover {
-  background: #99efe4cc;
+  background: #6366f180;
 }
 
 /* React hot toast */

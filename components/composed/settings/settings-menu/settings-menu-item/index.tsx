@@ -13,7 +13,7 @@ const SettingsMenuItem: FC<SettingsMenuItemProps> = ({
   tag,
 }) => (
   <div
-    className={`mx-4 py-2 flex justify-between items-center ${withBorder ? 'border-t border-t-surface-separator' : ''}`}
+    className={`mx-4 py-2 flex justify-between items-center ${withBorder ? 'border-t border-t-surface-border' : ''}`}
   >
     <span>
       {title}

@@ -57,7 +57,7 @@ const ModalProvider: FC = () => {
         <motion.div
           className="inset-0 fixed z-[99] w-screen flex justify-center items-end md:items-center"
           style={{
-            background: '#0007',
+            background: 'rgba(0,0,0,0.7)',
             height: safeHeight,
             backdropFilter: 'blur(10px)',
             paddingTop: `calc(100vh - ${safeHeight}px)`,
@@ -80,11 +80,12 @@ const ModalProvider: FC = () => {
             }}
           >
             <div
-              className="p-4 gap-6 w-[27rem] flex text-white max-h-full flex-col rounded-t-[1rem] md:rounded-[1rem]"
+              className="p-4 gap-6 w-[27rem] flex text-white max-h-full flex-col rounded-t-[1rem] md:rounded-[1rem] border border-[#ffffff0d]"
               style={{
                 backdropFilter: 'blur(50px)',
                 background:
-                  'linear-gradient(45deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.10))',
+                  'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
               }}
             >
               <div className="px-2 pt-2 flex justify-between">

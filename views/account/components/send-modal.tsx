@@ -113,7 +113,9 @@ const SendModal: FC = () => {
     <div className="flex flex-col gap-6 p-6">
       {/* Network Selection */}
       <div>
-        <span className="text-text-muted text-sm mb-2 block">Network</span>
+        <span className="text-text-secondary text-sm font-medium mb-2 block">
+          Network
+        </span>
         <div className="flex gap-2">
           {CHAIN_KEYS.map((net) => {
             const isSelected = net === network;
@@ -121,17 +123,19 @@ const SendModal: FC = () => {
               <button
                 key={net}
                 type="button"
-                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
                 style={{
-                  border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
-                  background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+                  border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
+                  background: isSelected
+                    ? 'var(--color-accent-wash)'
+                    : 'var(--color-surface-light)',
                 }}
                 onClick={() => {
                   setNetwork(net);
                   setSelectedTokenIndex(0);
                 }}
               >
-                <span className="text-white font-semibold capitalize">
+                <span className="text-text font-semibold capitalize">
                   {CHAIN_REGISTRY[net].displayName}
                 </span>
               </button>
@@ -142,7 +146,9 @@ const SendModal: FC = () => {
 
       {/* Token Selection */}
       <div>
-        <span className="text-text-muted text-sm mb-2 block">Token</span>
+        <span className="text-text-secondary text-sm font-medium mb-2 block">
+          Token
+        </span>
         <div className="flex gap-2">
           {tokens.map((token, index) => {
             const isSelected = index === selectedTokenIndex;
@@ -150,10 +156,12 @@ const SendModal: FC = () => {
               <button
                 key={token.type}
                 type="button"
-                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
                 style={{
-                  border: `1px solid ${isSelected ? '#A78BFA' : '#FFFFFF1A'}`,
-                  background: isSelected ? '#A78BFA1A' : '#FFFFFF0D',
+                  border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
+                  background: isSelected
+                    ? 'var(--color-accent-wash)'
+                    : 'var(--color-surface-light)',
                 }}
                 onClick={() => setSelectedTokenIndex(index)}
               >
@@ -166,7 +174,7 @@ const SendModal: FC = () => {
                     style={{ borderRadius: '50%' }}
                   />
                 )}
-                <span className="text-white font-semibold">{token.symbol}</span>
+                <span className="text-text font-semibold">{token.symbol}</span>
               </button>
             );
           })}
@@ -175,11 +183,11 @@ const SendModal: FC = () => {
 
       {/* Recipient Address */}
       <div>
-        <span className="text-text-muted text-sm mb-2 block">
+        <span className="text-text-secondary text-sm font-medium mb-2 block">
           Recipient Address
         </span>
         <input
-          className="w-full p-4 text-white bg-black rounded-lg border border-surface-border font-mono text-sm outline-none"
+          className="w-full p-4 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-sm outline-none focus:border-accent-border transition-all duration-200"
           placeholder={config.addressPlaceholder}
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
@@ -189,7 +197,9 @@ const SendModal: FC = () => {
       {/* Amount */}
       <div>
         <div className="flex justify-between mb-2">
-          <span className="text-text-muted text-sm">Amount</span>
+          <span className="text-text-secondary text-sm font-medium">
+            Amount
+          </span>
           <span className="text-text-muted text-sm">
             Balance:{' '}
             {isLoading ? '...' : `${balanceFormatted} ${selectedToken.symbol}`}
@@ -197,7 +207,7 @@ const SendModal: FC = () => {
         </div>
         <div className="relative">
           <input
-            className="w-full p-4 pr-16 text-white bg-black rounded-lg border border-surface-border font-mono text-base outline-none"
+            className="w-full p-4 pr-16 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-base outline-none focus:border-accent-border transition-all duration-200"
             placeholder="0.0"
             type="text"
             inputMode="decimal"
@@ -229,11 +239,11 @@ const SendModal: FC = () => {
       <div
         className="p-4 rounded-lg"
         style={{
-          background: '#A78BFA1A',
-          border: '1px solid #A78BFA4D',
+          background: 'var(--color-accent-wash)',
+          border: '1px solid var(--color-accent-border)',
         }}
       >
-        <p className="text-white text-sm">
+        <p className="text-text text-sm">
           Please verify the recipient address carefully. Transactions cannot be
           reversed.
         </p>
@@ -242,10 +252,12 @@ const SendModal: FC = () => {
       {/* Send Button */}
       <button
         type="button"
-        className="w-full p-4 bg-accent text-black rounded-xl font-semibold text-base text-center border-none hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
+        className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-all duration-200 disabled:cursor-wait disabled:opacity-60"
         style={{
           cursor: sending ? 'wait' : 'pointer',
           opacity: sending ? 0.6 : 1,
+          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+          boxShadow: '0 0 20px #6366f11a',
         }}
         onClick={handleSend}
         disabled={sending}

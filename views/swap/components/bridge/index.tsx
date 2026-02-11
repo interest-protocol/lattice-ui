@@ -155,7 +155,7 @@ const Bridge: FC = () => {
           className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
           onClick={handleFlip}
         >
-          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover border border-surface-border">
+          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover border border-surface-border transition-colors duration-150">
             <span className="text-text-muted text-lg">&#x2193;</span>
           </div>
         </button>
@@ -170,7 +170,11 @@ const Bridge: FC = () => {
       ) : (
         <button
           type="button"
-          className="w-full py-4 px-6 bg-accent text-white text-base font-semibold rounded-xl border-none hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            boxShadow: '0 0 20px #6366f11a',
+          }}
           onClick={handleBridge}
           disabled={isDisabled}
         >

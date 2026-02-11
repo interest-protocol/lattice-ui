@@ -14,20 +14,20 @@ const SwapDetails: FC = () => {
   const rate = hasRates ? (suiPrice / solPrice).toFixed(6) : '...';
 
   return (
-    <div className="p-6 bg-surface-light rounded-2xl flex flex-col gap-4">
+    <div className="p-6 bg-[#ffffff04] rounded-2xl flex flex-col gap-4 border border-surface-border">
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Exchange Rate</span>
-        <span className="text-sm font-medium text-white">
+        <span className="text-sm font-medium text-text">
           1 SUI &#x2248; {rate} SOL
         </span>
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Slippage Tolerance</span>
-        <span className="text-sm font-medium text-white">0.5%</span>
+        <span className="text-sm font-medium text-text">0.5%</span>
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Estimated Time</span>
-        <span className="text-sm font-medium text-white">~2-5 minutes</span>
+        <span className="text-sm font-medium text-text">~2-5 minutes</span>
       </div>
     </div>
   );

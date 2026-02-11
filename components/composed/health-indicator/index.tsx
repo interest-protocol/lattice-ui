@@ -37,14 +37,14 @@ const HealthIndicator: FC = () => {
   return (
     <div className="fixed bottom-4 left-4 z-[1000] flex flex-col gap-2">
       {expanded && (
-        <div className="bg-[#1a1a1a] rounded-lg border border-[#333] p-3 flex flex-col gap-2 min-w-[180px]">
+        <div className="bg-surface-raised rounded-lg border border-surface-border p-3 flex flex-col gap-2 min-w-[180px]">
           <div className="flex items-center gap-2">
             <div
               className="w-2 h-2 rounded-full"
               style={{ background: stateColors[enclaveState] }}
             />
-            <span className="text-white text-xs">Enclave</span>
-            <span className="text-[#888] text-[11px] ml-auto">
+            <span className="text-text text-xs">Enclave</span>
+            <span className="text-text-muted text-[11px] ml-auto">
               {enclaveState}
             </span>
           </div>
@@ -54,8 +54,8 @@ const HealthIndicator: FC = () => {
               className="w-2 h-2 rounded-full"
               style={{ background: stateColors[solverState] }}
             />
-            <span className="text-white text-xs">Solver API</span>
-            <span className="text-[#888] text-[11px] ml-auto">
+            <span className="text-text text-xs">Solver API</span>
+            <span className="text-text-muted text-[11px] ml-auto">
               {solverState}
             </span>
           </div>
@@ -66,7 +66,7 @@ const HealthIndicator: FC = () => {
         type="button"
         aria-expanded={expanded}
         aria-label="System health status"
-        className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg border border-[#333] py-2 px-3 cursor-pointer hover:bg-[#252525] transition-colors duration-200"
+        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border py-2 px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200"
         onClick={() => setExpanded(!expanded)}
       >
         <div
@@ -76,7 +76,7 @@ const HealthIndicator: FC = () => {
             boxShadow: `0 0 6px ${stateColors[overallState]}`,
           }}
         />
-        <span className="text-white text-xs font-medium">
+        <span className="text-text text-xs font-medium">
           {overallState === 'loading'
             ? 'Checking...'
             : overallState === 'healthy'

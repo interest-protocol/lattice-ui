@@ -25,7 +25,7 @@ const DepositModal: FC = () => {
             S
           </div>
           <div>
-            <p className="text-white font-semibold">Sui Network</p>
+            <p className="text-text font-semibold">Sui Network</p>
             <p className="text-text-muted text-xs">
               Send SUI tokens to your wallet address
             </p>
@@ -33,8 +33,8 @@ const DepositModal: FC = () => {
         </div>
         {suiAddress ? (
           <>
-            <div className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border">
-              <span className="flex-1 text-white font-mono text-xs break-all">
+            <div className="flex items-center gap-3 p-3 bg-surface-inset rounded-lg border border-surface-border">
+              <span className="flex-1 text-text font-mono text-xs break-all">
                 {suiAddress}
               </span>
               <button
@@ -66,7 +66,7 @@ const DepositModal: FC = () => {
             S
           </div>
           <div>
-            <p className="text-white font-semibold">Solana Network</p>
+            <p className="text-text font-semibold">Solana Network</p>
             <p className="text-text-muted text-xs">
               Fund via card, exchange, or external wallet
             </p>
@@ -74,8 +74,8 @@ const DepositModal: FC = () => {
         </div>
         {solanaAddress ? (
           <>
-            <div className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border">
-              <span className="flex-1 text-white font-mono text-xs break-all">
+            <div className="flex items-center gap-3 p-3 bg-surface-inset rounded-lg border border-surface-border">
+              <span className="flex-1 text-text font-mono text-xs break-all">
                 {solanaAddress}
               </span>
               <button

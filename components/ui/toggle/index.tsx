@@ -44,7 +44,7 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
           className="flex w-11 h-[1.7rem] cursor-pointer items-center rounded-full transition-all duration-300 ease-in-out"
           style={{
             opacity: disabled ? 0.4 : 1,
-            background: !active ? '#0000003D' : '#C484F6',
+            background: !active ? '#ffffff14' : 'var(--color-accent)',
           }}
         >
           <motion.span

@@ -20,7 +20,10 @@ const InputField: FC<InputFieldProps> = ({
   const { register, setValue, getValues } = useFormContext();
 
   return (
-    <div className="p-4 gap-4 bg-surface-light flex text-text-muted rounded-2xl text-sm flex-col border border-surface-border">
+    <div
+      className="p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border border-surface-border transition-all duration-200 focus-within:border-accent-border"
+      style={{ background: 'var(--color-surface-inset)' }}
+    >
       <div className="flex justify-between">
         <label htmlFor={`input-${name}`} className="opacity-80">
           {label}
@@ -34,7 +37,7 @@ const InputField: FC<InputFieldProps> = ({
       <div className="grid max-w-full items-center font-mono grid-cols-[1fr_auto]">
         <input
           id={`input-${name}`}
-          className="appearance-none bg-transparent border-none outline-none text-white min-w-full text-2xl"
+          className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-2xl"
           placeholder="0"
           autoComplete="off"
           disabled={disabled}

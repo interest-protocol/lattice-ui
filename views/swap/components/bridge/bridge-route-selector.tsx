@@ -27,7 +27,7 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
           className="flex items-center gap-3 p-4 rounded-xl border-none w-full text-left"
           style={{
             background: isSelected
-              ? 'var(--color-accent-1a)'
+              ? 'var(--color-accent-wash)'
               : 'var(--color-surface-light)',
             border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-surface-border)'}`,
             opacity: hasBalance ? 1 : 0.4,
@@ -46,7 +46,7 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
               height={24}
               className="rounded-full"
             />
-            <span className="text-white font-semibold text-sm">
+            <span className="text-text font-semibold text-sm">
               {route.sourceToken.symbol}
             </span>
             <span className="text-text-muted text-sm">&#x2192;</span>
@@ -57,7 +57,7 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
               height={24}
               className="rounded-full"
             />
-            <span className="text-white font-semibold text-sm">
+            <span className="text-text font-semibold text-sm">
               {route.destToken.symbol}
             </span>
           </div>

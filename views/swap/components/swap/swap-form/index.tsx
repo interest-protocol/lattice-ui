@@ -39,7 +39,13 @@ const SwapForm: FC = () => {
 
   return (
     <FormProvider {...form}>
-      <div className="flex flex-col gap-4 p-6 bg-surface-light rounded-2xl">
+      <div
+        className="flex flex-col gap-4 p-6 rounded-2xl border border-surface-border"
+        style={{
+          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+        }}
+      >
         <InputField
           name="from"
           label="From"
@@ -59,7 +65,7 @@ const SwapForm: FC = () => {
             form.setValue('to', fromValue);
           }}
         >
-          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover">
+          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover transition-colors duration-150">
             &#x2193;&#x2191;
           </div>
         </button>

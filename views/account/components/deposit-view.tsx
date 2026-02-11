@@ -41,10 +41,10 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
         </p>
         <button
           type="button"
-          className="flex items-center gap-3 p-3 bg-black rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light w-full"
+          className="flex items-center gap-3 p-3 bg-surface-inset rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light w-full"
           onClick={copyAddress}
         >
-          <span className="flex-1 text-white font-mono text-[0.6875rem] break-all text-center">
+          <span className="flex-1 text-text font-mono text-[0.6875rem] break-all text-center">
             {address}
           </span>
           <div className="hover:opacity-70">
@@ -60,7 +60,7 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
           border: `1px solid ${config.color}4D`,
         }}
       >
-        <p className="text-white text-[0.8125rem] text-center">
+        <p className="text-text text-[0.8125rem] text-center">
           Only send {config.displayName} network assets to this address
         </p>
       </div>

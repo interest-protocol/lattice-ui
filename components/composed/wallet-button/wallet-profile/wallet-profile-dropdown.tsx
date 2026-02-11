@@ -44,7 +44,7 @@ const WalletProfileDropdown: FC<
         </div>
         <button
           type="button"
-          className="p-4 flex text-[#E53E3E] cursor-pointer items-center justify-between border-t border-t-[#FFFFFF33] hover:opacity-90 bg-transparent w-full"
+          className="p-4 flex text-error cursor-pointer items-center justify-between border-t border-t-surface-border-hover hover:opacity-90 bg-transparent w-full"
           onClick={() => {
             onLogout();
             close();

@@ -17,9 +17,10 @@ const TooltipIcon: React.FC<TooltipIconProps> = ({ icon: Icon, text }) => {
         role="tooltip"
         className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 absolute -translate-x-1/2 bottom-[120%] left-1/2 z-10 leading-tight p-2 rounded-md whitespace-normal text-[0.9rem] max-w-[180px] w-max text-center transition-opacity duration-400 ease-in-out"
         style={{
-          background: '#333',
+          background: 'var(--color-surface-overlay)',
           color: '#fff',
-          boxShadow: 'inset 0 0 0 1px #888',
+          border: '1px solid var(--color-surface-border)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
         }}
       >
         {text}
