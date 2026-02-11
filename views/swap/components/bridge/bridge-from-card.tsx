@@ -59,7 +59,7 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
 
   return (
     <div
-      className="p-4 gap-4 flex text-text-secondary rounded-2xl text-sm flex-col border border-surface-border"
+      className="p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border border-surface-border transition-all duration-200 focus-within:border-accent-border"
       style={{ background: 'var(--color-surface-inset)' }}
     >
       <div className="flex justify-between items-center">

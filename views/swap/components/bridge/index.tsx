@@ -139,50 +139,59 @@ const Bridge: FC = () => {
   const destChainName = CHAIN_REGISTRY[selectedRoute.destChain].displayName;
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-[40rem] mx-auto">
-      <BridgeFromCard
-        route={selectedRoute}
-        amount={amount}
-        setAmount={setAmount}
-        balance={balance}
-        balanceLoading={balanceLoading}
-        onOpenRouteSelector={openRouteSelector}
-      />
+    <div className="flex flex-col gap-4 w-full max-w-[40rem] mx-auto">
+      <div
+        className="flex flex-col gap-4 p-6 rounded-2xl border border-surface-border"
+        style={{
+          background: 'linear-gradient(180deg, #ffffff06 0%, #ffffff02 100%)',
+          boxShadow: '0 1px 0 0 #ffffff08 inset, 0 4px 24px 0 #00000040',
+        }}
+      >
+        <BridgeFromCard
+          route={selectedRoute}
+          amount={amount}
+          setAmount={setAmount}
+          balance={balance}
+          balanceLoading={balanceLoading}
+          onOpenRouteSelector={openRouteSelector}
+        />
 
-      <div className="flex items-center justify-center -my-1 relative z-10">
-        <button
-          type="button"
-          className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
-          onClick={handleFlip}
-        >
-          <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover border border-surface-border transition-colors duration-150">
-            <span className="text-text-muted text-lg">&#x2193;</span>
-          </div>
-        </button>
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            aria-label="Reverse bridge direction"
+            className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
+            onClick={handleFlip}
+          >
+            <div className="w-10 h-10 rounded-full bg-surface-lighter flex justify-center items-center hover:bg-surface-hover transition-colors duration-150">
+              &#x2193;&#x2191;
+            </div>
+          </button>
+        </div>
+
+        <BridgeToCard route={selectedRoute} amount={amount} />
+
+        <BridgeDetailsInline route={selectedRoute} amount={amount} />
+
+        {isLoading || status === 'success' || status === 'error' ? (
+          <BridgeProgressStepper status={status} onRetry={handleRetry} />
+        ) : (
+          <button
+            type="button"
+            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              boxShadow: '0 0 20px #6366f11a',
+            }}
+            onClick={handleBridge}
+            disabled={isDisabled}
+          >
+            {validation.message
+              ? validation.message
+              : `Bridge ${selectedRoute.sourceToken.symbol} to ${destChainName}`}
+          </button>
+        )}
       </div>
-
-      <BridgeToCard route={selectedRoute} amount={amount} />
-
-      <BridgeDetailsInline route={selectedRoute} amount={amount} />
-
-      {isLoading || status === 'success' || status === 'error' ? (
-        <BridgeProgressStepper status={status} onRetry={handleRetry} />
-      ) : (
-        <button
-          type="button"
-          className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-            boxShadow: '0 0 20px #6366f11a',
-          }}
-          onClick={handleBridge}
-          disabled={isDisabled}
-        >
-          {validation.message
-            ? validation.message
-            : `Bridge ${selectedRoute.sourceToken.symbol} to ${destChainName}`}
-        </button>
-      )}
 
       <p className="text-text-dimmed text-xs text-center">
         Powered by XBridge. Assets are bridged as wrapped tokens.
