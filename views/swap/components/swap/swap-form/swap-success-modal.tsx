@@ -59,7 +59,13 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
   const sourceChainName = CHAIN_REGISTRY[result.sourceChainKey].displayName;
   const destChainName = CHAIN_REGISTRY[result.destChainKey].displayName;
 
-  const totalSeconds = Math.round(result.elapsedMs / 1000);
+  const truncateDigest = (digest: string) => {
+    if (digest.length <= 16) return digest;
+    return `${digest.slice(0, 8)}...${digest.slice(-6)}`;
+  };
+
+  const elapsedMs = Date.now() - result.startedAt;
+  const totalSeconds = Math.round(elapsedMs / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   const elapsedDisplay = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
@@ -147,37 +153,45 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           style={{ background: 'var(--color-surface-border)' }}
         />
 
-        {/* Explorer Links */}
-        <div className="flex items-center gap-3">
+        {/* Source Tx */}
+        <div className="flex items-center justify-between">
+          <span className="text-text-secondary text-sm">
+            {sourceChainName} tx
+          </span>
           <a
             href={sourceTxUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-accent text-xs px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
-            style={{
-              border: '1px solid var(--color-accent-border)',
-              background: 'var(--color-accent-wash)',
-            }}
+            className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
           >
-            Deposit tx
-            <ExternalLinkSVG maxWidth="0.875rem" maxHeight="0.875rem" />
+            {truncateDigest(result.depositDigest)}
+            <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
           </a>
-          {destTxUrl && (
-            <a
-              href={destTxUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-accent text-xs px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
-              style={{
-                border: '1px solid var(--color-accent-border)',
-                background: 'var(--color-accent-wash)',
-              }}
-            >
-              Receive tx
-              <ExternalLinkSVG maxWidth="0.875rem" maxHeight="0.875rem" />
-            </a>
-          )}
         </div>
+
+        {/* Dest Tx */}
+        {destTxUrl && (
+          <>
+            <div
+              className="h-px w-full"
+              style={{ background: 'var(--color-surface-border)' }}
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-text-secondary text-sm">
+                {destChainName} tx
+              </span>
+              <a
+                href={destTxUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
+              >
+                {truncateDigest(result.destinationTxDigest!)}
+                <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
+              </a>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Close Button */}

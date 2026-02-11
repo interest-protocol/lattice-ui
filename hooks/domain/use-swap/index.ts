@@ -43,7 +43,7 @@ export interface SwapResult {
   destinationTxDigest?: string;
   toAmount: bigint;
   feeAmount: bigint;
-  elapsedMs: number;
+  startedAt: number;
 }
 
 interface SwapParams {
@@ -162,7 +162,7 @@ export const useSwap = () => {
     const destAdapter = getAdapter(destChainKey);
 
     try {
-      const startTime = performance.now();
+      const startedAt = Date.now();
       setStatus('depositing');
       setError(null);
       toasting.loadingWithId(
@@ -320,7 +320,7 @@ export const useSwap = () => {
         destinationTxDigest: fulfillResult.destinationTxDigest,
         toAmount: minimumReceived,
         feeAmount,
-        elapsedMs: Math.round(performance.now() - startTime),
+        startedAt,
       });
       setStatus('success');
       toasting.dismiss(SWAP_TOAST_ID);
