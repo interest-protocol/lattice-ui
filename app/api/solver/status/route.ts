@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { validateQueryParam } from '@/lib/api/validate-params';
+import { errorResponse, validateQueryParam } from '@/lib/api/validate-params';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
@@ -32,8 +32,6 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to fetch status';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error, 'Failed to fetch status');
   }
 }

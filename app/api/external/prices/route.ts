@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { validateBody } from '@/lib/api/validate-params';
+import { errorResponse, validateBody } from '@/lib/api/validate-params';
 
 const PYTH_HERMES_URL = 'https://hermes.pyth.network/v2/updates/price/latest';
 
@@ -89,8 +89,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to fetch prices';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error, 'Failed to fetch prices');
   }
 }

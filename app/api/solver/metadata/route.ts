@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { errorResponse } from '@/lib/api/validate-params';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET() {
@@ -25,8 +26,6 @@ export async function GET() {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to fetch metadata';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error, 'Failed to fetch metadata');
   }
 }

@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { validateBody } from '@/lib/api/validate-params';
+import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { ENCLAVE_URL } from '@/lib/config.server';
 
 interface NewRequestProofRaw {
@@ -49,8 +49,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(raw);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to fetch proof';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error, 'Failed to fetch proof');
   }
 }

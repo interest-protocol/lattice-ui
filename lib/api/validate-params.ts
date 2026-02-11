@@ -1,6 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { ZodSchema } from 'zod';
 
+import { extractErrorMessage } from '@/utils/extract-error-message';
+
+export const errorResponse = (
+  error: unknown,
+  fallback: string,
+  status = 500
+): NextResponse =>
+  NextResponse.json(
+    { error: extractErrorMessage(error, fallback) },
+    { status }
+  );
+
 export const validateBody = <T>(
   body: unknown,
   schema: ZodSchema<T>

@@ -2,7 +2,7 @@ import type { ChainId } from '@interest-protocol/xswap-sdk';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { validateBody } from '@/lib/api/validate-params';
+import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -103,9 +103,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     if (error instanceof WalletNotFoundError)
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    const message =
-      error instanceof Error ? error.message : 'Failed to create request';
-    return NextResponse.json({ error: message }, { status: 500 });
+      return errorResponse(error, error.message, 404);
+    return errorResponse(error, 'Failed to create request');
   }
 }

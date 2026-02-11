@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { validateBody } from '@/lib/api/validate-params';
+import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
 
 const schema = z.object({
@@ -26,8 +26,6 @@ export async function POST(request: NextRequest) {
       chainType: wallet.chain_type,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to create wallet';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return errorResponse(error, 'Failed to create wallet');
   }
 }
