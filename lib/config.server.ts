@@ -7,3 +7,7 @@ export const PRIVY_APP_SECRET = privyAppSecret;
 const enclaveUrl = process.env.ENCLAVE_URL;
 invariant(enclaveUrl, 'ENCLAVE_URL not configured');
 export const ENCLAVE_URL = enclaveUrl;
+
+const enclaveApiKey = process.env.ENCLAVE_API_KEY;
+invariant(enclaveApiKey, 'ENCLAVE_API_KEY not configured');
+export const ENCLAVE_API_KEY = enclaveApiKey;
