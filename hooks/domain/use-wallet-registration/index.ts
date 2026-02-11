@@ -35,6 +35,7 @@ const useWalletRegistration = () => {
     {}
   );
   const isRegistering = useRef(false);
+  const registeredThisSession = useRef(false);
   const isLinking = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const createdSuiAddressRef = useRef<string | null>(null);
@@ -56,6 +57,7 @@ const useWalletRegistration = () => {
     if (effectiveRegisteredUsers[user.id]) return;
 
     isRegistering.current = true;
+    registeredThisSession.current = true;
     onboarding.getState().setStep('creating-wallets');
 
     try {
@@ -179,10 +181,10 @@ const useWalletRegistration = () => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: linkWallets closes over deps already listed — React Compiler ensures stable reference
   useEffect(() => {
     if (!mounted) return;
-    if (isRegistering.current) return;
 
-    // Don't auto-link if the user is at the funding step — let FundingStep trigger it via retryLink
-    if (onboarding.getState().step === 'funding') return;
+    // Block auto-linking for users who went through registration this session.
+    // They must link via retryLink from the funding step instead.
+    if (registeredThisSession.current) return;
 
     if (
       ready &&
