@@ -127,7 +127,7 @@ const useWalletRegistration = () => {
   const linkWallets = async (retryCount = 0) => {
     if (!user?.id || isLinking.current) return;
     if (effectiveLinkedUsers[user.id]) return;
-    if (!hasSuiWallet || !hasSolanaWallet) return;
+    if (!(hasSuiWallet && hasSolanaWallet)) return;
 
     isLinking.current = true;
 

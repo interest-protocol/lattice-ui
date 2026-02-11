@@ -111,9 +111,9 @@ export async function POST(request: NextRequest) {
       requestId,
       requestInitialSharedVersion,
     });
-  } catch (error: unknown) {
-    if (error instanceof WalletNotFoundError)
-      return errorResponse(error, error.message, 404);
-    return errorResponse(error, 'Failed to create request');
+  } catch (caught: unknown) {
+    if (caught instanceof WalletNotFoundError)
+      return errorResponse(caught, caught.message, 404);
+    return errorResponse(caught, 'Failed to create request');
   }
 }

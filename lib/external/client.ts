@@ -5,5 +5,5 @@ export interface PriceQuote {
   price: number;
 }
 
-export const fetchCoinPrices = (coins: ReadonlyArray<string>) =>
-  post<ReadonlyArray<PriceQuote>>('/api/external/prices', { coins });
+export const fetchCoinPrices = (coins: readonly string[]) =>
+  post<readonly PriceQuote[]>('/api/external/prices', { coins });

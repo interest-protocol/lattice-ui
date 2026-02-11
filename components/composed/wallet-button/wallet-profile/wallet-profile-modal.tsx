@@ -30,13 +30,13 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
     <div className="flex flex-col gap-1 max-h-[70vh] overflow-y-auto">
       <div className="flex items-center justify-between px-1 py-2">
         <span className="font-mono text-sm">{displayAddress}</span>
-        {fullAddress && (
+        {fullAddress ? (
           <CopyButton
             text={fullAddress}
             className="hover:text-accent"
             ariaLabel="Copy address"
           />
-        )}
+        ) : null}
       </div>
       <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
       <ExplorerSection

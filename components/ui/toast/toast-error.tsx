@@ -20,7 +20,7 @@ const ToastError: FC<ToastProps> = ({ action, message }) => (
       </div>
       <div>
         <p className="text-text">{action} failed!</p>
-        {message && <p className="text-text-secondary">{message}</p>}
+        {message ? <p className="text-text-secondary">{message}</p> : null}
       </div>
     </div>
     <ToastTimer color="var(--color-toast-error)" />

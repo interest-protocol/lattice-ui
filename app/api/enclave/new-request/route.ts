@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const raw: NewRequestProofRaw = await response.json();
 
     return NextResponse.json(raw);
-  } catch (error: unknown) {
-    return errorResponse(error, 'Failed to fetch proof');
+  } catch (caught: unknown) {
+    return errorResponse(caught, 'Failed to fetch proof');
   }
 }

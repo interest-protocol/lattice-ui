@@ -1,5 +1,5 @@
 export interface TabsProps {
   tab: number;
-  tabs: ReadonlyArray<string>;
+  tabs: readonly string[];
   setTab: (tab: number) => void;
 }

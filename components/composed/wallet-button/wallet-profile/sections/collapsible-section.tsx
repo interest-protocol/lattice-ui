@@ -28,7 +28,7 @@ const CollapsibleSection: FC<CollapsibleSectionProps> = ({
       </motion.div>
     </button>
     <AnimatePresence>
-      {show && (
+      {show ? (
         <motion.div
           className="ml-6"
           style={{ originY: 0 }}
@@ -41,7 +41,7 @@ const CollapsibleSection: FC<CollapsibleSectionProps> = ({
         >
           {children}
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   </div>
 );

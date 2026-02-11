@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ digest: txResult.digest });
-  } catch (error: unknown) {
-    if (error instanceof WalletNotFoundError)
-      return errorResponse(error, error.message, 404);
-    return errorResponse(error, 'Failed to vote on mint request');
+  } catch (caught: unknown) {
+    if (caught instanceof WalletNotFoundError)
+      return errorResponse(caught, caught.message, 404);
+    return errorResponse(caught, 'Failed to vote on mint request');
   }
 }

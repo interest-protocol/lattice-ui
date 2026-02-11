@@ -34,7 +34,7 @@ const AssetRow: FC<{
 }> = ({ symbol, name, iconUrl, balance, decimals, isLoading }) => (
   <div className="p-4 bg-surface-light flex items-center rounded-xl hover:bg-surface-hover transition-colors duration-150 justify-between">
     <div className="flex items-center gap-4">
-      {iconUrl && (
+      {iconUrl ? (
         <Image
           src={iconUrl}
           alt={symbol}
@@ -42,7 +42,7 @@ const AssetRow: FC<{
           height={40}
           className="rounded-full object-cover ring-1 ring-surface-border"
         />
-      )}
+      ) : null}
       <div>
         <p className="text-text font-semibold mb-1">{symbol}</p>
         <p className="text-text-secondary text-sm">{name}</p>
@@ -137,7 +137,7 @@ const BalancesView: FC<{
       </div>
     )}
 
-    {solanaAddress && (
+    {solanaAddress ? (
       <div
         className="p-6 rounded-2xl border border-surface-border"
         style={{
@@ -177,7 +177,7 @@ const BalancesView: FC<{
           />
         </div>
       </div>
-    )}
+    ) : null}
   </div>
 );
 

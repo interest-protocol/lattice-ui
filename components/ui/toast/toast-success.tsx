@@ -20,7 +20,7 @@ const ToastContent: FC<ToastProps> = ({ action, message }) => (
     </div>
     <div>
       <p className="text-text">{action} Successfully!</p>
-      {message && <p className="text-text-secondary">{message}</p>}
+      {message ? <p className="text-text-secondary">{message}</p> : null}
     </div>
     <ToastTimer color="var(--color-toast-success)" />
   </div>

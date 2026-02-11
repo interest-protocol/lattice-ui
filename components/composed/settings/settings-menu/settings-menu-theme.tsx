@@ -34,7 +34,7 @@ const SettingsMenuTheme: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
         </motion.div>
       </button>
       <AnimatePresence>
-        {show && (
+        {show ? (
           <motion.div
             className="ml-6"
             style={{ originY: 0 }}
@@ -56,7 +56,7 @@ const SettingsMenuTheme: FC<SettingsMenusProps> = ({ show, toggleShow }) => {
               />
             ))}
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );

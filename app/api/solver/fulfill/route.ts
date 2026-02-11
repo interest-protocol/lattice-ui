@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: unknown) {
-    return errorResponse(error, 'Failed to fulfill request');
+  } catch (caught: unknown) {
+    return errorResponse(caught, 'Failed to fulfill request');
   }
 }

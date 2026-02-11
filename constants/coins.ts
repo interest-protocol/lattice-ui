@@ -12,7 +12,7 @@ export const REQUEST_DEADLINE_MS = 60 * 60 * 1000;
 export const BALANCE_POLL_INTERVAL_MS = 5000;
 export const BALANCE_POLL_MAX_ATTEMPTS = 24;
 
-export const COIN_TYPES: ReadonlyArray<string> = [SUI_TYPE_ARG, SOL_TYPE];
+export const COIN_TYPES: readonly string[] = [SUI_TYPE_ARG, SOL_TYPE];
 
 export const ASSET_METADATA: Record<string, AssetMetadata> = {
   [SUI_TYPE_ARG]: {

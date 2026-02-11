@@ -8,10 +8,10 @@ export interface InputFieldGenericProps {
 }
 
 export interface InputFieldAssetProps extends InputFieldGenericProps {
-  types: ReadonlyArray<string>;
+  types: readonly string[];
 }
 export interface InputFieldModalProps extends InputFieldGenericProps {
-  assetList: ReadonlyArray<AssetMetadata>;
+  assetList: readonly AssetMetadata[];
 }
 
 export interface InputFieldProps extends InputFieldAssetProps {

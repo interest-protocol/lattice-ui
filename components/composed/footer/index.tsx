@@ -8,7 +8,7 @@ import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { formatDollars } from '@/utils/money';
 
-const CHAINS: ReadonlyArray<ChainKey> = ['sui', 'solana'];
+const CHAINS: readonly ChainKey[] = ['sui', 'solana'];
 
 const Footer: FC = () => {
   const { getPrice, isLoading } = useTokenPrices();

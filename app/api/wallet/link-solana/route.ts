@@ -81,11 +81,11 @@ export async function POST(request: NextRequest) {
       suiAddress: suiWallet.address,
       solanaAddress: solanaWallet.address,
     });
-  } catch (error: unknown) {
-    if (error instanceof WalletNotFoundError)
-      return errorResponse(error, error.message, 404);
+  } catch (caught: unknown) {
+    if (caught instanceof WalletNotFoundError)
+      return errorResponse(caught, caught.message, 404);
 
-    const msg = error instanceof Error ? error.message : '';
+    const msg = caught instanceof Error ? caught.message : '';
     const isGasError =
       /GasBalanceTooLow|InsufficientGas|InsufficientCoinBalance|No valid gas coins/i.test(
         msg
@@ -97,6 +97,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return errorResponse(error, 'Failed to link Solana');
+    return errorResponse(caught, 'Failed to link Solana');
   }
 }

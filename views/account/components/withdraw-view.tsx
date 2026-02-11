@@ -73,7 +73,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
       });
       return;
     }
-    if (!recipient || !amount) {
+    if (!(recipient && amount)) {
       toasting.error({
         action: 'Withdraw',
         message: 'Please fill in all fields',
@@ -147,7 +147,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
             )
           }
         >
-          {selectedToken.iconUrl && (
+          {selectedToken.iconUrl ? (
             <Image
               src={selectedToken.iconUrl}
               alt={selectedToken.symbol}
@@ -155,7 +155,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
               height={24}
               className="rounded-full"
             />
-          )}
+          ) : null}
           <span className="text-text font-semibold text-sm flex-1 text-left">
             {selectedToken.symbol}
           </span>

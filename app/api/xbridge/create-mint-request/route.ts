@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
         : null;
 
     return NextResponse.json({ digest: txResult.digest, requestId, mintCapId });
-  } catch (error: unknown) {
-    if (error instanceof WalletNotFoundError)
-      return errorResponse(error, error.message, 404);
-    return errorResponse(error, 'Failed to create mint request');
+  } catch (caught: unknown) {
+    if (caught instanceof WalletNotFoundError)
+      return errorResponse(caught, caught.message, 404);
+    return errorResponse(caught, 'Failed to create mint request');
   }
 }

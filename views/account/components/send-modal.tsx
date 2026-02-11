@@ -64,7 +64,7 @@ const SendModal: FC = () => {
       toasting.error({ action: 'Send', message: 'Please connect your wallet' });
       return;
     }
-    if (!recipient || !amount) {
+    if (!(recipient && amount)) {
       toasting.error({ action: 'Send', message: 'Please fill in all fields' });
       return;
     }
@@ -165,7 +165,7 @@ const SendModal: FC = () => {
                 }}
                 onClick={() => setSelectedTokenIndex(index)}
               >
-                {token.iconUrl && (
+                {token.iconUrl ? (
                   <Image
                     src={token.iconUrl}
                     alt={token.symbol}
@@ -173,7 +173,7 @@ const SendModal: FC = () => {
                     height={20}
                     style={{ borderRadius: '50%' }}
                   />
-                )}
+                ) : null}
                 <span className="text-text font-semibold">{token.symbol}</span>
               </button>
             );

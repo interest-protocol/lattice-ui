@@ -41,7 +41,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-surface-dark text-white">
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-surface text-text">
           <div className="flex flex-col items-center max-w-[400px] text-center gap-6">
             <span className="text-5xl" role="img" aria-label="Error">
               &#x26A0;
@@ -72,7 +72,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </button>
               <button
                 type="button"
-                className="py-3 px-6 bg-transparent text-white text-sm font-semibold rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light"
+                className="py-3 px-6 bg-transparent text-text text-sm font-semibold rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light"
                 onClick={this.handleRefresh}
               >
                 Refresh Page

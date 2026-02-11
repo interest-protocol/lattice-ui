@@ -80,14 +80,14 @@ const WalletProfile: FC = () => {
           </span>
         </button>
         <AnimatePresence>
-          {isOpen && (
+          {isOpen ? (
             <WalletProfileDropdown
               close={() => setOpen(false)}
               displayAddress={displayAddress}
               fullAddress={fullAddress}
               onLogout={logout}
             />
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
       <button

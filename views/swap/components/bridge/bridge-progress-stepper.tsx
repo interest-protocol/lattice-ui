@@ -8,7 +8,7 @@ import type { BridgeStatus } from '@/hooks/domain/use-bridge';
 
 import type { BridgeProgressStepperProps } from './bridge.types';
 
-const BRIDGE_STEPS: ReadonlyArray<{ status: BridgeStatus; label: string }> = [
+const BRIDGE_STEPS: readonly { status: BridgeStatus; label: string }[] = [
   { status: 'depositing', label: 'Deposit' },
   { status: 'creating', label: 'Create' },
   { status: 'voting', label: 'Verify' },
@@ -57,7 +57,6 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
           {BRIDGE_STEPS.map((step, i) => {
             const isCompleted = isSuccess || activeIndex > i;
             const isActive = !isSuccess && activeIndex === i;
-            const isPending = !isSuccess && !isError && activeIndex < i;
             const isErrorStep = isError && activeIndex === -1 && i === 0;
 
             return (
@@ -106,9 +105,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                       <div
                         className="w-2.5 h-2.5 rounded-full"
                         style={{
-                          background: isPending
-                            ? 'var(--color-text-dimmed)'
-                            : 'var(--color-text-dimmed)',
+                          background: 'var(--color-text-dimmed)',
                         }}
                       />
                     </div>

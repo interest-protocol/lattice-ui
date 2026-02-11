@@ -6,7 +6,7 @@ import type { ChainConfig, ChainKey } from './chain.types';
 
 export type { ChainConfig, ChainKey } from './chain.types';
 
-export const CHAIN_KEYS: ReadonlyArray<ChainKey> = ['sui', 'solana'] as const;
+export const CHAIN_KEYS: readonly ChainKey[] = ['sui', 'solana'] as const;
 
 export const CHAIN_REGISTRY: Record<ChainKey, ChainConfig> = {
   sui: {

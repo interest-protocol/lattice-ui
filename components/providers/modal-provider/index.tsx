@@ -53,7 +53,7 @@ const ModalProvider: FC = () => {
 
   return (
     <AnimatePresence>
-      {content && (
+      {content ? (
         <motion.div
           className="inset-0 fixed z-[99] w-screen flex justify-center items-end md:items-center"
           style={{
@@ -102,7 +102,7 @@ const ModalProvider: FC = () => {
             </div>
           </motion.div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 };

@@ -17,7 +17,7 @@ const SettingsMenuItem: FC<SettingsMenuItemProps> = ({
   >
     <span>
       {title}
-      {tag && <small className="opacity-60"> ({tag})</small>}
+      {tag ? <small className="opacity-60"> ({tag})</small> : null}
     </span>
     <ToggleButton name={name} defaultValue={selected} onChange={onSelect} />
   </div>

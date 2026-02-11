@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         'Cache-Control': `s-maxage=${CACHE_TTL_SECONDS}, stale-while-revalidate`,
       },
     });
-  } catch (error: unknown) {
-    return errorResponse(error, 'Failed to fetch prices');
+  } catch (caught: unknown) {
+    return errorResponse(caught, 'Failed to fetch prices');
   }
 }

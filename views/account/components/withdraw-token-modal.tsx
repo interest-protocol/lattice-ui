@@ -45,7 +45,7 @@ const WithdrawTokenModal: FC<WithdrawTokenModalProps> = ({
               handleClose();
             }}
           >
-            {token.iconUrl && (
+            {token.iconUrl ? (
               <span className="flex overflow-hidden rounded-lg w-10 h-10 min-w-10 bg-surface-lighter items-center justify-center p-1.5">
                 <Image
                   alt={token.name}
@@ -55,7 +55,7 @@ const WithdrawTokenModal: FC<WithdrawTokenModalProps> = ({
                   height={28}
                 />
               </span>
-            )}
+            ) : null}
             <div className="flex flex-col gap-0.5 flex-1">
               <span className="text-text font-semibold text-sm">
                 {token.symbol}

@@ -8,7 +8,7 @@ export const Routes: Record<RoutesEnum, string> = {
   [RoutesEnum.Account]: '/account',
 };
 
-export const NAV_ITEMS: ReadonlyArray<RoutesEnum> = [
+export const NAV_ITEMS: readonly RoutesEnum[] = [
   RoutesEnum.Swap,
   RoutesEnum.Account,
 ];

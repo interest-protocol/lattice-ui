@@ -37,13 +37,13 @@ const WalletProfileDropdown: FC<
     >
       <div className="px-4 py-2 flex items-center justify-between">
         <span className="font-mono text-sm">{displayAddress}</span>
-        {fullAddress && (
+        {fullAddress ? (
           <CopyButton
             text={fullAddress}
             className="hover:text-accent"
             ariaLabel="Copy address"
           />
-        )}
+        ) : null}
       </div>
       <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
       <ExplorerSection

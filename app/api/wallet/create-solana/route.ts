@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       address: wallet.address,
       chainType: wallet.chain_type,
     });
-  } catch (error: unknown) {
-    return errorResponse(error, 'Failed to create wallet');
+  } catch (caught: unknown) {
+    return errorResponse(caught, 'Failed to create wallet');
   }
 }

@@ -29,7 +29,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
 
   if (isLoading || !metadata?.[type])
     return (
-      <div className="gap-2 text-white flex text-base overflow-hidden items-center justify-center">
+      <div className="gap-2 text-text flex text-base overflow-hidden items-center justify-center">
         <Skeleton width="2rem" height="2rem" />
         <Skeleton width="4rem" />
       </div>
@@ -64,11 +64,11 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   return (
     <button
       type="button"
-      className="gap-2 text-white flex text-base cursor-pointer overflow-hidden items-center justify-center bg-transparent border-none p-0"
+      className="gap-2 text-text flex text-base cursor-pointer overflow-hidden items-center justify-center bg-transparent border-none p-0"
       onClick={handleClick}
       aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
     >
-      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center">
+      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center ring-1 ring-surface-border">
         <Image
           className="object-contain"
           alt={metadata[type]?.symbol ?? ''}

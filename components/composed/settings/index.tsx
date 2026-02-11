@@ -23,11 +23,11 @@ const Settings: FC = () => {
         <span className="p-1 transition-all duration-300 lg:hidden">
           <BarsSVG maxWidth="1rem" maxHeight="1rem" width="100%" />
         </span>
-        <span className="p-2 sm:p-3 transition-all duration-300 hidden lg:inline-block hover:rotate-90 hover:text-white">
+        <span className="p-2 sm:p-3 transition-all duration-300 hidden lg:inline-block hover:rotate-90 hover:text-text">
           <CogSVG maxWidth="1.5rem" maxHeight="1.5rem" width="100%" />
         </span>
       </button>
-      <AnimatePresence>{show && <SettingsMenu />}</AnimatePresence>
+      <AnimatePresence>{show ? <SettingsMenu /> : null}</AnimatePresence>
     </div>
   );
 };

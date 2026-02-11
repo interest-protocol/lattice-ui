@@ -36,7 +36,7 @@ const HealthIndicator: FC = () => {
 
   return (
     <div className="fixed bottom-4 left-4 z-[1000] flex flex-col gap-2">
-      {expanded && (
+      {expanded ? (
         <div className="bg-surface-raised rounded-lg border border-surface-border p-3 flex flex-col gap-2 min-w-[180px]">
           <div className="flex items-center gap-2">
             <div
@@ -60,7 +60,7 @@ const HealthIndicator: FC = () => {
             </span>
           </div>
         </div>
-      )}
+      ) : null}
 
       <button
         type="button"

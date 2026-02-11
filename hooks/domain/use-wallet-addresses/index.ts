@@ -9,7 +9,7 @@ export interface WalletAddresses {
 }
 
 const findWalletAddress = (
-  linkedAccounts: Array<Record<string, unknown>> | undefined,
+  linkedAccounts: Record<string, unknown>[] | undefined,
   chainKey: ChainKey
 ): string | null => {
   const config = CHAIN_REGISTRY[chainKey];
@@ -39,7 +39,7 @@ export const useWalletAddresses = (): WalletAddresses => {
   const { user } = usePrivy();
 
   const accounts = user?.linkedAccounts as
-    | Array<Record<string, unknown>>
+    | Record<string, unknown>[]
     | undefined;
 
   const addresses = Object.fromEntries(

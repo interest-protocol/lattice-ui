@@ -16,7 +16,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y="4"
       width="32"
       height="32"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -29,7 +29,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="4"
       x2="13.33"
       y2="36"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -38,7 +38,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="4"
       x2="26.67"
       y2="36"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -49,7 +49,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="13.33"
       x2="36"
       y2="13.33"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -58,19 +58,19 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="26.67"
       x2="36"
       y2="26.67"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
     />
 
     {/* Center connection nodes (representing swap/exchange) */}
-    <circle cx="20" cy="20" r="3" fill="#0EA5E9" />
+    <circle cx="20" cy="20" r="3" fill="currentColor" />
 
     {/* Corner nodes */}
-    <circle cx="13.33" cy="13.33" r="2" fill="#0EA5E9" fillOpacity="0.6" />
-    <circle cx="26.67" cy="13.33" r="2" fill="#0EA5E9" fillOpacity="0.6" />
-    <circle cx="13.33" cy="26.67" r="2" fill="#0EA5E9" fillOpacity="0.6" />
-    <circle cx="26.67" cy="26.67" r="2" fill="#0EA5E9" fillOpacity="0.6" />
+    <circle cx="13.33" cy="13.33" r="2" fill="currentColor" fillOpacity="0.6" />
+    <circle cx="26.67" cy="13.33" r="2" fill="currentColor" fillOpacity="0.6" />
+    <circle cx="13.33" cy="26.67" r="2" fill="currentColor" fillOpacity="0.6" />
+    <circle cx="26.67" cy="26.67" r="2" fill="currentColor" fillOpacity="0.6" />
 
     {/* Diagonal connections from center (representing cross-chain flow) */}
     <line
@@ -78,7 +78,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="20"
       x2="13.33"
       y2="13.33"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.4"
@@ -88,7 +88,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="20"
       x2="26.67"
       y2="13.33"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.4"
@@ -98,7 +98,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="20"
       x2="13.33"
       y2="26.67"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.4"
@@ -108,7 +108,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       y1="20"
       x2="26.67"
       y2="26.67"
-      stroke="#0EA5E9"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       opacity="0.4"

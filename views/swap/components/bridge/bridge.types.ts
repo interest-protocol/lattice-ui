@@ -18,7 +18,7 @@ export interface BridgeRoute {
   label: string;
 }
 
-export const BRIDGE_ROUTES: ReadonlyArray<BridgeRoute> = [
+export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
   {
     key: 'sol-to-wsol',
     sourceChain: 'solana',
@@ -108,7 +108,7 @@ export interface BridgeToCardProps {
 }
 
 export interface BridgeRouteSelectorProps {
-  routes: ReadonlyArray<BridgeRoute>;
+  routes: readonly BridgeRoute[];
   selectedRoute: BridgeRoute;
   routeBalances: Record<string, bigint>;
   onSelect: (route: BridgeRoute) => void;

@@ -67,6 +67,7 @@
 
   /* Component: Scrollbar */
   --color-scrollbar-track: rgba(0, 0, 0, 0.47);
+  --color-scrollbar-track-hover: rgba(0, 0, 0, 0.2);
   --color-scrollbar-thumb: #888;
 
   /* Component: Warning/Error */
@@ -155,6 +156,7 @@
     --color-skeleton-highlight: #00000014;
 
     --color-scrollbar-track: rgba(0, 0, 0, 0.06);
+    --color-scrollbar-track-hover: rgba(0, 0, 0, 0.1);
     --color-scrollbar-thumb: #999;
 
     --color-warning-bg: #fef3c7;
@@ -201,7 +203,7 @@
 }
 
 ::-webkit-scrollbar-track:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-scrollbar-track-hover);
 }
 
 ::-webkit-scrollbar-thumb {

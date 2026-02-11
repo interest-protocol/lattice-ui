@@ -12,7 +12,7 @@ import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities';
 import { formatMoney } from '@/utils/money';
 
-const CHAINS: ReadonlyArray<ChainKey> = ['sui', 'solana'];
+const CHAINS: readonly ChainKey[] = ['sui', 'solana'];
 
 const GasBalances: FC = () => {
   const { authenticated } = usePrivy();

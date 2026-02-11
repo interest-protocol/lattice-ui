@@ -13,7 +13,12 @@ const Header: FC = () => (
   >
     <div className="flex items-center gap-2 sm:gap-4 md:gap-8">
       <div className="flex items-center gap-4">
-        <LogoSVG maxWidth="2rem" maxHeight="2rem" width="100%" />
+        <LogoSVG
+          maxWidth="2rem"
+          maxHeight="2rem"
+          width="100%"
+          className="text-accent"
+        />
         <h1 className="hidden md:block mx-auto text-text max-w-[20rem] text-xl text-center font-bold tracking-tight uppercase">
           Lattice
         </h1>
