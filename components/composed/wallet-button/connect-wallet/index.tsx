@@ -18,9 +18,7 @@ const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => (
     onClick={onConnect}
   >
     <WalletSVG maxWidth="1rem" maxHeight="1rem" width="100%" />
-    <span>
-      Connect <span className="hidden sm:inline">Wallet</span>
-    </span>
+    <span>Login</span>
   </button>
 );
 

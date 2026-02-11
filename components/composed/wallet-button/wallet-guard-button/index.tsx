@@ -19,7 +19,7 @@ const WalletGuardButton: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({
   if (!authenticated)
     return (
       <button type="button" {...props} onClick={login}>
-        Connect Wallet
+        Login
       </button>
     );
 
