@@ -5,6 +5,7 @@ import { SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { normalizeSuiCoinType } from '@/utils/sui';
 
 import type {
   UseBalancesOptions,
@@ -33,13 +34,14 @@ const useBalances = (options?: UseBalancesOptions): UseBalancesReturn => {
   } = useSolanaBalances(solanaAddress);
 
   const allBalances: Record<string, bigint> = {
-    [SUI_TYPE_ARG]: suiBalances.sui,
+    [normalizeSuiCoinType(SUI_TYPE_ARG)]: suiBalances.sui,
     [SOL_TYPE]: solanaBalances.sol,
-    [WSOL_SUI_TYPE]: suiBalances.wsol,
+    [normalizeSuiCoinType(WSOL_SUI_TYPE)]: suiBalances.wsol,
     [WSUI_SOLANA_MINT]: solanaBalances.wsui,
   };
 
-  const getBalance = (type: string): bigint => allBalances[type] ?? 0n;
+  const getBalance = (type: string): bigint =>
+    allBalances[normalizeSuiCoinType(type)] ?? allBalances[type] ?? 0n;
 
   return {
     suiAddress,

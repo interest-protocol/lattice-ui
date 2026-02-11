@@ -1,3 +1,5 @@
+import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+
 import type { ChainKey } from '@/constants/chains';
 import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
 
@@ -63,7 +65,7 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       symbol: 'SUI',
       iconUrl: '/sui-logo.svg',
       decimals: 9,
-      type: '0x2::sui::SUI',
+      type: SUI_TYPE_ARG,
     },
     destToken: {
       symbol: 'wSUI',
@@ -81,7 +83,7 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       symbol: 'wSUI',
       iconUrl: '/sui-logo.svg',
       decimals: 9,
-      type: '0x2::sui::SUI',
+      type: SUI_TYPE_ARG,
     },
     destToken: {
       symbol: 'SUI',

@@ -45,10 +45,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Fulfillment request failed' },
-        { status: response.status }
-      );
+      const upstream = await response.json().catch(() => null);
+      const message = upstream?.error ?? 'Fulfillment request failed';
+      return NextResponse.json({ error: message }, { status: response.status });
     }
 
     const json = await response.json();

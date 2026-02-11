@@ -9,7 +9,7 @@ import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
 import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
 import type { SwapResult } from '@/hooks/domain/use-swap';
 import { useModal } from '@/hooks/store/use-modal';
-import { formatUnits } from '@/lib/bigint-utils';
+import { toSignificant } from '@/lib/bigint-utils';
 import { Token } from '@/lib/entities';
 
 interface SwapSuccessModalProps {
@@ -25,9 +25,9 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
   const fromToken = Token.fromType(result.fromType);
   const toToken = Token.fromType(result.toType);
 
-  const fromDisplay = formatUnits(result.fromAmount, fromToken.decimals);
-  const toDisplay = formatUnits(result.toAmount, toToken.decimals);
-  const feeDisplay = formatUnits(result.feeAmount, toToken.decimals);
+  const fromDisplay = toSignificant(result.fromAmount, fromToken.decimals, 6);
+  const toDisplay = toSignificant(result.toAmount, toToken.decimals, 6);
+  const feeDisplay = toSignificant(result.feeAmount, toToken.decimals, 4);
 
   const getSourceTxUrl = () => {
     if (result.sourceChainKey === 'sui') {
@@ -94,15 +94,9 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           <span className="text-text-secondary text-sm">
             Sent on {sourceChainName}
           </span>
-          <a
-            href={sourceTxUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-accent text-sm font-semibold hover:opacity-70 transition-opacity"
-          >
+          <span className="text-text font-semibold text-sm">
             {fromDisplay} {fromToken.symbol}
-            <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
-          </a>
+          </span>
         </div>
 
         {/* Divider */}
@@ -116,21 +110,9 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           <span className="text-text-secondary text-sm">
             Received on {destChainName}
           </span>
-          {destTxUrl ? (
-            <a
-              href={destTxUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-accent text-sm font-semibold hover:opacity-70 transition-opacity"
-            >
-              {toDisplay} {toToken.symbol}
-              <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
-            </a>
-          ) : (
-            <span className="text-text font-semibold text-sm">
-              ~{toDisplay} {toToken.symbol}
-            </span>
-          )}
+          <span className="text-text font-semibold text-sm">
+            ~{toDisplay} {toToken.symbol}
+          </span>
         </div>
 
         {/* Divider */}
@@ -157,6 +139,44 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">Time</span>
           <span className="text-text-muted text-sm">{elapsedDisplay}</span>
+        </div>
+
+        {/* Divider */}
+        <div
+          className="h-px w-full"
+          style={{ background: 'var(--color-surface-border)' }}
+        />
+
+        {/* Explorer Links */}
+        <div className="flex items-center gap-3">
+          <a
+            href={sourceTxUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-accent text-xs px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+            style={{
+              border: '1px solid var(--color-accent-border)',
+              background: 'var(--color-accent-wash)',
+            }}
+          >
+            Deposit tx
+            <ExternalLinkSVG maxWidth="0.875rem" maxHeight="0.875rem" />
+          </a>
+          {destTxUrl && (
+            <a
+              href={destTxUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-accent text-xs px-3 py-1.5 rounded-full hover:opacity-70 transition-opacity"
+              style={{
+                border: '1px solid var(--color-accent-border)',
+                background: 'var(--color-accent-wash)',
+              }}
+            >
+              Receive tx
+              <ExternalLinkSVG maxWidth="0.875rem" maxHeight="0.875rem" />
+            </a>
+          )}
         </div>
       </div>
 

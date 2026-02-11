@@ -13,6 +13,7 @@ import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
 import { extractErrorMessage, formatMoney } from '@/utils';
+import { coinTypeEquals } from '@/utils/sui';
 
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
@@ -50,7 +51,7 @@ const SendModal: FC = () => {
   };
 
   const isNativeToken = (type: string, chain: ChainKey): boolean =>
-    chain === 'sui' ? type === SUI_TYPE_ARG : type === SOL_TYPE;
+    chain === 'sui' ? coinTypeEquals(type, SUI_TYPE_ARG) : type === SOL_TYPE;
 
   const handleSend = async () => {
     if (!authenticated) {

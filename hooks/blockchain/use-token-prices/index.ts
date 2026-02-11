@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { SOL_TYPE } from '@/constants/coins';
 import { fetchCoinPrices } from '@/lib/external/client';
+import { normalizeSuiCoinType } from '@/utils/sui';
 
 interface TokenPrices {
   [SUI_TYPE_ARG]: number | undefined;
@@ -29,6 +30,7 @@ const useTokenPrices = () => {
   });
 
   const getPrice = (tokenType: string): number | undefined =>
+    data?.[normalizeSuiCoinType(tokenType) as keyof TokenPrices] ??
     data?.[tokenType as keyof TokenPrices];
 
   return { prices: data, getPrice, isLoading, error };

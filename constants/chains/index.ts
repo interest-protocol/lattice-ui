@@ -1,6 +1,7 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
+import { coinTypeEquals } from '@/utils/sui';
 
 import type { ChainConfig, ChainKey } from './chain.types';
 
@@ -48,4 +49,4 @@ export const getChainConfig = (key: ChainKey): ChainConfig =>
   CHAIN_REGISTRY[key];
 
 export const chainKeyFromTokenType = (tokenType: string): ChainKey =>
-  tokenType === SUI_TYPE_ARG ? 'sui' : 'solana';
+  coinTypeEquals(tokenType, SUI_TYPE_ARG) ? 'sui' : 'solana';

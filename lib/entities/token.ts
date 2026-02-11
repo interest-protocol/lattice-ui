@@ -3,6 +3,7 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import type { ChainKey } from '@/constants/chains';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import type { AssetMetadata } from '@/interface';
+import { coinTypeEquals, normalizeSuiCoinType } from '@/utils/sui';
 
 interface TokenParams {
   chainId: ChainKey;
@@ -31,11 +32,11 @@ export class Token {
   }
 
   equals(other: Token): boolean {
-    return this.chainId === other.chainId && this.type === other.type;
+    return this.chainId === other.chainId && coinTypeEquals(this.type, other.type);
   }
 
   isSui(): boolean {
-    return this.type === SUI_TYPE_ARG;
+    return coinTypeEquals(this.type, SUI_TYPE_ARG);
   }
 
   isSol(): boolean {
@@ -71,12 +72,12 @@ export class Token {
   });
 
   private static readonly BY_TYPE: Record<string, Token> = {
-    [SUI_TYPE_ARG]: Token.SUI,
+    [normalizeSuiCoinType(SUI_TYPE_ARG)]: Token.SUI,
     [SOL_TYPE]: Token.SOL,
   };
 
   static fromType(type: string): Token {
-    const token = Token.BY_TYPE[type];
+    const token = Token.BY_TYPE[normalizeSuiCoinType(type)];
     if (!token) {
       throw new Error(`Unknown token type: ${type}`);
     }
