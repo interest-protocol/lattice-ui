@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
 import { WalletSVG } from '@/components/ui/icons';
@@ -14,17 +14,23 @@ const MIN_GAS_RAW = parseUnits(String(MIN_GAS), CHAIN_REGISTRY.sui.decimals);
 
 const FundingStep: FC = () => {
   const suiAddress = useOnboarding((s) => s.suiAddress);
-  const retryLink = useOnboarding((s) => s.retryLink);
+  const linkWallets = useOnboarding((s) => s.linkWallets);
   const [checking, setChecking] = useState(false);
 
-  const { mutate } = useSuiBalances(suiAddress);
+  const { balances, mutate } = useSuiBalances(suiAddress);
+
+  useEffect(() => {
+    if (balances.sui >= MIN_GAS_RAW && !checking) {
+      linkWallets();
+    }
+  }, [balances.sui, linkWallets, checking]);
 
   const handleCheckBalance = async () => {
     setChecking(true);
     try {
       const result = await mutate();
       if (result.sui >= MIN_GAS_RAW) {
-        retryLink?.();
+        linkWallets();
       }
     } finally {
       setChecking(false);

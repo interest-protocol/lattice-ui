@@ -17,6 +17,7 @@ import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { WALLETS_LINKED_KEY } from '@/constants/storage-keys';
 import { TOAST_DURATION } from '@/constants/toast';
+import { useOnboarding } from '@/hooks/store/use-onboarding';
 import useThemeColors from '@/hooks/ui/use-theme-colors';
 import OnboardingView from '@/views/onboarding';
 
@@ -24,6 +25,7 @@ type LinkedUsers = Record<string, boolean>;
 
 const OnboardingGate = ({ children }: { children: ReactNode }) => {
   const { user, authenticated, ready } = usePrivy();
+  const step = useOnboarding((s) => s.step);
   const [mounted, setMounted] = useState(false);
   const [linkedUsers] = useLocalStorage<LinkedUsers>(WALLETS_LINKED_KEY, {});
 
@@ -38,7 +40,9 @@ const OnboardingGate = ({ children }: { children: ReactNode }) => {
   if (!authenticated || !user?.id) return <>{children}</>;
 
   // Already linked — show normal app
-  if (linkedUsers[user.id]) return <>{children}</>;
+  // step === 'complete' provides immediate same-tab reactivity since
+  // direct localStorage.setItem doesn't trigger useLocalStorage.
+  if (linkedUsers[user.id] || step === 'complete') return <>{children}</>;
 
   // Onboarding in progress
   return <OnboardingView />;

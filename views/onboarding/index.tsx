@@ -15,7 +15,7 @@ const stepTransition = { duration: 0.25, ease: 'easeOut' as const };
 const OnboardingView: FC = () => {
   const step = useOnboarding((s) => s.step);
   const error = useOnboarding((s) => s.error);
-  const retryLink = useOnboarding((s) => s.retryLink);
+  const retry = useOnboarding((s) => s.retry);
 
   const hasError = Boolean(error);
 
@@ -124,7 +124,7 @@ const OnboardingView: FC = () => {
                 <button
                   type="button"
                   className="px-6 py-2 bg-accent text-white text-sm font-semibold rounded-xl border-none cursor-pointer hover:bg-accent-hover"
-                  onClick={() => retryLink?.()}
+                  onClick={retry}
                 >
                   Try Again
                 </button>
