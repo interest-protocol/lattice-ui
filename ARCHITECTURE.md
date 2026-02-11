@@ -58,6 +58,7 @@ lattice-ui/
 │
 ├── components/                 # React components (4 layers)
 │   ├── composed/               # Feature-rich composed components
+│   │   ├── footer/             # App footer
 │   │   ├── header/             # App header + navbar
 │   │   ├── health-indicator/   # Service health display
 │   │   ├── input-field/        # Token input with asset selector
@@ -550,7 +551,7 @@ Chain-specific configuration is centralized in `CHAIN_REGISTRY`, and runtime beh
 ```typescript
 // constants/chains/index.ts
 export const CHAIN_REGISTRY: Record<ChainKey, ChainConfig> = {
-  sui: { displayName: 'Sui', color: '#4DA2FF', alphaMax: 0.1, minGas: 0.005, ... },
+  sui: { displayName: 'Sui', color: '#4DA2FF', alphaMax: 0.1, minGas: 0.01, ... },
   solana: { displayName: 'Solana', color: '#9945FF', alphaMax: 0.001, minGas: 0.00001, ... },
 };
 
@@ -620,7 +621,7 @@ Every API route validates request parameters:
 
 ```typescript
 // lib/api/validate-params.ts
-const validated = validateParams(schema, requestBody);
+const { data, error } = validateBody(requestBody, schema);
 // Returns 400 with error details if validation fails
 ```
 
@@ -639,4 +640,4 @@ All secrets and service URLs are externalized via environment variables:
 
 ---
 
-*Last updated: 2026-02-10*
+*Last updated: 2026-02-11*

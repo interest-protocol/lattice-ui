@@ -30,6 +30,7 @@
 - **Chain config**: Use `CHAIN_REGISTRY` from `@/constants/chains` for chain-specific values
 - **API routes**: All in `app/api/`, validate with Zod, proxy to backend services
 - **Toast notifications**: Use `toasting.success/error/loading` factory from `@/components/ui/toast`
+- **Keyboard a11y**: Use `handleKeyDown` utility from `@/utils/handle-key-down` for non-button interactive elements
 - **Dynamic imports**: Wallet/web3 components must use `dynamic(() => ..., { ssr: false })`
 
 ## Gotchas

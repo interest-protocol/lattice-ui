@@ -91,7 +91,7 @@ app/api/{service}/{action}/
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { validateParams } from '@/lib/api/validate-params';
+import { validateBody } from '@/lib/api/validate-params';
 
 const schema = z.object({
   // Request validation
@@ -100,8 +100,9 @@ const schema = z.object({
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-    const params = validateParams(schema, body);
-    // Implementation
+    const { data, error } = validateBody(body, schema);
+    if (error) return error;
+    // Implementation using `data`
     return NextResponse.json({ data: result });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

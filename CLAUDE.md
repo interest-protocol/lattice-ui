@@ -4,7 +4,7 @@
 
 **Winter Walrus** is a DeFi application that provides cross-chain swap functionality between SUI and SOL tokens. Users can seamlessly exchange assets across the Sui and Solana blockchains.
 
-- **Tech Stack**: Next.js 16 (App Router + Turbopack), TypeScript 5.9 (strict), React 19, Framer Motion (`motion/react`), Tailwind CSS v4
+- **Tech Stack**: Next.js 16 (App Router + Turbopack), TypeScript 5.9 (strict), React 19 + React Compiler, Framer Motion (`motion/react`), Tailwind CSS v4
 - **Blockchains**: Sui Network & Solana
 - **Wallet**: Privy integration for wallet connection
 - **State**: Zustand for global state, TanStack Query v5 for server state, React Hook Form for forms
@@ -31,15 +31,15 @@ lattice-ui/
 │       └── external/           # External API proxy (prices)
 │
 ├── components/                 # React components (4 layers)
-│   ├── composed/               # Feature-rich components (header, input-field, settings, wallet-button)
+│   ├── composed/               # Feature-rich components (header, footer, health-indicator, input-field, settings, wallet-button)
 │   ├── layout/                 # Page structure (layout, background)
-│   ├── providers/              # Context/state providers (privy, error-boundary, modal, app-state)
+│   ├── providers/              # Context/state providers (privy, error-boundary, modal, app-state, wallet-registration)
 │   └── ui/                     # Atomic primitives (icons, tabs, toast, toggle, tooltip, motion)
 │
 ├── hooks/                      # Custom React hooks (4 layers)
 │   ├── store/                  # Zustand stores (use-app-state, use-modal, use-network)
 │   ├── blockchain/             # Chain data fetching (use-sui-*, use-solana-*, use-token-prices)
-│   ├── domain/                 # Business logic (use-swap, use-bridge, use-wallet-*, use-health)
+│   ├── domain/                 # Business logic (use-swap, use-bridge, use-wallet-*, use-health, use-metadata, use-get-explorer-url)
 │   └── ui/                     # Component utilities (use-event-listener, use-click-outside, etc.)
 │
 ├── lib/                        # Core business logic
@@ -69,8 +69,10 @@ lattice-ui/
 │   ├── chains/                 # Chain registry (CHAIN_REGISTRY)
 │   ├── routes.ts               # Route definitions
 │   ├── storage-keys.ts         # localStorage keys
+│   ├── network.ts              # Network enum (mainnet)
 │   ├── rpc.ts                  # RPC provider config
 │   ├── explorer.ts             # Block explorer URLs
+│   ├── toast.tsx               # Toast duration constant
 │   └── bridged-tokens.ts       # XBridge token metadata
 │
 ├── utils/                      # Pure utility functions
@@ -79,13 +81,69 @@ lattice-ui/
 │   ├── number.ts               # Input parsing
 │   ├── format-address.ts       # Address truncation
 │   ├── extract-error-message.ts # Error message extraction
-│   └── gas-validation.ts       # Gas + alpha limit validation
+│   ├── gas-validation.ts       # Gas + alpha limit validation
+│   └── handle-key-down.ts      # Keyboard event handler for a11y
 │
 ├── interface/                  # Shared TypeScript types
 │   └── index.ts                # BigNumberish, AssetMetadata, Node, SdkPool
 │
 └── public/                     # Static assets
 ```
+
+---
+
+## Rules of React (Compiler-Critical)
+
+This project has the **React Compiler** enabled. The compiler auto-memoizes components, hooks, and expressions — but **only if you follow the Rules of React**. Violations silently disable optimizations for the affected code.
+
+### 1. Components and Hooks Must Be Pure
+
+- **Idempotent**: Same inputs (props, state, context) → same JSX output. No side effects during render.
+- **No mutation during render**: Never mutate props, state, or values read during render. Derive new values instead.
+- **Locally sound**: Only mutate values created within the render scope (local variables, arrays, objects).
+
+```typescript
+// BAD — mutates during render (compiler skips optimization)
+const items = props.items;
+items.sort((a, b) => a.name.localeCompare(b.name)); // Mutates input!
+
+// GOOD — creates a new array
+const items = props.items.toSorted((a, b) => a.name.localeCompare(b.name));
+```
+
+### 2. Never Call Components as Functions
+
+```typescript
+// BAD — destroys React identity, breaks hooks
+const output = MyComponent({ value });
+
+// GOOD — always use JSX
+<MyComponent value={value} />
+```
+
+### 3. Never Pass Hooks Around as Values
+
+```typescript
+// BAD — compiler cannot verify Rules of Hooks
+const useHook = condition ? useA : useB;
+
+// GOOD — call hooks unconditionally at the top level
+const a = useA();
+const b = useB();
+const value = condition ? a : b;
+```
+
+### 4. Rules of Hooks
+
+- Call hooks at the **top level** of a component or custom hook only.
+- Never inside conditions, loops, early returns, or nested functions.
+
+### 5. What Breaks the React Compiler
+
+The compiler will silently bail out (skip memoization) for code that:
+- Mutates values after creation in a way the compiler cannot track
+- Reads and writes refs during render (refs in event handlers are fine)
+- Uses non-standard patterns like `arguments`, `eval`, dynamic property access on components
 
 ---
 
@@ -123,39 +181,36 @@ export const useSwap = () => {
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const executeSwap = useCallback(async () => {
+  const executeSwap = async () => {
     setLoading(true);
     try {
       // swap logic
     } finally {
       setLoading(false);
     }
-  }, [amount]);
+  };
 
   return { amount, setAmount, loading, executeSwap };
 };
 ```
 
-### 3. Memoization Strategy
+### 3. Memoization (Handled by React Compiler)
 
-Use memoization judiciously - only when needed:
+The React Compiler auto-memoizes components, JSX, hooks, and expressions. **Do NOT add manual memoization to new code:**
 
 ```typescript
-// Memoize expensive calculations
-const formattedBalance = useMemo(() =>
-  formatBalance(balance, decimals),
-  [balance, decimals]
-);
+// DO NOT ADD to new code — compiler handles this automatically
+useMemo(...)       // ← not needed
+useCallback(...)   // ← not needed
+React.memo(...)    // ← not needed
 
-// Memoize callbacks passed to children
-const handleSelect = useCallback((coin: Coin) => {
-  setSelectedCoin(coin);
-}, []);
-
-// DON'T memoize simple values
-// const isDisabled = useMemo(() => !amount, [amount]); // Overkill!
-const isDisabled = !amount; // Fine
+// GOOD — just write plain code, the compiler optimizes it
+const formattedBalance = formatBalance(balance, decimals);
+const handleSelect = (coin: Coin) => { setSelectedCoin(coin); };
+const isDisabled = !amount;
 ```
+
+> Existing `useMemo`/`useCallback` in the codebase are legacy and being removed incrementally. Do not add new ones.
 
 ### 4. Event Handler Naming
 
@@ -193,9 +248,124 @@ const Component = () => {
 
 ---
 
+## When to Use useEffect (and When Not To)
+
+### Do NOT use useEffect for:
+
+| Scenario | Use instead |
+|----------|-------------|
+| Derived/computed values | Plain variables or function calls during render |
+| Transforming data from a query | Compute inline: `const filtered = data?.filter(...)` |
+| Resetting state when a prop changes | Use a `key` on the component |
+| Event-driven logic (click, submit) | Event handlers |
+| Initializing global state | Module-level code or lazy state initializer |
+
+### useEffect IS correct for:
+
+- **External system synchronization**: DOM manipulation, subscriptions, WebSocket, timers, IntersectionObserver
+- **Browser API access**: viewport dimensions, matchMedia, localStorage listeners
+- **Third-party library setup/teardown**: chart libraries, analytics, SDK initialization
+
+### Anti-pattern: Effect Chains
+
+```typescript
+// BAD — cascading effects (state A triggers effect that sets state B, which triggers another effect)
+useEffect(() => { setB(computeB(a)); }, [a]);
+useEffect(() => { setC(computeC(b)); }, [b]);
+
+// GOOD — derive directly
+const b = computeB(a);
+const c = computeC(b);
+```
+
+---
+
+## React 19 Features
+
+This project uses React 19 with the React Compiler. Key features to leverage:
+
+### React Compiler (Auto-Memoization)
+
+Enabled via `reactCompiler: true` in `next.config.js`. Automatically memoizes components, hooks, and expressions. No manual `useMemo`/`useCallback`/`React.memo` needed.
+
+### `ref` as a Prop (No `forwardRef`)
+
+```typescript
+// React 19 — ref is a regular prop
+const Input = ({ ref, ...props }: { ref?: React.Ref<HTMLInputElement> }) => (
+  <input ref={ref} {...props} />
+);
+
+// forwardRef is no longer needed
+```
+
+### Ref Cleanup Functions
+
+```typescript
+// React 19 — return a cleanup from ref callback
+<div ref={(node) => {
+  // setup
+  return () => { /* cleanup */ };
+}} />
+```
+
+### `use()` Hook
+
+```typescript
+import { use } from 'react';
+
+// Read a context (can be called conditionally, unlike useContext)
+const theme = use(ThemeContext);
+
+// Read a promise (suspends until resolved)
+const data = use(fetchPromise);
+```
+
+### Document Metadata in Components
+
+```typescript
+// React 19 — title/meta/link in any component, hoisted to <head>
+const Page = () => (
+  <>
+    <title>My Page</title>
+    <meta name="description" content="..." />
+    <Content />
+  </>
+);
+```
+
+---
+
 ## Next.js 16 Patterns (App Router)
 
-### 1. Client Components
+### 1. Server vs Client Components
+
+| Need | Component type |
+|------|---------------|
+| Data fetching, DB access, secrets | Server Component (default) |
+| Hooks (`useState`, `useEffect`, etc.) | Client Component (`'use client'`) |
+| Event handlers (onClick, onChange) | Client Component |
+| Browser APIs (localStorage, window) | Client Component |
+| Static UI, layout, text | Server Component |
+
+**`'use client'` boundary rules:**
+- The directive marks the **entry point** into client-side code. All imports from that file also become client code.
+- Push `'use client'` as far **down** the tree as possible to keep the server-rendered portion large.
+- Server Components can render Client Components as children (composition pattern).
+
+```typescript
+// app/page.tsx — Server Component (no directive)
+import { ClientWidget } from '@/components/client-widget';
+
+const Page = () => (
+  <main>
+    <h1>Server-rendered heading</h1>
+    <ClientWidget /> {/* Interactive island */}
+  </main>
+);
+```
+
+### 2. Client Components
 
 Use `'use client'` directive for components with hooks, event handlers, or browser APIs:
 
@@ -210,7 +380,7 @@ const InteractiveComponent = () => {
 };
 ```
 
-### 2. Dynamic Imports (SSR Disabled)
+### 3. Dynamic Imports (SSR Disabled)
 
 Disable SSR for wallet/web3 components:
 
@@ -224,7 +394,7 @@ const PrivyProviderWrapper = dynamic(
 );
 ```
 
-### 3. Path Aliases
+### 4. Path Aliases
 
 Use `@/` prefix (configured in tsconfig.json):
 
@@ -237,7 +407,7 @@ import { ACCENT } from '@/constants/colors';
 import { useAppState } from '../../../hooks/store/use-app-state';
 ```
 
-### 4. Page Component Pattern
+### 5. Page Component Pattern
 
 Keep pages thin, delegate to views:
 
@@ -252,7 +422,7 @@ export default HomePage;
 
 Layout wrapping is handled by `app/layout.tsx` (not in page components).
 
-### 5. Metadata (instead of next/head)
+### 6. Metadata (instead of next/head)
 
 ```typescript
 // app/layout.tsx
@@ -264,7 +434,7 @@ export const metadata: Metadata = {
 };
 ```
 
-### 6. API Route Handlers
+### 7. API Route Handlers
 
 All API routes use Route Handlers with Zod validation:
 
@@ -273,15 +443,16 @@ All API routes use Route Handlers with Zod validation:
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { validateParams } from '@/lib/api/validate-params';
+import { validateBody } from '@/lib/api/validate-params';
 
 const schema = z.object({ /* request shape */ });
 
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-    const params = validateParams(schema, body);
-    const result = await backendService(params);
+    const { data, error } = validateBody(body, schema);
+    if (error) return error;
+    const result = await backendService(data);
     return NextResponse.json({ data: result });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -323,7 +494,7 @@ export const useAppState = create<AppState>((set) => ({
 
 ```typescript
 // REQUIRED: Use useShallow selectors (prevents unnecessary re-renders)
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react/shallow';
 
 const { update, loadingCoins } = useAppState(
   useShallow((s) => ({ update: s.update, loadingCoins: s.loadingCoins }))
@@ -360,6 +531,16 @@ queryClient.invalidateQueries({ queryKey: ['suiBalances'] });
 ```
 
 `QueryClientProvider` is set up in `app/providers.tsx`.
+
+### State Structure Principles
+
+When designing component or store state, follow these principles:
+
+1. **Group related state**: If two state variables always change together, merge them into one object.
+2. **Avoid contradictions**: Don't have `isLoading` and `isError` as separate booleans — use a `status` union (`'idle' | 'loading' | 'error' | 'success'`).
+3. **Avoid redundant state**: If you can compute a value from props or other state during render, don't store it in state.
+4. **Avoid duplication**: Don't store the same data in multiple state variables.
+5. **Avoid deeply nested state**: Prefer flat structures — deeply nested state is hard to update immutably.
 
 ---
 
@@ -438,7 +619,7 @@ import { CHAIN_REGISTRY } from '@/constants/chains';
 
 CHAIN_REGISTRY.sui.displayName   // 'Sui'
 CHAIN_REGISTRY.sui.alphaMax      // 0.1 (SUI transaction cap)
-CHAIN_REGISTRY.sui.minGas        // 0.005
+CHAIN_REGISTRY.sui.minGas        // 0.01
 CHAIN_REGISTRY.solana.alphaMax   // 0.001 (SOL transaction cap)
 ```
 
@@ -542,6 +723,12 @@ Tailwind v4 is configured via CSS, not `tailwind.config.js`. Custom theme tokens
 
   --color-accent: #a78bfa;
   --color-accent-hover: #c4b5fd;
+  --color-accent-80: #a78bfa80;
+  --color-accent-4d: #a78bfa4d;
+  --color-accent-1a: #a78bfa1a;
+  --color-accent-2a: #a78bfa2a;
+  --color-accent-33: #a78bfa33;
+
   --color-surface: #0c0f1d;
   --color-surface-light: #ffffff0d;
   --color-surface-lighter: #ffffff1a;
@@ -550,6 +737,7 @@ Tailwind v4 is configured via CSS, not `tailwind.config.js`. Custom theme tokens
   --color-text: #ffffff;
   --color-text-muted: #ffffff80;
   --color-text-dimmed: #ffffff40;
+  --color-text-dim: #ffffff14;
 }
 ```
 
@@ -848,6 +1036,43 @@ try {
 }
 ```
 
+### 9. Mutating Props/State During Render
+
+```typescript
+// BAD — mutates the input array
+const sorted = items.sort((a, b) => a.value - b.value);
+
+// GOOD — use non-mutating methods
+const sorted = items.toSorted((a, b) => a.value - b.value);
+// or: const sorted = [...items].sort((a, b) => a.value - b.value);
+```
+
+### 10. Manual Memoization (useMemo/useCallback/React.memo)
+
+```typescript
+// BAD — React Compiler handles this automatically
+const value = useMemo(() => compute(a, b), [a, b]);
+const handler = useCallback(() => doThing(x), [x]);
+const MemoComp = React.memo(MyComponent);
+
+// GOOD — just write plain code
+const value = compute(a, b);
+const handler = () => doThing(x);
+```
+
+### 11. useEffect for Derived State
+
+```typescript
+// BAD — unnecessary effect + extra render cycle
+const [fullName, setFullName] = useState('');
+useEffect(() => {
+  setFullName(`${firstName} ${lastName}`);
+}, [firstName, lastName]);
+
+// GOOD — compute during render
+const fullName = `${firstName} ${lastName}`;
+```
+
 ---
 
 ## Accessibility Checklist
@@ -888,11 +1113,13 @@ Import from `@/components/ui/icons`:
 ```typescript
 import {
   LogoSVG, SwapSVG, WalletSVG, CogSVG, CopySVG,
-  CheckSVG, ErrorSVG, InfoSVG, SearchSVG,
+  CheckSVG, CheckboxSVG, ErrorSVG, InfoSVG, SearchSVG,
   CaretDownSVG, CaretUpSVG, ChevronDownSVG, ChevronRightSVG,
   ExternalLinkSVG, LogoutSVG, GridSVG, BarsSVG,
+  // DeFi protocol icons
+  BluefinSVG, BucketSVG, NoodlesSVG, ScallopSVG, WalSVG,
   // Pizza indicators (balance quick-select)
-  PizzaPart25SVG, PizzaPart50SVG, PizzaPart100SVG,
+  PizzaPart25PercentSVG, PizzaPart50PercentSVG, PizzaPart100PercentSVG,
 } from '@/components/ui/icons';
 ```
 
@@ -901,20 +1128,19 @@ import {
 ## Development Commands
 
 ```bash
-pnpm dev          # Development server (port 3000, Turbopack)
+pnpm dev          # Development server (port 3000, Turbopack enabled by default in Next.js 16)
 pnpm build        # Production build
 pnpm start        # Start production server
 pnpm lint         # Biome check
 pnpm lint:fix     # Biome auto-fix
 pnpm format       # Biome format
+pnpm typecheck    # TypeScript type check (tsc --noEmit)
+pnpm verify       # Runs lint + typecheck
 pnpm test         # Vitest watch mode
 pnpm test:run     # Vitest single run (CI)
 ```
 
-Type checking (not in scripts):
-```bash
-npx tsc --noEmit  # TypeScript type check
-```
+Git hooks are managed by Husky (`prepare: husky`).
 
 ---
 
@@ -922,8 +1148,9 @@ npx tsc --noEmit  # TypeScript type check
 
 1. **Package Manager**: pnpm (9.1.0, pinned)
 2. **Node Version**: >=18.17
-3. **Active Views**: `views/swap` (Swap + Bridge tabs) and `views/account` (Balances + Deposit + Withdraw)
-4. **Commit Style**: Gitmoji convention via commitlint
+3. **React Compiler**: Enabled via `reactCompiler: true` in `next.config.js` — auto-memoizes components
+4. **Active Views**: `views/swap` (Swap + Bridge tabs) and `views/account` (Balances + Deposit + Withdraw)
+5. **Commit Style**: Gitmoji convention via commitlint
 
 ### Removed Features (Do Not Recreate)
 
@@ -940,7 +1167,7 @@ npx tsc --noEmit  # TypeScript type check
 
 ```typescript
 // React
-import { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 
 // Next.js
 import dynamic from 'next/dynamic';
@@ -973,6 +1200,6 @@ import type { ComponentProps } from './component.types';
 
 ---
 
-**Last Updated**: 2026-02-10
+**Last Updated**: 2026-02-11
 **Active Views**: `views/swap` and `views/account`
 **Main Features**: Cross-chain SUI/SOL token swapping
