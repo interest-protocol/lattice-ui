@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { type FC, useState } from 'react';
 
 import { ChevronDownSVG, InfoSVG, WalletSVG } from '@/components/ui/icons';
+import Spinner from '@/components/ui/spinner';
 import { toasting } from '@/components/ui/toast';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
@@ -252,9 +253,12 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         onClick={handleSend}
         disabled={sending}
       >
-        {sending
-          ? 'Sending...'
-          : `Withdraw ${selectedToken.symbol} on ${config.displayName}`}
+        <span className="flex items-center justify-center gap-2">
+          {sending && <Spinner />}
+          {sending
+            ? 'Sending...'
+            : `Withdraw ${selectedToken.symbol} on ${config.displayName}`}
+        </span>
       </button>
     </div>
   );

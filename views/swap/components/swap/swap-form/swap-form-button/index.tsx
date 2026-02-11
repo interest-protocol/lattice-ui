@@ -1,18 +1,33 @@
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
+import Spinner from '@/components/ui/spinner';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
+import type { SwapStatus } from '@/hooks/domain/use-swap';
+import useSwap from '@/hooks/domain/use-swap';
 import { CurrencyAmount, Token } from '@/lib/entities';
 import { validateSwapAmount } from '@/utils/gas-validation';
+
+const STATUS_LABELS: Record<SwapStatus, string> = {
+  idle: '',
+  depositing: 'Depositing...',
+  verifying: 'Verifying...',
+  creating: 'Creating request...',
+  waiting: 'Waiting for solver...',
+  success: '',
+  error: '',
+};
 
 const SwapFormButton: FC = () => {
   const { control } = useFormContext();
   const fromValue = useWatch({ control, name: 'from.value' }) as string;
   const fromType = useWatch({ control, name: 'from.type' }) as string;
+  const fromValueBN = useWatch({ control, name: 'from.valueBN' }) as bigint;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
   const { suiAmounts, solanaAmounts } = useBalances();
+  const { swap, isLoading, status } = useSwap();
 
   const sourceToken = Token.fromType(fromType);
   const destToken = Token.fromType(toType);
@@ -24,27 +39,34 @@ const SwapFormButton: FC = () => {
   const validation = validateSwapAmount(amount, gasBalance);
 
   const handleSwap = () => {
-    // Swap execution handled by parent form submission
+    swap({ fromType, toType, fromAmount: fromValueBN });
   };
 
-  const buttonLabel = validation.message
-    ? validation.message
-    : `Swap ${sourceConfig.nativeToken.symbol} to ${destConfig.nativeToken.symbol}`;
+  const isDisabled = validation.isDisabled || isLoading;
+
+  const buttonLabel = isLoading
+    ? STATUS_LABELS[status]
+    : validation.message
+      ? validation.message
+      : `Swap ${sourceConfig.nativeToken.symbol} to ${destConfig.nativeToken.symbol}`;
 
   return (
     <button
       type="button"
       className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
       style={{
-        cursor: validation.isDisabled ? 'not-allowed' : 'pointer',
-        opacity: validation.isDisabled ? 0.5 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: isDisabled ? 0.5 : 1,
         background: 'var(--btn-primary-bg)',
         boxShadow: 'var(--btn-primary-shadow)',
       }}
       onClick={handleSwap}
-      disabled={validation.isDisabled}
+      disabled={isDisabled}
     >
-      {buttonLabel}
+      <span className="flex items-center justify-center gap-2">
+        {isLoading && <Spinner />}
+        {buttonLabel}
+      </span>
     </button>
   );
 };

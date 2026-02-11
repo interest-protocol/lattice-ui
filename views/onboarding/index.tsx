@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { FC } from 'react';
 
 import { CheckSVG, LogoSVG } from '@/components/ui/icons';
+import Spinner from '@/components/ui/spinner';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 
 import FundingStep from './funding-step';
@@ -54,7 +55,7 @@ const OnboardingView: FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={stepTransition}
               >
-                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                <Spinner size="1.5rem" className="text-accent" />
                 <span className="text-sm text-text-muted">
                   Creating your SUI and Solana wallets...
                 </span>
@@ -83,7 +84,7 @@ const OnboardingView: FC = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={stepTransition}
               >
-                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                <Spinner size="1.5rem" className="text-accent" />
                 <span className="text-sm text-text-muted">
                   Linking your wallets...
                 </span>

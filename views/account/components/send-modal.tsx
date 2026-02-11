@@ -3,6 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
+import Spinner from '@/components/ui/spinner';
 import { toasting } from '@/components/ui/toast';
 import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
@@ -254,9 +255,12 @@ const SendModal: FC = () => {
         onClick={handleSend}
         disabled={sending}
       >
-        {sending
-          ? 'Sending...'
-          : `Send ${selectedToken.symbol} on ${config.displayName}`}
+        <span className="flex items-center justify-center gap-2">
+          {sending && <Spinner />}
+          {sending
+            ? 'Sending...'
+            : `Send ${selectedToken.symbol} on ${config.displayName}`}
+        </span>
       </button>
     </div>
   );
