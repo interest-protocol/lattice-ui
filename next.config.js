@@ -5,7 +5,6 @@ const nextConfig = {
   reactCompiler: true,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'strapi-dev.scand.app' },
       { protocol: 'https', hostname: 'cryptologos.cc' },
     ],
   },

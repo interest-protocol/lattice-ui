@@ -27,6 +27,6 @@ export const BRIDGED_ASSET_METADATA: Record<string, AssetMetadata> = {
     decimals: XBRIDGE_DECIMALS,
     symbol: 'wSUI',
     type: WSUI_SOLANA_MINT,
-    iconUrl: 'https://strapi-dev.scand.app/uploads/sui_c07df05f00.png',
+    iconUrl: '/sui-logo.svg',
   },
 };

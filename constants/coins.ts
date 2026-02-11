@@ -20,7 +20,7 @@ export const ASSET_METADATA: Record<string, AssetMetadata> = {
     decimals: 9,
     symbol: 'SUI',
     type: SUI_TYPE_ARG,
-    iconUrl: 'https://strapi-dev.scand.app/uploads/sui_c07df05f00.png',
+    iconUrl: '/sui-logo.svg',
   },
   [SOL_TYPE]: {
     name: 'Solana',
