@@ -5,6 +5,8 @@ import { WSUI_SOLANA_MINT } from '@/constants';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import { CurrencyAmount, Token } from '@/lib/entities';
 
+const SOLANA_RPC_TIMEOUT = 10_000;
+
 const DEFAULT_SOLANA_BALANCES = {
   sol: 0n,
   wsui: 0n,
@@ -22,14 +24,16 @@ const useSolanaBalances = (addr: string | null) => {
     const wsuiMint = address(WSUI_SOLANA_MINT);
 
     const [solResult, tokenResult] = await Promise.all([
-      rpc.getBalance(pubkey, { commitment: 'confirmed' }).send(),
+      rpc
+        .getBalance(pubkey, { commitment: 'confirmed' })
+        .send({ abortSignal: AbortSignal.timeout(SOLANA_RPC_TIMEOUT) }),
       rpc
         .getTokenAccountsByOwner(
           pubkey,
           { mint: wsuiMint },
           { encoding: 'jsonParsed', commitment: 'confirmed' }
         )
-        .send(),
+        .send({ abortSignal: AbortSignal.timeout(SOLANA_RPC_TIMEOUT) }),
     ]);
 
     const wsuiRaw = tokenResult.value.reduce((sum, { account }) => {
@@ -47,6 +51,7 @@ const useSolanaBalances = (addr: string | null) => {
     queryKey,
     queryFn: fetchBalances,
     enabled: !!addr,
+    retry: 1,
     refetchInterval: 30_000,
     refetchOnWindowFocus: false,
     staleTime: 5_000,
