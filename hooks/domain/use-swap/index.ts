@@ -20,7 +20,7 @@ import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import { createSuiAdapter } from '@/lib/chain-adapters/sui-adapter';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
 import { CurrencyAmount, Token, Trade } from '@/lib/entities';
-import { fetchMetadata } from '@/lib/solver/client';
+import { fetchMetadata, fulfill } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
 
@@ -33,16 +33,65 @@ export type SwapStatus =
   | 'success'
   | 'error';
 
+export interface SwapResult {
+  sourceChainKey: ChainKey;
+  destChainKey: ChainKey;
+  fromAmount: bigint;
+  fromType: string;
+  toType: string;
+  depositDigest: string;
+  destinationTxDigest?: string;
+  toAmount: bigint;
+  feeAmount: bigint;
+  elapsedMs: number;
+}
+
 interface SwapParams {
   fromType: string;
   toType: string;
   fromAmount: bigint;
 }
 
+const ENCLAVE_RETRY_ATTEMPTS = 5;
+const ENCLAVE_RETRY_DELAY_MS = 2000;
+
+const withRetry = async <T>(
+  fn: () => Promise<T>,
+  attempts: number,
+  delayMs: number,
+  signal?: AbortSignal
+): Promise<T> => {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i === attempts - 1) throw err;
+      if (signal?.aborted) {
+        throw new DOMException('The operation was aborted.', 'AbortError');
+      }
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(resolve, delayMs);
+        signal?.addEventListener(
+          'abort',
+          () => {
+            clearTimeout(timer);
+            reject(
+              new DOMException('The operation was aborted.', 'AbortError')
+            );
+          },
+          { once: true }
+        );
+      });
+    }
+  }
+  throw new Error('Retry exhausted');
+};
+
 export const useSwap = () => {
   const { user } = usePrivy();
   const [status, setStatus] = useState<SwapStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<SwapResult | null>(null);
 
   const suiClient = useSuiClient();
   const solanaRpc = useSolanaRpc();
@@ -113,6 +162,7 @@ export const useSwap = () => {
     const destAdapter = getAdapter(destChainKey);
 
     try {
+      const startTime = performance.now();
       setStatus('depositing');
       setError(null);
       toasting.loadingWithId(
@@ -133,7 +183,12 @@ export const useSwap = () => {
       setStatus('verifying');
       toasting.update(SWAP_TOAST_ID, 'Verifying deposit on-chain...');
 
-      const proof = await fetchNewRequestProof(depositDigest, sourceChain);
+      const proof = await withRetry(
+        () => fetchNewRequestProof(depositDigest, sourceChain),
+        ENCLAVE_RETRY_ATTEMPTS,
+        ENCLAVE_RETRY_DELAY_MS,
+        signal
+      );
 
       setStatus('creating');
       toasting.update(SWAP_TOAST_ID, 'Creating swap request...');
@@ -177,44 +232,66 @@ export const useSwap = () => {
       });
       const minDestinationAmount = trade.minimumReceived.raw.toString();
 
-      await createSwapRequest({
-        userId: user.id,
-        proof: {
-          signature: Array.from(proof.signature),
-          digest: Array.from(proof.digest),
-          timestampMs: proof.timestampMs.toString(),
-          dwalletAddress: Array.from(proof.dwalletAddress),
-          user: Array.from(proof.user),
-          chainId: proof.chainId,
-          token: Array.from(proof.token),
-          amount: proof.amount.toString(),
-        },
-        walletKey: walletKey.toString(),
-        sourceAddress: Array.from(sourceAddress),
-        sourceChain,
-        destinationChain,
-        destinationAddress: Array.from(destinationAddress),
-        destinationToken: Array.from(destinationToken),
-        minDestinationAmount,
-        minConfirmations: 0,
-        deadline: deadline.toString(),
-        solverSender: Array.from(solverSender),
-        solverRecipient: Array.from(solverRecipient),
-      });
+      const { requestId, requestInitialSharedVersion } =
+        await createSwapRequest({
+          userId: user.id,
+          proof: {
+            signature: Array.from(proof.signature),
+            digest: Array.from(proof.digest),
+            timestampMs: proof.timestampMs.toString(),
+            dwalletAddress: Array.from(proof.dwalletAddress),
+            user: Array.from(proof.user),
+            chainId: proof.chainId,
+            token: Array.from(proof.token),
+            amount: proof.amount.toString(),
+          },
+          walletKey: walletKey.toString(),
+          sourceAddress: Array.from(sourceAddress),
+          sourceChain,
+          destinationChain,
+          destinationAddress: Array.from(destinationAddress),
+          destinationToken: Array.from(destinationToken),
+          minDestinationAmount,
+          minConfirmations: 0,
+          deadline: deadline.toString(),
+          solverSender: Array.from(solverSender),
+          solverRecipient: Array.from(solverRecipient),
+        });
+
+      invariant(requestId, 'Swap request created but requestId is missing');
 
       setStatus('waiting');
-      toasting.update(SWAP_TOAST_ID, 'Waiting for solver to complete...');
+      toasting.update(SWAP_TOAST_ID, 'Waiting for solver to fulfill...');
 
       const initialBalance = destAdapter.getBalanceForPolling(
         getBalancesRef(destChainKey)
       );
 
+      const fulfillResult = await fulfill({
+        requestId,
+        userAddress: suiAddress,
+        requestInitialSharedVersion: requestInitialSharedVersion ?? undefined,
+      });
+
+      toasting.update(SWAP_TOAST_ID, 'Waiting for tokens to arrive...');
+
       for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
-        if (signal.aborted) break;
-        await new Promise((resolve) =>
-          setTimeout(resolve, BALANCE_POLL_INTERVAL_MS)
-        );
-        if (signal.aborted) break;
+        if (signal.aborted) {
+          throw new DOMException('The operation was aborted.', 'AbortError');
+        }
+        await new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(resolve, BALANCE_POLL_INTERVAL_MS);
+          signal.addEventListener(
+            'abort',
+            () => {
+              clearTimeout(timer);
+              reject(
+                new DOMException('The operation was aborted.', 'AbortError')
+              );
+            },
+            { once: true }
+          );
+        });
 
         const newBalances = await destAdapter.refetchBalance();
         const currentBalance = newBalances
@@ -229,13 +306,30 @@ export const useSwap = () => {
         }
       }
 
+      const minimumReceived = trade.minimumReceived.raw;
+      const expectedOutput = trade.expectedOutput.raw;
+      const feeAmount = expectedOutput - minimumReceived;
+
+      setResult({
+        sourceChainKey,
+        destChainKey,
+        fromAmount,
+        fromType,
+        toType,
+        depositDigest,
+        destinationTxDigest: fulfillResult.destinationTxDigest,
+        toAmount: minimumReceived,
+        feeAmount,
+        elapsedMs: Math.round(performance.now() - startTime),
+      });
       setStatus('success');
       toasting.dismiss(SWAP_TOAST_ID);
-      toasting.success({
-        action: 'Swap',
-        message: 'Your tokens have been exchanged',
-      });
     } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setStatus('idle');
+        toasting.dismiss(SWAP_TOAST_ID);
+        return;
+      }
       setStatus('error');
       const message = extractErrorMessage(err, 'Swap failed');
       setError(message);
@@ -247,6 +341,7 @@ export const useSwap = () => {
   const reset = () => {
     setStatus('idle');
     setError(null);
+    setResult(null);
   };
 
   return {
@@ -254,6 +349,7 @@ export const useSwap = () => {
     reset,
     status,
     error,
+    result,
     isLoading: status !== 'idle' && status !== 'success' && status !== 'error',
   };
 };

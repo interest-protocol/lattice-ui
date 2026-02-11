@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { errorResponse, validateQueryParam } from '@/lib/api/validate-params';
+import { SOLVER_API_KEY } from '@/lib/config.server';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
@@ -15,7 +16,10 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
       `${SOLVER_API_URL}/api/v1/requests/${requestId}`,
-      { signal: AbortSignal.timeout(10_000) }
+      {
+        headers: { 'x-api-key': SOLVER_API_KEY },
+        signal: AbortSignal.timeout(10_000),
+      }
     );
 
     if (!response.ok) {
@@ -25,8 +29,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const json = await response.json();
+    return NextResponse.json(json.data);
   } catch (error: unknown) {
     return errorResponse(error, 'Failed to fetch status');
   }

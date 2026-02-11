@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { errorResponse } from '@/lib/api/validate-params';
+import { SOLVER_API_KEY } from '@/lib/config.server';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export async function GET() {
@@ -9,6 +10,7 @@ export async function GET() {
 
   try {
     const response = await fetch(`${SOLVER_API_URL}/api/v1/prices`, {
+      headers: { 'x-api-key': SOLVER_API_KEY },
       signal: AbortSignal.timeout(10_000),
     });
 
@@ -19,8 +21,8 @@ export async function GET() {
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const json = await response.json();
+    return NextResponse.json(json.data);
   } catch (error: unknown) {
     return errorResponse(error, 'Failed to fetch prices');
   }

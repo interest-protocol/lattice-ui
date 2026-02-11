@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
-import { ENCLAVE_URL } from '@/lib/config.server';
+import { ENCLAVE_API_KEY, ENCLAVE_URL } from '@/lib/config.server';
 
 interface NewRequestProofRaw {
   signature: string;
@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
   try {
     const response = await fetch(`${ENCLAVE_URL}/new_request`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ENCLAVE_API_KEY,
+      },
       signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
         digest: body.digest,

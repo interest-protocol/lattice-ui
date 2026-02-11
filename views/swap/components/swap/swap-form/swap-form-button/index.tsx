@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { type FC, useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import Spinner from '@/components/ui/spinner';
@@ -6,8 +6,10 @@ import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import type { SwapStatus } from '@/hooks/domain/use-swap';
 import useSwap from '@/hooks/domain/use-swap';
+import { useModal } from '@/hooks/store/use-modal';
 import { CurrencyAmount, Token } from '@/lib/entities';
 import { validateSwapAmount } from '@/utils/gas-validation';
+import SwapSuccessModal from '../swap-success-modal';
 
 const STATUS_LABELS: Record<SwapStatus, string> = {
   idle: '',
@@ -27,7 +29,18 @@ const SwapFormButton: FC = () => {
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
   const { suiAmounts, solanaAmounts } = useBalances();
-  const { swap, isLoading, status } = useSwap();
+  const { swap, isLoading, status, result, reset } = useSwap();
+  const setContent = useModal((s) => s.setContent);
+  const shownResultRef = useRef<typeof result>(null);
+
+  useEffect(() => {
+    if (status === 'success' && result && shownResultRef.current !== result) {
+      shownResultRef.current = result;
+      setContent(<SwapSuccessModal result={result} onReset={reset} />, {
+        title: 'Swap Complete',
+      });
+    }
+  }, [status, result, setContent, reset]);
 
   const sourceToken = Token.fromType(fromType);
   const destToken = Token.fromType(toType);

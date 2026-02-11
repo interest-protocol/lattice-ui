@@ -18,3 +18,7 @@ export const ENCLAVE_URL = enclaveUrl;
 const enclaveApiKey = process.env.ENCLAVE_API_KEY;
 invariant(enclaveApiKey, 'ENCLAVE_API_KEY not configured');
 export const ENCLAVE_API_KEY = enclaveApiKey;
+
+const solverApiKey = process.env.SOLVER_API_KEY;
+invariant(solverApiKey, 'SOLVER_API_KEY not configured');
+export const SOLVER_API_KEY = solverApiKey;

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { SOLVER_API_KEY } from '@/lib/config.server';
 import { SOLVER_API_URL } from '@/lib/config';
 
 const schema = z.object({
@@ -31,7 +32,10 @@ export async function POST(request: NextRequest) {
   try {
     const response = await fetch(`${SOLVER_API_URL}/api/v1/fulfill`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': SOLVER_API_KEY,
+      },
       signal: AbortSignal.timeout(10_000),
       body: JSON.stringify({
         requestId: body.requestId,
@@ -47,8 +51,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const json = await response.json();
+    return NextResponse.json(json.data);
   } catch (caught: unknown) {
     return errorResponse(caught, 'Failed to fulfill request');
   }

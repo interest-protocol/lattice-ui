@@ -2,6 +2,7 @@ import {
   type Address,
   address,
   appendTransactionMessageInstruction,
+  type Base64EncodedWireTransaction,
   compileTransaction,
   createNoopSigner,
   createTransactionMessage,
@@ -22,6 +23,14 @@ import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
+
+const BLOCKHASH_RETRY_ATTEMPTS = 3;
+const BLOCKHASH_RETRY_DELAY_MS = 500;
+
+const isBlockhashError = (err: unknown): boolean => {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg.includes('Blockhash not found') || msg.includes('blockhash');
+};
 
 const schema = z.object({
   userId: z.string(),
@@ -93,35 +102,52 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { value: latestBlockhash } = await rpc
-      .getLatestBlockhash({ commitment: 'confirmed' })
-      .send();
+    let lastError: unknown;
 
-    const transactionMessage = pipe(
-      createTransactionMessage({ version: 'legacy' }),
-      (msg) => setTransactionMessageFeePayer(fromAddress, msg),
-      (msg) =>
-        setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, msg),
-      (msg) => appendTransactionMessageInstruction(instruction, msg)
-    );
+    for (let attempt = 0; attempt < BLOCKHASH_RETRY_ATTEMPTS; attempt++) {
+      try {
+        const { value: latestBlockhash } = await rpc
+          .getLatestBlockhash({ commitment: 'confirmed' })
+          .send();
 
-    const compiledTransaction = compileTransaction(transactionMessage);
-    const serialized = getBase64EncodedWireTransaction(compiledTransaction);
+        const transactionMessage = pipe(
+          createTransactionMessage({ version: 'legacy' }),
+          (msg) => setTransactionMessageFeePayer(fromAddress, msg),
+          (msg) =>
+            setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, msg),
+          (msg) => appendTransactionMessageInstruction(instruction, msg)
+        );
 
-    const result = await privy
-      .wallets()
-      .solana()
-      .signAndSendTransaction(wallet.id, {
-        caip2: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
-        transaction: serialized,
-        authorization_context: {
-          authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
-        },
-      });
+        const compiledTransaction = compileTransaction(transactionMessage);
+        const serialized = getBase64EncodedWireTransaction(compiledTransaction);
 
-    return NextResponse.json({
-      signature: result.hash,
-    });
+        const signResult = await privy
+          .wallets()
+          .solana()
+          .signTransaction(wallet.id, {
+            transaction: serialized,
+            authorization_context: {
+              authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
+            },
+          });
+
+        const signature = await rpc
+          .sendTransaction(
+            signResult.signed_transaction as Base64EncodedWireTransaction,
+            { encoding: 'base64', preflightCommitment: 'confirmed' }
+          )
+          .send();
+
+        return NextResponse.json({ signature });
+      } catch (err) {
+        lastError = err;
+        if (!isBlockhashError(err) || attempt === BLOCKHASH_RETRY_ATTEMPTS - 1)
+          throw err;
+        await new Promise((r) => setTimeout(r, BLOCKHASH_RETRY_DELAY_MS));
+      }
+    }
+
+    throw lastError;
   } catch (caught: unknown) {
     if (caught instanceof WalletNotFoundError)
       return errorResponse(caught, caught.message, 404);

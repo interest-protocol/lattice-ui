@@ -47,16 +47,20 @@ const useSolanaBalances = (addr: string | null) => {
     };
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey,
     queryFn: fetchBalances,
     enabled: !!addr,
-    retry: 1,
+    retry: 2,
     refetchInterval: 30_000,
     refetchOnWindowFocus: false,
     staleTime: 5_000,
     structuralSharing: false,
   });
+
+  if (error) {
+    console.warn('[useSolanaBalances] Balance query error:', error);
+  }
 
   const balances = data ?? DEFAULT_SOLANA_BALANCES;
 
@@ -76,6 +80,7 @@ const useSolanaBalances = (addr: string | null) => {
   return {
     balances,
     amounts,
+    error,
     isLoading,
     mutate,
   };
