@@ -71,7 +71,7 @@ lattice-ui/
 │   │   ├── app-state-provider/ # Zustand hydration
 │   │   ├── error-boundary/     # React error boundary
 │   │   ├── modal-provider/     # Global modal system
-│   │   ├── privy-provider/     # Wallet auth (SSR disabled)
+│   │   ├── privy-provider/     # Wallet auth (client-only via 'use client')
 │   │   └── wallet-registration-provider/  # Auto wallet setup
 │   └── ui/                     # Reusable UI primitives
 │       ├── icons/              # 26+ SVG icon components
@@ -439,7 +439,7 @@ sdkChainIdFromKey(key: ChainKey): SupportedChainId
 App loads
     │
     ▼
-PrivyProvider initializes (SSR disabled via dynamic import)
+PrivyProvider initializes ('use client' component, direct import)
     │
     ▼
 WalletRegistrationProvider (side-effect provider):
@@ -518,14 +518,15 @@ The provider tree in `app/providers.tsx` wraps all pages:
 
 ```
 ErrorBoundary
-  └── PrivyProviderWrapper (dynamic, ssr: false)
-        ├── ModalProvider (global modal overlay)
-        ├── Toaster (react-hot-toast, bottom-right)
-        └── SkeletonTheme (loading placeholders)
-              ├── AppStateProvider (Zustand hydration)
-              ├── WalletRegistrationProvider (auto wallet setup)
-              ├── BackgroundProvider (parallax background init)
-              └── {children} (page content)
+  └── QueryClientProvider
+        └── PrivyProviderWrapper ('use client', direct import)
+              ├── ModalProvider (global modal overlay)
+              ├── Toaster (react-hot-toast, bottom-right)
+              └── SkeletonTheme (loading placeholders)
+                    ├── AppStateProvider (Zustand hydration)
+                    ├── WalletRegistrationProvider (auto wallet setup)
+                    ├── BackgroundProvider (parallax background init)
+                    └── {children} (page content)
 ```
 
 Additionally, the root `layout.tsx` wraps everything in:

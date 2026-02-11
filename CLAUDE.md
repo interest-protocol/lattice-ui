@@ -380,17 +380,24 @@ const InteractiveComponent = () => {
 };
 ```
 
-### 3. Dynamic Imports (SSR Disabled)
+### 3. Privy Provider (Client-Only Auth)
 
-Disable SSR for wallet/web3 components:
+Privy is imported directly with `'use client'` — no `next/dynamic` or `ssr: false` needed:
 
 ```typescript
-// app/providers.tsx pattern
-import dynamic from 'next/dynamic';
+// components/providers/privy-provider/index.tsx
+'use client';
 
-const PrivyProviderWrapper = dynamic(
-  import('@/components/providers/privy-provider').then((m) => m.default),
-  { ssr: false }
+import { PrivyProvider } from '@privy-io/react-auth';
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana';
+
+const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
+  <PrivyProvider appId={PRIVY_APP_ID} config={{
+    externalWallets: { solana: { connectors: toSolanaWalletConnectors() } },
+    // ...
+  }}>
+    {children}
+  </PrivyProvider>
 );
 ```
 
@@ -739,6 +746,20 @@ Tailwind v4 is configured via CSS, not `tailwind.config.js`. Custom theme tokens
   --color-text-dimmed: #ffffff40;
   --color-text-dim: #ffffff14;
 }
+```
+
+### CSS Cascade Layers (Critical)
+
+In Tailwind v4, all utilities live inside `@layer utilities`. **Unlayered CSS always beats layered CSS** regardless of specificity. Never add unlayered resets like `* { margin: 0; padding: 0; }` to `globals.css` — they override every Tailwind margin/padding utility. Tailwind's preflight (inside `@layer base`) already handles resets. Custom base styles must go inside `@layer base`:
+
+```css
+/* GOOD — inside a layer, overrideable by utilities */
+@layer base {
+  html { background: var(--color-surface); }
+}
+
+/* BAD — unlayered, overrides ALL Tailwind margin/padding utilities */
+* { margin: 0; padding: 0; }
 ```
 
 ### Usage Pattern
@@ -1170,7 +1191,6 @@ Git hooks are managed by Husky (`prepare: husky`).
 import { FC, useState, useEffect, useRef } from 'react';
 
 // Next.js
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
