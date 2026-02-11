@@ -16,6 +16,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@noble/curves": "^1.9.4",
+    "bs58": "^6.0.0",
     "@interest-protocol/enclave-sdk": "^0.0.1",
     "@interest-protocol/registry-sdk": "^1.0.1",
     "@interest-protocol/xbridge-sdk": "^1.1.1",

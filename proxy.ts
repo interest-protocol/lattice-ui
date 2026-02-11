@@ -46,7 +46,7 @@ setInterval(() => {
   }
 }, RATE_LIMIT_WINDOW_MS);
 
-export const middleware = (request: NextRequest) => {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const limit = RATE_LIMITS[path];
 
