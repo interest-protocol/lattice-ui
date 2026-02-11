@@ -2,8 +2,8 @@
 
 import { type FC, useState } from 'react';
 
-import { CopySVG, LogoutSVG } from '@/components/ui/icons';
-import { toasting } from '@/components/ui/toast';
+import CopyButton from '@/components/ui/copy-button';
+import { LogoutSVG } from '@/components/ui/icons';
 
 import ExplorerSection from './sections/explorer-section';
 import RpcSection from './sections/rpc-section';
@@ -26,26 +26,16 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
 }) => {
   const [menu, setMenu] = useState<MenuSection>(null);
 
-  const copyAddress = () => {
-    if (fullAddress) {
-      window.navigator.clipboard.writeText(fullAddress);
-      toasting.success({ action: 'Copy', message: 'Address copied' });
-    }
-  };
-
   return (
     <div className="flex flex-col gap-1 max-h-[70vh] overflow-y-auto">
       <div className="flex items-center justify-between px-1 py-2">
         <span className="font-mono text-sm">{displayAddress}</span>
         {fullAddress && (
-          <button
-            type="button"
-            className="cursor-pointer hover:text-accent bg-transparent border-none p-0"
-            onClick={copyAddress}
-            aria-label="Copy address"
-          >
-            <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-          </button>
+          <CopyButton
+            text={fullAddress}
+            className="hover:text-accent"
+            ariaLabel="Copy address"
+          />
         )}
       </div>
       <hr className="border-b border-b-surface-border border-t-0 border-x-0" />

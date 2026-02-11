@@ -1,18 +1,12 @@
 import type { FC } from 'react';
 
-import { CopySVG } from '@/components/ui/icons';
-import { toasting } from '@/components/ui/toast';
+import CopyButton from '@/components/ui/copy-button';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
 const DepositModal: FC = () => {
   const { getAddress } = useWalletAddresses();
   const suiAddress = getAddress('sui');
   const solanaAddress = getAddress('solana');
-
-  const copyAddress = (addr: string) => {
-    window.navigator.clipboard.writeText(addr);
-    toasting.success({ action: 'Copy', message: 'Address copied' });
-  };
 
   return (
     <div className="flex flex-col gap-5 px-2">
@@ -37,14 +31,7 @@ const DepositModal: FC = () => {
               <span className="flex-1 text-text font-mono text-xs break-all">
                 {suiAddress}
               </span>
-              <button
-                type="button"
-                className="cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
-                onClick={() => copyAddress(suiAddress)}
-                aria-label="Copy address"
-              >
-                <CopySVG maxWidth="1rem" width="100%" />
-              </button>
+              <CopyButton text={suiAddress} ariaLabel="Copy Sui address" />
             </div>
             <p className="text-text-dimmed text-xs">
               Only send Sui network assets to this address
@@ -78,14 +65,10 @@ const DepositModal: FC = () => {
               <span className="flex-1 text-text font-mono text-xs break-all">
                 {solanaAddress}
               </span>
-              <button
-                type="button"
-                className="cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
-                onClick={() => copyAddress(solanaAddress)}
-                aria-label="Copy address"
-              >
-                <CopySVG maxWidth="1rem" width="100%" />
-              </button>
+              <CopyButton
+                text={solanaAddress}
+                ariaLabel="Copy Solana address"
+              />
             </div>
             <p className="text-text-dimmed text-xs">
               Only send Solana network assets to this address

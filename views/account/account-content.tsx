@@ -3,7 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
-import { CopySVG } from '@/components/ui/icons';
+import CopyButton from '@/components/ui/copy-button';
 import Tabs from '@/components/ui/tabs';
 import { toasting } from '@/components/ui/toast';
 import {
@@ -40,7 +40,7 @@ const AssetRow: FC<{
           alt={symbol}
           width={40}
           height={40}
-          className="rounded-full object-cover"
+          className="rounded-full object-cover ring-1 ring-surface-border"
         />
       )}
       <div>
@@ -104,20 +104,16 @@ const BalancesView: FC<{
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Sui Wallet</h2>
-        <button
-          type="button"
-          className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
-          onClick={() => {
-            window.navigator.clipboard.writeText(displaySuiAddress);
-            toasting.success({ action: 'Copy', message: 'Address copied' });
-          }}
-          aria-label="Copy address"
-        >
+        <div className="flex items-center gap-2 mb-4">
           <p className="text-text-muted text-xs font-mono">
             {formatAddress(displaySuiAddress)}
           </p>
-          <CopySVG maxWidth="0.875rem" width="100%" />
-        </button>
+          <CopyButton
+            text={displaySuiAddress}
+            size="0.875rem"
+            ariaLabel="Copy Sui address"
+          />
+        </div>
         <div className="flex flex-col gap-3">
           <AssetRow
             symbol="SUI"
@@ -150,20 +146,16 @@ const BalancesView: FC<{
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Solana Wallet</h2>
-        <button
-          type="button"
-          className="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-70 bg-transparent border-none p-0"
-          onClick={() => {
-            window.navigator.clipboard.writeText(solanaAddress);
-            toasting.success({ action: 'Copy', message: 'Address copied' });
-          }}
-          aria-label="Copy address"
-        >
+        <div className="flex items-center gap-2 mb-4">
           <p className="text-text-muted text-xs font-mono">
             {formatAddress(solanaAddress, 4, 4)}
           </p>
-          <CopySVG maxWidth="0.875rem" width="100%" />
-        </button>
+          <CopyButton
+            text={solanaAddress}
+            size="0.875rem"
+            ariaLabel="Copy Solana address"
+          />
+        </div>
         <div className="flex flex-col gap-3">
           <AssetRow
             symbol="SOL"

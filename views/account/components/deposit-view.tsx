@@ -1,8 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import type { FC } from 'react';
 
-import { CopySVG } from '@/components/ui/icons';
-import { toasting } from '@/components/ui/toast';
+import CopyButton from '@/components/ui/copy-button';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 
@@ -15,12 +14,6 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
   const config = CHAIN_REGISTRY[network];
   const address = getAddress(network);
 
-  const copyAddress = () => {
-    if (!address) return;
-    window.navigator.clipboard.writeText(address);
-    toasting.success({ action: 'Copy', message: 'Address copied' });
-  };
-
   if (!address) {
     return (
       <div className="text-center py-8">
@@ -31,7 +24,7 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
 
   return (
     <div className="flex flex-col items-center gap-5">
-      <div className="p-4 bg-white rounded-xl flex items-center justify-center">
+      <div className="p-4 bg-white rounded-xl flex items-center justify-center border border-surface-border">
         <QRCodeSVG value={address} size={160} level="H" />
       </div>
 
@@ -39,18 +32,15 @@ const DepositView: FC<DepositViewProps> = ({ network }) => {
         <p className="text-text-muted text-xs mb-2 text-center">
           {config.displayName} Deposit Address
         </p>
-        <button
-          type="button"
-          className="flex items-center gap-3 p-3 bg-surface-inset rounded-lg border border-surface-border cursor-pointer hover:bg-surface-light w-full"
-          onClick={copyAddress}
-        >
+        <div className="flex items-center gap-3 p-3 bg-surface-inset rounded-lg border border-surface-border w-full">
           <span className="flex-1 text-text font-mono text-[0.6875rem] break-all text-center">
             {address}
           </span>
-          <div className="hover:opacity-70">
-            <CopySVG maxWidth="1rem" width="100%" />
-          </div>
-        </button>
+          <CopyButton
+            text={address}
+            ariaLabel={`Copy ${config.displayName} address`}
+          />
+        </div>
       </div>
 
       <div

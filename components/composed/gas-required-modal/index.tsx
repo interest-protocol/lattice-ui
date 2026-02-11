@@ -2,8 +2,8 @@
 
 import { type FC, useState } from 'react';
 
-import { CopySVG, WalletSVG } from '@/components/ui/icons';
-import { toasting } from '@/components/ui/toast';
+import CopyButton from '@/components/ui/copy-button';
+import { WalletSVG } from '@/components/ui/icons';
 
 interface GasRequiredModalProps {
   suiAddress: string;
@@ -15,11 +15,6 @@ const GasRequiredModal: FC<GasRequiredModalProps> = ({
   onRetry,
 }) => {
   const [retrying, setRetrying] = useState(false);
-
-  const copyAddress = () => {
-    window.navigator.clipboard.writeText(suiAddress);
-    toasting.success({ action: 'Copy', message: 'Address copied' });
-  };
 
   const handleRetry = async () => {
     setRetrying(true);
@@ -44,14 +39,11 @@ const GasRequiredModal: FC<GasRequiredModalProps> = ({
         <span className="flex-1 font-mono text-xs break-all text-text-secondary">
           {suiAddress}
         </span>
-        <button
-          type="button"
-          className="shrink-0 cursor-pointer bg-transparent border-none p-1 hover:text-accent text-text-muted"
-          onClick={copyAddress}
-          aria-label="Copy Sui address"
-        >
-          <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-        </button>
+        <CopyButton
+          text={suiAddress}
+          className="shrink-0 p-1 hover:text-accent text-text-muted"
+          ariaLabel="Copy Sui address"
+        />
       </div>
       <button
         type="button"

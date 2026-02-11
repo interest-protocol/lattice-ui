@@ -2,9 +2,9 @@
 
 import { type FC, useState } from 'react';
 
-import { CopySVG, LogoutSVG } from '@/components/ui/icons';
+import CopyButton from '@/components/ui/copy-button';
+import { LogoutSVG } from '@/components/ui/icons';
 import Motion from '@/components/ui/motion';
-import { toasting } from '@/components/ui/toast';
 import ExplorerSection from './sections/explorer-section';
 import RpcSection from './sections/rpc-section';
 import ThemeSection from './sections/theme-section';
@@ -20,13 +20,6 @@ const WalletProfileDropdown: FC<
   }
 > = ({ close, displayAddress, fullAddress, onLogout }) => {
   const [menu, setMenu] = useState<MenuSection>(null);
-
-  const copyAddress = () => {
-    if (fullAddress) {
-      window.navigator.clipboard.writeText(fullAddress);
-      toasting.success({ action: 'Copy', message: 'Address copied' });
-    }
-  };
 
   return (
     <Motion
@@ -45,14 +38,11 @@ const WalletProfileDropdown: FC<
       <div className="px-4 py-2 flex items-center justify-between">
         <span className="font-mono text-sm">{displayAddress}</span>
         {fullAddress && (
-          <button
-            type="button"
-            className="cursor-pointer hover:text-accent bg-transparent border-none p-0"
-            onClick={copyAddress}
-            aria-label="Copy address"
-          >
-            <CopySVG width="100%" maxWidth="1rem" maxHeight="1rem" />
-          </button>
+          <CopyButton
+            text={fullAddress}
+            className="hover:text-accent"
+            ariaLabel="Copy address"
+          />
         )}
       </div>
       <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
