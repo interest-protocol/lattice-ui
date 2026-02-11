@@ -1,74 +1,127 @@
 import type { ChainKey } from '@/constants/chains';
-import type { BridgeStatus } from '@/hooks/domain/use-bridge';
+import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
 
-export type TokenKey = 'SUI' | 'SOL';
-
-export interface TokenOption {
+export interface BridgeRouteToken {
   symbol: string;
-  iconUrl?: string;
+  iconUrl: string;
   decimals: number;
+  type: string;
 }
 
-export interface BridgeFormProps {
-  sourceNetwork: ChainKey;
-  setSourceNetwork: (net: ChainKey) => void;
-  selectedToken: TokenKey;
-  setSelectedToken: (tk: TokenKey) => void;
+export interface BridgeRoute {
+  key: BridgeDirection;
+  sourceChain: ChainKey;
+  destChain: ChainKey;
+  sourceToken: BridgeRouteToken;
+  destToken: Omit<BridgeRouteToken, 'type'>;
+  enabled: boolean;
+  label: string;
+}
+
+export const BRIDGE_ROUTES: ReadonlyArray<BridgeRoute> = [
+  {
+    key: 'sol-to-wsol',
+    sourceChain: 'solana',
+    destChain: 'sui',
+    sourceToken: {
+      symbol: 'SOL',
+      iconUrl: '/sol-logo.svg',
+      decimals: 9,
+      type: 'sol',
+    },
+    destToken: {
+      symbol: 'wSOL',
+      iconUrl: '/sol-logo.svg',
+      decimals: 9,
+    },
+    enabled: true,
+    label: 'SOL → wSOL',
+  },
+  {
+    key: 'wsol-to-sol',
+    sourceChain: 'sui',
+    destChain: 'solana',
+    sourceToken: {
+      symbol: 'wSOL',
+      iconUrl: '/sol-logo.svg',
+      decimals: 9,
+      type: 'sol',
+    },
+    destToken: {
+      symbol: 'SOL',
+      iconUrl: '/sol-logo.svg',
+      decimals: 9,
+    },
+    enabled: true,
+    label: 'wSOL → SOL',
+  },
+  {
+    key: 'sui-to-wsui',
+    sourceChain: 'sui',
+    destChain: 'solana',
+    sourceToken: {
+      symbol: 'SUI',
+      iconUrl: '/sui-logo.svg',
+      decimals: 9,
+      type: '0x2::sui::SUI',
+    },
+    destToken: {
+      symbol: 'wSUI',
+      iconUrl: '/sui-logo.svg',
+      decimals: 9,
+    },
+    enabled: true,
+    label: 'SUI → wSUI',
+  },
+  {
+    key: 'wsui-to-sui',
+    sourceChain: 'solana',
+    destChain: 'sui',
+    sourceToken: {
+      symbol: 'wSUI',
+      iconUrl: '/sui-logo.svg',
+      decimals: 9,
+      type: '0x2::sui::SUI',
+    },
+    destToken: {
+      symbol: 'SUI',
+      iconUrl: '/sui-logo.svg',
+      decimals: 9,
+    },
+    enabled: true,
+    label: 'wSUI → SUI',
+  },
+];
+
+export interface BridgeFromCardProps {
+  route: BridgeRoute;
   amount: string;
   setAmount: (val: string) => void;
-  isDisabled: boolean;
-  isLoading: boolean;
-  status: BridgeStatus;
-  validationMessage: string | null;
-  destNetwork: string;
-  token: TokenOption;
-  tokenOptionsList: TokenOptionListItem[];
+  balance: bigint;
   balanceLoading: boolean;
-  balanceFormatted: string;
-  setMaxAmount: () => void;
-  onBridge: () => void;
+  onOpenRouteSelector: () => void;
 }
 
-export interface TokenOptionListItem {
-  key: TokenKey;
-  iconUrl?: string;
-  symbol: string;
-}
-
-export interface BridgeNetworkSelectorProps {
-  sourceNetwork: ChainKey;
-  setSourceNetwork: (net: ChainKey) => void;
-}
-
-export interface BridgeTokenSelectorProps {
-  selectedToken: TokenKey;
-  setSelectedToken: (tk: TokenKey) => void;
-}
-
-export interface BridgeAmountInputProps {
-  amount: string;
-  setAmount: (val: string) => void;
-  token: TokenOption;
-  balanceLoading: boolean;
-  balanceFormatted: string;
-  setMaxAmount: () => void;
-}
-
-export interface BridgeDetailsProps {
-  sourceNetwork: ChainKey;
-  selectedToken: TokenKey;
-  destNetwork: string;
+export interface BridgeToCardProps {
+  route: BridgeRoute;
   amount: string;
 }
 
-export interface BridgeButtonProps {
-  isDisabled: boolean;
-  isLoading: boolean;
+export interface BridgeRouteSelectorProps {
+  routes: ReadonlyArray<BridgeRoute>;
+  selectedRoute: BridgeRoute;
+  routeBalances: Record<string, bigint>;
+  onSelect: (route: BridgeRoute) => void;
+}
+
+export interface BridgeDetailsInlineProps {
+  route: BridgeRoute;
+  amount: string;
+}
+
+export interface BridgeProgressStepperProps {
   status: BridgeStatus;
-  validationMessage: string | null;
-  token: TokenOption;
-  destNetwork: string;
-  onBridge: () => void;
+  onRetry: () => void;
 }
 
 export interface ValidationResult {

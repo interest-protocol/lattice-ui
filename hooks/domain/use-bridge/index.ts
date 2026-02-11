@@ -140,26 +140,9 @@ export const useBridge = () => {
           await bridgeSolToWsol(amount, BRIDGE_TOAST_ID);
           break;
         case 'wsol-to-sol':
-          toasting.dismiss(BRIDGE_TOAST_ID);
-          toasting.error({
-            action: 'Bridge',
-            message: 'wSOL → SOL bridge coming soon',
-          });
-          return;
         case 'sui-to-wsui':
-          toasting.dismiss(BRIDGE_TOAST_ID);
-          toasting.error({
-            action: 'Bridge',
-            message: 'SUI → wSUI bridge coming soon',
-          });
-          return;
         case 'wsui-to-sui':
-          toasting.dismiss(BRIDGE_TOAST_ID);
-          toasting.error({
-            action: 'Bridge',
-            message: 'wSUI → SUI bridge coming soon',
-          });
-          return;
+          throw new Error(`${direction} bridge not yet implemented`);
         default:
           throw new Error('Invalid bridge direction');
       }
@@ -170,6 +153,7 @@ export const useBridge = () => {
         action: 'Bridge',
         message: 'Your tokens are ready',
       });
+      return true;
     } catch (err: unknown) {
       setStatus('error');
       const message = extractErrorMessage(err, 'Bridge failed');
