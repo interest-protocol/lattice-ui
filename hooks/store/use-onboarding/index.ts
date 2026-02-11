@@ -1,11 +1,10 @@
 import { create } from 'zustand';
 
-import {
-  WALLETS_LINKED_KEY,
-  WALLETS_REGISTERED_KEY,
-} from '@/constants/storage-keys';
+import { REGISTRATION_CACHE_KEY } from '@/constants/storage-keys';
 import { ApiRequestError } from '@/lib/api/client';
 import {
+  type CheckRegistrationResult,
+  checkRegistration as checkRegistrationApi,
   createSolanaWallet,
   createSuiWallet,
   linkSolanaWallet,
@@ -14,208 +13,299 @@ import {
 // --- Types ---
 
 export type OnboardingStep =
+  | 'checking'
   | 'creating-wallets'
   | 'funding'
   | 'linking'
+  | 'confirming'
   | 'complete';
-
-export interface RegistrationParams {
-  userId: string;
-  hasSuiWallet: boolean;
-  hasSolanaWallet: boolean;
-  existingSuiAddress: string | null;
-  refreshUser: () => Promise<unknown>;
-}
 
 interface OnboardingState {
   step: OnboardingStep;
   error: string | null;
   suiAddress: string | null;
+  solanaAddress: string | null;
   userId: string | null;
+  _isProcessing: boolean;
+  _retryCount: number;
 
-  registerWallets: (params: RegistrationParams) => void;
-  linkWallets: () => void;
+  checkRegistration: (userId: string) => void;
+  registerWallets: () => void;
+  startLinking: () => void;
   retry: () => void;
   reset: () => void;
   cleanup: () => void;
 }
 
-// --- Module-level concurrency guards ---
+// --- Constants ---
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [2000, 5000, 10000];
 
-let isRegistering = false;
-let isLinking = false;
-let retryTimer: ReturnType<typeof setTimeout> | undefined;
-let registrationParams: RegistrationParams | null = null;
+// --- localStorage cache helpers ---
 
-// --- localStorage helpers ---
+type CacheRecord = Record<string, boolean>;
 
-type StorageRecord = Record<string, boolean>;
-
-const readStorage = (key: string): StorageRecord => {
+const readCache = (): CacheRecord => {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = localStorage.getItem(REGISTRATION_CACHE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 };
 
-const writeStorage = (key: string, userId: string) => {
-  const prev = readStorage(key);
-  localStorage.setItem(key, JSON.stringify({ ...prev, [userId]: true }));
+const writeCache = (userId: string) => {
+  try {
+    const prev = readCache();
+    localStorage.setItem(
+      REGISTRATION_CACHE_KEY,
+      JSON.stringify({ ...prev, [userId]: true })
+    );
+  } catch {
+    // Non-critical — cache write failure is acceptable
+  }
 };
 
-// --- Exported helpers ---
+export const isUserCached = (userId: string): boolean =>
+  readCache()[userId] ?? false;
 
-export const isUserRegistered = (userId: string): boolean =>
-  readStorage(WALLETS_REGISTERED_KEY)[userId] ?? false;
+// --- Timer management ---
 
-export const isUserLinked = (userId: string): boolean =>
-  readStorage(WALLETS_LINKED_KEY)[userId] ?? false;
+let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+const clearRetryTimer = () => {
+  if (retryTimer !== undefined) {
+    clearTimeout(retryTimer);
+    retryTimer = undefined;
+  }
+};
 
 // --- Async business logic ---
 
-const registerWithRetry = async (retryCount = 0) => {
-  const params = registrationParams;
-  if (!params || isRegistering) return;
+const doCheckRegistration = async (userId: string) => {
+  const state = useOnboarding.getState();
+  if (state._isProcessing) return;
 
-  isRegistering = true;
-  useOnboarding.setState({ step: 'creating-wallets', error: null });
+  useOnboarding.setState({ _isProcessing: true, userId, error: null });
+
+  // Fast-path: if localStorage cache says linked, verify on-chain
+  // If cache says not linked, still check on-chain (source of truth)
+  if (isUserCached(userId)) {
+    try {
+      const result = await checkRegistrationApi();
+      if (result.registered) {
+        useOnboarding.setState({
+          step: 'complete',
+          suiAddress: result.suiAddress,
+          solanaAddress: result.solanaAddress,
+          _isProcessing: false,
+        });
+        return;
+      }
+      // Cache was stale — fall through to normal check logic
+      handleCheckResult(result, userId);
+      return;
+    } catch {
+      // API failed but cache says linked — trust cache
+      useOnboarding.setState({ step: 'complete', _isProcessing: false });
+      return;
+    }
+  }
+
+  useOnboarding.setState({ step: 'checking' });
 
   try {
-    const {
-      userId,
-      hasSuiWallet,
-      hasSolanaWallet,
-      existingSuiAddress,
-      refreshUser,
-    } = params;
+    const result = await checkRegistrationApi();
+    handleCheckResult(result, userId);
+  } catch {
+    // On API failure, assume not registered and start from scratch
+    useOnboarding.setState({
+      step: 'creating-wallets',
+      _isProcessing: false,
+    });
+    doRegisterWallets(0);
+  }
+};
 
-    let createdSuiAddress: string | null = null;
+const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
+  if (result.registered) {
+    writeCache(userId);
+    useOnboarding.setState({
+      step: 'complete',
+      suiAddress: result.suiAddress,
+      solanaAddress: result.solanaAddress,
+      _isProcessing: false,
+    });
+    return;
+  }
 
-    if (!hasSuiWallet || !hasSolanaWallet) {
-      const [suiResult] = await Promise.all([
-        !hasSuiWallet ? createSuiWallet(userId) : null,
-        !hasSolanaWallet ? createSolanaWallet(userId) : null,
-      ]);
+  if (result.hasWallets) {
+    useOnboarding.setState({
+      step: 'funding',
+      suiAddress: result.suiAddress,
+      solanaAddress: result.solanaAddress,
+      _isProcessing: false,
+    });
+    return;
+  }
 
-      if (suiResult) {
-        createdSuiAddress = suiResult.address;
-        useOnboarding.setState({ suiAddress: suiResult.address });
-      }
+  useOnboarding.setState({
+    step: 'creating-wallets',
+    _isProcessing: false,
+  });
 
-      try {
-        await refreshUser();
-      } catch {
-        // Non-fatal — Privy will eventually sync.
-      }
-    }
+  // Automatically trigger wallet creation
+  doRegisterWallets(0);
+};
 
-    writeStorage(WALLETS_REGISTERED_KEY, userId);
+const doRegisterWallets = async (retryCount = 0) => {
+  const { userId, _isProcessing } = useOnboarding.getState();
+  if (!userId || _isProcessing) return;
 
-    const suiAddr = existingSuiAddress || createdSuiAddress;
-    if (suiAddr) {
-      useOnboarding.setState({ suiAddress: suiAddr });
-    }
-    useOnboarding.setState({ step: 'funding', error: null });
+  useOnboarding.setState({
+    _isProcessing: true,
+    step: 'creating-wallets',
+    error: null,
+    _retryCount: retryCount,
+  });
+
+  try {
+    const [suiResult, solanaResult] = await Promise.all([
+      createSuiWallet(userId),
+      createSolanaWallet(userId),
+    ]);
+
+    useOnboarding.setState({
+      step: 'funding',
+      suiAddress: suiResult.address,
+      solanaAddress: solanaResult.address,
+      _isProcessing: false,
+    });
   } catch {
     if (retryCount < MAX_RETRY_ATTEMPTS) {
-      isRegistering = false;
+      useOnboarding.setState({ _isProcessing: false });
       retryTimer = setTimeout(
-        () => registerWithRetry(retryCount + 1),
+        () => doRegisterWallets(retryCount + 1),
         RETRY_DELAYS_MS[retryCount]
       );
       return;
     }
     useOnboarding.setState({
       error: 'Wallet setup failed. Please try again.',
+      _isProcessing: false,
     });
-  } finally {
-    isRegistering = false;
   }
 };
 
-const linkWithRetry = async (retryCount = 0) => {
-  const { userId } = useOnboarding.getState();
-  if (!userId || isLinking) return;
-  if (isUserLinked(userId)) return;
+const doStartLinking = async (retryCount = 0) => {
+  const { userId, _isProcessing } = useOnboarding.getState();
+  if (!userId || _isProcessing) return;
 
-  isLinking = true;
-  useOnboarding.setState({ step: 'linking', error: null });
+  useOnboarding.setState({
+    _isProcessing: true,
+    step: 'linking',
+    error: null,
+    _retryCount: retryCount,
+  });
 
   try {
-    await linkSolanaWallet(userId);
-    writeStorage(WALLETS_LINKED_KEY, userId);
-    useOnboarding.setState({ step: 'complete' });
+    useOnboarding.setState({ step: 'confirming' });
+    const result = await linkSolanaWallet(userId);
+
+    if ('alreadyLinked' in result && result.alreadyLinked) {
+      writeCache(userId);
+      useOnboarding.setState({
+        step: 'complete',
+        suiAddress: result.suiAddress,
+        solanaAddress: result.solanaAddress,
+        _isProcessing: false,
+      });
+      return;
+    }
+
+    writeCache(userId);
+    useOnboarding.setState({
+      step: 'complete',
+      suiAddress: result.suiAddress,
+      solanaAddress: result.solanaAddress,
+      _isProcessing: false,
+    });
   } catch (error) {
     if (error instanceof ApiRequestError && error.code === 'INSUFFICIENT_GAS') {
-      isLinking = false;
-      useOnboarding.setState({ step: 'funding' });
+      useOnboarding.setState({
+        step: 'funding',
+        _isProcessing: false,
+      });
       return;
     }
 
     if (retryCount < MAX_RETRY_ATTEMPTS) {
-      isLinking = false;
+      useOnboarding.setState({ _isProcessing: false });
       retryTimer = setTimeout(
-        () => linkWithRetry(retryCount + 1),
+        () => doStartLinking(retryCount + 1),
         RETRY_DELAYS_MS[retryCount]
       );
       return;
     }
     useOnboarding.setState({
       error: 'Wallet linking failed. Please try again.',
+      _isProcessing: false,
     });
-  } finally {
-    isLinking = false;
   }
 };
 
 // --- Store ---
 
 const initialState = {
-  step: 'creating-wallets' as OnboardingStep,
+  step: 'checking' as OnboardingStep,
   error: null as string | null,
   suiAddress: null as string | null,
+  solanaAddress: null as string | null,
   userId: null as string | null,
+  _isProcessing: false,
+  _retryCount: 0,
 };
 
 export const useOnboarding = create<OnboardingState>((set, get) => ({
   ...initialState,
 
-  registerWallets: (params) => {
-    registrationParams = params;
-    registerWithRetry(0);
+  checkRegistration: (userId) => {
+    doCheckRegistration(userId);
   },
 
-  linkWallets: () => {
-    isLinking = false;
-    linkWithRetry(0);
+  registerWallets: () => {
+    clearRetryTimer();
+    set({ _isProcessing: false });
+    doRegisterWallets(0);
+  },
+
+  startLinking: () => {
+    clearRetryTimer();
+    set({ _isProcessing: false });
+    doStartLinking(0);
   },
 
   retry: () => {
-    clearTimeout(retryTimer);
-    const { step } = get();
-    if (step === 'creating-wallets') {
-      isRegistering = false;
-      registerWithRetry(0);
+    clearRetryTimer();
+    const { step, userId } = get();
+    set({ _isProcessing: false });
+
+    if (step === 'checking' && userId) {
+      doCheckRegistration(userId);
+    } else if (step === 'creating-wallets') {
+      doRegisterWallets(0);
     } else {
-      isLinking = false;
-      linkWithRetry(0);
+      doStartLinking(0);
     }
   },
 
   reset: () => {
-    clearTimeout(retryTimer);
-    isRegistering = false;
-    isLinking = false;
-    registrationParams = null;
+    clearRetryTimer();
     set(initialState);
   },
 
   cleanup: () => {
-    clearTimeout(retryTimer);
+    clearRetryTimer();
   },
 }));

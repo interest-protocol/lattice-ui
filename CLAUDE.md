@@ -6,7 +6,7 @@
 
 - **Tech Stack**: Next.js 16 (App Router + Turbopack), TypeScript 5.9 (strict), React 19 + React Compiler, Framer Motion (`motion/react`), Tailwind CSS v4
 - **Blockchains**: Sui Network & Solana
-- **Wallet**: Privy integration for wallet connection
+- **Wallet**: Privy developer-owned server wallets (wallet mapping via `custom_metadata`)
 - **State**: Zustand for global state, TanStack Query v5 for server state, React Hook Form for forms
 - **Styling**: Tailwind CSS v4 (utility-first, configured via `@theme` in `globals.css`)
 - **Linting**: Biome 2.3 (not ESLint/Prettier)
@@ -927,7 +927,143 @@ toasting.dismiss(toastId);
 
 ## Wallet Integration (Privy)
 
-### Basic Usage
+### Architecture: Developer-Owned Server Wallets
+
+This project uses **developer-owned** (server) wallets, NOT user-owned wallets. This is a critical architectural decision:
+
+| Aspect | User-Owned | Developer-Owned (ours) |
+|--------|-----------|----------------------|
+| `create()` call | `{ chain_type, owner: { user_id } }` | `{ chain_type }` (no `owner`) |
+| Server-side signing | Requires user JWT/session (401 for dev auth keys) | Developer auth key is sufficient |
+| Solana `signMessage` via `/rpc` | 401 — dev auth keys rejected | Works with dev auth keys |
+| Solana `rawSign` via `/raw_sign` | 400 — "solana wallets not supported" | 400 — still not supported (use `signMessage`) |
+| Wallet lookup | `wallets().list({ user_id })` | `custom_metadata` on Privy user |
+
+### Wallet ↔ User Mapping via `custom_metadata`
+
+Since developer-owned wallets have no `owner`, we store the mapping in Privy user `custom_metadata`:
+
+```typescript
+// Metadata keys stored per user:
+{
+  suiWalletId: string,      // Privy wallet ID
+  suiAddress: string,       // On-chain address
+  solanaWalletId: string,   // Privy wallet ID
+  solanaAddress: string,    // On-chain address (base58)
+}
+```
+
+Core functions in `lib/privy/wallet.ts`:
+- `getOrCreateWallet(privy, userId, chainType)` — Looks up metadata first, creates if missing
+- `getFirstWallet(privy, userId, chainType)` — Metadata lookup only, throws `WalletNotFoundError`
+- `storeWalletMetadata(privy, userId, chainType, wallet)` — Merges into existing metadata
+
+### Privy Node SDK API Surface
+
+```typescript
+// User lookup (by Privy user ID like "did:privy:...")
+const user = await privy.users()._get(userId);
+// NOTE: privy.users().get() only accepts { id_token }, NOT a string userId
+
+// Store metadata (reads existing + merges)
+await privy.users().setCustomMetadata(userId, {
+  custom_metadata: { ...existing, newKey: 'value' },
+});
+
+// Wallet creation (developer-owned — no owner field)
+const wallet = await privy.wallets().create({ chain_type: 'sui' });
+
+// Wallet lookup by ID
+const wallet = await privy.wallets().get(walletId);
+
+// Solana signing (first-class chain — use chain-specific methods)
+const result = await privy.wallets().solana().signMessage(walletId, {
+  message: messageBytes,  // Uint8Array or base64 string
+  authorization_context: { authorization_private_keys: [AUTH_KEY] },
+});
+// Returns: { encoding: 'base64', signature: string }
+
+// Sui signing (curve-signing chain — use rawSign)
+const result = await privy.wallets().rawSign(walletId, {
+  params: {
+    bytes: base64EncodedBytes,
+    encoding: 'base64',
+    hash_function: 'blake2b256',
+  },
+  authorization_context: { authorization_private_keys: [AUTH_KEY] },
+});
+// Returns: { encoding: 'hex', signature: string }
+```
+
+### Privy Chain Classification
+
+| Classification | Chains | Signing Method |
+|---------------|--------|---------------|
+| **First-Class** | Ethereum, Solana | Chain-specific methods: `.ethereum().signMessage()`, `.solana().signAndSendTransaction()` |
+| **Curve-Signing** | Sui, Aptos, Cosmos, Stellar, etc. | Generic `rawSign()` only |
+
+**Sui has NO chain-specific Privy service** (no `.sui().signTransaction()`). All Sui signing goes through `rawSign`.
+
+### Sui Transaction Signing (via `rawSign`)
+
+Sui transaction signing requires manually replicating what the Sui SDK does internally:
+
+```typescript
+// 1. Build intent message (3-byte prefix + raw tx bytes)
+const intentMessage = messageWithIntent('TransactionData', rawBytes);
+
+// 2. Use Bytes variant — let Privy hash with blake2b256 and sign
+const signResult = await privy.wallets().rawSign(walletId, {
+  params: {
+    bytes: Buffer.from(intentMessage).toString('base64'),
+    encoding: 'base64',
+    hash_function: 'blake2b256',  // Sui uses blake2b-256
+  },
+  authorization_context: authorizationContext,
+});
+
+// 3. Strip 0x prefix from hex signature (Privy may include it)
+const sigHex = signResult.signature.replace(/^0x/, '');
+const signatureBytes = Uint8Array.from(Buffer.from(sigHex, 'hex'));
+
+// 4. Extract public key from wallet (Privy returns hex with flag byte prefix)
+const publicKey = extractPublicKey(walletInfo.public_key);
+
+// 5. Build serialized signature for Sui
+const serializedSignature = toSerializedSignature({
+  signature: signatureBytes,
+  signatureScheme: 'ED25519',
+  publicKey,
+});
+
+// 6. Execute
+await suiClient.executeTransactionBlock({
+  transactionBlock: Buffer.from(rawBytes).toString('base64'),
+  signature: serializedSignature,
+});
+```
+
+### Solana-to-Sui Cross-Chain Signature (Link Solana)
+
+The `linkSolana` flow signs a message with the **Solana** wallet and passes that signature into a **Sui** transaction for on-chain Ed25519 verification:
+
+```typescript
+// 1. Create the message the on-chain contract expects
+const messageBytes = Registry.createSolanaLinkMessage(suiAddress);
+// → Uint8Array of "Link Solana to Sui: <hex_address_without_0x>"
+
+// 2. Sign with Solana wallet (standard Ed25519, no prefix)
+const signResult = await privy.wallets().solana().signMessage(walletId, {
+  message: messageBytes,  // Pass Uint8Array directly
+  authorization_context: { ... },
+});
+
+// 3. On-chain, Sui's ed25519_verify(signature, pubkey, message) verifies it
+```
+
+Reference implementation: `core/scripts/src/setup/1-user-registers-solana.ts` uses `nacl.sign.detached()`.
+
+### Basic Client Usage
 
 ```typescript
 import { usePrivy } from '@privy-io/react-auth';
@@ -937,7 +1073,7 @@ const { login, logout, authenticated, user, ready } = usePrivy();
 
 ### Getting Wallet Addresses
 
-Use the project's custom hook (not raw Privy parsing):
+Use the project's custom hook (reads from onboarding store, not raw Privy `linkedAccounts`):
 
 ```typescript
 import { useWalletAddresses } from '@/hooks/domain/use-wallet-addresses';
@@ -951,6 +1087,96 @@ if (hasWallet('sui')) {
   // Sui wallet available
 }
 ```
+
+### Privy Gotchas & Mistakes to Avoid
+
+#### 1. NEVER use the `Hash` variant of `rawSign` for Sui
+
+```typescript
+// BAD — Hash variant produces invalid signatures for Sui transactions
+const signResult = await privy.wallets().rawSign(walletId, {
+  params: { hash: `0x${hashHex}` },
+  ...
+});
+
+// GOOD — Bytes variant with blake2b256 (matches Sui's signing flow)
+const signResult = await privy.wallets().rawSign(walletId, {
+  params: {
+    bytes: Buffer.from(intentMessage).toString('base64'),
+    encoding: 'base64',
+    hash_function: 'blake2b256',
+  },
+  ...
+});
+```
+
+#### 2. ALWAYS strip `0x` from `rawSign` hex signatures
+
+```typescript
+// BAD — Buffer.from silently corrupts bytes when 0x prefix is present
+const sig = Buffer.from(signResult.signature, 'hex');
+
+// GOOD — strip the prefix first
+const sig = Buffer.from(signResult.signature.replace(/^0x/, ''), 'hex');
+```
+
+#### 3. NEVER use `privy.users().get(userId)` — use `._get(userId)`
+
+```typescript
+// BAD — PrivyUsersService.get() only accepts { id_token }, not a string
+const user = await privy.users().get(userId);
+
+// GOOD — _get() from base Users class accepts a string user ID
+const user = await privy.users()._get(userId);
+```
+
+#### 4. Privy public keys for Sui wallets are hex with a flag byte
+
+```typescript
+// Privy returns: "0063c7e614..." (hex: 00 flag + 32-byte key = 33 bytes)
+// You must detect hex vs base64, then extract the last 32 bytes:
+const isHex = /^(0x)?[0-9a-fA-F]+$/.test(rawString) && rawString.length >= 64;
+const decoded = isHex
+  ? Buffer.from(rawString.replace(/^0x/, ''), 'hex')
+  : Buffer.from(rawString, 'base64');
+const keyBytes = decoded.length > 32
+  ? decoded.subarray(decoded.length - 32)
+  : decoded;
+```
+
+#### 5. NEVER use `rawSign` for Solana wallets — use `signMessage`
+
+```typescript
+// BAD — rawSign rejects Solana wallets ("not supported for this endpoint")
+await privy.wallets().rawSign(solanaWalletId, { ... });
+
+// GOOD — use chain-specific signMessage
+await privy.wallets().solana().signMessage(solanaWalletId, { ... });
+```
+
+#### 6. Pass `Uint8Array` to `signMessage` when possible
+
+```typescript
+// OK — base64 string (Privy assumes base64 for strings)
+signMessage(walletId, { message: base64String });
+
+// BETTER — Uint8Array (Privy handles encoding internally)
+signMessage(walletId, { message: messageBytes });
+```
+
+#### 7. Verify cross-chain signatures locally before submitting on-chain
+
+```typescript
+import { ed25519 } from '@noble/curves/ed25519';
+
+// Verify Solana signature matches message + pubkey before paying gas
+const valid = ed25519.verify(signature, message, publicKey);
+if (!valid) throw new Error('Signature verification failed locally');
+```
+
+#### 8. `useWalletAddresses` reads from onboarding store, NOT Privy `linkedAccounts`
+
+Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads from the Zustand onboarding store which is populated from `custom_metadata` during the registration check.
 
 ---
 
@@ -983,10 +1209,10 @@ const { balances, loadingCoins } = useAppState(
 ### 3. Raw Privy Address Extraction
 
 ```typescript
-// BAD - manual linkedAccounts parsing
+// BAD - manual linkedAccounts parsing (dev-owned wallets aren't in linkedAccounts)
 const suiWallet = user?.linkedAccounts.find(...);
 
-// GOOD - use the hook
+// GOOD - use the hook (reads from onboarding store, populated from custom_metadata)
 const { getAddress } = useWalletAddresses();
 const suiAddress = getAddress('sui');
 ```

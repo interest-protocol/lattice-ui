@@ -38,4 +38,5 @@ export {
   REGISTRY_SHARED_OBJECT_DATA,
   Registry,
   SolanaPubkey,
+  SuiAddress,
 } from '@interest-protocol/registry-sdk';

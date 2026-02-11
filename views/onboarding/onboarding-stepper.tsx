@@ -12,11 +12,19 @@ const STEPS: readonly { key: OnboardingStep; label: string }[] = [
   { key: 'linking', label: 'Link' },
 ];
 
-const STEP_INDEX: Record<OnboardingStep, number> = {
-  'creating-wallets': 0,
-  funding: 1,
-  linking: 2,
-  complete: 3,
+const getStepIndex = (step: OnboardingStep): number => {
+  switch (step) {
+    case 'checking':
+    case 'creating-wallets':
+      return 0;
+    case 'funding':
+      return 1;
+    case 'linking':
+    case 'confirming':
+      return 2;
+    case 'complete':
+      return 3;
+  }
 };
 
 interface OnboardingStepperProps {
@@ -25,7 +33,7 @@ interface OnboardingStepperProps {
 }
 
 const OnboardingStepper: FC<OnboardingStepperProps> = ({ step, hasError }) => {
-  const activeIndex = STEP_INDEX[step];
+  const activeIndex = getStepIndex(step);
   const isComplete = step === 'complete';
 
   return (

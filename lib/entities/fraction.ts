@@ -118,10 +118,6 @@ export class Fraction {
     );
   }
 
-  /**
-   * Performs bigint-based decimal division to avoid Number precision loss
-   * for values exceeding Number.MAX_SAFE_INTEGER.
-   */
   private toBigIntDecimal(decimalPlaces: number): string {
     const negative = this.numerator < 0n;
     const abs = negative ? -this.numerator : this.numerator;

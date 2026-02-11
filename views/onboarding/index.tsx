@@ -46,6 +46,22 @@ const OnboardingView: FC = () => {
 
         <div className="w-full min-h-[7rem]">
           <AnimatePresence mode="wait">
+            {step === 'checking' && !hasError && (
+              <motion.div
+                key="checking"
+                className="flex flex-col items-center gap-3 py-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={stepTransition}
+              >
+                <Spinner size="1.5rem" className="text-accent" />
+                <span className="text-sm text-text-muted">
+                  Checking registration status...
+                </span>
+              </motion.div>
+            )}
+
             {step === 'creating-wallets' && !hasError && (
               <motion.div
                 key="creating"
@@ -75,7 +91,7 @@ const OnboardingView: FC = () => {
               </motion.div>
             )}
 
-            {step === 'linking' && !hasError && (
+            {(step === 'linking' || step === 'confirming') && !hasError && (
               <motion.div
                 key="linking"
                 className="flex flex-col items-center gap-3 py-4"
@@ -86,7 +102,9 @@ const OnboardingView: FC = () => {
               >
                 <Spinner size="1.5rem" className="text-accent" />
                 <span className="text-sm text-text-muted">
-                  Linking your wallets...
+                  {step === 'confirming'
+                    ? 'Confirming transaction...'
+                    : 'Linking your wallets...'}
                 </span>
               </motion.div>
             )}

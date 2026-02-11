@@ -1,5 +1,5 @@
 import type { ChainKey } from '@/constants/chains';
-import { post } from '@/lib/api/client';
+import { get, post } from '@/lib/api/client';
 
 export interface CreateWalletResult {
   id: string;
@@ -43,6 +43,16 @@ export const sendSolana = (params: {
 
 export const linkSolanaWallet = (userId: string) =>
   post<LinkSolanaResult>('/api/wallet/link-solana', { userId });
+
+export interface CheckRegistrationResult {
+  registered: boolean;
+  suiAddress: string | null;
+  solanaAddress: string | null;
+  hasWallets: boolean;
+}
+
+export const checkRegistration = () =>
+  get<CheckRegistrationResult>('/api/wallet/check-registration');
 
 // Unified send interface
 

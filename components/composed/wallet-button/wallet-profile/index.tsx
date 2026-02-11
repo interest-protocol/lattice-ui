@@ -2,10 +2,10 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { AnimatePresence } from 'motion/react';
-import Image from 'next/image';
 import { type FC, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { ChevronDownSVG } from '@/components/ui/icons';
+import { ChevronDownSVG, LogoSVG } from '@/components/ui/icons';
+import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { useModal } from '@/hooks/store/use-modal';
 import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
 import { formatAddress } from '@/utils';
@@ -26,10 +26,8 @@ const WalletProfile: FC = () => {
     setOpen(false)
   );
 
-  const userWallet =
-    user?.wallet ?? user?.linkedAccounts?.find((a) => a.type === 'wallet');
-  const walletAddr =
-    userWallet && 'address' in userWallet ? userWallet.address : null;
+  const { getAddress } = useWalletAddresses();
+  const walletAddr = getAddress('sui') ?? getAddress('solana');
 
   const displayAddress = (() => {
     if (!user) return '';
@@ -63,13 +61,7 @@ const WalletProfile: FC = () => {
           className="py-3 gap-2 flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200"
           onClick={handleOpenProfileDropdown}
         >
-          <Image
-            alt="Account"
-            className="rounded-full"
-            src="/icon.svg"
-            width={24}
-            height={24}
-          />
+          <LogoSVG maxWidth="1.25rem" maxHeight="1.25rem" className="text-accent" />
           <span className="whitespace-nowrap">{displayAddress}</span>
           <span className="hidden sm:flex items-center ml-1">
             <ChevronDownSVG
@@ -95,14 +87,7 @@ const WalletProfile: FC = () => {
         className="flex md:hidden gap-1 bg-surface-raised text-text cursor-pointer items-center rounded-lg py-2.5 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200"
         onClick={handleOpenProfileModal}
       >
-        <Image
-          alt="Account"
-          className="rounded-full"
-          src="/icon.svg"
-          width={16}
-          height={16}
-          style={{ padding: 2 }}
-        />
+        <LogoSVG maxWidth="1rem" maxHeight="1rem" className="text-accent" />
         {displayAddress}
         <span className="hidden sm:inline">
           <ChevronDownSVG maxWidth="0.65rem" maxHeight="0.65rem" width="100%" />

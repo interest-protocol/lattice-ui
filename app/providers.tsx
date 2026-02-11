@@ -2,10 +2,9 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { BackgroundProvider } from '@/components';
 import AuthInitializer from '@/components/providers/auth-initializer';
@@ -15,36 +14,20 @@ import ModalProvider from '@/components/providers/modal-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
-import { WALLETS_LINKED_KEY } from '@/constants/storage-keys';
 import { TOAST_DURATION } from '@/constants/toast';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 import useThemeColors from '@/hooks/ui/use-theme-colors';
 import OnboardingView from '@/views/onboarding';
 
-type LinkedUsers = Record<string, boolean>;
-
 const OnboardingGate = ({ children }: { children: ReactNode }) => {
   const { user, authenticated, ready } = usePrivy();
   const step = useOnboarding((s) => s.step);
-  const [mounted, setMounted] = useState(false);
-  const [linkedUsers] = useLocalStorage<LinkedUsers>(WALLETS_LINKED_KEY, {});
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Prevent flash: wait for mount + Privy ready
-  if (!mounted || !ready) return null;
-
-  // Not authenticated — show normal app (login button)
+  if (!ready) return null;
   if (!authenticated || !user?.id) return <>{children}</>;
+  if (step === 'complete') return <>{children}</>;
+  if (step === 'checking') return null;
 
-  // Already linked — show normal app
-  // step === 'complete' provides immediate same-tab reactivity since
-  // direct localStorage.setItem doesn't trigger useLocalStorage.
-  if (linkedUsers[user.id] || step === 'complete') return <>{children}</>;
-
-  // Onboarding in progress
   return <OnboardingView />;
 };
 

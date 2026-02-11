@@ -1,43 +1,47 @@
 'use client';
 
-import { type FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useRef } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
+import Spinner from '@/components/ui/spinner';
 import { WalletSVG } from '@/components/ui/icons';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
-import { parseUnits } from '@/lib/bigint-utils';
+import { formatUnits, parseUnits } from '@/lib/bigint-utils';
 
 const MIN_GAS = CHAIN_REGISTRY.sui.minGas;
 const MIN_GAS_RAW = parseUnits(String(MIN_GAS), CHAIN_REGISTRY.sui.decimals);
+const SUI_DECIMALS = CHAIN_REGISTRY.sui.decimals;
 
 const FundingStep: FC = () => {
   const suiAddress = useOnboarding((s) => s.suiAddress);
-  const linkWallets = useOnboarding((s) => s.linkWallets);
-  const [checking, setChecking] = useState(false);
+  const startLinking = useOnboarding((s) => s.startLinking);
+  const hasAdvanced = useRef(false);
 
-  const { balances, mutate } = useSuiBalances(suiAddress);
+  const { balances, isLoading, mutate } = useSuiBalances(suiAddress);
+  const suiBalance = balances.sui;
+  const hasSufficientBalance = suiBalance >= MIN_GAS_RAW;
 
+  // Auto-advance when balance is sufficient
   useEffect(() => {
-    if (balances.sui >= MIN_GAS_RAW && !checking) {
-      linkWallets();
+    if (hasSufficientBalance && !hasAdvanced.current) {
+      hasAdvanced.current = true;
+      startLinking();
     }
-  }, [balances.sui, linkWallets, checking]);
+  }, [hasSufficientBalance, startLinking]);
 
   const handleCheckBalance = async () => {
-    setChecking(true);
-    try {
-      const result = await mutate();
-      if (result.sui >= MIN_GAS_RAW) {
-        linkWallets();
-      }
-    } finally {
-      setChecking(false);
+    const result = await mutate();
+    if (result.sui >= MIN_GAS_RAW && !hasAdvanced.current) {
+      hasAdvanced.current = true;
+      startLinking();
     }
   };
 
   if (!suiAddress) return null;
+
+  const displayBalance = formatUnits(suiBalance, SUI_DECIMALS);
 
   return (
     <div className="flex flex-col gap-5">
@@ -58,13 +62,23 @@ const FundingStep: FC = () => {
           ariaLabel="Copy SUI address"
         />
       </div>
+      <div className="flex items-center justify-between rounded-xl bg-surface-inset px-4 py-3">
+        <span className="text-sm text-text-muted">Current balance</span>
+        <span className="text-sm font-semibold text-text">
+          {isLoading ? (
+            <Spinner size="0.875rem" className="text-accent" />
+          ) : (
+            `${displayBalance} SUI`
+          )}
+        </span>
+      </div>
       <button
         type="button"
         className="w-full py-3 rounded-xl font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-50 cursor-pointer border-none"
         onClick={handleCheckBalance}
-        disabled={checking}
+        disabled={isLoading}
       >
-        {checking ? 'Checking...' : 'Check Balance'}
+        {isLoading ? 'Checking...' : 'Check Balance'}
       </button>
     </div>
   );

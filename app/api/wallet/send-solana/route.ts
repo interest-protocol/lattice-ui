@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest) {
       .signAndSendTransaction(wallet.id, {
         caip2: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
         transaction: serialized,
+        authorization_context: {
+          authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
+        },
       });
 
     return NextResponse.json({

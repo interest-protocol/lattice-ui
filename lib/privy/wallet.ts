@@ -9,18 +9,36 @@ export class WalletNotFoundError extends Error {
   }
 }
 
+const walletIdKey = (chain: ChainKey) => `${chain}WalletId`;
+const walletAddressKey = (chain: ChainKey) => `${chain}Address`;
+
+export const storeWalletMetadata = async (
+  privy: PrivyClient,
+  userId: string,
+  chainType: ChainKey,
+  wallet: { id: string; address: string }
+) => {
+  const user = await privy.users()._get(userId);
+  const existing = user.custom_metadata ?? {};
+  await privy.users().setCustomMetadata(userId, {
+    custom_metadata: {
+      ...existing,
+      [walletIdKey(chainType)]: wallet.id,
+      [walletAddressKey(chainType)]: wallet.address,
+    },
+  });
+};
+
 export const getFirstWallet = async (
   privy: PrivyClient,
   userId: string,
   chainType: ChainKey
 ) => {
-  for await (const wallet of privy.wallets().list({
-    user_id: userId,
-    chain_type: chainType,
-  })) {
-    return wallet;
+  const user = await privy.users()._get(userId);
+  const walletId = user.custom_metadata?.[walletIdKey(chainType)];
+  if (walletId) {
+    return privy.wallets().get(String(walletId));
   }
-
   throw new WalletNotFoundError(chainType);
 };
 
@@ -29,15 +47,13 @@ export const getOrCreateWallet = async (
   userId: string,
   chainType: ChainKey
 ) => {
-  for await (const wallet of privy.wallets().list({
-    user_id: userId,
-    chain_type: chainType,
-  })) {
-    return wallet;
+  const user = await privy.users()._get(userId);
+  const walletId = user.custom_metadata?.[walletIdKey(chainType)];
+  if (walletId) {
+    return privy.wallets().get(String(walletId));
   }
 
-  return privy.wallets().create({
-    chain_type: chainType,
-    owner: { user_id: userId },
-  });
+  const wallet = await privy.wallets().create({ chain_type: chainType });
+  await storeWalletMetadata(privy, userId, chainType, wallet);
+  return wallet;
 };

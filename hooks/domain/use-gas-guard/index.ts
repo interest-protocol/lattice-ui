@@ -4,7 +4,7 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import GasRequiredModal from '@/components/composed/gas-required-modal';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
-import { WALLETS_LINKED_KEY } from '@/constants/storage-keys';
+import { REGISTRATION_CACHE_KEY } from '@/constants/storage-keys';
 import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
@@ -17,7 +17,10 @@ const SOL_THRESHOLD = parseUnits('0.01', CHAIN_REGISTRY.solana.decimals);
 const useGasGuard = () => {
   const { authenticated, ready, user } = usePrivy();
   const [mounted, setMounted] = useState(false);
-  const [linkedUsers] = useLocalStorage<LinkedUsers>(WALLETS_LINKED_KEY, {});
+  const [linkedUsers] = useLocalStorage<LinkedUsers>(
+    REGISTRATION_CACHE_KEY,
+    {}
+  );
 
   const {
     suiAddress,

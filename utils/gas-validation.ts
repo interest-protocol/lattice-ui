@@ -110,10 +110,6 @@ export const validateSwapInput = ({
   return { isDisabled: false, message: null };
 };
 
-/**
- * CurrencyAmount-based swap validation — simpler API with fewer params.
- * Token carries its own decimals/chain info, so we derive everything.
- */
 export const validateSwapAmount = (
   amount: CurrencyAmount,
   gasBalance: CurrencyAmount

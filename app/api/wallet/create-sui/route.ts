@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
 import { getPrivyClient } from '@/lib/privy/server';
+import { getOrCreateWallet } from '@/lib/privy/wallet';
 
 const schema = z.object({
   userId: z.string(),
@@ -29,10 +30,7 @@ export async function POST(request: NextRequest) {
   try {
     const privy = getPrivyClient();
 
-    const wallet = await privy.wallets().create({
-      chain_type: 'sui',
-      owner: { user_id: body.userId },
-    });
+    const wallet = await getOrCreateWallet(privy, body.userId, 'sui');
 
     return NextResponse.json({
       id: wallet.id,
