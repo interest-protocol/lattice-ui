@@ -12,7 +12,7 @@ import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
-import { formatMoney } from '@/utils';
+import { extractErrorMessage, formatMoney } from '@/utils';
 
 interface WithdrawViewProps {
   network: ChainKey;
@@ -110,7 +110,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
       dismiss();
       toasting.error({
         action: 'Withdraw',
-        message: error instanceof Error ? error.message : 'Transaction failed',
+        message: extractErrorMessage(error, 'Transaction failed'),
       });
     } finally {
       setSending(false);

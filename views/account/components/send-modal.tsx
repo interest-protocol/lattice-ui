@@ -13,7 +13,7 @@ import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
-import { formatMoney } from '@/utils';
+import { extractErrorMessage, formatMoney } from '@/utils';
 
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
@@ -102,7 +102,7 @@ const SendModal: FC = () => {
       dismiss();
       toasting.error({
         action: 'Send',
-        message: error instanceof Error ? error.message : 'Transaction failed',
+        message: extractErrorMessage(error, 'Transaction failed'),
       });
     } finally {
       setSending(false);
