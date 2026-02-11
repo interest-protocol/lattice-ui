@@ -6,8 +6,6 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { PRIVY_APP_ID } from '@/lib/config';
 
-const solanaConnectors = toSolanaWalletConnectors();
-
 const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
   <PrivyProvider
     appId={PRIVY_APP_ID}
@@ -24,7 +22,7 @@ const PrivyProviderWrapper: FC<PropsWithChildren> = ({ children }) => (
       },
       externalWallets: {
         solana: {
-          connectors: solanaConnectors,
+          connectors: toSolanaWalletConnectors(),
         },
       },
     }}

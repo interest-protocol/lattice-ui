@@ -1,7 +1,6 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import dynamic from 'next/dynamic';
 import { type ReactNode, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
@@ -10,13 +9,9 @@ import { BackgroundProvider } from '@/components';
 import AppStateProvider from '@/components/providers/app-state-provider';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import ModalProvider from '@/components/providers/modal-provider';
+import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
-
-const PrivyProviderWrapper = dynamic(
-  import('@/components/providers/privy-provider').then((m) => m.default),
-  { ssr: false }
-);
 
 const Providers = ({ children }: { children: ReactNode }) => {
   const [queryClient] = useState(

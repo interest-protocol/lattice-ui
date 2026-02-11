@@ -58,13 +58,13 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       whileHover="hover"
       onClick={() => availableTypes.length > 1 && openAssetModal()}
     >
-      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 bg-surface-lighter items-center justify-center">
+      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 bg-surface-lighter items-center justify-center p-1">
         <Image
           className="object-contain"
           alt={metadata[type]?.symbol ?? ''}
           src={metadata[type]?.iconUrl ?? ''}
-          width={32}
-          height={32}
+          width={24}
+          height={24}
         />
       </span>
       {metadata?.[type]?.symbol ?? 'Select Coin'}

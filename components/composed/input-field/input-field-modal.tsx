@@ -56,13 +56,13 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
               }}
             >
               <div className="flex gap-4 items-center">
-                <span className="flex overflow-hidden rounded-lg w-10 h-10 min-w-10 bg-surface-lighter items-center justify-center">
+                <span className="flex overflow-hidden rounded-lg w-10 h-10 min-w-10 bg-surface-lighter items-center justify-center p-1.5">
                   <Image
                     alt={name}
                     className="object-contain"
                     src={iconUrl}
-                    width={40}
-                    height={40}
+                    width={28}
+                    height={28}
                   />
                 </span>
                 <p className="text-sm">{symbol}</p>
