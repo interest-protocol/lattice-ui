@@ -1,13 +1,16 @@
 import { usePrivy } from '@privy-io/react-auth';
-import { useEffect, useRef, useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
+import GasRequiredModal from '@/components/composed/gas-required-modal';
 import { toasting } from '@/components/ui/toast';
 import {
   WALLETS_LINKED_KEY,
   WALLETS_REGISTERED_KEY,
 } from '@/constants/storage-keys';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
+import { useModal } from '@/hooks/store/use-modal';
+import { ApiRequestError } from '@/lib/api/client';
 import {
   createSolanaWallet,
   createSuiWallet,
@@ -22,7 +25,7 @@ type LinkedUsers = Record<string, boolean>;
 
 const useWalletRegistration = () => {
   const { user, authenticated, ready } = usePrivy();
-  const { hasWallet } = useWalletAddresses();
+  const { hasWallet, getAddress } = useWalletAddresses();
   const hasSuiWallet = hasWallet('sui');
   const hasSolanaWallet = hasWallet('solana');
   const [mounted, setMounted] = useState(false);
@@ -100,6 +103,16 @@ const useWalletRegistration = () => {
     }
   };
 
+  const openGasModal = (suiAddress: string) => {
+    useModal.getState().setContent(
+      createElement(GasRequiredModal, {
+        suiAddress,
+        onRetry: () => linkWallets(0),
+      }),
+      { title: 'SUI Gas Required', allowClose: false }
+    );
+  };
+
   const linkWallets = async (retryCount = 0) => {
     if (!user?.id || isLinking.current) return;
     if (effectiveLinkedUsers[user.id]) return;
@@ -110,7 +123,20 @@ const useWalletRegistration = () => {
     try {
       await linkSolanaWallet(user.id);
       setLinkedUsers((prev) => ({ ...prev, [user.id]: true }));
-    } catch (_error) {
+      useModal.getState().handleClose();
+    } catch (error) {
+      if (
+        error instanceof ApiRequestError &&
+        error.code === 'INSUFFICIENT_GAS'
+      ) {
+        const suiAddress = getAddress('sui');
+        if (suiAddress) {
+          isLinking.current = false;
+          openGasModal(suiAddress);
+          return;
+        }
+      }
+
       if (retryCount < MAX_RETRY_ATTEMPTS) {
         const delay = RETRY_DELAYS_MS[retryCount];
         isLinking.current = false;

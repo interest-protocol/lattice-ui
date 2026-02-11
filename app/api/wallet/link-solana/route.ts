@@ -29,6 +29,17 @@ export async function POST(request: NextRequest) {
 
     const { suiClient, registry } = createRegistrySdk();
 
+    const { totalBalance } = await suiClient.getBalance({
+      owner: suiWallet.address,
+    });
+
+    if (BigInt(totalBalance) < 1_000_000n) {
+      return NextResponse.json(
+        { error: 'Insufficient SUI for gas', code: 'INSUFFICIENT_GAS' },
+        { status: 402 }
+      );
+    }
+
     const messageBytes = Registry.createSolanaLinkMessage(suiWallet.address);
     const messageHex = Buffer.from(messageBytes).toString('hex');
 
@@ -73,6 +84,19 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     if (error instanceof WalletNotFoundError)
       return errorResponse(error, error.message, 404);
+
+    const msg = error instanceof Error ? error.message : '';
+    const isGasError =
+      /GasBalanceTooLow|InsufficientGas|InsufficientCoinBalance|No valid gas coins/i.test(
+        msg
+      );
+    if (isGasError) {
+      return NextResponse.json(
+        { error: 'Insufficient SUI for gas', code: 'INSUFFICIENT_GAS' },
+        { status: 402 }
+      );
+    }
+
     return errorResponse(error, 'Failed to link Solana');
   }
 }

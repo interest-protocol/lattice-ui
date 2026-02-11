@@ -3,6 +3,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
+import { InfoSVG, WalletSVG } from '@/components/ui/icons';
 import { toasting } from '@/components/ui/toast';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
@@ -120,7 +121,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <span className="text-text-secondary text-sm font-medium mb-2 block">
+        <span className="text-text-secondary text-sm font-medium opacity-80 mb-2 block">
           Select Token
         </span>
         <div className="flex gap-2">
@@ -130,7 +131,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
               <button
                 key={token.type}
                 type="button"
-                className="flex-1 p-2.5 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
                 style={{
                   border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
                   background: isSelected
@@ -143,9 +144,9 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
                   <Image
                     src={token.iconUrl}
                     alt={token.symbol}
-                    width={18}
-                    height={18}
-                    style={{ borderRadius: '50%' }}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
                   />
                 )}
                 <span className="text-text font-semibold text-sm">
@@ -158,33 +159,53 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
       </div>
 
       <div>
-        <span className="text-text-secondary text-sm font-medium mb-2 block">
+        <label
+          htmlFor="withdraw-recipient"
+          className="text-text-secondary text-sm font-medium opacity-80 mb-2 block"
+        >
           Recipient Address
-        </span>
-        <input
-          className="w-full p-3.5 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-[0.8125rem] outline-none focus:border-accent-border transition-all duration-200"
-          placeholder={config.addressPlaceholder}
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        />
+        </label>
+        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-all duration-200 bg-surface-inset">
+          <input
+            id="withdraw-recipient"
+            className="w-full bg-transparent border-none text-text font-mono text-sm outline-none"
+            placeholder={config.addressPlaceholder}
+            autoComplete="off"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+          />
+        </div>
       </div>
 
       <div>
         <div className="flex justify-between mb-2">
-          <span className="text-text-secondary text-sm font-medium">
+          <label
+            htmlFor="withdraw-amount"
+            className="text-text-secondary text-sm font-medium opacity-80"
+          >
             Amount
-          </span>
-          <span className="text-text-muted text-[0.8125rem]">
-            Balance:{' '}
-            {isLoading ? '...' : `${balanceFormatted} ${selectedToken.symbol}`}
-          </span>
+          </label>
+          <button
+            type="button"
+            className="flex gap-2 items-center cursor-pointer bg-transparent border-none p-0 text-text-muted text-sm hover:text-accent transition-colors"
+            onClick={setMaxAmount}
+          >
+            <WalletSVG maxWidth="1rem" width="100%" />
+            <span className="font-mono">
+              {isLoading
+                ? '...'
+                : `${balanceFormatted} ${selectedToken.symbol}`}
+            </span>
+          </button>
         </div>
-        <div className="relative">
+        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-all duration-200 bg-surface-inset flex items-center gap-3">
           <input
-            className="w-full p-3.5 pr-14 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-[0.9375rem] outline-none focus:border-accent-border transition-all duration-200"
-            placeholder="0.0"
+            id="withdraw-amount"
+            className="flex-1 bg-transparent border-none text-text font-mono text-2xl outline-none min-w-0"
+            placeholder="0"
             type="text"
             inputMode="decimal"
+            autoComplete="off"
             value={amount}
             onChange={(e) => {
               const filtered = e.target.value.replace(/[^0-9.]/g, '');
@@ -201,7 +222,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
           />
           <button
             type="button"
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-accent text-[0.8125rem] font-semibold bg-transparent border-none hover:opacity-70"
+            className="px-3 py-1.5 rounded-lg text-accent text-xs font-semibold cursor-pointer border-none bg-accent-wash hover:bg-accent-subtle transition-colors"
             onClick={setMaxAmount}
           >
             MAX
@@ -209,24 +230,23 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         </div>
       </div>
 
-      <div
-        className="p-3 rounded-lg"
-        style={{
-          background: 'var(--color-accent-wash)',
-          border: '1px solid var(--color-accent-border)',
-        }}
-      >
-        <p className="text-text text-[0.8125rem]">
-          Verify the address carefully. Transactions cannot be reversed.
+      <div className="p-3 bg-warning-bg border border-warning-border rounded-xl flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <InfoSVG maxWidth="1rem" width="100%" />
+          <span className="text-warning font-semibold text-sm">Important</span>
+        </div>
+        <p className="text-text-secondary text-xs leading-relaxed m-0">
+          Verify the recipient address carefully. Transactions on the blockchain
+          cannot be reversed.
         </p>
       </div>
 
       <button
         type="button"
-        className="w-full p-3.5 text-white rounded-lg font-semibold text-[0.9375rem] text-center border-none transition-all duration-200 disabled:cursor-wait disabled:opacity-60"
+        className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         style={{
           cursor: sending ? 'wait' : 'pointer',
-          opacity: sending ? 0.6 : 1,
+          opacity: sending ? 0.5 : 1,
           background: 'var(--btn-primary-bg)',
           boxShadow: 'var(--btn-primary-shadow)',
         }}

@@ -1,6 +1,12 @@
+import Image from 'next/image';
 import type { FC } from 'react';
 
 import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
+
+const CHAIN_LOGO: Record<ChainKey, string> = {
+  sui: '/sui-logo.svg',
+  solana: '/sol-logo.svg',
+};
 
 interface NetworkTabsProps {
   network: ChainKey;
@@ -19,19 +25,19 @@ const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
           type="button"
           role="tab"
           aria-selected={isSelected}
-          className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
+          className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
           style={{
             border: `2px solid ${isSelected ? color : 'var(--color-surface-border)'}`,
-            background: isSelected ? `${color}1A` : 'transparent',
+            background: isSelected ? `${color}1A` : undefined,
           }}
           onClick={() => setNetwork(net)}
         >
-          <div
-            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-            style={{ background: `${color}33`, color }}
-          >
-            {displayName[0]}
-          </div>
+          <Image
+            src={CHAIN_LOGO[net]}
+            alt={displayName}
+            width={22}
+            height={22}
+          />
           <span className="text-text font-semibold text-sm">{displayName}</span>
         </button>
       );
