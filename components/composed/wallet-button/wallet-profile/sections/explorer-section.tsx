@@ -36,7 +36,7 @@ const ExplorerSection: FC<ExplorerSectionProps> = ({ show, toggleShow }) => {
 
   return (
     <CollapsibleSection title="Explorer" show={show} toggleShow={toggleShow}>
-      <span className="text-text-muted text-xs px-4 pt-1 block">Sui</span>
+      <span key="sui-label" className="text-text-muted text-xs px-4 pt-1 block">Sui</span>
       {EXPLORERS.map((explorer, index) => (
         <SettingsMenuItem
           key={explorer}
@@ -47,7 +47,7 @@ const ExplorerSection: FC<ExplorerSectionProps> = ({ show, toggleShow }) => {
           onSelect={() => setExplorer(explorer)}
         />
       ))}
-      <span className="text-text-muted text-xs px-4 pt-2 block">Solana</span>
+      <span key="solana-label" className="text-text-muted text-xs px-4 pt-2 block">Solana</span>
       {SOLANA_EXPLORERS.map((explorer, index) => (
         <SettingsMenuItem
           key={explorer}

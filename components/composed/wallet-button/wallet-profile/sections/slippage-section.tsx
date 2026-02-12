@@ -58,6 +58,7 @@ const SlippageSection: FC<SlippageSectionProps> = ({ show, toggleShow }) => {
         />
       ))}
       <div
+        key="custom"
         className="mx-4 py-2 flex items-center gap-2 border-t border-t-surface-border rounded-md transition-colors duration-150"
         style={
           isCustom
