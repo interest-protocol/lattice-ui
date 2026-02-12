@@ -76,12 +76,12 @@ const SwapForm: FC = () => {
   const form = useForm<SwapFormValues>({
     defaultValues: {
       from: {
-        type: SUI_TYPE_ARG,
+        type: SOL_TYPE,
         value: '',
         valueBN: ZERO_BIG_INT,
       },
       to: {
-        type: SOL_TYPE,
+        type: SUI_TYPE_ARG,
         value: '',
         valueBN: ZERO_BIG_INT,
       },
