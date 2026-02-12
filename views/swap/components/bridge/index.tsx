@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'motion/react';
 import { type FC, useState } from 'react';
 import { SwapSVG } from '@/components/ui/icons';
 import { CHAIN_REGISTRY } from '@/constants/chains';
@@ -135,6 +136,7 @@ const Bridge: FC = () => {
         style={{
           background: 'var(--card-bg)',
           boxShadow: 'var(--card-shadow)',
+          backdropFilter: 'var(--card-backdrop)',
         }}
       >
         <BridgeFromCard
@@ -152,15 +154,22 @@ const Bridge: FC = () => {
           className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0 self-center"
           onClick={handleFlip}
         >
-          <div
+          <motion.div
             className="w-10 h-10 rounded-full flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
             style={{
-              background: 'var(--color-surface-light)',
+              background: 'var(--color-surface-lighter)',
               border: '1px solid var(--color-surface-border)',
             }}
+            whileHover={{
+              rotate: 180,
+              scale: 1.1,
+              boxShadow: 'var(--swap-btn-glow)',
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <SwapSVG maxHeight="1rem" />
-          </div>
+          </motion.div>
         </button>
 
         <BridgeToCard route={selectedRoute} amount={amount} />
@@ -170,20 +179,27 @@ const Bridge: FC = () => {
         {isLoading || status === 'success' || status === 'error' ? (
           <BridgeProgressStepper status={status} onRetry={handleRetry} />
         ) : (
-          <button
+          <motion.button
             type="button"
-            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-ring"
+            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-ring"
             style={{
               background: 'var(--btn-primary-bg)',
               boxShadow: 'var(--btn-primary-shadow)',
             }}
+            whileHover={
+              isDisabled
+                ? undefined
+                : { y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }
+            }
+            whileTap={isDisabled ? undefined : { scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             onClick={handleBridge}
             disabled={isDisabled}
           >
             {validation.message
               ? validation.message
               : `Bridge ${selectedRoute.sourceToken.symbol} to ${destChainName}`}
-          </button>
+          </motion.button>
         )}
       </div>
 

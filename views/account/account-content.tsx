@@ -100,6 +100,7 @@ const BalancesView: FC<{
         style={{
           background: 'var(--card-bg)',
           boxShadow: 'var(--card-shadow)',
+          backdropFilter: 'var(--card-backdrop)',
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Sui Wallet</h2>
@@ -142,6 +143,7 @@ const BalancesView: FC<{
         style={{
           background: 'var(--card-bg)',
           boxShadow: 'var(--card-shadow)',
+          backdropFilter: 'var(--card-backdrop)',
         }}
       >
         <h2 className="text-text text-lg font-semibold mb-2">Solana Wallet</h2>
@@ -228,6 +230,7 @@ const AccountContent: FC = () => {
           style={{
             background: 'var(--card-bg)',
             boxShadow: 'var(--card-shadow)',
+            backdropFilter: 'var(--card-backdrop)',
           }}
         >
           <h2 className="text-text mb-4">Connect Your Wallet</h2>
@@ -274,6 +277,7 @@ const AccountContent: FC = () => {
           style={{
             background: 'var(--card-bg)',
             boxShadow: 'var(--card-shadow)',
+            backdropFilter: 'var(--card-backdrop)',
           }}
         >
           <NetworkTabs network={network} setNetwork={setNetwork} />
@@ -287,6 +291,7 @@ const AccountContent: FC = () => {
           style={{
             background: 'var(--card-bg)',
             boxShadow: 'var(--card-shadow)',
+            backdropFilter: 'var(--card-backdrop)',
           }}
         >
           <NetworkTabs network={network} setNetwork={setNetwork} />

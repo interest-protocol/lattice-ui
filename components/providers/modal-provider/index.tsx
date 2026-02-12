@@ -11,7 +11,11 @@ const OVERLAY_EXIT = { opacity: 0 };
 const OVERLAY_ANIMATE = { opacity: [0, 1] };
 const OVERLAY_TRANSITION = { duration: 0.25 };
 
-const CONTAINER_ANIMATE = { y: ['2rem', '0rem'], opacity: [0, 1] };
+const CONTAINER_ANIMATE = {
+  y: ['2rem', '0rem'],
+  opacity: [0, 1],
+  scale: [0.96, 1],
+};
 const CONTAINER_TRANSITION = {
   type: 'spring' as const,
   stiffness: 500,
@@ -110,9 +114,9 @@ const ModalProvider: FC = () => {
               role="dialog"
               aria-modal="true"
               aria-label={title || undefined}
-              className="p-4 gap-6 w-[27rem] flex text-text max-h-full flex-col rounded-t-[1rem] md:rounded-[1rem] border border-modal-border"
+              className="p-5 gap-6 w-[27rem] flex text-text max-h-full flex-col rounded-t-[1.25rem] md:rounded-[1.25rem] border border-modal-border"
               style={{
-                backdropFilter: `blur(var(--blur-xl))`,
+                backdropFilter: `blur(var(--blur-xl)) saturate(1.5)`,
                 background: 'var(--modal-bg)',
                 boxShadow: 'var(--modal-shadow)',
               }}

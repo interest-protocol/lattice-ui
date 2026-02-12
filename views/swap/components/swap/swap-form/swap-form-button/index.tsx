@@ -1,3 +1,4 @@
+import { motion } from 'motion/react';
 import { type FC, useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -19,6 +20,12 @@ const STATUS_LABELS: Record<SwapStatus, string> = {
   waiting: 'Waiting for solver...',
   success: '',
   error: '',
+};
+
+const HOVER_SPRING = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 25,
 };
 
 const SwapFormButton: FC = () => {
@@ -64,15 +71,22 @@ const SwapFormButton: FC = () => {
       : `Swap ${sourceConfig.nativeToken.symbol} to ${destConfig.nativeToken.symbol}`;
 
   return (
-    <button
+    <motion.button
       type="button"
-      className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 focus-ring"
+      className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 focus-ring"
       style={{
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: isDisabled ? 0.5 : 1,
         background: 'var(--btn-primary-bg)',
         boxShadow: 'var(--btn-primary-shadow)',
       }}
+      whileHover={
+        isDisabled
+          ? undefined
+          : { y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }
+      }
+      whileTap={isDisabled ? undefined : { scale: 0.98 }}
+      transition={HOVER_SPRING}
       onClick={handleSwap}
       disabled={isDisabled}
     >
@@ -80,7 +94,7 @@ const SwapFormButton: FC = () => {
         {isLoading && <Spinner />}
         {buttonLabel}
       </span>
-    </button>
+    </motion.button>
   );
 };
 

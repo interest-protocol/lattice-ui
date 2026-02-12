@@ -1,8 +1,14 @@
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { type FC, useState } from 'react';
 import { BarsSVG, CogSVG } from '@/components/ui/icons';
 import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
 import SettingsMenu from './settings-menu';
+
+const COG_SPRING = {
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 20,
+};
 
 const Settings: FC = () => {
   const [show, setShow] = useState(false);
@@ -23,9 +29,13 @@ const Settings: FC = () => {
         <span className="p-1 transition-all duration-300 lg:hidden">
           <BarsSVG maxWidth="1rem" maxHeight="1rem" width="100%" />
         </span>
-        <span className="p-2 sm:p-3 transition-all duration-300 hidden lg:inline-block hover:rotate-90 hover:text-text">
+        <motion.span
+          className="p-2 sm:p-3 hidden lg:inline-block"
+          whileHover={{ rotate: 90, scale: 1.05 }}
+          transition={COG_SPRING}
+        >
           <CogSVG maxWidth="1.5rem" maxHeight="1.5rem" width="100%" />
-        </span>
+        </motion.span>
       </button>
       <AnimatePresence>{show ? <SettingsMenu /> : null}</AnimatePresence>
     </div>

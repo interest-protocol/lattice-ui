@@ -23,9 +23,11 @@ const InputField: FC<InputFieldProps> = ({
 
   const errorId = error ? `input-${name}-error` : undefined;
 
+  const glowClass = !disabled && !error ? 'input-focus-glow' : '';
+
   return (
     <div
-      className={`p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border transition-all duration-200 ${
+      className={`p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border transition-all duration-200 ${glowClass} ${
         error
           ? 'border-error'
           : disabled
@@ -46,13 +48,13 @@ const InputField: FC<InputFieldProps> = ({
       </div>
       <div className="grid max-w-full items-center font-mono grid-cols-[1fr_auto]">
         {disabled ? (
-          <span className="text-text text-2xl min-w-full truncate">
+          <span className="text-text text-3xl min-w-full truncate">
             {watchedValue || '0'}
           </span>
         ) : (
           <input
             id={`input-${name}`}
-            className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-2xl"
+            className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-3xl"
             placeholder="0"
             autoComplete="off"
             aria-invalid={error ? 'true' : undefined}

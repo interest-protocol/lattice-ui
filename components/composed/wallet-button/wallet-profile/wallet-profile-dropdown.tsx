@@ -34,8 +34,8 @@ const WalletProfileDropdown: FC<
         background: 'var(--color-surface-overlay)',
         boxShadow: 'var(--settings-shadow)',
       }}
-      exit={{ scaleY: 0 }}
-      animate={{ scaleY: [0, 1] }}
+      exit={{ scaleY: 0, filter: 'blur(4px)' }}
+      animate={{ scaleY: [0, 1], filter: ['blur(4px)', 'blur(0px)'] }}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="px-4 py-2 flex items-center justify-between">

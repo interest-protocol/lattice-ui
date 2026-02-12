@@ -1,4 +1,5 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { motion } from 'motion/react';
 import type { FC } from 'react';
 import { useEffect } from 'react';
 import {
@@ -7,7 +8,6 @@ import {
   useFormContext,
   useWatch,
 } from 'react-hook-form';
-
 import InputField from '@/components/composed/input-field';
 import { SwapSVG } from '@/components/ui/icons';
 import { SOL_TYPE } from '@/constants/coins';
@@ -92,6 +92,7 @@ const SwapForm: FC = () => {
         style={{
           background: 'var(--card-bg)',
           boxShadow: 'var(--card-shadow)',
+          backdropFilter: 'var(--card-backdrop)',
         }}
       >
         <InputField
@@ -113,15 +114,22 @@ const SwapForm: FC = () => {
             form.setValue('to', fromValue);
           }}
         >
-          <div
+          <motion.div
             className="w-10 h-10 rounded-full flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
             style={{
-              background: 'var(--color-surface-light)',
+              background: 'var(--color-surface-lighter)',
               border: '1px solid var(--color-surface-border)',
             }}
+            whileHover={{
+              rotate: 180,
+              scale: 1.1,
+              boxShadow: 'var(--swap-btn-glow)',
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
             <SwapSVG maxHeight="1rem" />
-          </div>
+          </motion.div>
         </button>
 
         <InputField

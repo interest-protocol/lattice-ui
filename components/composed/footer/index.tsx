@@ -16,8 +16,12 @@ const Footer: FC = () => {
 
   return (
     <footer
-      className="sticky bottom-0 mt-auto backdrop-blur-md border-t border-surface-border"
-      style={{ background: 'var(--color-footer-bg)', zIndex: Z_INDEX.STICKY }}
+      className="sticky bottom-0 mt-auto border-t border-surface-border"
+      style={{
+        background: 'var(--color-footer-bg)',
+        backdropFilter: 'blur(var(--blur-lg)) saturate(1.4)',
+        zIndex: Z_INDEX.STICKY,
+      }}
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-4 px-4 py-2">
         {CHAINS.map((chain, i) => {

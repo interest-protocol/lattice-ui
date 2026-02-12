@@ -16,7 +16,11 @@ const Tabs: FC<TabsProps> = ({ setTab, tab, tabs, id = 'tabs' }) => {
   const reducedMotion = useReducedMotion();
 
   return (
-    <div className="flex border-b border-surface-border" role="tablist">
+    <div
+      className="flex p-1 rounded-xl border border-surface-border"
+      style={{ background: 'var(--color-surface-light)' }}
+      role="tablist"
+    >
       {tabs.map((text, index) => {
         const isActive = tab === index;
         return (
@@ -27,21 +31,25 @@ const Tabs: FC<TabsProps> = ({ setTab, tab, tabs, id = 'tabs' }) => {
             id={`${id}-tab-${index}`}
             aria-selected={isActive}
             aria-controls={`${id}-tabpanel-${index}`}
-            className={`relative py-3 px-4 cursor-pointer text-sm font-medium tracking-wide transition-colors duration-200 border-none bg-transparent focus-ring ${
-              isActive ? 'text-accent' : 'text-text-secondary hover:text-text'
+            className={`relative py-2.5 px-4 flex-1 cursor-pointer text-sm font-medium tracking-wide border-none bg-transparent focus-ring rounded-lg ${
+              isActive ? 'text-text' : 'text-text-secondary hover:text-text'
             }`}
             onClick={() => setTab(index)}
           >
-            {text}
             {isActive && (
               <motion.span
                 layoutId={`${id}-tab-indicator`}
-                className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-accent"
+                className="absolute inset-0 rounded-lg"
+                style={{
+                  background: 'var(--color-surface-overlay)',
+                  boxShadow: '0 1px 0 0 rgba(255,255,255,0.06) inset',
+                }}
                 transition={
                   reducedMotion ? INSTANT_TRANSITION : SPRING_TRANSITION
                 }
               />
             )}
+            <span className="relative z-10">{text}</span>
           </button>
         );
       })}

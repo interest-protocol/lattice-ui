@@ -21,8 +21,12 @@ const SettingsMenu: FC = () => {
         background: 'var(--color-surface-overlay)',
         boxShadow: 'var(--settings-shadow)',
       }}
-      exit={reducedMotion ? { opacity: 0 } : { scaleY: 0 }}
-      animate={reducedMotion ? { opacity: [0, 1] } : { scaleY: [0, 1] }}
+      exit={reducedMotion ? { opacity: 0 } : { scaleY: 0, filter: 'blur(4px)' }}
+      animate={
+        reducedMotion
+          ? { opacity: [0, 1] }
+          : { scaleY: [0, 1], filter: ['blur(4px)', 'blur(0px)'] }
+      }
     >
       <motion.div className="py-2 rounded-xl w-80">
         <SettingsMenuTheme
