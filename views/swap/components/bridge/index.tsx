@@ -135,6 +135,10 @@ const Bridge: FC = () => {
   const sourceConfig = CHAIN_REGISTRY[selectedRoute.sourceChain];
 
   const validation: ValidationResult = (() => {
+    if (!selectedRoute.enabled) {
+      return { isDisabled: true, message: 'Coming Soon' };
+    }
+
     const amountNum = Number.parseFloat(amount) || 0;
 
     if (!amount || amountNum <= 0) {
@@ -172,6 +176,8 @@ const Bridge: FC = () => {
   const isReady = !isDisabled && !isLoading;
 
   const handleBridge = async () => {
+    if (!selectedRoute.enabled) return;
+
     if (!nonce.hasNonce) {
       setNonceModalOpen(true);
       return;
@@ -212,7 +218,10 @@ const Bridge: FC = () => {
   const handleFlip = () => {
     const reverseKey = REVERSE_ROUTE_KEY[selectedRoute.key];
     const reverseRoute = BRIDGE_ROUTES.find((r) => r.key === reverseKey);
-    if (reverseRoute?.enabled) setSelectedRoute(reverseRoute);
+    if (reverseRoute) {
+      setSelectedRoute(reverseRoute);
+      setAmount('');
+    }
   };
 
   const destChainName = CHAIN_REGISTRY[selectedRoute.destChain].displayName;
