@@ -1,17 +1,17 @@
 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="lattice-grad" x1="5" y1="3" x2="35" y2="37" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#06b6d4"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
     </linearGradient>
   </defs>
 
-  <!-- Top face fill (bright cyan - lit from above) -->
-  <polygon points="5,11.5 20,3 35,11.5 20,20" fill="#22d3ee" fill-opacity="0.25"/>
-  <!-- Left face fill (deeper cyan - side shadow) -->
-  <polygon points="5,11.5 20,20 20,37 5,28.5" fill="#0891b2" fill-opacity="0.3"/>
-  <!-- Right face fill (violet - deep shadow) -->
-  <polygon points="35,11.5 35,28.5 20,37 20,20" fill="#7c3aed" fill-opacity="0.3"/>
+  <!-- Top face fill (bright violet - lit from above) -->
+  <polygon points="5,11.5 20,3 35,11.5 20,20" fill="#c4b5fd" fill-opacity="0.25"/>
+  <!-- Left face fill (deeper violet - side shadow) -->
+  <polygon points="5,11.5 20,20 20,37 5,28.5" fill="#8b5cf6" fill-opacity="0.3"/>
+  <!-- Right face fill (cyan spark - deep shadow) -->
+  <polygon points="35,11.5 35,28.5 20,37 20,20" fill="#06b6d4" fill-opacity="0.3"/>
 
   <!-- Hexagonal outline -->
   <polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" stroke="url(#lattice-grad)" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
@@ -27,24 +27,24 @@
   <line x1="20" y1="20" x2="5" y2="28.5" stroke="url(#lattice-grad)" stroke-width="1.2" stroke-linecap="round"/>
 
   <!-- Lattice subdivision lines - top face -->
-  <line x1="12.5" y1="7.25" x2="27.5" y2="15.75" stroke="#22d3ee" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
-  <line x1="27.5" y1="7.25" x2="12.5" y2="15.75" stroke="#22d3ee" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="12.5" y1="7.25" x2="27.5" y2="15.75" stroke="#c4b5fd" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="27.5" y1="7.25" x2="12.5" y2="15.75" stroke="#c4b5fd" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
 
   <!-- Lattice subdivision lines - right face -->
-  <line x1="35" y1="20" x2="20" y2="28.5" stroke="#8b5cf6" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
-  <line x1="27.5" y1="15.75" x2="27.5" y2="32.75" stroke="#8b5cf6" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="35" y1="20" x2="20" y2="28.5" stroke="#06b6d4" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="27.5" y1="15.75" x2="27.5" y2="32.75" stroke="#06b6d4" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
 
   <!-- Lattice subdivision lines - left face -->
-  <line x1="5" y1="20" x2="20" y2="28.5" stroke="#0891b2" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
-  <line x1="12.5" y1="15.75" x2="12.5" y2="32.75" stroke="#0891b2" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="5" y1="20" x2="20" y2="28.5" stroke="#8b5cf6" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
+  <line x1="12.5" y1="15.75" x2="12.5" y2="32.75" stroke="#8b5cf6" stroke-width="0.75" stroke-linecap="round" opacity="0.5"/>
 
   <!-- Center node glow halo -->
-  <circle cx="20" cy="20" r="5" fill="#22d3ee" fill-opacity="0.15"/>
-  <!-- Center node (bright white/cyan glow) -->
-  <circle cx="20" cy="20" r="2.5" fill="#e0f7fa"/>
+  <circle cx="20" cy="20" r="5" fill="#c4b5fd" fill-opacity="0.15"/>
+  <!-- Center node (bright white/violet glow) -->
+  <circle cx="20" cy="20" r="2.5" fill="#ede9fe"/>
 
   <!-- Face-center nodes -->
-  <circle cx="20" cy="11.5" r="1.25" fill="#22d3ee" fill-opacity="0.7"/>
-  <circle cx="27.5" cy="24.25" r="1.25" fill="#8b5cf6" fill-opacity="0.6"/>
-  <circle cx="12.5" cy="24.25" r="1.25" fill="#0891b2" fill-opacity="0.65"/>
+  <circle cx="20" cy="11.5" r="1.25" fill="#c4b5fd" fill-opacity="0.7"/>
+  <circle cx="27.5" cy="24.25" r="1.25" fill="#06b6d4" fill-opacity="0.6"/>
+  <circle cx="12.5" cy="24.25" r="1.25" fill="#8b5cf6" fill-opacity="0.65"/>
 </svg>
