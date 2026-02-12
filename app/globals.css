@@ -378,11 +378,11 @@
 
     --flip-btn-bg: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.92) 0%,
-      rgba(124, 58, 237, 0.06) 100%
+      rgba(124, 58, 237, 0.08) 0%,
+      rgba(124, 58, 237, 0.04) 100%
     );
-    --flip-btn-border: rgba(124, 58, 237, 0.15);
-    --flip-btn-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+    --flip-btn-border: rgba(124, 58, 237, 0.2);
+    --flip-btn-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);
     --flip-btn-hover-shadow:
       0 0 20px rgba(124, 58, 237, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
 

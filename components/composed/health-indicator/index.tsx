@@ -70,8 +70,10 @@ const HealthIndicator: FC = () => {
         type="button"
         aria-expanded={expanded}
         aria-label="System health status"
-        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border p-2 sm:py-2 sm:px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200 focus-ring"
-        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border p-2 sm:py-2 sm:px-3 sm:cursor-pointer sm:hover:bg-surface-overlay transition-colors duration-200 focus-ring"
+        onClick={() => {
+          if (window.innerWidth >= 640) setExpanded(!expanded);
+        }}
       >
         <div
           className="w-2 h-2 rounded-full"
