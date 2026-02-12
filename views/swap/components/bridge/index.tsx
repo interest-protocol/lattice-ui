@@ -73,12 +73,11 @@ const Bridge: FC = () => {
   const [nonceModalOpen, setNonceModalOpen] = useState(false);
 
   // Auto-open nonce modal when query confirms no nonce account
-  // TODO: TEMP FORCE — remove this override
   useEffect(() => {
-    if (solanaAddress) {
+    if (!nonce.isLoading && !nonce.hasNonce && solanaAddress) {
       setNonceModalOpen(true);
     }
-  }, [solanaAddress]);
+  }, [nonce.isLoading, nonce.hasNonce, solanaAddress]);
 
   // Sync nonce modal content when dependencies change
   useEffect(() => {
@@ -107,9 +106,8 @@ const Bridge: FC = () => {
   ]);
 
   // Auto-close when nonce is created
-  // TODO: TEMP FORCE — disabled auto-close
   useEffect(() => {
-    if (false && nonceModalOpen && nonce.hasNonce) {
+    if (nonceModalOpen && nonce.hasNonce) {
       setNonceModalOpen(false);
       handleClose();
     }

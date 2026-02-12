@@ -65,8 +65,15 @@ const useNonceAccount = () => {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Not authenticated');
-      // TODO: TEMP FORCE — let 409 error through for testing
-      return await createNonceAccount(user.id);
+      try {
+        return await createNonceAccount(user.id);
+      } catch (err) {
+        // 409 = nonce already exists — treat as success
+        if (err instanceof ApiRequestError && err.code === 'NONCE_EXISTS') {
+          return { signature: '', nonceAddress: nonceAddress ?? '' };
+        }
+        throw err;
+      }
     },
     onSuccess: (result) => {
       setNonceExists(result.nonceAddress);

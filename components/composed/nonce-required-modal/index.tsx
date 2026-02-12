@@ -83,7 +83,9 @@ const NonceRequiredModal: FC<NonceRequiredModalProps> = ({
         {hasEnoughSol ? (
           <button
             type="button"
-            className="w-full py-3 rounded-xl font-semibold text-white bg-accent hover:bg-accent-hover disabled:opacity-50 cursor-pointer border-none"
+            className={`w-full py-3 rounded-xl font-semibold text-white disabled:opacity-50 cursor-pointer border-none hover:opacity-90 ${
+              createError ? 'bg-error' : 'bg-accent'
+            }`}
             onClick={onCreate}
             disabled={isCreating}
           >
