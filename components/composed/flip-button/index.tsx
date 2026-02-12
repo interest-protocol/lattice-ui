@@ -48,7 +48,7 @@ const FlipButton: FC<FlipButtonProps> = ({ onClick, ariaLabel }) => {
           whileTap={reducedMotion ? undefined : { scale: 0.95 }}
           transition={reducedMotion ? { duration: 0 } : FLIP_BTN_SPRING}
         >
-          <SwapSVG maxHeight="1rem" />
+          <SwapSVG maxHeight="1rem" width="18" height="17" />
         </motion.div>
       </button>
     </div>
