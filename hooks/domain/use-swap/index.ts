@@ -7,14 +7,12 @@ import { useLocalStorage } from 'usehooks-ts';
 import { toasting } from '@/components/ui/toast';
 import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
-import {
-  BALANCE_POLL_MAX_ATTEMPTS,
-  REQUEST_DEADLINE_MS,
-} from '@/constants/coins';
+import { REQUEST_DEADLINE_MS } from '@/constants/coins';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import useBalances from '@/hooks/domain/use-balances';
+import useSolverMetadata from '@/hooks/domain/use-solver-metadata';
 import type { ChainAdapter } from '@/lib/chain-adapters';
 import { sdkChainIdFromKey } from '@/lib/chain-adapters';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
@@ -56,13 +54,15 @@ interface SwapParams {
 }
 
 const ENCLAVE_RETRY_ATTEMPTS = 5;
-const ENCLAVE_RETRY_DELAY_MS = 2000;
+const ENCLAVE_RETRY_BASE_DELAY_MS = 500;
+const ENCLAVE_RETRY_MAX_DELAY_MS = 4000;
 
 const withRetry = async <T>(
   fn: () => Promise<T>,
   attempts: number,
-  delayMs: number,
-  signal?: AbortSignal
+  baseDelayMs: number,
+  signal?: AbortSignal,
+  maxDelayMs?: number
 ): Promise<T> => {
   for (let i = 0; i < attempts; i++) {
     try {
@@ -72,8 +72,11 @@ const withRetry = async <T>(
       if (signal?.aborted) {
         throw new DOMException('The operation was aborted.', 'AbortError');
       }
+      const delay = maxDelayMs
+        ? Math.min(baseDelayMs * 2 ** i, maxDelayMs)
+        : baseDelayMs;
       await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, delayMs);
+        const timer = setTimeout(resolve, delay);
         signal?.addEventListener(
           'abort',
           () => {
@@ -98,15 +101,10 @@ export const useSwap = () => {
 
   const suiClient = useSuiClient();
   const solanaRpc = useSolanaRpc();
-  const {
-    suiAddress,
-    solanaAddress,
-    suiBalances,
-    solanaBalances,
-    mutateSuiBalances,
-    mutateSolanaBalances,
-  } = useBalances();
+  const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
+    useBalances();
 
+  const { metadata: cachedMetadata } = useSolverMetadata();
   const { getPrice } = useTokenPrices();
   const [slippageBps] = useLocalStorage(
     SLIPPAGE_STORAGE_KEY,
@@ -167,11 +165,6 @@ export const useSwap = () => {
     return () => controller.abort();
   }, [status, result?.requestId, result?.destinationTxDigest]);
 
-  const suiBalancesRef = useRef(suiBalances);
-  suiBalancesRef.current = suiBalances;
-  const solanaBalancesRef = useRef(solanaBalances);
-  solanaBalancesRef.current = solanaBalances;
-
   const getAdapter = (chainKey: ChainKey): ChainAdapter => {
     const adapterFactories: Record<ChainKey, () => ChainAdapter> = {
       sui: () => createSuiAdapter(suiClient, mutateSuiBalances),
@@ -179,9 +172,6 @@ export const useSwap = () => {
     };
     return adapterFactories[chainKey]();
   };
-
-  const getBalancesRef = (chainKey: ChainKey): Record<string, bigint> =>
-    chainKey === 'sui' ? suiBalancesRef.current : solanaBalancesRef.current;
 
   const swap = async ({ fromType, toType, fromAmount }: SwapParams) => {
     const SWAP_TOAST_ID = 'swap-operation';
@@ -239,10 +229,13 @@ export const useSwap = () => {
         withRetry(
           () => fetchNewRequestProof(depositDigest, sourceChain, signal),
           ENCLAVE_RETRY_ATTEMPTS,
-          ENCLAVE_RETRY_DELAY_MS,
-          signal
+          ENCLAVE_RETRY_BASE_DELAY_MS,
+          signal,
+          ENCLAVE_RETRY_MAX_DELAY_MS
         ),
-        fetchMetadata(signal),
+        cachedMetadata
+          ? Promise.resolve(cachedMetadata)
+          : fetchMetadata(signal),
       ]);
 
       setStatus('creating');
@@ -321,10 +314,6 @@ export const useSwap = () => {
       setStatus('waiting');
       toasting.update(SWAP_TOAST_ID, 'Waiting for solver to fulfill...');
 
-      const initialBalance = destAdapter.getBalanceForPolling(
-        getBalancesRef(destChainKey)
-      );
-
       const fulfillResult = await fulfill(
         {
           requestId,
@@ -333,44 +322,6 @@ export const useSwap = () => {
         },
         signal
       );
-
-      toasting.update(SWAP_TOAST_ID, 'Waiting for tokens to arrive...');
-
-      const POLL_INITIAL_MS = 500;
-      const POLL_MAX_MS = 5000;
-
-      for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
-        if (signal.aborted) {
-          throw new DOMException('The operation was aborted.', 'AbortError');
-        }
-
-        const delay = Math.min(POLL_INITIAL_MS * 2 ** i, POLL_MAX_MS);
-        await new Promise<void>((resolve, reject) => {
-          const timer = setTimeout(resolve, delay);
-          signal.addEventListener(
-            'abort',
-            () => {
-              clearTimeout(timer);
-              reject(
-                new DOMException('The operation was aborted.', 'AbortError')
-              );
-            },
-            { once: true }
-          );
-        });
-
-        const newBalances = await destAdapter.refetchBalance();
-        const currentBalance = newBalances
-          ? destAdapter.getBalanceForPolling(newBalances)
-          : undefined;
-
-        if (
-          currentBalance !== undefined &&
-          (initialBalance === undefined || currentBalance !== initialBalance)
-        ) {
-          break;
-        }
-      }
 
       const minimumReceived = trade.minimumReceived.raw;
       const expectedOutput = trade.expectedOutput.raw;
@@ -384,7 +335,7 @@ export const useSwap = () => {
         toType,
         depositDigest,
         requestId,
-        destinationTxDigest: undefined,
+        destinationTxDigest: fulfillResult.destinationTxDigest,
         toAmount: minimumReceived,
         feeAmount,
         startedAt,
@@ -392,6 +343,9 @@ export const useSwap = () => {
       setStatus('success');
       haptic.success();
       toasting.dismiss(SWAP_TOAST_ID);
+
+      mutateSuiBalances();
+      mutateSolanaBalances();
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         setStatus('idle');

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'x-api-key': SOLVER_API_KEY,
       },
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(15_000),
       body: JSON.stringify({
         requestId: body.requestId,
         userAddress: body.userAddress,
