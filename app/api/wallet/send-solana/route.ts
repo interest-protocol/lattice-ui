@@ -22,15 +22,12 @@ import { withAuthPost } from '@/lib/api/with-auth';
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import {
+  BLOCKHASH_RETRY_ATTEMPTS,
+  BLOCKHASH_RETRY_DELAY_MS,
+  isBlockhashError,
+} from '@/lib/solana/blockhash-retry';
 import { getSolanaRpc } from '@/lib/solana/server';
-
-const BLOCKHASH_RETRY_ATTEMPTS = 3;
-const BLOCKHASH_RETRY_DELAY_MS = 500;
-
-const isBlockhashError = (err: unknown): boolean => {
-  const msg = err instanceof Error ? err.message : String(err);
-  return msg.includes('Blockhash not found') || msg.includes('blockhash');
-};
 
 const schema = z.object({
   userId: z.string(),
@@ -112,7 +109,8 @@ export const POST = withAuthPost(
           );
 
           const compiledTransaction = compileTransaction(transactionMessage);
-          const serialized = getBase64EncodedWireTransaction(compiledTransaction);
+          const serialized =
+            getBase64EncodedWireTransaction(compiledTransaction);
 
           const signResult = await privy
             .wallets()
@@ -134,7 +132,10 @@ export const POST = withAuthPost(
           return NextResponse.json({ signature });
         } catch (err) {
           lastError = err;
-          if (!isBlockhashError(err) || attempt === BLOCKHASH_RETRY_ATTEMPTS - 1)
+          if (
+            !isBlockhashError(err) ||
+            attempt === BLOCKHASH_RETRY_ATTEMPTS - 1
+          )
             throw err;
           await new Promise((r) => setTimeout(r, BLOCKHASH_RETRY_DELAY_MS));
         }

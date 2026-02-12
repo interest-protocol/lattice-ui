@@ -1,10 +1,10 @@
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
+import { fromHex, toBase64 } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import type { Base64EncodedWireTransaction, Signature } from '@solana/kit';
 import bs58 from 'bs58';
 import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
-
 import { toasting } from '@/components/ui/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import type { ChainKey } from '@/constants/chains';
@@ -17,24 +17,9 @@ import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import { pollUntil } from '@/lib/poll-until';
 import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
 import { bridgeBurn, bridgeMint } from '@/lib/xbridge/client';
+
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
-
-const hexToBytes = (hex: string): Uint8Array => {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes;
-};
-
-const uint8ToBase64 = (bytes: Uint8Array): string => {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-};
 
 export type BridgeStatus =
   | 'idle'
@@ -193,8 +178,8 @@ export const useBridge = () => {
     // Phase C: Build raw Solana tx and broadcast
     toasting.update(toastId, 'Broadcasting to Solana...');
 
-    const messageBytes = hexToBytes(burnResult.message);
-    const userSigBytes = hexToBytes(burnResult.userSignature);
+    const messageBytes = fromHex(burnResult.message);
+    const userSigBytes = fromHex(burnResult.userSignature);
 
     // Wire format: [num_sigs(1)][sig0(64)][sig1(64)][message]
     const rawTx = new Uint8Array(1 + 64 + 64 + messageBytes.length);
@@ -203,7 +188,7 @@ export const useBridge = () => {
     rawTx.set(dwalletSignature, 65); // position 1: dWallet (tokenOwner)
     rawTx.set(messageBytes, 129);
 
-    const base64Tx = uint8ToBase64(rawTx) as Base64EncodedWireTransaction;
+    const base64Tx = toBase64(rawTx) as Base64EncodedWireTransaction;
 
     const solanaSignature = await solanaRpc
       .sendTransaction(base64Tx, {

@@ -9,18 +9,17 @@
  * Ported from core/scripts/src/flows/xbridge/wsol-to-sol/1-create-burn-request.ts
  */
 
-const SPL_TOKEN_PROGRAM = Buffer.from(
-  '06ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9',
-  'hex'
+import { fromHex } from '@mysten/sui/utils';
+
+const SPL_TOKEN_PROGRAM = fromHex(
+  '06ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9'
 );
-const SPL_ATA_PROGRAM = Buffer.from(
-  '8c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859',
-  'hex'
+const SPL_ATA_PROGRAM = fromHex(
+  '8c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859'
 );
-const SYSTEM_PROGRAM = Buffer.alloc(32, 0);
-const NONCE_SYSVAR = Buffer.from(
-  '06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000',
-  'hex'
+const SYSTEM_PROGRAM = new Uint8Array(32);
+const NONCE_SYSVAR = fromHex(
+  '06a7d517192c568ee08a845f73d29788cf035c3145b21ab344d8062ea9400000'
 );
 const ADVANCE_NONCE_DISCRIMINATOR = Buffer.from([0x04, 0x00, 0x00, 0x00]);
 const TRANSFER_CHECKED_DISCRIMINATOR = 12;
@@ -32,15 +31,15 @@ const u64ToLeBytes = (value: bigint): Buffer => {
 };
 
 export interface BuildSplTransferParams {
-  tokenOwner: Buffer;
-  sourceAta: Buffer;
-  mint: Buffer;
+  tokenOwner: Uint8Array;
+  sourceAta: Uint8Array;
+  mint: Uint8Array;
   decimals: number;
-  nonce: Buffer;
-  nonceAccount: Buffer;
-  nonceAuthority: Buffer;
-  destinationWallet: Buffer;
-  destinationAta: Buffer;
+  nonce: Uint8Array;
+  nonceAccount: Uint8Array;
+  nonceAuthority: Uint8Array;
+  destinationWallet: Uint8Array;
+  destinationAta: Uint8Array;
   amount: bigint;
 }
 
@@ -64,7 +63,7 @@ export const buildSplTransfer = ({
   destinationWallet,
   destinationAta,
   amount,
-}: BuildSplTransferParams): Buffer =>
+}: BuildSplTransferParams): Uint8Array =>
   Buffer.concat([
     // Message header: [numSigners, numReadonlySigners, numReadonlyUnsigned, numAccounts]
     Buffer.from([2, 1, 6, 11]),

@@ -1,4 +1,4 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { fromBase64, SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { ed25519 } from '@noble/curves/ed25519';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
@@ -92,9 +92,7 @@ export const POST = withAuthPost(
         15_000,
         'Solana message signing'
       );
-      const solanaSignature = Uint8Array.from(
-        Buffer.from(signResult.signature, 'base64')
-      );
+      const solanaSignature = fromBase64(signResult.signature);
 
       const localVerify = ed25519.verify(
         solanaSignature,

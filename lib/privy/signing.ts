@@ -4,6 +4,7 @@ import {
   toSerializedSignature,
 } from '@mysten/sui/cryptography';
 import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
+import { fromBase64, fromHex, toBase64 } from '@mysten/sui/utils';
 import type { PrivyClient } from '@privy-io/node';
 import invariant from 'tiny-invariant';
 
@@ -26,13 +27,10 @@ interface SignAndExecuteParams {
 
 export const extractPublicKey = (rawString: string): Ed25519PublicKey => {
   const isHex = /^(0x)?[0-9a-fA-F]+$/.test(rawString) && rawString.length >= 64;
-  const decoded = isHex
-    ? Buffer.from(rawString.replace(/^0x/, ''), 'hex')
-    : Buffer.from(rawString, 'base64');
+  const decoded = isHex ? fromHex(rawString) : fromBase64(rawString);
 
-  const keyBytes = Uint8Array.from(
-    decoded.length > 32 ? decoded.subarray(decoded.length - 32) : decoded
-  );
+  const keyBytes =
+    decoded.length > 32 ? decoded.subarray(decoded.length - 32) : decoded;
   return new Ed25519PublicKey(keyBytes);
 };
 
@@ -47,7 +45,7 @@ export const signAndExecuteSuiTransaction = async (
   }: SignAndExecuteParams
 ) => {
   const intentMessage = messageWithIntent('TransactionData', rawBytes);
-  const intentBase64 = Buffer.from(intentMessage).toString('base64');
+  const intentBase64 = toBase64(intentMessage);
 
   const signResult = await privy.wallets().rawSign(walletId, {
     params: {
@@ -58,8 +56,7 @@ export const signAndExecuteSuiTransaction = async (
     authorization_context: authorizationContext,
   });
 
-  const sigHex = signResult.signature.replace(/^0x/, '');
-  const signatureBytes = Uint8Array.from(Buffer.from(sigHex, 'hex'));
+  const signatureBytes = fromHex(signResult.signature);
 
   let publicKey = cachedPublicKey;
   if (!publicKey) {
@@ -75,7 +72,7 @@ export const signAndExecuteSuiTransaction = async (
   });
 
   const result = await suiClient.executeTransactionBlock({
-    transactionBlock: Buffer.from(rawBytes).toString('base64'),
+    transactionBlock: toBase64(rawBytes),
     signature: serializedSignature,
     options,
   });

@@ -6,6 +6,7 @@ import {
 } from '@interest-protocol/xbridge-sdk';
 import { XSWAP_TYPE } from '@interest-protocol/xswap-sdk';
 import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
+import { fromBase64, fromHex, toBase64, toHex } from '@mysten/sui/utils';
 import { address } from '@solana/kit';
 import { fetchMaybeNonce } from '@solana-program/system';
 import {
@@ -103,22 +104,16 @@ export const POST = withAuthPost(
       );
       invariant(nonceResult.exists, 'Nonce account not found');
       const nonceValue = nonceResult.data.blockhash;
-      const nonceBytes = Buffer.from(bs58.decode(nonceValue as string));
+      const nonceBytes = bs58.decode(nonceValue as string);
 
       // Build SPL transfer message
-      const tokenOwnerBytes = Buffer.from(bs58.decode(dwalletSolana));
-      const sourceAtaBytes = Buffer.from(
-        bs58.decode(sourceAtaAddress as string)
-      );
-      const destinationAtaBytes = Buffer.from(
-        bs58.decode(destinationAtaAddress as string)
-      );
-      const mintBytes = Buffer.from(bs58.decode(NATIVE_SOL_MINT));
-      const nonceAccountBytes = Buffer.from(bs58.decode(body.nonceAddress));
-      const userSolanaBytes = Buffer.from(bs58.decode(userSolanaAddress));
-      const destinationWalletBytes = Buffer.from(
-        new Uint8Array(body.destinationAddress)
-      );
+      const tokenOwnerBytes = bs58.decode(dwalletSolana);
+      const sourceAtaBytes = bs58.decode(sourceAtaAddress as string);
+      const destinationAtaBytes = bs58.decode(destinationAtaAddress as string);
+      const mintBytes = bs58.decode(NATIVE_SOL_MINT);
+      const nonceAccountBytes = bs58.decode(body.nonceAddress);
+      const userSolanaBytes = bs58.decode(userSolanaAddress);
+      const destinationWalletBytes = new Uint8Array(body.destinationAddress);
 
       const messageBytes = buildSplTransfer({
         tokenOwner: tokenOwnerBytes,
@@ -146,17 +141,14 @@ export const POST = withAuthPost(
         .wallets()
         .solana()
         .signTransaction(solanaWallet.id, {
-          transaction: wireTx.toString('base64'),
+          transaction: toBase64(wireTx),
           authorization_context: {
             authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
           },
         });
 
       // Extract user's 64-byte Ed25519 signature from position 0 of signed wire tx
-      const signedTxBytes = Buffer.from(
-        signResult.signed_transaction,
-        'base64'
-      );
+      const signedTxBytes = fromBase64(signResult.signed_transaction);
       const userSolanaSignature = signedTxBytes.subarray(1, 65);
 
       // === Phase 2: Tx1 (create burn request) ===
@@ -251,15 +243,13 @@ export const POST = withAuthPost(
           body: JSON.stringify({
             request_id: requestId.replace(/^0x/, ''),
             chain_id: Number(burnRequestData.sourceChain),
-            source_token: Buffer.from(burnRequestData.sourceToken).toString(
-              'hex'
-            ),
+            source_token: toHex(new Uint8Array(burnRequestData.sourceToken)),
             source_decimals: burnRequestData.sourceDecimals,
-            destination_address: Buffer.from(
-              burnRequestData.destinationAddress
-            ).toString('hex'),
+            destination_address: toHex(
+              new Uint8Array(burnRequestData.destinationAddress)
+            ),
             source_amount: burnRequestData.sourceAmount.toString(),
-            message: Buffer.from(burnRequestData.message).toString('hex'),
+            message: toHex(new Uint8Array(burnRequestData.message)),
           }),
         }).then(
           (r) =>
@@ -307,8 +297,8 @@ export const POST = withAuthPost(
         },
         signal: AbortSignal.timeout(30_000),
         body: JSON.stringify({
-          presign: Buffer.from(presignData.presign).toString('hex'),
-          message: Buffer.from(burnRequestData.message).toString('hex'),
+          presign: toHex(new Uint8Array(presignData.presign)),
+          message: toHex(new Uint8Array(burnRequestData.message)),
           chain: 'solana',
         }),
       });
@@ -324,12 +314,7 @@ export const POST = withAuthPost(
         success: boolean;
         data: { signature: string };
       };
-      const messageCentralizedSignatureHex =
-        solverResult.data.signature.replace(/^0x/, '');
-      const messageCentralizedSignature = Buffer.from(
-        messageCentralizedSignatureHex,
-        'hex'
-      );
+      const messageCentralizedSignature = fromHex(solverResult.data.signature);
 
       // === Phase 4: Tx2 (combined PTB: vote + execute) ===
       const tx2 = new Transaction();
@@ -340,7 +325,7 @@ export const POST = withAuthPost(
         requestId,
         enclaveId: ENCLAVE_OBJECT_ID,
         validatorType: XSWAP_TYPE,
-        signature: new Uint8Array(Buffer.from(voteData.signature, 'hex')),
+        signature: fromHex(voteData.signature),
         timestampMs: BigInt(voteData.timestamp_ms),
         coinType: body.coinType,
       });
@@ -350,9 +335,7 @@ export const POST = withAuthPost(
         requestId,
         burnCapId,
         presignCapId: presignData.presignCapId,
-        messageCentralizedSignature: new Uint8Array(
-          messageCentralizedSignature
-        ),
+        messageCentralizedSignature,
         coinType: body.coinType,
       });
 
@@ -374,8 +357,8 @@ export const POST = withAuthPost(
         executeDigest: tx2Result.digest,
         requestId,
         signId: updatedRequest.signId,
-        userSignature: userSolanaSignature.toString('hex'),
-        message: Buffer.from(messageBytes).toString('hex'),
+        userSignature: toHex(userSolanaSignature),
+        message: toHex(messageBytes),
       });
     } catch (caught: unknown) {
       if (caught instanceof WalletNotFoundError)

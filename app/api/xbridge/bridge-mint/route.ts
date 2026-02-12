@@ -1,6 +1,7 @@
 import type { ChainId } from '@interest-protocol/xbridge-sdk';
 import { XSWAP_TYPE } from '@interest-protocol/xswap-sdk';
 import { Transaction } from '@mysten/sui/transactions';
+import { fromHex, toHex } from '@mysten/sui/utils';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
 import invariant from 'tiny-invariant';
@@ -100,8 +101,8 @@ export const POST = withAuthPost(
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 
       // === Enclave: get vote signature (with retry for RPC propagation) ===
-      const sourceTokenHex = Buffer.from(body.sourceToken).toString('hex');
-      const sourceAddressHex = Buffer.from(body.sourceAddress).toString('hex');
+      const sourceTokenHex = toHex(new Uint8Array(body.sourceToken));
+      const sourceAddressHex = toHex(new Uint8Array(body.sourceAddress));
 
       const enclaveResponse = await fetchWithRetry(
         `${ENCLAVE_URL}/xbridge/vote_mint`,
@@ -129,7 +130,7 @@ export const POST = withAuthPost(
         timestamp_ms: number;
       };
 
-      const signature = new Uint8Array(Buffer.from(voteData.signature, 'hex'));
+      const signature = fromHex(voteData.signature);
       const timestampMs = BigInt(voteData.timestamp_ms);
 
       // === Sui Tx 2: setDigest + vote + execute (combined PTB) ===
