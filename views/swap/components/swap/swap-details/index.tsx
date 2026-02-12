@@ -1,11 +1,14 @@
 import type { FC } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
+import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { SOL_TYPE } from '@/constants/coins';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
-import { Token } from '@/lib/entities';
+import { Percent, Token } from '@/lib/entities';
 
 const SwapDetails: FC = () => {
   const { getPrice } = useTokenPrices();
+  const [slippageBps] = useLocalStorage(SLIPPAGE_STORAGE_KEY, DEFAULT_SLIPPAGE_BPS);
 
   const suiPrice = getPrice(Token.SUI.type);
   const solPrice = getPrice(SOL_TYPE);
@@ -23,7 +26,7 @@ const SwapDetails: FC = () => {
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Slippage Tolerance</span>
-        <span className="text-sm font-medium text-text">0.5%</span>
+        <span className="text-sm font-medium text-text">{Percent.fromBps(slippageBps).toPercent(1)}</span>
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Estimated Time</span>

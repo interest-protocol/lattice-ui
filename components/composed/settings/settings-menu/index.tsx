@@ -5,10 +5,11 @@ import { Z_INDEX } from '@/constants/z-index';
 
 import SettingsMenuExplorer from './settings-menu-explorer';
 import SettingsMenuRPC from './settings-menu-rpc';
+import SettingsMenuSlippage from './settings-menu-slippage';
 import SettingsMenuTheme from './settings-menu-theme';
 
 const SettingsMenu: FC = () => {
-  const [menu, setMenu] = useState<'theme' | 'explorer' | 'rpc' | null>(null);
+  const [menu, setMenu] = useState<'theme' | 'explorer' | 'rpc' | 'slippage' | null>(null);
   const reducedMotion = useReducedMotion();
 
   return (
@@ -42,6 +43,11 @@ const SettingsMenu: FC = () => {
         <SettingsMenuRPC
           show={menu === 'rpc'}
           toggleShow={() => setMenu(menu === 'rpc' ? null : 'rpc')}
+        />
+        <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
+        <SettingsMenuSlippage
+          show={menu === 'slippage'}
+          toggleShow={() => setMenu(menu === 'slippage' ? null : 'slippage')}
         />
       </motion.div>
     </motion.div>

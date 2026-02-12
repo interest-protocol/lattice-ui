@@ -2,6 +2,7 @@ import { DWalletAddress, WalletKey } from '@interest-protocol/xswap-sdk';
 import { usePrivy } from '@privy-io/react-auth';
 import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { toasting } from '@/components/ui/toast';
 import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
@@ -9,6 +10,7 @@ import {
   BALANCE_POLL_MAX_ATTEMPTS,
   REQUEST_DEADLINE_MS,
 } from '@/constants/coins';
+import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
@@ -18,7 +20,7 @@ import { sdkChainIdFromKey } from '@/lib/chain-adapters';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import { createSuiAdapter } from '@/lib/chain-adapters/sui-adapter';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
-import { CurrencyAmount, Token, Trade } from '@/lib/entities';
+import { CurrencyAmount, Percent, Token, Trade } from '@/lib/entities';
 import { fetchMetadata, fulfill } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
@@ -105,9 +107,12 @@ export const useSwap = () => {
   } = useBalances();
 
   const { getPrice } = useTokenPrices();
+  const [slippageBps] = useLocalStorage(SLIPPAGE_STORAGE_KEY, DEFAULT_SLIPPAGE_BPS);
   const abortRef = useRef<AbortController | null>(null);
   const getPriceRef = useRef(getPrice);
   getPriceRef.current = getPrice;
+  const slippageBpsRef = useRef(slippageBps);
+  slippageBpsRef.current = slippageBps;
 
   useEffect(() => {
     return () => {
@@ -231,6 +236,7 @@ export const useSwap = () => {
         outputToken,
         inputPriceUsd,
         outputPriceUsd,
+        slippage: Percent.fromBps(slippageBpsRef.current),
       });
       const minDestinationAmount = trade.minimumReceived.raw.toString();
 

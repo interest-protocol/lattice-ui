@@ -9,10 +9,11 @@ import { Z_INDEX } from '@/constants/z-index';
 import GasBalancesInline from './gas-balances-inline';
 import ExplorerSection from './sections/explorer-section';
 import RpcSection from './sections/rpc-section';
+import SlippageSection from './sections/slippage-section';
 import ThemeSection from './sections/theme-section';
 import type { WalletProfileDropdownProps } from './wallet-profile.types';
 
-type MenuSection = 'explorer' | 'rpc' | 'theme' | null;
+type MenuSection = 'explorer' | 'rpc' | 'theme' | 'slippage' | null;
 
 const WalletProfileDropdown: FC<
   WalletProfileDropdownProps & {
@@ -64,6 +65,11 @@ const WalletProfileDropdown: FC<
       <ThemeSection
         show={menu === 'theme'}
         toggleShow={() => setMenu(menu === 'theme' ? null : 'theme')}
+      />
+      <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
+      <SlippageSection
+        show={menu === 'slippage'}
+        toggleShow={() => setMenu(menu === 'slippage' ? null : 'slippage')}
       />
       <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
       <button

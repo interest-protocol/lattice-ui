@@ -4,5 +4,6 @@ export * from './explorer';
 export * from './network';
 export * from './routes';
 export * from './rpc';
+export * from './slippage';
 export * from './solana-explorer';
 export * from './storage-keys';

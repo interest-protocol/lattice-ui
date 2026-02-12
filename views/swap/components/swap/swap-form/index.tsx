@@ -8,11 +8,13 @@ import {
   useFormContext,
   useWatch,
 } from 'react-hook-form';
+import { useLocalStorage } from 'usehooks-ts';
 import InputField from '@/components/composed/input-field';
 import { SwapSVG } from '@/components/ui/icons';
 import { SOL_TYPE } from '@/constants/coins';
+import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
-import { CurrencyAmount, Token, Trade } from '@/lib/entities';
+import { CurrencyAmount, Percent, Token, Trade } from '@/lib/entities';
 import { ZERO_BIG_INT } from '@/utils';
 
 import SwapFormButton from './swap-form-button';
@@ -33,6 +35,7 @@ interface SwapFormValues {
 const SwapQuoteSync: FC = () => {
   const { control, setValue } = useFormContext<SwapFormValues>();
   const { getPrice } = useTokenPrices();
+  const [slippageBps] = useLocalStorage(SLIPPAGE_STORAGE_KEY, DEFAULT_SLIPPAGE_BPS);
 
   const fromValue = useWatch({ control, name: 'from.value' });
   const fromType = useWatch({ control, name: 'from.type' });
@@ -59,11 +62,12 @@ const SwapQuoteSync: FC = () => {
       outputToken,
       inputPriceUsd: inputPrice,
       outputPriceUsd: outputPrice,
+      slippage: Percent.fromBps(slippageBps),
     });
 
     setValue('to.value', trade.minimumReceived.toSignificant(6));
     setValue('to.valueBN', trade.minimumReceived.raw);
-  }, [fromValue, fromType, toType, getPrice, setValue]);
+  }, [fromValue, fromType, toType, getPrice, setValue, slippageBps]);
 
   return null;
 };
