@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import invariant from 'tiny-invariant';
 
 import { SOL_TYPE } from '@/constants/coins';
 import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
@@ -10,7 +11,7 @@ export const useSolPrice = () =>
     queryFn: async () => {
       const data = await fetchCoinPrices([SOL_TYPE]);
       const price = data[0]?.price;
-      if (!price) throw new Error('Failed to fetch SOL price');
+      invariant(price, 'Failed to fetch SOL price');
       return price;
     },
     refetchInterval: REFETCH_INTERVALS.PRICES,

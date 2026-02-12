@@ -1,4 +1,5 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import invariant from 'tiny-invariant';
 
 import type { ChainKey } from '@/constants/chains';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
@@ -80,9 +81,7 @@ export class Token {
 
   static fromType(type: string): Token {
     const token = Token.BY_TYPE[normalizeSuiCoinType(type)];
-    if (!token) {
-      throw new Error(`Unknown token type: ${type}`);
-    }
+    invariant(token, `Unknown token type: ${type}`);
     return token;
   }
 }

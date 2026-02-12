@@ -1,6 +1,7 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
+import invariant from 'tiny-invariant';
 import { address } from '@solana/kit';
 import { fetchMaybeNonce, NonceState } from '@solana-program/system';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -64,7 +65,7 @@ const useNonceAccount = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error('Not authenticated');
+      invariant(user, 'Not authenticated');
       try {
         return await createNonceAccount(user.id);
       } catch (err) {

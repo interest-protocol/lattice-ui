@@ -2,6 +2,7 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { ed25519 } from '@noble/curves/ed25519';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
+import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
@@ -142,11 +143,10 @@ export const POST = withAuthPost(
         15_000,
         'Post-link verification'
       );
-      if (verifyLinks.length === 0) {
-        throw new Error(
-          `On-chain verification failed — no link found after tx ${result.digest}`
-        );
-      }
+      invariant(
+        verifyLinks.length > 0,
+        `On-chain verification failed — no link found after tx ${result.digest}`
+      );
 
       return NextResponse.json({
         digest: result.digest,

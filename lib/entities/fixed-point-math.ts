@@ -1,3 +1,5 @@
+import invariant from 'tiny-invariant';
+
 import { formatUnits, parseUnits } from '@/lib/bigint-utils';
 
 import { Fraction } from './fraction';
@@ -69,7 +71,7 @@ export class FixedPointMath {
 
   public div(x: BigIntish | FixedPointMath): FixedPointMath {
     const divisor = this.parseValue(x);
-    if (divisor === 0n) throw new Error('FixedPointMath: division by zero');
+    invariant(divisor !== 0n, 'FixedPointMath: division by zero');
     return new FixedPointMath((this._value * ONE_COIN) / divisor);
   }
 

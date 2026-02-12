@@ -1,3 +1,5 @@
+import invariant from 'tiny-invariant';
+
 export enum Rounding {
   ROUND_DOWN = 0,
   ROUND_HALF_UP = 1,
@@ -19,9 +21,7 @@ export class Fraction {
   public constructor(numerator: BigIntish, denominator: BigIntish = 1n) {
     this.numerator = toBigInt(numerator);
     this.denominator = toBigInt(denominator);
-    if (this.denominator === 0n) {
-      throw new Error('Fraction: denominator must not be zero');
-    }
+    invariant(this.denominator !== 0n, 'Fraction: denominator must not be zero');
   }
 
   public get quotient(): bigint {

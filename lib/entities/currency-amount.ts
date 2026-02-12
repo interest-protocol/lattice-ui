@@ -1,3 +1,5 @@
+import invariant from 'tiny-invariant';
+
 import { parseUnits, toSignificant } from '@/lib/bigint-utils';
 
 import { FixedPointMath } from './fixed-point-math';
@@ -119,10 +121,9 @@ export class CurrencyAmount {
   // --- Internal ---
 
   private assertSameToken(other: CurrencyAmount): void {
-    if (!this.token.equals(other.token)) {
-      throw new Error(
-        `Token mismatch: ${this.token.symbol} vs ${other.token.symbol}`
-      );
-    }
+    invariant(
+      this.token.equals(other.token),
+      `Token mismatch: ${this.token.symbol} vs ${other.token.symbol}`
+    );
   }
 }

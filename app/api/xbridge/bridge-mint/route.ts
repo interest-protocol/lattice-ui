@@ -3,6 +3,7 @@ import { XSWAP_TYPE } from '@interest-protocol/xswap-sdk';
 import { Transaction } from '@mysten/sui/transactions';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
+import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { fetchWithRetry } from '@/lib/api/fetch-with-retry';
@@ -41,9 +42,7 @@ export const POST = withAuthPost(
 
       // Pre-fetch public key once for both transactions
       const walletInfo = await privy.wallets().get(wallet.id);
-      if (!walletInfo.public_key) {
-        throw new Error(`Wallet ${wallet.id} has no public key`);
-      }
+      invariant(walletInfo.public_key, `Wallet ${wallet.id} has no public key`);
       const publicKey = extractPublicKey(walletInfo.public_key);
 
       // === Sui Tx 1: create + share mint request + transfer mint cap ===
@@ -92,9 +91,10 @@ export const POST = withAuthPost(
           ? mintCapObject.objectId
           : null;
 
-      if (!requestId || !mintCapId) {
-        throw new Error('Failed to extract requestId or mintCapId from tx1');
-      }
+      invariant(
+        requestId && mintCapId,
+        'Failed to extract requestId or mintCapId from tx1'
+      );
 
       // Wait for tx1 to be indexed before the enclave tries to read it on-chain
       await suiClient.waitForTransaction({ digest: tx1Result.digest });

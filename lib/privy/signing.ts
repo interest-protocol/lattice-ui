@@ -5,6 +5,7 @@ import {
 } from '@mysten/sui/cryptography';
 import { Ed25519PublicKey } from '@mysten/sui/keypairs/ed25519';
 import type { PrivyClient } from '@privy-io/node';
+import invariant from 'tiny-invariant';
 
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 
@@ -63,9 +64,7 @@ export const signAndExecuteSuiTransaction = async (
   let publicKey = cachedPublicKey;
   if (!publicKey) {
     const walletInfo = await privy.wallets().get(walletId);
-    if (!walletInfo.public_key) {
-      throw new Error(`Wallet ${walletId} has no public key`);
-    }
+    invariant(walletInfo.public_key, `Wallet ${walletId} has no public key`);
     publicKey = extractPublicKey(walletInfo.public_key);
   }
 

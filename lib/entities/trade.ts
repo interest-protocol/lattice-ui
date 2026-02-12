@@ -1,3 +1,5 @@
+import invariant from 'tiny-invariant';
+
 import { CurrencyAmount } from './currency-amount';
 import { Percent } from './percent';
 import type { Token } from './token';
@@ -40,12 +42,8 @@ export class Trade {
     outputPriceUsd,
     slippage = DEFAULT_SLIPPAGE,
   }: TradeParams): Trade {
-    if (inputPriceUsd <= 0) {
-      throw new Error('Input price must be positive');
-    }
-    if (outputPriceUsd <= 0) {
-      throw new Error('Output price must be positive');
-    }
+    invariant(inputPriceUsd > 0, 'Input price must be positive');
+    invariant(outputPriceUsd > 0, 'Output price must be positive');
 
     const rate = inputPriceUsd / outputPriceUsd;
     const outputHuman = inputAmount.toNumber() * rate;

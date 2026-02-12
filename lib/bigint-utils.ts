@@ -1,3 +1,5 @@
+import invariant from 'tiny-invariant';
+
 export const formatUnits = (value: bigint, decimals: number): string => {
   const isNeg = value < 0n;
   const abs = isNeg ? -value : value;
@@ -47,7 +49,7 @@ export const bigintAbs = (value: bigint): bigint =>
 export const bigintDivDown = (a: bigint, b: bigint): bigint => a / b;
 
 export const bigintDivUp = (a: bigint, b: bigint): bigint => {
-  if (b === 0n) throw new Error('Division by zero');
+  invariant(b !== 0n, 'Division by zero');
   const result = a / b;
   return a % b !== 0n ? result + 1n : result;
 };
