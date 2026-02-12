@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const tx = new Transaction();
     tx.setSender(wallet.address);
 
-    const feeCoin = tx.splitCoins(tx.gas, [tx.pure.u64(1_000_000)]);
+    const feeCoin = tx.splitCoins(tx.gas, [tx.pure.u64(0)]);
 
     const { result: mintRequest, mintCap } = xbridge.newMintRequest({
       tx,

@@ -10,27 +10,21 @@ import type { BridgeProgressStepperProps } from './bridge.types';
 
 const BRIDGE_STEPS: readonly { status: BridgeStatus; label: string }[] = [
   { status: 'depositing', label: 'Deposit' },
-  { status: 'creating', label: 'Create' },
-  { status: 'voting', label: 'Verify' },
-  { status: 'executing', label: 'Mint' },
+  { status: 'creating', label: 'Mint' },
   { status: 'waiting', label: 'Confirm' },
 ];
 
 const STATUS_INDEX: Record<string, number> = {
   depositing: 0,
   creating: 1,
-  voting: 2,
-  executing: 3,
-  waiting: 4,
-  success: 5,
+  waiting: 2,
+  success: 3,
   error: -1,
 };
 
 const STATUS_MESSAGES: Record<string, string> = {
   depositing: 'Depositing to bridge...',
-  creating: 'Creating mint request...',
-  voting: 'Verifying with enclave...',
-  executing: 'Minting tokens...',
+  creating: 'Minting bridged tokens...',
   waiting: 'Confirming transaction...',
   success: 'Bridge completed!',
   error: 'Bridge failed',

@@ -6,16 +6,12 @@ import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/ui/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
+import type { ChainKey } from '@/constants/chains';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useBalances from '@/hooks/domain/use-balances';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
-import {
-  createMintRequest,
-  executeMint,
-  setMintDigest,
-  voteMint,
-} from '@/lib/xbridge/client';
+import { bridgeMint } from '@/lib/xbridge/client';
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
 
@@ -35,6 +31,19 @@ export type BridgeDirection =
   | 'sui-to-wsui'
   | 'wsui-to-sui';
 
+export interface BridgeResult {
+  direction: BridgeDirection;
+  sourceChainKey: ChainKey;
+  destChainKey: ChainKey;
+  fromSymbol: string;
+  toSymbol: string;
+  amount: bigint;
+  decimals: number;
+  depositDigest: string;
+  mintDigest: string;
+  startedAt: number;
+}
+
 interface BridgeParams {
   direction: BridgeDirection;
   amount: bigint;
@@ -44,6 +53,7 @@ export const useBridge = () => {
   const { user } = usePrivy();
   const [status, setStatus] = useState<BridgeStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<BridgeResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -83,8 +93,9 @@ export const useBridge = () => {
       throw new DOMException('The operation was aborted.', 'AbortError');
 
     setStatus('creating');
-    toasting.update(toastId, 'Creating mint request...');
-    const { requestId, mintCapId } = await createMintRequest({
+    toasting.update(toastId, 'Minting bridged tokens...');
+
+    const { digest } = await bridgeMint({
       userId: user.id,
       sourceChain: ChainId.Solana,
       sourceToken: Array.from(bs58.decode(NATIVE_SOL_MINT)),
@@ -92,44 +103,17 @@ export const useBridge = () => {
       sourceAddress: Array.from(bs58.decode(solanaAddress)),
       sourceAmount: amount.toString(),
       coinType: WSOL_SUI_TYPE.split('<')[1].replace('>', ''),
-    });
-
-    invariant(requestId && mintCapId, 'Failed to get requestId or mintCapId');
-    if (signal.aborted)
-      throw new DOMException('The operation was aborted.', 'AbortError');
-
-    setStatus('voting');
-    toasting.update(toastId, 'Verifying with enclave...');
-    await setMintDigest({
-      userId: user.id,
-      requestId,
-      mintCapId,
       depositSignature,
     });
 
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
-
-    await voteMint({
-      userId: user.id,
-      requestId,
-      depositSignature,
-    });
-
-    if (signal.aborted)
-      throw new DOMException('The operation was aborted.', 'AbortError');
-
-    setStatus('executing');
-    toasting.update(toastId, 'Minting tokens...');
-    await executeMint({
-      userId: user.id,
-      requestId,
-      mintCapId,
-    });
 
     setStatus('waiting');
     toasting.update(toastId, 'Confirming transaction...');
     await mutateSuiBalances();
+
+    return { depositDigest: depositSignature, mintDigest: digest };
   };
 
   const bridge = async ({ direction, amount }: BridgeParams) => {
@@ -150,14 +134,18 @@ export const useBridge = () => {
     try {
       setStatus('idle');
       setError(null);
+      setResult(null);
+      const startedAt = Date.now();
       toasting.loadingWithId(
         { message: 'Starting bridge...' },
         BRIDGE_TOAST_ID
       );
 
+      let digests: { depositDigest: string; mintDigest: string } | undefined;
+
       switch (direction) {
         case 'sol-to-wsol':
-          await bridgeSolToWsol(amount, BRIDGE_TOAST_ID, signal);
+          digests = await bridgeSolToWsol(amount, BRIDGE_TOAST_ID, signal);
           break;
         case 'wsol-to-sol':
         case 'sui-to-wsui':
@@ -167,13 +155,24 @@ export const useBridge = () => {
           throw new Error('Invalid bridge direction');
       }
 
+      if (digests) {
+        setResult({
+          direction,
+          sourceChainKey: 'solana',
+          destChainKey: 'sui',
+          fromSymbol: 'SOL',
+          toSymbol: 'wSOL',
+          amount,
+          decimals: SOL_DECIMALS,
+          depositDigest: digests.depositDigest,
+          mintDigest: digests.mintDigest,
+          startedAt,
+        });
+      }
+
       setStatus('success');
       haptic.success();
       toasting.dismiss(BRIDGE_TOAST_ID);
-      toasting.success({
-        action: 'Bridge',
-        message: 'Your tokens are ready',
-      });
       return true;
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -193,6 +192,7 @@ export const useBridge = () => {
   const reset = () => {
     setStatus('idle');
     setError(null);
+    setResult(null);
   };
 
   return {
@@ -200,6 +200,7 @@ export const useBridge = () => {
     reset,
     status,
     error,
+    result,
     isLoading: status !== 'idle' && status !== 'success' && status !== 'error',
   };
 };

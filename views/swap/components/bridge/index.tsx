@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { type FC, useState } from 'react';
+import { type FC, useEffect, useRef, useState } from 'react';
 import FlipButton from '@/components/composed/flip-button';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
@@ -15,6 +15,7 @@ import BridgeDetailsInline from './bridge-details-inline';
 import BridgeFromCard from './bridge-from-card';
 import BridgeProgressStepper from './bridge-progress-stepper';
 import BridgeRouteSelector from './bridge-route-selector';
+import BridgeSuccessModal from './bridge-success-modal';
 import BridgeToCard from './bridge-to-card';
 import useBridgeValidation from './use-bridge-validation';
 import useNonceModal from './use-nonce-modal';
@@ -44,7 +45,7 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
 const NONCE_REQUIRED_LAMPORTS = 1_452_680n;
 
 const Bridge: FC = () => {
-  const { bridge, status, isLoading, reset } = useBridge();
+  const { bridge, status, isLoading, result, reset } = useBridge();
   const {
     suiBalances,
     solanaBalances,
@@ -56,6 +57,16 @@ const Bridge: FC = () => {
   const setContent = useModal((s) => s.setContent);
   const handleClose = useModal((s) => s.handleClose);
   const nonce = useNonceAccount();
+  const shownResultRef = useRef<typeof result>(null);
+
+  useEffect(() => {
+    if (status === 'success' && result && shownResultRef.current !== result) {
+      shownResultRef.current = result;
+      setContent(<BridgeSuccessModal result={result} onReset={reset} />, {
+        title: 'Bridge Complete',
+      });
+    }
+  }, [status, result, setContent, reset]);
 
   const [selectedRoute, setSelectedRoute] = useState<BridgeRoute>(
     BRIDGE_ROUTES[0] as BridgeRoute

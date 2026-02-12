@@ -16,13 +16,14 @@ interface SignAndExecuteParams {
   walletId: string;
   rawBytes: Uint8Array;
   suiClient: SuiClient;
+  publicKey?: Ed25519PublicKey;
   options?: {
     showEffects?: boolean;
     showObjectChanges?: boolean;
   };
 }
 
-const extractPublicKey = (rawString: string): Ed25519PublicKey => {
+export const extractPublicKey = (rawString: string): Ed25519PublicKey => {
   const isHex = /^(0x)?[0-9a-fA-F]+$/.test(rawString) && rawString.length >= 64;
   const decoded = isHex
     ? Buffer.from(rawString.replace(/^0x/, ''), 'hex')
@@ -36,7 +37,13 @@ const extractPublicKey = (rawString: string): Ed25519PublicKey => {
 
 export const signAndExecuteSuiTransaction = async (
   privy: PrivyClient,
-  { walletId, rawBytes, suiClient, options }: SignAndExecuteParams
+  {
+    walletId,
+    rawBytes,
+    suiClient,
+    publicKey: cachedPublicKey,
+    options,
+  }: SignAndExecuteParams
 ) => {
   const intentMessage = messageWithIntent('TransactionData', rawBytes);
   const intentBase64 = Buffer.from(intentMessage).toString('base64');
@@ -53,12 +60,14 @@ export const signAndExecuteSuiTransaction = async (
   const sigHex = signResult.signature.replace(/^0x/, '');
   const signatureBytes = Uint8Array.from(Buffer.from(sigHex, 'hex'));
 
-  const walletInfo = await privy.wallets().get(walletId);
-  if (!walletInfo.public_key) {
-    throw new Error(`Wallet ${walletId} has no public key`);
+  let publicKey = cachedPublicKey;
+  if (!publicKey) {
+    const walletInfo = await privy.wallets().get(walletId);
+    if (!walletInfo.public_key) {
+      throw new Error(`Wallet ${walletId} has no public key`);
+    }
+    publicKey = extractPublicKey(walletInfo.public_key);
   }
-
-  const publicKey = extractPublicKey(walletInfo.public_key);
 
   const serializedSignature = toSerializedSignature({
     signature: signatureBytes,
