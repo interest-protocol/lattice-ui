@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
-import { SOLVER_API_KEY } from '@/lib/config.server';
 import { SOLVER_API_URL } from '@/lib/config';
+import { SOLVER_API_KEY } from '@/lib/config.server';
 
 const schema = z.object({
   requestId: z.string(),

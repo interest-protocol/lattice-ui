@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { errorResponse } from '@/lib/api/validate-params';
-import { SOLVER_API_KEY } from '@/lib/config.server';
 import { SOLVER_API_URL } from '@/lib/config';
+import { SOLVER_API_KEY } from '@/lib/config.server';
 
 export async function GET() {
   if (!SOLVER_API_URL)

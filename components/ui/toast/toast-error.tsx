@@ -6,21 +6,24 @@ import ToastTimer from './toast-timer';
 
 const ToastError: FC<ToastProps> = ({ action, message }) => (
   <>
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3.5">
       <div
-        className="w-8 h-8 rounded-full"
+        className="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center"
         style={{
           color: 'var(--color-toast-error)',
-          boxShadow: 'var(--toast-error-glow)',
+          background: 'var(--toast-icon-error-bg)',
+          border: '1px solid var(--toast-icon-error-border)',
         }}
       >
-        <span className="w-8 h-8 flex rounded-full items-center justify-center">
-          <ErrorSVG maxWidth="1.25rem" width="100%" />
-        </span>
+        <ErrorSVG maxWidth="1.125rem" width="100%" />
       </div>
-      <div>
-        <p className="text-text">{action} failed!</p>
-        {message ? <p className="text-text-secondary">{message}</p> : null}
+      <div className="flex flex-col gap-0.5">
+        <p className="text-text font-medium text-sm leading-tight">
+          {action} failed!
+        </p>
+        {message ? (
+          <p className="text-text-secondary text-xs leading-tight">{message}</p>
+        ) : null}
       </div>
     </div>
     <ToastTimer color="var(--color-toast-error)" />

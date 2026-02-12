@@ -21,20 +21,26 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
     return () => clearInterval(interval);
   }, [loading]);
 
+  const outerStyle = {
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    position: 'absolute' as const,
+    borderRadius: '0 0 12px 12px',
+    overflow: 'hidden' as const,
+  };
+
   if (loading)
     return (
-      <Motion
-        style={{
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          position: 'absolute',
-        }}
-      >
+      <Motion style={outerStyle}>
         <Motion
           layout
-          style={{ background: color, height: '0.15rem' }}
+          style={{
+            background: `linear-gradient(90deg, ${color}, ${color}80)`,
+            height: '0.2rem',
+            opacity: 0.6,
+          }}
           initial={{ scaleX: 1 }}
           animate={{ scaleX: [0, 1] }}
           transition={{
@@ -49,18 +55,13 @@ const ToastTimer: FC<ToastTimerProps> = ({ color, loading }) => {
 
   return (
     <AnimatePresence>
-      <Motion
-        style={{
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          position: 'absolute',
-        }}
-      >
+      <Motion style={outerStyle}>
         <Motion
           layout
-          style={{ background: color, height: '0.15rem' }}
+          style={{
+            background: `linear-gradient(90deg, ${color}, ${color}80)`,
+            height: '0.2rem',
+          }}
           initial={{ width: '100%' }}
           transition={{ duration: 0.1, ease: 'linear' }}
           animate={{ width: `${progress}%` }}

@@ -13,7 +13,8 @@ export const WSUI_SOLANA_MINT = 'F8x6mpvp4PHTgNyb617zEvKhrN5G5fkJKnXsNCCHUHeB';
 export const XBRIDGE_DECIMALS = 9;
 
 export const SOLANA_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? 'https://api.mainnet-beta.solana.com';
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
+  'https://api.mainnet-beta.solana.com';
 
 export const BRIDGED_ASSET_METADATA: Record<string, AssetMetadata> = {
   [WSOL_SUI_TYPE]: {

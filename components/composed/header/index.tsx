@@ -16,7 +16,9 @@ const Header: FC = () => (
   >
     <div className="flex items-center gap-2 sm:gap-4 md:gap-8">
       <div className="flex items-center gap-4">
-        <div style={{ filter: 'drop-shadow(0 0 8px var(--color-accent-muted))' }}>
+        <div
+          style={{ filter: 'drop-shadow(0 0 8px var(--color-accent-muted))' }}
+        >
           <LogoSVG
             maxWidth="2rem"
             maxHeight="2rem"

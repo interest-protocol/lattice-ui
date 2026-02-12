@@ -32,7 +32,9 @@ export class Token {
   }
 
   equals(other: Token): boolean {
-    return this.chainId === other.chainId && coinTypeEquals(this.type, other.type);
+    return (
+      this.chainId === other.chainId && coinTypeEquals(this.type, other.type)
+    );
   }
 
   isSui(): boolean {

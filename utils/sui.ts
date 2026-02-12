@@ -1,4 +1,4 @@
-import { normalizeSuiAddress, normalizeStructTag } from '@mysten/sui/utils';
+import { normalizeStructTag, normalizeSuiAddress } from '@mysten/sui/utils';
 
 /** Normalize a SUI coin type (struct tag) for reliable comparison. Non-SUI types pass through unchanged. */
 export const normalizeSuiCoinType = (type: string): string =>

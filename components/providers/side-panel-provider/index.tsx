@@ -29,7 +29,11 @@ const REDUCED_PANEL_EXIT = { opacity: 0, x: '2%' };
 const REDUCED_PANEL_TRANSITION = { duration: 0.15 };
 
 const CONTENT_ANIMATE = { opacity: [0, 1], y: [8, 0] };
-const CONTENT_TRANSITION = { duration: 0.25, ease: 'easeOut' as const, delay: 0.1 };
+const CONTENT_TRANSITION = {
+  duration: 0.25,
+  ease: 'easeOut' as const,
+  delay: 0.1,
+};
 
 const SidePanelProvider: FC = () => {
   const { isOpen, content, title, onClose, close } = useSidePanel(
@@ -94,7 +98,9 @@ const SidePanelProvider: FC = () => {
             initial={reducedMotion ? REDUCED_PANEL_INITIAL : PANEL_INITIAL}
             animate={reducedMotion ? REDUCED_PANEL_ANIMATE : PANEL_ANIMATE}
             exit={reducedMotion ? REDUCED_PANEL_EXIT : PANEL_EXIT}
-            transition={reducedMotion ? REDUCED_PANEL_TRANSITION : PANEL_TRANSITION}
+            transition={
+              reducedMotion ? REDUCED_PANEL_TRANSITION : PANEL_TRANSITION
+            }
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 pt-6 pb-4 flex justify-between items-center">

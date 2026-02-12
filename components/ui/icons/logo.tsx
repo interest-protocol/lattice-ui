@@ -54,19 +54,28 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
 
     {/* 3 internal cube edges meeting at center */}
     <line
-      x1="20" y1="20" x2="20" y2="3"
+      x1="20"
+      y1="20"
+      x2="20"
+      y2="3"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="20" y1="20" x2="35" y2="11.5"
+      x1="20"
+      y1="20"
+      x2="35"
+      y2="11.5"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="20" y1="20" x2="5" y2="11.5"
+      x1="20"
+      y1="20"
+      x2="5"
+      y2="11.5"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
@@ -74,19 +83,28 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
 
     {/* Bottom internal edges (center to bottom, completing the cube) */}
     <line
-      x1="20" y1="20" x2="20" y2="37"
+      x1="20"
+      y1="20"
+      x2="20"
+      y2="37"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="20" y1="20" x2="35" y2="28.5"
+      x1="20"
+      y1="20"
+      x2="35"
+      y2="28.5"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="20" y1="20" x2="5" y2="28.5"
+      x1="20"
+      y1="20"
+      x2="5"
+      y2="28.5"
       stroke="url(#lattice-grad)"
       strokeWidth="1.2"
       strokeLinecap="round"
@@ -94,14 +112,20 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
 
     {/* Lattice subdivision lines — top face */}
     <line
-      x1="12.5" y1="7.25" x2="27.5" y2="15.75"
+      x1="12.5"
+      y1="7.25"
+      x2="27.5"
+      y2="15.75"
       stroke="#22d3ee"
       strokeWidth="0.75"
       strokeLinecap="round"
       opacity="0.5"
     />
     <line
-      x1="27.5" y1="7.25" x2="12.5" y2="15.75"
+      x1="27.5"
+      y1="7.25"
+      x2="12.5"
+      y2="15.75"
       stroke="#22d3ee"
       strokeWidth="0.75"
       strokeLinecap="round"
@@ -110,14 +134,20 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
 
     {/* Lattice subdivision lines — right face */}
     <line
-      x1="35" y1="20" x2="20" y2="28.5"
+      x1="35"
+      y1="20"
+      x2="20"
+      y2="28.5"
       stroke="#8b5cf6"
       strokeWidth="0.75"
       strokeLinecap="round"
       opacity="0.5"
     />
     <line
-      x1="27.5" y1="15.75" x2="27.5" y2="32.75"
+      x1="27.5"
+      y1="15.75"
+      x2="27.5"
+      y2="32.75"
       stroke="#8b5cf6"
       strokeWidth="0.75"
       strokeLinecap="round"
@@ -126,14 +156,20 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
 
     {/* Lattice subdivision lines — left face */}
     <line
-      x1="5" y1="20" x2="20" y2="28.5"
+      x1="5"
+      y1="20"
+      x2="20"
+      y2="28.5"
       stroke="#0891b2"
       strokeWidth="0.75"
       strokeLinecap="round"
       opacity="0.5"
     />
     <line
-      x1="12.5" y1="15.75" x2="12.5" y2="32.75"
+      x1="12.5"
+      y1="15.75"
+      x2="12.5"
+      y2="32.75"
       stroke="#0891b2"
       strokeWidth="0.75"
       strokeLinecap="round"
@@ -141,11 +177,7 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
     />
 
     {/* Center node glow halo */}
-    <circle
-      cx="20" cy="20" r="5"
-      fill="#22d3ee"
-      fillOpacity="0.15"
-    />
+    <circle cx="20" cy="20" r="5" fill="#22d3ee" fillOpacity="0.15" />
     {/* Center node (convergence/swap hub) */}
     <circle cx="20" cy="20" r="2.5" fill="#e0f7fa" />
 

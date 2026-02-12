@@ -70,11 +70,7 @@ const WalletProfile: FC = () => {
         />
         <span className="whitespace-nowrap">{displayAddress}</span>
         <span className="hidden sm:flex items-center ml-1">
-          <ChevronDownSVG
-            width="100%"
-            maxWidth="0.65rem"
-            maxHeight="0.65rem"
-          />
+          <ChevronDownSVG width="100%" maxWidth="0.65rem" maxHeight="0.65rem" />
         </span>
       </button>
       <button

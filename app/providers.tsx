@@ -46,13 +46,16 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
           duration: TOAST_DURATION,
           style: {
             zIndex: Z_INDEX.TOAST,
-            maxWidth: '20rem',
+            maxWidth: '22rem',
             overflow: 'hidden',
             position: 'relative',
-            background: toast.background,
+            padding: '0.875rem 1rem',
+            background: 'var(--toast-glass-bg)',
+            backdropFilter: 'blur(var(--blur-lg)) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(var(--blur-lg)) saturate(1.4)',
             border: `1px solid ${toast.border}`,
             borderRadius: '12px',
-            boxShadow: toast.shadow,
+            boxShadow: `var(--toast-inner-highlight), ${toast.shadow}`,
           },
         }}
       />

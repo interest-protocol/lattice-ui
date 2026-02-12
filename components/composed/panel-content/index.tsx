@@ -1,14 +1,13 @@
 'use client';
 
 import { type FC, useState } from 'react';
-
-import CopyButton from '@/components/ui/copy-button';
-import { LogoutSVG } from '@/components/ui/icons';
 import GasBalancesInline from '@/components/composed/wallet-button/wallet-profile/gas-balances-inline';
 import ExplorerSection from '@/components/composed/wallet-button/wallet-profile/sections/explorer-section';
 import RpcSection from '@/components/composed/wallet-button/wallet-profile/sections/rpc-section';
 import SlippageSection from '@/components/composed/wallet-button/wallet-profile/sections/slippage-section';
 import ThemeSection from '@/components/composed/wallet-button/wallet-profile/sections/theme-section';
+import CopyButton from '@/components/ui/copy-button';
+import { LogoutSVG } from '@/components/ui/icons';
 
 type MenuSection = 'explorer' | 'rpc' | 'theme' | 'slippage' | null;
 

@@ -5,12 +5,12 @@ import invariant from 'tiny-invariant';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { toasting } from '@/components/ui/toast';
+import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
 import {
   BALANCE_POLL_MAX_ATTEMPTS,
   REQUEST_DEADLINE_MS,
 } from '@/constants/coins';
-import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
@@ -107,7 +107,10 @@ export const useSwap = () => {
   } = useBalances();
 
   const { getPrice } = useTokenPrices();
-  const [slippageBps] = useLocalStorage(SLIPPAGE_STORAGE_KEY, DEFAULT_SLIPPAGE_BPS);
+  const [slippageBps] = useLocalStorage(
+    SLIPPAGE_STORAGE_KEY,
+    DEFAULT_SLIPPAGE_BPS
+  );
   const abortRef = useRef<AbortController | null>(null);
   const getPriceRef = useRef(getPrice);
   getPriceRef.current = getPrice;
