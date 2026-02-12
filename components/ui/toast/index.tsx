@@ -15,10 +15,8 @@ export const toasting = {
   success: (args: ToastSuccessProps) =>
     dismissHandler(toast(<ToastSuccess {...args} />)),
   loading: (args: ToastLoadingProps) => {
-    const id = toast.loading(<ToastLoading {...args} />, {
-      duration: Number.POSITIVE_INFINITY,
-    });
-    toast.loading(<ToastLoading {...args} toastId={id} />, {
+    const id = Math.random().toString(36).slice(2);
+    toast(<ToastLoading {...args} toastId={id} />, {
       id,
       duration: Number.POSITIVE_INFINITY,
     });
@@ -26,7 +24,7 @@ export const toasting = {
   },
 
   loadingWithId: (args: ToastLoadingProps, id: string) => {
-    toast.loading(<ToastLoading {...args} toastId={id} />, {
+    toast(<ToastLoading {...args} toastId={id} />, {
       id,
       duration: Number.POSITIVE_INFINITY,
     });
@@ -34,7 +32,7 @@ export const toasting = {
   },
 
   update: (id: string, message: string) => {
-    toast.loading(<ToastLoading message={message} toastId={id} />, {
+    toast(<ToastLoading message={message} toastId={id} />, {
       id,
       duration: Number.POSITIVE_INFINITY,
     });

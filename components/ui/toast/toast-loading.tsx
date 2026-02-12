@@ -2,7 +2,6 @@ import { motion } from 'motion/react';
 import type { FC } from 'react';
 import toast from 'react-hot-toast';
 import type { ToastLoadingProps } from './toast.types';
-import ToastTimer from './toast-timer';
 
 const ToastLoading: FC<ToastLoadingProps> = ({ message, toastId }) => (
   <div className="flex items-center gap-3.5 w-full">
@@ -78,7 +77,6 @@ const ToastLoading: FC<ToastLoadingProps> = ({ message, toastId }) => (
         </svg>
       </button>
     )}
-    <ToastTimer loading color="var(--color-text-secondary)" />
   </div>
 );
 
