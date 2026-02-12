@@ -1,30 +1,20 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { AnimatePresence } from 'motion/react';
-import { type FC, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import type { FC } from 'react';
+
+import PanelContent from '@/components/composed/panel-content';
 import { ChevronDownSVG, LogoSVG } from '@/components/ui/icons';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
 import { useModal } from '@/hooks/store/use-modal';
-import useClickOutsideListenerRef from '@/hooks/ui/use-click-outside-listener-ref';
+import { useSidePanel } from '@/hooks/store/use-side-panel';
 import { formatAddress } from '@/utils';
-
-import WalletProfileDropdown from './wallet-profile-dropdown';
-import WalletProfileModal from './wallet-profile-modal';
 
 const WalletProfile: FC = () => {
   const { user, logout } = usePrivy();
-  const { setContent, handleClose } = useModal(
-    useShallow((s) => ({
-      setContent: s.setContent,
-      handleClose: s.handleClose,
-    }))
-  );
-  const [isOpen, setOpen] = useState(false);
-  const menuRef = useClickOutsideListenerRef<HTMLDivElement>(() =>
-    setOpen(false)
-  );
+  const openPanel = useSidePanel((s) => s.open);
+  const setModalContent = useModal((s) => s.setContent);
+  const handleModalClose = useModal((s) => s.handleClose);
 
   const { getAddress } = useWalletAddresses();
   const walletAddr = getAddress('sui') ?? getAddress('solana');
@@ -38,61 +28,60 @@ const WalletProfile: FC = () => {
 
   const fullAddress = walletAddr ?? '';
 
-  const handleOpenProfileDropdown = () => setOpen((prev) => !prev);
-  const handleOpenProfileModal = () =>
-    setContent(
-      <WalletProfileModal
-        displayAddress={displayAddress}
-        fullAddress={fullAddress}
+  const handleDesktop = () => {
+    const closePanel = useSidePanel.getState().close;
+    openPanel(
+      <PanelContent
+        wallet={{ displayAddress, fullAddress }}
         onLogout={() => {
           logout();
-          handleClose();
+          closePanel();
         }}
-        onClose={handleClose}
       />,
       { title: 'Account' }
     );
+  };
+
+  const handleMobile = () => {
+    setModalContent(
+      <PanelContent
+        wallet={{ displayAddress, fullAddress }}
+        onLogout={() => {
+          logout();
+          handleModalClose();
+        }}
+      />,
+      { title: 'Account' }
+    );
+  };
 
   return (
     <>
-      <div ref={menuRef} className="items-end flex-col hidden md:flex">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-haspopup="menu"
-          className="py-3 gap-2 flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
-          onClick={handleOpenProfileDropdown}
-        >
-          <LogoSVG
-            maxWidth="1.25rem"
-            maxHeight="1.25rem"
-            className="text-accent"
+      <button
+        type="button"
+        aria-label="Open account menu"
+        className="py-3 gap-2 hidden md:flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
+        onClick={handleDesktop}
+      >
+        <LogoSVG
+          maxWidth="1.25rem"
+          maxHeight="1.25rem"
+          className="text-accent"
+        />
+        <span className="whitespace-nowrap">{displayAddress}</span>
+        <span className="hidden sm:flex items-center ml-1">
+          <ChevronDownSVG
+            width="100%"
+            maxWidth="0.65rem"
+            maxHeight="0.65rem"
           />
-          <span className="whitespace-nowrap">{displayAddress}</span>
-          <span className="hidden sm:flex items-center ml-1">
-            <ChevronDownSVG
-              width="100%"
-              maxWidth="0.65rem"
-              maxHeight="0.65rem"
-            />
-          </span>
-        </button>
-        <AnimatePresence>
-          {isOpen ? (
-            <WalletProfileDropdown
-              close={() => setOpen(false)}
-              displayAddress={displayAddress}
-              fullAddress={fullAddress}
-              onLogout={logout}
-            />
-          ) : null}
-        </AnimatePresence>
-      </div>
+        </span>
+      </button>
       <button
         type="button"
         aria-label="Open account menu"
         className="flex md:hidden gap-1 bg-surface-raised text-text cursor-pointer items-center rounded-lg py-2.5 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
-        onClick={handleOpenProfileModal}
+        onClick={handleMobile}
       >
         <LogoSVG maxWidth="1rem" maxHeight="1rem" className="text-accent" />
         {displayAddress}

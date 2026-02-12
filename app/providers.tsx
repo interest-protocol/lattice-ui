@@ -11,6 +11,7 @@ import ErrorBoundary from '@/components/providers/error-boundary';
 import GasGuardProvider from '@/components/providers/gas-guard-provider';
 import ModalProvider from '@/components/providers/modal-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
+import SidePanelProvider from '@/components/providers/side-panel-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
@@ -38,6 +39,7 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
     <>
       <AuthInitializer />
       <ModalProvider />
+      <SidePanelProvider />
       <Toaster
         position="bottom-right"
         toastOptions={{
