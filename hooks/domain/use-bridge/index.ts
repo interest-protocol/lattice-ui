@@ -10,8 +10,9 @@ import type { ChainKey } from '@/constants/chains';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useBalances from '@/hooks/domain/use-balances';
+import { useOnboarding } from '@/hooks/store/use-onboarding';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
-import { bridgeMint } from '@/lib/xbridge/client';
+import { bridgeBurn, bridgeMint, broadcastBurn } from '@/lib/xbridge/client';
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
 
@@ -116,6 +117,51 @@ export const useBridge = () => {
     return { depositDigest: depositSignature, mintDigest: digest };
   };
 
+  const bridgeWsolToSol = async (
+    amount: bigint,
+    toastId: string,
+    signal: AbortSignal
+  ) => {
+    invariant(user && solanaAddress && suiAddress, 'Wallets not connected');
+    const nonceAddr = useOnboarding.getState().nonceAddress;
+    invariant(nonceAddr, 'Nonce account not set up');
+
+    setStatus('creating');
+    toasting.update(toastId, 'Creating burn request...');
+
+    const coinType = WSOL_SUI_TYPE.split('<')[1].replace('>', '');
+    const burnResult = await bridgeBurn({
+      userId: user.id,
+      sourceAmount: amount.toString(),
+      destinationAddress: Array.from(bs58.decode(solanaAddress)),
+      nonceAddress: nonceAddr,
+      coinType,
+    });
+
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
+
+    setStatus('waiting');
+    toasting.update(toastId, 'Broadcasting to Solana...');
+
+    const broadcast = await broadcastBurn({
+      userId: user.id,
+      requestId: burnResult.requestId,
+      signId: burnResult.signId,
+      userSignature: burnResult.userSignature,
+      message: burnResult.message,
+    });
+
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
+
+    await Promise.all([mutateSuiBalances(), mutateSolanaBalances()]);
+    return {
+      depositDigest: burnResult.executeDigest,
+      mintDigest: broadcast.solanaSignature,
+    };
+  };
+
   const bridge = async ({ direction, amount }: BridgeParams) => {
     const BRIDGE_TOAST_ID = 'bridge-operation';
 
@@ -148,6 +194,8 @@ export const useBridge = () => {
           digests = await bridgeSolToWsol(amount, BRIDGE_TOAST_ID, signal);
           break;
         case 'wsol-to-sol':
+          digests = await bridgeWsolToSol(amount, BRIDGE_TOAST_ID, signal);
+          break;
         case 'sui-to-wsui':
         case 'wsui-to-sui':
           throw new Error(`${direction} bridge not yet implemented`);
@@ -156,12 +204,13 @@ export const useBridge = () => {
       }
 
       if (digests) {
+        const isBurn = direction === 'wsol-to-sol';
         setResult({
           direction,
-          sourceChainKey: 'solana',
-          destChainKey: 'sui',
-          fromSymbol: 'SOL',
-          toSymbol: 'wSOL',
+          sourceChainKey: isBurn ? 'sui' : 'solana',
+          destChainKey: isBurn ? 'solana' : 'sui',
+          fromSymbol: isBurn ? 'wSOL' : 'SOL',
+          toSymbol: isBurn ? 'SOL' : 'wSOL',
           amount,
           decimals: SOL_DECIMALS,
           depositDigest: digests.depositDigest,

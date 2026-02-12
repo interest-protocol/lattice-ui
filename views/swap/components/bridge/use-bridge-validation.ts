@@ -27,8 +27,9 @@ const useBridgeValidation = ({
   }
 
   const symbol = route.sourceToken.symbol;
-  if (symbol === 'SUI' || symbol === 'SOL') {
-    const alphaError = validateAlphaLimit(symbol, amountNum);
+  if (symbol === 'SUI' || symbol === 'SOL' || symbol === 'wSOL') {
+    const alphaToken = symbol === 'wSOL' ? 'SOL' : symbol;
+    const alphaError = validateAlphaLimit(alphaToken, amountNum);
     if (alphaError) return alphaError;
   }
 

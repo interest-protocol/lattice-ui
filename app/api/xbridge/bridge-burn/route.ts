@@ -5,7 +5,7 @@ import {
   WITNESS_TYPE,
 } from '@interest-protocol/xbridge-sdk';
 import { XSWAP_TYPE } from '@interest-protocol/xswap-sdk';
-import { Transaction } from '@mysten/sui/transactions';
+import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
 import { address } from '@solana/kit';
 import { fetchMaybeNonce } from '@solana-program/system';
 import {
@@ -14,6 +14,7 @@ import {
 } from '@solana-program/token';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
+import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
@@ -64,9 +65,10 @@ export const POST = withAuthPost(
       const { suiClient, xbridge } = createXBridgeSdk();
 
       const walletInfo = await privy.wallets().get(suiWallet.id);
-      if (!walletInfo.public_key) {
-        throw new Error(`Wallet ${suiWallet.id} has no public key`);
-      }
+      invariant(
+        walletInfo.public_key,
+        `Wallet ${suiWallet.id} has no public key`
+      );
       const publicKey = extractPublicKey(walletInfo.public_key);
 
       const walletAddress = suiWallet.address;
@@ -95,10 +97,11 @@ export const POST = withAuthPost(
 
       // Fetch nonce value from Solana RPC
       const rpc = getSolanaRpc();
-      const nonceResult = await fetchMaybeNonce(rpc, address(body.nonceAddress));
-      if (!nonceResult.exists) {
-        throw new Error('Nonce account not found');
-      }
+      const nonceResult = await fetchMaybeNonce(
+        rpc,
+        address(body.nonceAddress)
+      );
+      invariant(nonceResult.exists, 'Nonce account not found');
       const nonceValue = nonceResult.data.blockhash;
       const nonceBytes = Buffer.from(bs58.decode(nonceValue as string));
 
@@ -142,33 +145,17 @@ export const POST = withAuthPost(
         });
       const userSolanaSignature = Buffer.from(signResult.signature, 'base64');
 
-      // === Phase 2: Get wSOL coins + Tx1 (create burn request) ===
-      const coins = await suiClient.getCoins({
-        owner: walletAddress,
-        coinType: WSOL_SUI_TYPE,
-      });
-
-      if (!coins.data.length) {
-        throw new Error('No wSOL coins found');
-      }
-
+      // === Phase 2: Tx1 (create burn request) ===
       const tx1 = new Transaction();
       tx1.setSender(walletAddress);
 
-      const [first, ...rest] = coins.data;
-      const primaryCoin = tx1.object(first!.coinObjectId);
-
-      if (rest.length > 0) {
-        tx1.mergeCoins(
-          primaryCoin,
-          rest.map((c) => tx1.object(c.coinObjectId))
-        );
-      }
-
-      const burnCoin = tx1.splitCoins(primaryCoin, [
-        tx1.pure.u64(BigInt(body.sourceAmount)),
-      ]);
-      const feeCoin = tx1.splitCoins(tx1.gas, [tx1.pure.u64(1_000_000)]);
+      const burnCoin = tx1.add(
+        coinWithBalance({
+          type: WSOL_SUI_TYPE,
+          balance: BigInt(body.sourceAmount),
+        })
+      );
+      const feeCoin = tx1.splitCoins(tx1.gas, [tx1.pure.u64(0)]);
 
       const {
         result: burnRequest,
@@ -227,9 +214,10 @@ export const POST = withAuthPost(
           ? burnCapObject.objectId
           : null;
 
-      if (!requestId || !burnCapId) {
-        throw new Error('Failed to extract requestId or burnCapId from tx1');
-      }
+      invariant(
+        requestId && burnCapId,
+        'Failed to extract requestId or burnCapId from tx1'
+      );
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 
@@ -260,7 +248,8 @@ export const POST = withAuthPost(
             message: Buffer.from(burnRequestData.message).toString('hex'),
           }),
         }).then(
-          (r) => r.json() as Promise<{ signature: string; timestamp_ms: number }>
+          (r) =>
+            r.json() as Promise<{ signature: string; timestamp_ms: number }>
         ),
         // PresignCap lookup (create if missing)
         xbridge
@@ -273,9 +262,7 @@ export const POST = withAuthPost(
             // No PresignCap found — create one
             const mintTx = new Transaction();
             mintTx.setSender(walletAddress);
-            const mintFee = mintTx.splitCoins(mintTx.gas, [
-              mintTx.pure.u64(1_000_000),
-            ]);
+            const mintFee = mintTx.splitCoins(mintTx.gas, [mintTx.pure.u64(0)]);
             xbridge.mintPresign({
               tx: mintTx,
               chainId: ChainId.Solana,
@@ -323,10 +310,8 @@ export const POST = withAuthPost(
         success: boolean;
         data: { signature: string };
       };
-      const messageCentralizedSignatureHex = solverResult.data.signature.replace(
-        /^0x/,
-        ''
-      );
+      const messageCentralizedSignatureHex =
+        solverResult.data.signature.replace(/^0x/, '');
       const messageCentralizedSignature = Buffer.from(
         messageCentralizedSignatureHex,
         'hex'
@@ -351,7 +336,9 @@ export const POST = withAuthPost(
         requestId,
         burnCapId,
         presignCapId: presignData.presignCapId,
-        messageCentralizedSignature: new Uint8Array(messageCentralizedSignature),
+        messageCentralizedSignature: new Uint8Array(
+          messageCentralizedSignature
+        ),
         coinType: body.coinType,
       });
 

@@ -1,5 +1,6 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 
+import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import type { ChainKey } from '@/constants/chains';
 import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
 
@@ -47,14 +48,14 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       symbol: 'wSOL',
       iconUrl: '/sol-logo.svg',
       decimals: 9,
-      type: 'sol',
+      type: WSOL_SUI_TYPE,
     },
     destToken: {
       symbol: 'SOL',
       iconUrl: '/sol-logo.svg',
       decimals: 9,
     },
-    enabled: false,
+    enabled: true,
     label: 'wSOL → SOL',
   },
   {

@@ -1,4 +1,4 @@
-import { Transaction } from '@mysten/sui/transactions';
+import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -36,28 +36,11 @@ export const POST = withAuthPost(
         const [coin] = tx.splitCoins(tx.gas, [BigInt(body.amount)]);
         tx.transferObjects([coin], normalizeSuiAddress(body.recipient));
       } else {
-        const coins = await client.getCoins({
-          owner: wallet.address,
-          coinType: body.coinType,
+        const coin = coinWithBalance({
+          type: body.coinType,
+          balance: BigInt(body.amount),
         });
-
-        if (!coins.data.length)
-          return NextResponse.json(
-            { error: 'No coins of this type found' },
-            { status: 400 }
-          );
-
-        const primaryCoin = tx.object(coins.data[0].coinObjectId);
-
-        if (coins.data.length > 1) {
-          tx.mergeCoins(
-            primaryCoin,
-            coins.data.slice(1).map((c) => tx.object(c.coinObjectId))
-          );
-        }
-
-        const [splitCoin] = tx.splitCoins(primaryCoin, [BigInt(body.amount)]);
-        tx.transferObjects([splitCoin], body.recipient);
+        tx.transferObjects([coin], body.recipient);
       }
 
       const rawBytes = await tx.build({ client });

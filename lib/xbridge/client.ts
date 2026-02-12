@@ -21,3 +21,40 @@ export const bridgeMint = (params: {
     timeout: 30_000,
     retries: 0,
   });
+
+export interface BridgeBurnResult {
+  createDigest: string;
+  executeDigest: string;
+  requestId: string;
+  signId: string;
+  userSignature: string;
+  message: string;
+}
+
+export const bridgeBurn = (params: {
+  userId: string;
+  sourceAmount: string;
+  destinationAddress: number[];
+  nonceAddress: string;
+  coinType: string;
+}) =>
+  post<BridgeBurnResult>('/api/xbridge/bridge-burn', params, {
+    timeout: 60_000,
+    retries: 0,
+  });
+
+export interface BroadcastBurnResult {
+  solanaSignature: string;
+}
+
+export const broadcastBurn = (params: {
+  userId: string;
+  requestId: string;
+  signId: string;
+  userSignature: string;
+  message: string;
+}) =>
+  post<BroadcastBurnResult>('/api/xbridge/broadcast-burn', params, {
+    timeout: 180_000,
+    retries: 0,
+  });
