@@ -372,10 +372,7 @@ All 18 API routes are Next.js Route Handlers (`app/api/**/route.ts`) that proxy 
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/xbridge/create-mint-request` | POST | Initiate bridge mint |
-| `/api/xbridge/set-mint-digest` | POST | Set transaction digest for mint |
-| `/api/xbridge/vote-mint` | POST | Vote on bridge mint via enclave |
-| `/api/xbridge/execute-mint` | POST | Execute finalized bridge mint |
+| `/api/xbridge/bridge-mint` | POST | Bridge SOL→wSOL in a single consolidated call |
 
 ### Wallet Management
 

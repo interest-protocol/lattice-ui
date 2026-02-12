@@ -8,10 +8,6 @@ const RATE_LIMITS: Record<string, number> = {
   '/api/wallet/send-solana': 20,
   '/api/wallet/link-solana': 5,
   '/api/xswap/create-request': 20,
-  '/api/xbridge/create-mint-request': 20,
-  '/api/xbridge/execute-mint': 20,
-  '/api/xbridge/set-mint-digest': 20,
-  '/api/xbridge/vote-mint': 20,
   '/api/solver/fulfill': 20,
   '/api/enclave/new-request': 20,
 };
