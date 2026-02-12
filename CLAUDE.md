@@ -637,6 +637,10 @@ Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads fr
 
 ## Design System
 
+### Visual Language Overview
+
+The UI follows a **glassmorphism-first** design language: gradient backgrounds + backdrop blur + inset highlights + subtle borders. The accent palette is a violet/cyan aurora (dark: `#a78bfa`/`#06b6d4`, light: `#7c3aed`/`#0891b2`). Dark mode is the default; light theme is a full override via `[data-theme="light"]` in `globals.css`.
+
 ### Theme Architecture
 
 Light + dark themes with system preference as default. Powered by `next-themes`:
@@ -650,13 +654,286 @@ Light + dark themes with system preference as default. Powered by `next-themes`:
 
 All design tokens follow `--color-{category}-{variant}` for simple colors and `--{component}-{property}` for complex values (gradients, shadows). Simple tokens (in `@theme`) generate Tailwind utilities like `bg-accent`, `text-text-muted`. Complex tokens (in `@layer base :root`) are used as `var(--token-name)` in inline styles. See `app/globals.css` for the full token list.
 
+### Color Token Reference
+
+**Accent** (6 variants) — primary interactive color:
+
+| Token | Tailwind class | Purpose |
+|-------|---------------|---------|
+| `--color-accent` | `bg-accent`, `text-accent` | Primary accent (violet-400 / violet-600) |
+| `--color-accent-hover` | `bg-accent-hover` | Hover state |
+| `--color-accent-muted` | `text-accent-muted` | 50% opacity accent for secondary text |
+| `--color-accent-subtle` | `bg-accent-subtle` | 20% opacity for light fills |
+| `--color-accent-wash` | `bg-accent-wash` | 8% opacity for wash backgrounds |
+| `--color-accent-border` | `border-accent-border` | 30% opacity for borders |
+
+**Secondary accent** (cyan spark): `accent-secondary`, `accent-secondary-muted`
+
+**Surface hierarchy** (4 layers, darkest → lightest):
+
+| Token | Tailwind class | Purpose |
+|-------|---------------|---------|
+| `--color-surface` | `bg-surface` | Page background (`#080b14` dark / `#f0f4f8` light) |
+| `--color-surface-raised` | `bg-surface-raised` | Elevated cards (`#0f1629` / `#ffffff`) |
+| `--color-surface-overlay` | `bg-surface-overlay` | Overlay panels (`#161e35` / `#f7f8fb`) |
+| `--color-surface-inset` | `bg-surface-inset` | Inset/sunken areas (`#060912` / `#e8edf4`) |
+
+**Surface modifiers** (white-alpha in dark, purple-alpha in light):
+`surface-light`, `surface-lighter`, `surface-hover`, `surface-border`, `surface-border-hover`
+
+**Text scale** (5 levels):
+
+| Token | Tailwind class | Purpose |
+|-------|---------------|---------|
+| `--color-text` | `text-text` | Primary text |
+| `--color-text-secondary` | `text-text-secondary` | Secondary labels |
+| `--color-text-muted` | `text-text-muted` | Muted/placeholder text |
+| `--color-text-dimmed` | `text-text-dimmed` | Very dim text |
+| `--color-text-dim` | `text-text-dim` | Near-invisible (dividers) |
+
+**Status**: `success` (green), `error` (red), `warning` (amber) — semantic only
+
+### Glassmorphism Patterns
+
+There are 4 glass surface tiers. Each uses CSS variable tokens consumed via the `style` prop (not className):
+
+**1. Card glass** — generic elevated containers:
+
+```typescript
+style={{
+  background: 'var(--card-bg)',       // gradient with violet tint
+  boxShadow: 'var(--card-shadow)',    // inset highlight + drop shadow
+  backdropFilter: 'var(--card-backdrop)', // blur(24px) saturate(1.5)
+}}
+className="border border-surface-border rounded-3xl"
+```
+
+**2. Swap card glass** — heavier gradient with cyan hints (swap/bridge forms):
+
+```typescript
+const CARD_STYLE = {
+  background: 'var(--swap-card-bg)',
+  boxShadow: 'var(--swap-card-shadow)',
+  border: '1px solid var(--swap-card-border)',
+  backdropFilter: 'blur(24px) saturate(1.5)',
+} as const;
+```
+
+**3. Modal glass** — heaviest blur, used for dialogs:
+
+```typescript
+style={{
+  backdropFilter: 'blur(var(--blur-xl)) saturate(1.5)', // 50px blur
+  background: 'var(--modal-bg)',
+  boxShadow: 'var(--modal-shadow)',
+}}
+className="border border-modal-border rounded-[1.25rem]"
+```
+
+**4. Header/footer glass** — transparent background with blur:
+
+```typescript
+style={{
+  background: 'var(--color-header-bg)',  // rgba with 60% opacity
+  backdropFilter: 'blur(var(--blur-lg)) saturate(1.4)', // 24px blur
+}}
+```
+
+### Blur Scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--blur-sm` | `8px` | Light overlays |
+| `--blur-md` | `12px` | Buttons, small elements (flip button) |
+| `--blur-lg` | `24px` | Header, footer, cards |
+| `--blur-xl` | `50px` | Modals, side panels |
+
+Always use `var(--blur-*)` — never hardcode blur values.
+
+### Glow & Shadow System
+
+All glow/shadow values are CSS variables that switch per theme. Use them via `style` prop:
+
+**Primary CTA button:**
+- Background: `var(--btn-primary-bg)` (violet → cyan gradient)
+- Idle shadow: `var(--cta-idle-glow)` + `.cta-ready-pulse` class for breathing animation
+- Hover shadow: `var(--cta-hover-glow)` (intensified with lift)
+
+**Flip button:** `var(--flip-btn-shadow)` → hover: `var(--flip-btn-hover-shadow)`
+
+**Input focus:** `.input-focus-glow` utility class (applied on `:focus-within`)
+
+**Toggle active:** `var(--toggle-track-active-bg)` gradient + `var(--toggle-track-active-shadow)` outer glow
+
+**Toast status glows:** `var(--toast-success-glow)`, `var(--toast-error-glow)` — large ambient glow behind toast icons
+
+### Animation & Motion Patterns
+
+All positional/scale animations use Framer Motion springs (from `motion/react`), not CSS transitions. CSS `transition` is only used for color/opacity changes.
+
+**Spring configs** — define as `const` outside the component:
+
+| Category | Config | Used for |
+|----------|--------|----------|
+| Snappy | `{ type: 'spring', stiffness: 500, damping: 30, mass: 0.8 }` | Toggle thumb, tab indicator |
+| Controlled | `{ type: 'spring', stiffness: 400, damping: 25 }` | Button hover/tap, token pill |
+| Flip | `{ type: 'spring', stiffness: 400, damping: 22 }` | Flip button rotation |
+| Card entry | `{ type: 'spring', stiffness: 300, damping: 30, delay: 0.05 }` | Swap/bridge card entrance |
+| Panel slide | `{ type: 'spring', stiffness: 400, damping: 32, mass: 0.8 }` | Side panel |
+| Modal pop | `{ type: 'spring', stiffness: 500, damping: 35 }` | Modal entrance |
+| Cog | `{ type: 'spring', stiffness: 300, damping: 20 }` | Settings gear icon |
+
+**Micro-interactions:**
+
+```typescript
+// Token pills, small interactive elements
+whileHover={{ scale: 1.03 }}
+whileTap={{ scale: 0.97 }}
+
+// CTA buttons — lift + glow
+whileHover={isDisabled ? undefined : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }}
+whileTap={isDisabled ? undefined : { scale: 0.98 }}
+
+// Wallet/secondary buttons — subtle lift
+whileHover={{ y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }}
+whileTap={{ scale: 0.98 }}
+
+// Flip button — rotation + scale
+whileHover={{ rotate: 180, scale: 1.1, boxShadow: 'var(--flip-btn-hover-shadow)' }}
+whileTap={{ scale: 0.95 }}
+```
+
+**Entrance animations** — cards and modals:
+
+```typescript
+// Card entrance (swap form, bridge)
+initial={{ opacity: 0, y: 12, scale: 0.98 }}
+animate={{ opacity: 1, y: 0, scale: 1 }}
+
+// Modal entrance
+animate={{ y: ['2rem', '0rem'], opacity: [0, 1], scale: [0.96, 1] }}
+```
+
+**Reduced motion** — always check and provide fallback:
+
+```typescript
+import { useReducedMotion } from 'motion/react';
+
+const reducedMotion = useReducedMotion();
+
+// Use in transition/animate props:
+transition={reducedMotion ? { duration: 0 } : SPRING_TRANSITION}
+whileTap={reducedMotion ? undefined : { scale: 1.15 }}
+```
+
+**Mount guard** — prevent animation on first render for toggles/tabs:
+
+```typescript
+<motion.span initial={false} animate={{ x: active ? '1.3rem' : '0.25rem' }} />
+// Also on AnimatePresence for detail panels:
+<AnimatePresence initial={false}>
+```
+
+### Typography
+
+| Usage | Class | Font |
+|-------|-------|------|
+| UI text | `font-sans` | "DM Sans" |
+| Code/addresses | `font-mono` | "JetBrains Mono" |
+
+### Spacing & Border Radius
+
+**Border radius scale:**
+
+| Class | Pixels | Usage |
+|-------|--------|-------|
+| `rounded-lg` | 8px | Close buttons, small UI elements |
+| `rounded-xl` | 12px | Flip button, input fields |
+| `rounded-2xl` | 16px | CTA buttons, inner cards |
+| `rounded-3xl` | 24px | Main swap/bridge cards |
+| `rounded-[1.25rem]` | 20px | Modals |
+| `rounded-full` | 50% | Toggles, pills |
+
+**Common padding:**
+
+| Pattern | Usage |
+|---------|-------|
+| `p-3` (12px) | Small elements |
+| `p-4` / `p-5` (16/20px) | Card content sections, modals |
+| `p-6` (24px) | Large panels |
+| `py-[18px] px-6` | CTA buttons |
+| `px-5 pb-4` / `px-5 pt-4` | Swap card top/bottom sections (tighter gap around flip button) |
+
+**Responsive container:**
+
+```typescript
+className="w-full sm:w-[30rem] px-2 sm:px-8"  // Swap view
+className="w-full sm:w-[34rem] px-2 sm:px-8"  // Account view
+```
+
+### Component Styling Recipes
+
+**Glass card** (for new elevated containers):
+
+```typescript
+<motion.div
+  className="rounded-3xl border border-surface-border"
+  style={{
+    background: 'var(--card-bg)',
+    boxShadow: 'var(--card-shadow)',
+    backdropFilter: 'var(--card-backdrop)',
+  }}
+  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+  animate={{ opacity: 1, y: 0, scale: 1 }}
+  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+>
+```
+
+**Primary CTA button:**
+
+```typescript
+<motion.button
+  className="w-full py-[18px] px-6 text-white text-base font-semibold rounded-2xl border-none focus-ring cta-ready-pulse"
+  style={{
+    background: 'var(--btn-primary-bg)',
+    boxShadow: 'var(--cta-idle-glow)',
+  }}
+  whileHover={{ y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }}
+  whileTap={{ scale: 0.98 }}
+  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+>
+```
+
+**Interactive token pill:**
+
+```typescript
+<motion.button
+  className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 cursor-pointer border-none"
+  style={{
+    background: 'var(--token-pill-bg)',
+    border: '1px solid var(--token-pill-border)',
+    boxShadow: 'var(--token-pill-shadow)',
+  }}
+  whileHover={{ scale: 1.03 }}
+  whileTap={{ scale: 0.97 }}
+  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+>
+```
+
 ### Rules
 
 1. **Never use hardcoded hex colors** in components — always use CSS variables or Tailwind theme classes
-2. **Use `text-text`** for theme-dependent text, not `text-white` (exception: text on colored-background buttons)
+2. **Use `text-text`** for theme-dependent text, not `text-white` (exception: text on colored-background buttons like `bg-accent text-white`)
 3. **Status colors** (`success`, `error`, `warning`) are semantic — only use them for their intended purpose
 4. **Component tokens** (`toast-bg`, `modal-bg`, etc.) are scoped — only use them in their intended component
 5. **Chain brand colors** in `constants/chains/` are intentionally theme-independent (they represent external brands)
+6. **All interactive elements** must use Framer Motion springs for positional/scale animations — not CSS transitions (CSS `transition` is only for color/opacity)
+7. **Always provide `useReducedMotion()` fallback** — check the hook and pass `{ duration: 0 }` or `undefined` for motion props
+8. **Use CSS variable tokens** for shadows/glows — never inline `rgba()` for box-shadow values that should switch per theme
+9. **Use the blur scale** (`var(--blur-sm/md/lg/xl)`) — never hardcode blur pixel values
+10. **Glass surfaces** must use `backdrop-filter: blur() saturate()` — never just opacity for frosted glass effects
+11. **Define spring configs as `const` outside the component** — never inline object literals in `transition` props
+12. **Use `initial={false}`** on toggles, tabs, and `AnimatePresence` for detail panels to prevent animation on mount
 
 ---
 
