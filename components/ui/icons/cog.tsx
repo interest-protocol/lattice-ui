@@ -25,7 +25,7 @@ const Cog: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => {
           fillRule="evenodd"
           clipRule="evenodd"
           d="M2 2.00049H21.2849V22.7215H2V2.00049Z"
-          fill="currentColor"
+          fill="white"
         />
       </mask>
       <g mask={`url(#mask0_${id})`}>

@@ -8,7 +8,7 @@ const LoadingWallet: FC = () => (
     type="button"
     disabled
     aria-busy="true"
-    className="flex gap-2 bg-surface-raised text-text cursor-pointer items-center rounded-xl py-3 sm:py-4 px-3 sm:px-6 border border-surface-border"
+    className="flex gap-2 bg-surface-raised text-text cursor-pointer items-center rounded-xl py-2.5 md:py-3 px-3 md:px-4 border border-surface-border"
   >
     <Skeleton width="1.5rem" height="1.5rem" borderRadius="50%" />
     <Skeleton width="5rem" />

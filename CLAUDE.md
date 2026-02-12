@@ -632,6 +632,9 @@ Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads fr
 - **Never use `<div onClick>`** → use `<button>` or add `role="button"` + `tabIndex={0}` + `handleKeyDown` from `@/utils/handle-key-down`
 - **Never use `<label>` without associated input** → use `htmlFor`/`id` or `<span>` for decorative labels
 - **Never mutate props/state during render** → use `.toSorted()` / `[...arr].sort()` instead of `.sort()`
+- **Never use `fill="currentColor"` inside SVG `<mask>` elements** → masks interpret color as luminance (white=visible, black=hidden). In light theme `currentColor` is dark ≈ black, which hides masked content. Always use `fill="white"` in masks
+- **Always give icon-only buttons explicit dimensions** → SVGs with `width="100%"` collapse to 0 in flex containers without a sized parent. Use `w-10 h-10` (40px mobile) or `w-11 h-11` (44px desktop) on icon-only buttons
+- **Always test both themes** → dark mode is default but light theme has white/bright backgrounds that reveal contrast issues invisible in dark mode
 
 ---
 
@@ -864,6 +867,15 @@ whileTap={reducedMotion ? undefined : { scale: 1.15 }}
 | `py-[18px] px-6` | CTA buttons |
 | `px-5 pb-4` / `px-5 pt-4` | Swap card top/bottom sections (tighter gap around flip button) |
 
+**Header button sizing:**
+
+| Breakpoint | Target Height | Method |
+|---|---|---|
+| Base (mobile) | 40px | `py-2.5` (10px x2) + ~20px content, or `w-10 h-10` for icon-only |
+| `md`+ (desktop) | 44px | `py-3` (12px x2) + ~20px content, or `w-11 h-11` for icon-only |
+
+All header buttons use `rounded-xl` (12px). Icon-only buttons (settings hamburger/cog) must have explicit `w-*`/`h-*` dimensions.
+
 **Responsive container:**
 
 ```typescript
@@ -934,6 +946,8 @@ className="w-full sm:w-[34rem] px-2 sm:px-8"  // Account view
 10. **Glass surfaces** must use `backdrop-filter: blur() saturate()` — never just opacity for frosted glass effects
 11. **Define spring configs as `const` outside the component** — never inline object literals in `transition` props
 12. **Use `initial={false}`** on toggles, tabs, and `AnimatePresence` for detail panels to prevent animation on mount
+13. **Never use `fill="currentColor"` inside SVG `<mask>` elements** — masks use luminance (white=show, black=hide). In light theme `currentColor` is dark, which hides masked content. Always use `fill="white"` in mask shapes
+14. **Icon-only buttons need explicit `w-*`/`h-*` dimensions** — SVGs using `width="100%"` resolve to 0px inside flex containers without a sized parent. Use `w-10 h-10` (40px) for mobile, `w-11 h-11` (44px) for desktop
 
 ---
 

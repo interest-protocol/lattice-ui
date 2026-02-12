@@ -37,7 +37,7 @@ const HealthIndicator: FC = () => {
 
   return (
     <div
-      className="fixed bottom-4 left-4 flex flex-col gap-2"
+      className="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 flex flex-col gap-2"
       style={{ zIndex: Z_INDEX.HEALTH }}
     >
       {expanded ? (
@@ -70,7 +70,7 @@ const HealthIndicator: FC = () => {
         type="button"
         aria-expanded={expanded}
         aria-label="System health status"
-        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border py-2 px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200 focus-ring"
+        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border p-2 sm:py-2 sm:px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200 focus-ring"
         onClick={() => setExpanded(!expanded)}
       >
         <div
@@ -80,14 +80,14 @@ const HealthIndicator: FC = () => {
             boxShadow: `0 0 6px ${stateColors[overallState]}`,
           }}
         />
-        <span className="text-text text-xs font-medium">
+        <span className="hidden sm:inline text-text text-xs font-medium">
           {overallState === 'loading'
             ? 'Checking...'
             : overallState === 'healthy'
               ? 'All Systems Operational'
               : overallState === 'degraded'
-                ? 'Degraded Performance'
-                : 'Service Disruption'}
+                ? 'Degraded'
+                : 'Disruption'}
         </span>
       </button>
     </div>

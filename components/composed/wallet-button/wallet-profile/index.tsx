@@ -60,7 +60,7 @@ const WalletProfile: FC = () => {
       <button
         type="button"
         aria-label="Open account menu"
-        className="py-3 gap-2 hidden md:flex bg-surface-raised text-text cursor-pointer items-center rounded-lg px-3 sm:px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
+        className="py-3 gap-2 hidden md:flex bg-surface-raised text-text cursor-pointer items-center rounded-xl px-4 border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
         onClick={handleDesktop}
       >
         <LogoSVG
@@ -76,7 +76,7 @@ const WalletProfile: FC = () => {
       <button
         type="button"
         aria-label="Open account menu"
-        className="flex md:hidden gap-1 bg-surface-raised text-text cursor-pointer items-center rounded-lg py-2.5 sm:py-4 px-2 sm:px-6 text-xs sm:text-sm border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
+        className="flex md:hidden gap-1.5 bg-surface-raised text-text cursor-pointer items-center rounded-xl py-2.5 px-2.5 sm:px-3 text-sm border border-surface-border hover:border-surface-border-hover hover:bg-surface-overlay transition-colors duration-200 focus-ring"
         onClick={handleMobile}
       >
         <LogoSVG maxWidth="1rem" maxHeight="1rem" className="text-accent" />
