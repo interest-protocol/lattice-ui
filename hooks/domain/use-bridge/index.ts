@@ -1,5 +1,6 @@
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
 import { usePrivy } from '@privy-io/react-auth';
+import type { Base64EncodedWireTransaction, Signature } from '@solana/kit';
 import bs58 from 'bs58';
 import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
@@ -9,12 +10,31 @@ import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import type { ChainKey } from '@/constants/chains';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
+import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useBalances from '@/hooks/domain/use-balances';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
-import { bridgeBurn, bridgeMint, broadcastBurn } from '@/lib/xbridge/client';
+import { pollUntil } from '@/lib/poll-until';
+import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
+import { bridgeBurn, bridgeMint } from '@/lib/xbridge/client';
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
+
+const hexToBytes = (hex: string): Uint8Array => {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+};
+
+const uint8ToBase64 = (bytes: Uint8Array): string => {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
 
 export type BridgeStatus =
   | 'idle'
@@ -64,6 +84,7 @@ export const useBridge = () => {
   }, []);
 
   const solanaRpc = useSolanaRpc();
+  const suiClient = useSuiClient();
   const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
     useBalances();
 
@@ -126,6 +147,7 @@ export const useBridge = () => {
     const nonceAddr = useOnboarding.getState().nonceAddress;
     invariant(nonceAddr, 'Nonce account not set up');
 
+    // Phase A: Sui-side burn (create + vote + execute)
     setStatus('creating');
     toasting.update(toastId, 'Creating burn request...');
 
@@ -141,24 +163,61 @@ export const useBridge = () => {
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
 
+    // Phase B: Poll IKA for dWallet signature
     setStatus('waiting');
+    toasting.update(toastId, 'Waiting for signature...');
+
+    const dwalletSignature = await pollUntil(
+      async () => {
+        const obj = await suiClient.getObject({
+          id: burnResult.signId,
+          options: { showContent: true },
+        });
+
+        const content = obj.data?.content;
+        if (content?.dataType !== 'moveObject') return null;
+
+        const fields = content.fields as Record<string, unknown>;
+        const state = fields?.state as Record<string, unknown> | undefined;
+        const completed = state?.Completed as
+          | { fields?: { signature?: number[] } }
+          | undefined;
+
+        return completed?.fields?.signature
+          ? new Uint8Array(completed.fields.signature)
+          : null;
+      },
+      { maxPolls: 40, intervalMs: 3_000, signal }
+    );
+
+    // Phase C: Build raw Solana tx and broadcast
     toasting.update(toastId, 'Broadcasting to Solana...');
 
-    const broadcast = await broadcastBurn({
-      userId: user.id,
-      requestId: burnResult.requestId,
-      signId: burnResult.signId,
-      userSignature: burnResult.userSignature,
-      message: burnResult.message,
-    });
+    const messageBytes = hexToBytes(burnResult.message);
+    const userSigBytes = hexToBytes(burnResult.userSignature);
 
-    if (signal.aborted)
-      throw new DOMException('The operation was aborted.', 'AbortError');
+    // Wire format: [num_sigs(1)][sig0(64)][sig1(64)][message]
+    const rawTx = new Uint8Array(1 + 64 + 64 + messageBytes.length);
+    rawTx[0] = 2; // 2 required signatures
+    rawTx.set(userSigBytes, 1); // position 0: user (nonceAuthority)
+    rawTx.set(dwalletSignature, 65); // position 1: dWallet (tokenOwner)
+    rawTx.set(messageBytes, 129);
+
+    const base64Tx = uint8ToBase64(rawTx) as Base64EncodedWireTransaction;
+
+    const solanaSignature = await solanaRpc
+      .sendTransaction(base64Tx, {
+        encoding: 'base64',
+        preflightCommitment: 'confirmed',
+      })
+      .send();
+
+    await confirmSolanaTransaction(solanaRpc, solanaSignature as Signature);
 
     await Promise.all([mutateSuiBalances(), mutateSolanaBalances()]);
     return {
       depositDigest: burnResult.executeDigest,
-      mintDigest: broadcast.solanaSignature,
+      mintDigest: solanaSignature as string,
     };
   };
 

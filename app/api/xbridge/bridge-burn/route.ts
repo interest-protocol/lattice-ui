@@ -133,17 +133,31 @@ export const POST = withAuthPost(
         amount: BigInt(body.sourceAmount),
       });
 
-      // Pre-sign with user's Privy Solana wallet
+      // Sign as Solana transaction (not signMessage — message signing adds a prefix
+      // that invalidates the signature for on-chain transaction verification)
+      const wireTx = Buffer.concat([
+        Buffer.from([2]), // compact-u16: 2 signatures
+        Buffer.alloc(64), // placeholder for user sig (position 0: nonceAuthority)
+        Buffer.alloc(64), // placeholder for dWallet sig (position 1: tokenOwner)
+        messageBytes,
+      ]);
+
       const signResult = await privy
         .wallets()
         .solana()
-        .signMessage(solanaWallet.id, {
-          message: messageBytes,
+        .signTransaction(solanaWallet.id, {
+          transaction: wireTx.toString('base64'),
           authorization_context: {
             authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
           },
         });
-      const userSolanaSignature = Buffer.from(signResult.signature, 'base64');
+
+      // Extract user's 64-byte Ed25519 signature from position 0 of signed wire tx
+      const signedTxBytes = Buffer.from(
+        signResult.signed_transaction,
+        'base64'
+      );
+      const userSolanaSignature = signedTxBytes.subarray(1, 65);
 
       // === Phase 2: Tx1 (create burn request) ===
       const tx1 = new Transaction();

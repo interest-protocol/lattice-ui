@@ -1,4 +1,5 @@
 import { get, post } from '@/lib/api/client';
+import { pollUntil } from '@/lib/poll-until';
 
 export interface SolverMetadata {
   solver: {
@@ -67,31 +68,20 @@ export const waitForSettlement = async (
     signal,
   } = options;
 
-  for (let i = 0; i < maxPolls; i++) {
-    if (signal?.aborted) {
-      throw new DOMException('The operation was aborted.', 'AbortError');
+  return pollUntil(
+    async () => {
+      const status = await fetchStatus(requestId, signal);
+      return status.status === 'settled' || status.status === 'failed'
+        ? status
+        : null;
+    },
+    {
+      maxPolls,
+      intervalMs: initialIntervalMs,
+      maxIntervalMs,
+      backoff: true,
+      jitterMs: 300,
+      signal,
     }
-
-    const status = await fetchStatus(requestId, signal);
-
-    if (status.status === 'settled' || status.status === 'failed') {
-      return status;
-    }
-
-    const delay =
-      Math.min(initialIntervalMs * 2 ** i, maxIntervalMs) + Math.random() * 300;
-    await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(resolve, delay);
-      signal?.addEventListener(
-        'abort',
-        () => {
-          clearTimeout(timer);
-          reject(new DOMException('The operation was aborted.', 'AbortError'));
-        },
-        { once: true }
-      );
-    });
-  }
-
-  throw new Error('Settlement timeout');
+  );
 };
