@@ -63,6 +63,7 @@ const SwapFormButton: FC = () => {
   };
 
   const isDisabled = validation.isDisabled || isLoading;
+  const isReady = !isDisabled && !isLoading;
 
   const buttonLabel = isLoading
     ? STATUS_LABELS[status]
@@ -73,17 +74,17 @@ const SwapFormButton: FC = () => {
   return (
     <motion.button
       type="button"
-      className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 focus-ring"
+      className={`w-full py-[18px] px-6 text-white text-base font-semibold rounded-2xl border-none transition-colors duration-200 disabled:cursor-not-allowed focus-ring ${isReady ? 'cta-ready-pulse' : ''}`}
       style={{
         cursor: isDisabled ? 'not-allowed' : 'pointer',
-        opacity: isDisabled ? 0.5 : 1,
+        opacity: isDisabled ? 0.4 : 1,
         background: 'var(--btn-primary-bg)',
-        boxShadow: 'var(--btn-primary-shadow)',
+        boxShadow: isReady ? 'var(--cta-idle-glow)' : 'none',
       }}
       whileHover={
         isDisabled
           ? undefined
-          : { y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }
+          : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
       }
       whileTap={isDisabled ? undefined : { scale: 0.98 }}
       transition={HOVER_SPRING}

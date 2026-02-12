@@ -35,7 +35,7 @@ const SwapContent: FC = () => {
   const [tab, setTab] = useState(0);
 
   return (
-    <div className="flex-1 mx-auto gap-4 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[34rem] my-4 xl:my-12">
+    <div className="flex-1 mx-auto gap-4 flex rounded-2xl flex-col px-2 sm:px-8 w-full sm:w-[30rem] my-4 xl:my-12">
       {/* Closed Alpha Banner */}
       <div className="p-3 bg-warning-bg border border-warning-border rounded-xl flex flex-col gap-2">
         <div className="flex items-center gap-2">

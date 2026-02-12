@@ -18,7 +18,7 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
   return (
     <button
       type="button"
-      className={`flex gap-2 cursor-pointer bg-transparent border-none p-0 text-inherit ${name === 'in' ? 'hover:text-accent' : ''}`}
+      className={`flex gap-1.5 items-center cursor-pointer bg-transparent border-none p-0 text-text-muted text-xs transition-colors duration-150 ${name === 'in' ? 'hover:text-accent' : ''}`}
       {...(name === 'in' && {
         onClick: () => {
           setValue(`${name}.value`, FixedPointMath.toNumber(balance));
@@ -26,8 +26,8 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
         },
       })}
     >
-      <WalletSVG maxWidth="1rem" width="100%" />
-      <span className="font-mono">
+      <WalletSVG maxWidth="0.875rem" width="100%" />
+      <span className="tabular-nums">
         {isLoading ? (
           <Skeleton width="2rem" />
         ) : (

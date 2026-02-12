@@ -1,3 +1,4 @@
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
@@ -62,24 +63,34 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   };
 
   return (
-    <button
+    <motion.button
       type="button"
-      className="gap-2 text-text flex text-base cursor-pointer overflow-hidden items-center justify-center bg-transparent border-none p-0"
+      className="flex gap-2.5 text-text text-sm font-semibold cursor-pointer overflow-hidden items-center justify-center rounded-full px-3 py-2 border-none"
+      style={{
+        background: 'var(--token-pill-bg)',
+        border: '1px solid var(--token-pill-border)',
+        boxShadow: 'var(--token-pill-shadow)',
+      }}
       onClick={handleClick}
       aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
-      <span className="overflow-hidden rounded-full flex w-8 h-8 min-w-8 items-center justify-center ring-1 ring-surface-border">
+      <span className="overflow-hidden rounded-full flex w-7 h-7 min-w-7 items-center justify-center">
         <Image
           className="object-contain"
           alt={metadata[type]?.symbol ?? ''}
           src={metadata[type]?.iconUrl ?? ''}
-          width={32}
-          height={32}
+          width={28}
+          height={28}
         />
       </span>
       {metadata?.[type]?.symbol ?? 'Select Coin'}
-      <ChevronDownSVG maxWidth="1rem" width="100%" />
-    </button>
+      <span className="text-text-muted">
+        <ChevronDownSVG maxWidth="0.75rem" width="100%" />
+      </span>
+    </motion.button>
   );
 };
 

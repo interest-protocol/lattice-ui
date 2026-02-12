@@ -87,6 +87,7 @@ const Bridge: FC = () => {
   })();
 
   const isDisabled = isLoading || validation.isDisabled;
+  const isReady = !isDisabled && !isLoading;
 
   const handleBridge = async () => {
     const amountRaw = parseUnits(amount, selectedRoute.sourceToken.decimals);
@@ -130,78 +131,103 @@ const Bridge: FC = () => {
   const destChainName = CHAIN_REGISTRY[selectedRoute.destChain].displayName;
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-[40rem] mx-auto">
-      <div
-        className="flex flex-col gap-4 p-6 rounded-2xl border border-surface-border"
+    <div className="flex flex-col gap-3 w-full max-w-[28rem] mx-auto">
+      <motion.div
+        className="flex flex-col rounded-3xl relative"
         style={{
-          background: 'var(--card-bg)',
-          boxShadow: 'var(--card-shadow)',
-          backdropFilter: 'var(--card-backdrop)',
+          background: 'var(--swap-card-bg)',
+          boxShadow: 'var(--swap-card-shadow)',
+          border: '1px solid var(--swap-card-border)',
+          backdropFilter: 'blur(24px) saturate(1.5)',
+        }}
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          delay: 0.05,
         }}
       >
-        <BridgeFromCard
-          route={selectedRoute}
-          amount={amount}
-          setAmount={setAmount}
-          balance={balance}
-          balanceLoading={balanceLoading}
-          onOpenRouteSelector={openRouteSelector}
-        />
+        <div className="p-5 pb-4">
+          <BridgeFromCard
+            route={selectedRoute}
+            amount={amount}
+            setAmount={setAmount}
+            balance={balance}
+            balanceLoading={balanceLoading}
+            onOpenRouteSelector={openRouteSelector}
+          />
+        </div>
 
-        <button
-          type="button"
-          aria-label="Reverse bridge direction"
-          className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0 self-center"
-          onClick={handleFlip}
+        <div
+          className="relative flex items-center justify-center"
+          style={{ height: '1px', background: 'var(--details-divider)' }}
         >
-          <motion.div
-            className="w-10 h-10 rounded-full flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
-            style={{
-              background: 'var(--color-surface-lighter)',
-              border: '1px solid var(--color-surface-border)',
-            }}
-            whileHover={{
-              rotate: 180,
-              scale: 1.1,
-              boxShadow: 'var(--swap-btn-glow)',
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <SwapSVG maxHeight="1rem" />
-          </motion.div>
-        </button>
-
-        <BridgeToCard route={selectedRoute} amount={amount} />
-
-        <BridgeDetailsInline route={selectedRoute} amount={amount} />
-
-        {isLoading || status === 'success' || status === 'error' ? (
-          <BridgeProgressStepper status={status} onRetry={handleRetry} />
-        ) : (
-          <motion.button
+          <button
             type="button"
-            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-ring"
-            style={{
-              background: 'var(--btn-primary-bg)',
-              boxShadow: 'var(--btn-primary-shadow)',
-            }}
-            whileHover={
-              isDisabled
-                ? undefined
-                : { y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }
-            }
-            whileTap={isDisabled ? undefined : { scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            onClick={handleBridge}
-            disabled={isDisabled}
+            aria-label="Reverse bridge direction"
+            className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
+            onClick={handleFlip}
           >
-            {validation.message
-              ? validation.message
-              : `Bridge ${selectedRoute.sourceToken.symbol} to ${destChainName}`}
-          </motion.button>
-        )}
-      </div>
+            <motion.div
+              className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
+              style={{
+                background: 'var(--flip-btn-bg)',
+                border: '1px solid var(--flip-btn-border)',
+                boxShadow: 'var(--flip-btn-shadow)',
+                backdropFilter: 'blur(12px)',
+              }}
+              whileHover={{
+                rotate: 180,
+                scale: 1.1,
+                boxShadow: 'var(--flip-btn-hover-shadow)',
+              }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            >
+              <SwapSVG maxHeight="1rem" />
+            </motion.div>
+          </button>
+        </div>
+
+        <div className="p-5 pt-4">
+          <BridgeToCard route={selectedRoute} amount={amount} />
+        </div>
+
+        <div className="px-5">
+          <BridgeDetailsInline route={selectedRoute} amount={amount} />
+        </div>
+
+        <div className="px-5 pb-5 pt-3">
+          {isLoading || status === 'success' || status === 'error' ? (
+            <BridgeProgressStepper status={status} onRetry={handleRetry} />
+          ) : (
+            <motion.button
+              type="button"
+              className={`w-full py-[18px] px-6 text-white text-base font-semibold rounded-2xl border-none transition-colors duration-200 disabled:cursor-not-allowed cursor-pointer focus-ring ${isReady ? 'cta-ready-pulse' : ''}`}
+              style={{
+                opacity: isDisabled ? 0.4 : 1,
+                background: 'var(--btn-primary-bg)',
+                boxShadow: isReady ? 'var(--cta-idle-glow)' : 'none',
+              }}
+              whileHover={
+                isDisabled
+                  ? undefined
+                  : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
+              }
+              whileTap={isDisabled ? undefined : { scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              onClick={handleBridge}
+              disabled={isDisabled}
+            >
+              {validation.message
+                ? validation.message
+                : `Bridge ${selectedRoute.sourceToken.symbol} to ${destChainName}`}
+            </motion.button>
+          )}
+        </div>
+      </motion.div>
 
       <p className="text-text-dimmed text-xs text-center">
         Powered by XBridge. Assets are bridged as wrapped tokens.

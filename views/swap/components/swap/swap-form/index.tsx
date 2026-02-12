@@ -11,12 +11,13 @@ import {
 import { useLocalStorage } from 'usehooks-ts';
 import InputField from '@/components/composed/input-field';
 import { SwapSVG } from '@/components/ui/icons';
-import { SOL_TYPE } from '@/constants/coins';
 import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
+import { SOL_TYPE } from '@/constants/coins';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { CurrencyAmount, Percent, Token, Trade } from '@/lib/entities';
 import { ZERO_BIG_INT } from '@/utils';
 
+import SwapDetails from '../swap-details';
 import SwapFormButton from './swap-form-button';
 
 interface SwapFormValues {
@@ -35,7 +36,10 @@ interface SwapFormValues {
 const SwapQuoteSync: FC = () => {
   const { control, setValue } = useFormContext<SwapFormValues>();
   const { getPrice } = useTokenPrices();
-  const [slippageBps] = useLocalStorage(SLIPPAGE_STORAGE_KEY, DEFAULT_SLIPPAGE_BPS);
+  const [slippageBps] = useLocalStorage(
+    SLIPPAGE_STORAGE_KEY,
+    DEFAULT_SLIPPAGE_BPS
+  );
 
   const fromValue = useWatch({ control, name: 'from.value' });
   const fromType = useWatch({ control, name: 'from.type' });
@@ -91,62 +95,90 @@ const SwapForm: FC = () => {
   return (
     <FormProvider {...form}>
       <SwapQuoteSync />
-      <div
-        className="flex flex-col gap-4 p-6 rounded-2xl border border-surface-border"
+      <motion.div
+        className="flex flex-col rounded-3xl relative"
         style={{
-          background: 'var(--card-bg)',
-          boxShadow: 'var(--card-shadow)',
-          backdropFilter: 'var(--card-backdrop)',
+          background: 'var(--swap-card-bg)',
+          boxShadow: 'var(--swap-card-shadow)',
+          border: '1px solid var(--swap-card-border)',
+          backdropFilter: 'blur(24px) saturate(1.5)',
+        }}
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          delay: 0.05,
         }}
       >
-        <InputField
-          name="from"
-          label="From"
-          types={[SUI_TYPE_ARG, SOL_TYPE]}
-          topContent="balance"
-          oppositeName="to"
-        />
+        <div className="p-5 pb-4">
+          <InputField
+            name="from"
+            label="You pay"
+            variant="from"
+            types={[SUI_TYPE_ARG, SOL_TYPE]}
+            topContent="balance"
+            oppositeName="to"
+          />
+        </div>
 
-        <button
-          type="button"
-          aria-label="Reverse swap direction"
-          className="flex justify-center items-center cursor-pointer bg-transparent border-none p-0 self-center"
-          onClick={() => {
-            const fromValue = form.getValues('from');
-            const toValue = form.getValues('to');
-            form.setValue('from', toValue);
-            form.setValue('to', fromValue);
-          }}
+        <div
+          className="relative flex items-center justify-center"
+          style={{ height: '1px', background: 'var(--details-divider)' }}
         >
-          <motion.div
-            className="w-10 h-10 rounded-full flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
-            style={{
-              background: 'var(--color-surface-lighter)',
-              border: '1px solid var(--color-surface-border)',
+          <button
+            type="button"
+            aria-label="Reverse swap direction"
+            className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
+            onClick={() => {
+              const fromValue = form.getValues('from');
+              const toValue = form.getValues('to');
+              form.setValue('from', toValue);
+              form.setValue('to', fromValue);
             }}
-            whileHover={{
-              rotate: 180,
-              scale: 1.1,
-              boxShadow: 'var(--swap-btn-glow)',
-            }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           >
-            <SwapSVG maxHeight="1rem" />
-          </motion.div>
-        </button>
+            <motion.div
+              className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
+              style={{
+                background: 'var(--flip-btn-bg)',
+                border: '1px solid var(--flip-btn-border)',
+                boxShadow: 'var(--flip-btn-shadow)',
+                backdropFilter: 'blur(12px)',
+              }}
+              whileHover={{
+                rotate: 180,
+                scale: 1.1,
+                boxShadow: 'var(--flip-btn-hover-shadow)',
+              }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            >
+              <SwapSVG maxHeight="1rem" />
+            </motion.div>
+          </button>
+        </div>
 
-        <InputField
-          name="to"
-          label="To (estimated)"
-          types={[SUI_TYPE_ARG, SOL_TYPE]}
-          disabled
-          topContent="balance"
-          oppositeName="from"
-        />
+        <div className="p-5 pt-4">
+          <InputField
+            name="to"
+            label="You receive"
+            variant="to"
+            types={[SUI_TYPE_ARG, SOL_TYPE]}
+            disabled
+            topContent="balance"
+            oppositeName="from"
+          />
+        </div>
 
-        <SwapFormButton />
-      </div>
+        <div className="px-5">
+          <SwapDetails />
+        </div>
+
+        <div className="px-5 pb-5 pt-3">
+          <SwapFormButton />
+        </div>
+      </motion.div>
     </FormProvider>
   );
 };

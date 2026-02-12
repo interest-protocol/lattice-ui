@@ -19,4 +19,5 @@ export interface InputFieldProps extends InputFieldAssetProps {
   disabled?: boolean;
   topContent?: ReactNode | 'balance';
   error?: string;
+  variant?: 'from' | 'to';
 }

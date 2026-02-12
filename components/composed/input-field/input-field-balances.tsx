@@ -31,7 +31,7 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
   const balance = getBalance(type);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5 items-center">
       {[0.25, 0.5, 1].map((factor) => {
         const Icon = PIZZA_ICONS[factor];
         const divisor = FACTOR_DIVISORS[factor];
@@ -41,14 +41,14 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
           <button
             type="button"
             key={factor}
-            className="flex gap-2 cursor-pointer hover:text-accent bg-transparent border-none p-0 text-inherit"
+            className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-all duration-150"
             onClick={() => {
               setValue(`${name}.value`, FixedPointMath.toNumber(scaled));
               setValue(`${name}.valueBN`, scaled);
             }}
           >
-            <span className="font-mono">{factor * 100}%</span>
-            <Icon maxWidth="1rem" width="100%" />
+            <span className="tabular-nums">{factor * 100}%</span>
+            <Icon maxWidth="0.75rem" width="100%" />
           </button>
         );
       })}

@@ -17,27 +17,28 @@ const InputField: FC<InputFieldProps> = ({
   topContent,
   oppositeName,
   error,
+  variant = 'from',
 }) => {
   const { register, setValue, getValues, control } = useFormContext();
   const watchedValue = useWatch({ control, name: `${name}.value` }) as string;
 
   const errorId = error ? `input-${name}-error` : undefined;
 
-  const glowClass = !disabled && !error ? 'input-focus-glow' : '';
+  const bgVar =
+    variant === 'from' ? 'var(--input-from-bg)' : 'var(--input-to-bg)';
 
   return (
     <div
-      className={`p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border transition-all duration-200 ${glowClass} ${
-        error
-          ? 'border-error'
-          : disabled
-            ? 'border-surface-border'
-            : 'border-surface-border focus-within:border-accent-border'
+      className={`p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-all duration-200 ${
+        error ? 'ring-1 ring-error' : ''
       }`}
-      style={{ background: 'var(--color-surface-inset)' }}
+      style={{ background: bgVar }}
     >
-      <div className="flex justify-between">
-        <label htmlFor={`input-${name}`} className="opacity-80">
+      <div className="flex justify-between items-center">
+        <label
+          htmlFor={`input-${name}`}
+          className="text-xs font-medium tracking-wider uppercase text-text-muted"
+        >
           {label}
         </label>
         {!disabled && topContent === 'balance' ? (
@@ -46,15 +47,15 @@ const InputField: FC<InputFieldProps> = ({
           topContent
         ) : null}
       </div>
-      <div className="grid max-w-full items-center font-mono grid-cols-[1fr_auto]">
+      <div className="grid max-w-full items-center gap-3 grid-cols-[1fr_auto]">
         {disabled ? (
-          <span className="text-text text-3xl min-w-full truncate">
+          <span className="text-text text-4xl font-light tracking-tight min-w-full truncate">
             {watchedValue || '0'}
           </span>
         ) : (
           <input
             id={`input-${name}`}
-            className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-3xl"
+            className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-4xl font-light tracking-tight placeholder:text-text-dimmed"
             placeholder="0"
             autoComplete="off"
             aria-invalid={error ? 'true' : undefined}
@@ -79,7 +80,7 @@ const InputField: FC<InputFieldProps> = ({
           oppositeName={oppositeName}
         />
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center text-xs">
         <InputFieldPrice name={name} />
         <InputFieldBalance name={name} />
       </div>

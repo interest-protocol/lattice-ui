@@ -129,6 +129,62 @@
     /* Swap button glow */
     --swap-btn-glow: 0 0 20px rgba(167, 139, 250, 0.2);
 
+    /* Swap card glass */
+    --swap-card-bg: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.02) 40%,
+      rgba(167, 139, 250, 0.05) 80%,
+      rgba(6, 182, 212, 0.03) 100%
+    );
+    --swap-card-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.08) inset, 0 -1px 0 0 rgba(
+        255,
+        255,
+        255,
+        0.02
+      ) inset, 0 16px 64px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(
+        255,
+        255,
+        255,
+        0.05
+      ) inset;
+    --swap-card-border: rgba(255, 255, 255, 0.08);
+
+    /* Swap input backgrounds */
+    --input-from-bg: rgba(255, 255, 255, 0.04);
+    --input-to-bg: rgba(0, 0, 0, 0.15);
+    --input-hover-bg: rgba(255, 255, 255, 0.06);
+
+    /* Token pill selector */
+    --token-pill-bg: rgba(255, 255, 255, 0.08);
+    --token-pill-hover-bg: rgba(255, 255, 255, 0.14);
+    --token-pill-border: rgba(255, 255, 255, 0.1);
+    --token-pill-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    /* Flip button */
+    --flip-btn-bg: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(167, 139, 250, 0.08) 100%
+    );
+    --flip-btn-border: rgba(255, 255, 255, 0.12);
+    --flip-btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --flip-btn-hover-shadow:
+      0 0 20px rgba(167, 139, 250, 0.25), 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    /* CTA glow */
+    --cta-idle-glow:
+      0 0 30px rgba(167, 139, 250, 0.15), 0 0 80px rgba(6, 182, 212, 0.06);
+    --cta-hover-glow:
+      0 0 32px rgba(167, 139, 250, 0.45), 0 0 100px rgba(6, 182, 212, 0.2),
+      0 6px 24px rgba(0, 0, 0, 0.35);
+
+    /* Details panel */
+    --details-bg: rgba(255, 255, 255, 0.03);
+    --details-border: rgba(255, 255, 255, 0.06);
+    --details-divider: rgba(255, 255, 255, 0.06);
+
     /* Enhanced card glass */
     --card-bg: linear-gradient(
       135deg,
@@ -140,6 +196,38 @@
       0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
       0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
     --card-backdrop: blur(24px) saturate(1.5);
+
+    /* Toggle depth tokens */
+    --toggle-track-inset-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.25);
+    --toggle-track-active-bg: linear-gradient(
+      135deg,
+      #a78bfa 0%,
+      #8b5cf6 50%,
+      #06b6d4 100%
+    );
+    --toggle-track-active-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 12px rgba(167, 139, 250, 0.25),
+      0 0 4px rgba(167, 139, 250, 0.15);
+    --toggle-thumb-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.15),
+      0 0 0 0.5px rgba(255, 255, 255, 0.1);
+    --toggle-thumb-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+
+    /* Toast glass tokens */
+    --toast-glass-bg: linear-gradient(
+      135deg,
+      rgba(17, 24, 39, 0.95) 0%,
+      rgba(17, 24, 39, 0.88) 50%,
+      rgba(167, 139, 250, 0.04) 100%
+    );
+    --toast-inner-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
+    --toast-icon-success-bg: rgba(0, 223, 128, 0.12);
+    --toast-icon-success-border: rgba(0, 223, 128, 0.25);
+    --toast-icon-error-bg: rgba(240, 66, 72, 0.12);
+    --toast-icon-error-border: rgba(240, 66, 72, 0.25);
+    --toast-icon-loading-bg: rgba(167, 139, 250, 0.12);
+    --toast-icon-loading-border: rgba(167, 139, 250, 0.25);
 
     --tooltip-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     --bg-blur:
@@ -220,15 +308,12 @@
 
     /* Complex tokens (light) */
     --toast-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.08),
-      0 16px 48px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(124, 58, 237, 0.08), 0 16px 48px rgba(0, 0, 0, 0.12),
       0 4px 16px rgba(124, 58, 237, 0.06);
     --toast-success-glow:
-      0 0 4rem 0.5rem #16a34a30,
-      inset 0 0 0.75rem 0.75rem #dcfce7;
+      0 0 4rem 0.5rem #16a34a30, inset 0 0 0.75rem 0.75rem #dcfce7;
     --toast-error-glow:
-      0 0 4rem 0.5rem #dc262630,
-      inset 0 0 0.75rem 0.75rem #fef2f2;
+      0 0 4rem 0.5rem #dc262630, inset 0 0 0.75rem 0.75rem #fef2f2;
     --modal-bg: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.85) 0%,
@@ -236,12 +321,10 @@
       rgba(196, 167, 254, 0.12) 100%
     );
     --modal-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.10),
-      0 24px 64px rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(124, 58, 237, 0.1), 0 24px 64px rgba(0, 0, 0, 0.12),
       0 8px 24px rgba(124, 58, 237, 0.08);
     --settings-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.08),
-      0 16px 48px rgba(0, 0, 0, 0.14),
+      0 0 0 1px rgba(124, 58, 237, 0.08), 0 16px 48px rgba(0, 0, 0, 0.14),
       0 4px 16px rgba(124, 58, 237, 0.06);
     --btn-primary-bg: linear-gradient(
       135deg,
@@ -250,17 +333,61 @@
       #0891b2 100%
     );
     --btn-primary-shadow:
-      0 0 20px rgba(124, 58, 237, 0.3),
-      0 0 60px rgba(8, 145, 178, 0.14),
+      0 0 20px rgba(124, 58, 237, 0.3), 0 0 60px rgba(8, 145, 178, 0.14),
       0 4px 12px rgba(0, 0, 0, 0.08);
     --btn-primary-hover-shadow:
-      0 0 28px rgba(124, 58, 237, 0.45),
-      0 0 80px rgba(8, 145, 178, 0.2),
+      0 0 28px rgba(124, 58, 237, 0.45), 0 0 80px rgba(8, 145, 178, 0.2),
       0 6px 20px rgba(0, 0, 0, 0.12);
     --input-focus-glow:
-      0 0 0 3px rgba(124, 58, 237, 0.2),
-      0 0 20px rgba(124, 58, 237, 0.12);
+      0 0 0 3px rgba(124, 58, 237, 0.2), 0 0 20px rgba(124, 58, 237, 0.12);
     --swap-btn-glow: 0 0 24px rgba(124, 58, 237, 0.3);
+
+    /* Swap card glass (light) */
+    --swap-card-bg: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(255, 255, 255, 0.78) 40%,
+      rgba(124, 58, 237, 0.04) 80%,
+      rgba(8, 145, 178, 0.02) 100%
+    );
+    --swap-card-shadow:
+      0 0 0 1px rgba(124, 58, 237, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 16px 64px -12px rgba(
+        124,
+        58,
+        237,
+        0.1
+      ), 0 24px 56px -16px rgba(0, 0, 0, 0.06);
+    --swap-card-border: rgba(124, 58, 237, 0.1);
+
+    --input-from-bg: rgba(124, 58, 237, 0.03);
+    --input-to-bg: rgba(0, 0, 0, 0.02);
+    --input-hover-bg: rgba(124, 58, 237, 0.06);
+
+    --token-pill-bg: rgba(124, 58, 237, 0.06);
+    --token-pill-hover-bg: rgba(124, 58, 237, 0.12);
+    --token-pill-border: rgba(124, 58, 237, 0.12);
+    --token-pill-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+
+    --flip-btn-bg: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(124, 58, 237, 0.06) 100%
+    );
+    --flip-btn-border: rgba(124, 58, 237, 0.15);
+    --flip-btn-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+    --flip-btn-hover-shadow:
+      0 0 20px rgba(124, 58, 237, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
+
+    --cta-idle-glow:
+      0 0 30px rgba(124, 58, 237, 0.2), 0 0 80px rgba(8, 145, 178, 0.08);
+    --cta-hover-glow:
+      0 0 32px rgba(124, 58, 237, 0.5), 0 0 100px rgba(8, 145, 178, 0.25),
+      0 6px 24px rgba(0, 0, 0, 0.1);
+
+    --details-bg: rgba(124, 58, 237, 0.02);
+    --details-border: rgba(124, 58, 237, 0.08);
+    --details-divider: rgba(124, 58, 237, 0.06);
+
     --card-bg: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.82) 0%,
@@ -270,16 +397,56 @@
     --card-shadow:
       0 0 0 1px rgba(124, 58, 237, 0.08),
       0 1px 2px 0 rgba(0, 0, 0, 0.06),
-      0 8px 32px -4px rgba(124, 58, 237, 0.10),
+      0 8px 32px -4px rgba(124, 58, 237, 0.1),
       0 16px 48px -8px rgba(0, 0, 0, 0.08);
     --card-backdrop: blur(24px) saturate(1.4);
+
+    /* Toggle depth tokens (light) */
+    --toggle-track-inset-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    --toggle-track-active-bg: linear-gradient(
+      135deg,
+      #7c3aed 0%,
+      #6d28d9 50%,
+      #0891b2 100%
+    );
+    --toggle-track-active-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 12px rgba(124, 58, 237, 0.2),
+      0 0 4px rgba(124, 58, 237, 0.12);
+    --toggle-thumb-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08),
+      0 0 0 0.5px rgba(0, 0, 0, 0.05);
+    --toggle-thumb-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+
+    /* Toast glass tokens (light) */
+    --toast-glass-bg: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.92) 50%,
+      rgba(124, 58, 237, 0.04) 100%
+    );
+    --toast-inner-highlight: 0 1px 0 0 rgba(255, 255, 255, 0.8) inset;
+    --toast-icon-success-bg: rgba(22, 163, 74, 0.1);
+    --toast-icon-success-border: rgba(22, 163, 74, 0.2);
+    --toast-icon-error-bg: rgba(220, 38, 38, 0.1);
+    --toast-icon-error-border: rgba(220, 38, 38, 0.2);
+    --toast-icon-loading-bg: rgba(124, 58, 237, 0.08);
+    --toast-icon-loading-border: rgba(124, 58, 237, 0.15);
+
     --tooltip-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.08),
-      0 8px 24px rgba(0, 0, 0, 0.14),
+      0 0 0 1px rgba(124, 58, 237, 0.08), 0 8px 24px rgba(0, 0, 0, 0.14),
       0 2px 8px rgba(124, 58, 237, 0.06);
     --bg-blur:
-      radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.06) 0%, transparent 60%),
-      linear-gradient(180deg, rgba(240, 244, 248, 0.7), rgba(240, 244, 248, 0.88));
+      radial-gradient(
+        ellipse at 50% 0%,
+        rgba(124, 58, 237, 0.06) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(240, 244, 248, 0.7),
+        rgba(240, 244, 248, 0.88)
+      );
   }
 }
 
@@ -332,8 +499,27 @@
   }
 }
 
+@keyframes cta-pulse {
+  0%,
+  100% {
+    box-shadow: var(--cta-idle-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(167, 139, 250, 0.25),
+      0 0 100px rgba(6, 182, 212, 0.12);
+  }
+}
+
+.cta-ready-pulse {
+  animation: cta-pulse 3s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bg-orb {
+    animation: none !important;
+  }
+  .cta-ready-pulse {
     animation: none !important;
   }
 }

@@ -15,7 +15,7 @@ const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
   const price = getPrice(type);
 
   return (
-    <span className="font-mono">
+    <span className="text-text-muted text-xs tabular-nums">
       {price != null ? formatDollars(price * Number(value), 2) : '—'}
     </span>
   );
