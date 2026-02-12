@@ -30,7 +30,7 @@ const BridgeDetailsInline: FC<BridgeDetailsInlineProps> = ({
             Route: {sourceName} &#x2192; {destName}
           </span>
           <span>Fee: --</span>
-          <span>~2-5 min</span>
+          <span>~10-15s</span>
         </Motion>
       )}
     </AnimatePresence>

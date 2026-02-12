@@ -27,7 +27,7 @@ const SwapDetails: FC = () => {
       </div>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text-muted">Estimated Time</span>
-        <span className="text-sm font-medium text-text">~2-5 minutes</span>
+        <span className="text-sm font-medium text-text">~10-15 seconds</span>
       </div>
     </div>
   );
