@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import type { ChangeEventHandler, FC, PropsWithChildren } from 'react';
 
 import type { CheckedButtonProps } from './toggle.types';
@@ -7,8 +7,11 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
   onChange,
   disabled,
   defaultValue: active,
+  'aria-label': ariaLabel,
   ...props
 }) => {
+  const reducedMotion = useReducedMotion();
+
   const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     if (disabled) return;
     onChange?.(event);
@@ -19,6 +22,7 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
       className="flex flex-wrap items-center"
       role="switch"
       aria-checked={active}
+      aria-label={ariaLabel}
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
@@ -41,7 +45,7 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
           {...props}
         />
         <div
-          className="flex w-11 h-[1.7rem] cursor-pointer items-center rounded-full transition-all duration-300 ease-in-out"
+          className="flex w-11 h-[1.7rem] cursor-pointer items-center rounded-full transition-all duration-300 ease-in-out focus-ring"
           style={{
             opacity: disabled ? 0.4 : 1,
             background: !active
@@ -58,6 +62,7 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
                 : 'var(--color-toggle-thumb)',
             }}
             animate={{ x: active ? '1.3rem' : '0.25rem' }}
+            transition={reducedMotion ? { duration: 0 } : undefined}
           />
         </div>
       </label>

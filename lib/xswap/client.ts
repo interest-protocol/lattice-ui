@@ -33,5 +33,7 @@ export interface CreateRequestResult {
   requestInitialSharedVersion: string | null;
 }
 
-export const createSwapRequest = (params: CreateRequestParams) =>
-  post<CreateRequestResult>('/api/xswap/create-request', params);
+export const createSwapRequest = (
+  params: CreateRequestParams,
+  signal?: AbortSignal
+) => post<CreateRequestResult>('/api/xswap/create-request', params, { signal });

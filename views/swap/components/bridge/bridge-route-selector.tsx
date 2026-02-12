@@ -17,6 +17,7 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
     {routes.map((route) => {
       const isSelected = route.key === selectedRoute.key;
       const hasBalance = (routeBalances[route.key] ?? 0n) > 0n;
+      const isDisabled = !route.enabled || !hasBalance;
       const sourceName = CHAIN_REGISTRY[route.sourceChain].displayName;
       const destName = CHAIN_REGISTRY[route.destChain].displayName;
 
@@ -24,19 +25,19 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
         <button
           key={route.key}
           type="button"
-          className="flex items-center gap-3 p-4 rounded-xl border-none w-full text-left"
+          className="flex items-center gap-3 p-4 rounded-xl border-none w-full text-left focus-ring"
           style={{
             background: isSelected
               ? 'var(--color-accent-wash)'
               : 'var(--color-surface-light)',
             border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-surface-border)'}`,
-            opacity: hasBalance ? 1 : 0.4,
-            cursor: hasBalance ? 'pointer' : 'default',
+            opacity: isDisabled ? 0.5 : 1,
+            cursor: isDisabled ? 'not-allowed' : 'pointer',
           }}
           onClick={() => {
-            if (hasBalance) onSelect(route);
+            if (!isDisabled) onSelect(route);
           }}
-          disabled={!hasBalance}
+          disabled={isDisabled}
         >
           <div className="flex items-center gap-2 flex-1">
             <Image
@@ -66,9 +67,13 @@ const BridgeRouteSelector: FC<BridgeRouteSelectorProps> = ({
             <span className="text-text-muted text-xs">
               {sourceName} &#x2192; {destName}
             </span>
-            {!hasBalance && (
+            {!route.enabled ? (
+              <span className="text-accent text-[10px] font-semibold bg-accent-wash px-1.5 py-0.5 rounded">
+                Coming Soon
+              </span>
+            ) : !hasBalance ? (
               <span className="text-text-dimmed text-xs">No balance</span>
-            )}
+            ) : null}
           </div>
         </button>
       );

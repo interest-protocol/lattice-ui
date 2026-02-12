@@ -1,7 +1,12 @@
 import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import type { FC } from 'react';
 import { useEffect } from 'react';
-import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
+import {
+  FormProvider,
+  useForm,
+  useFormContext,
+  useWatch,
+} from 'react-hook-form';
 
 import InputField from '@/components/composed/input-field';
 import { SwapSVG } from '@/components/ui/icons';

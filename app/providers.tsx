@@ -6,7 +6,6 @@ import { type ReactNode, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
-import { BackgroundProvider } from '@/components';
 import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import GasGuardProvider from '@/components/providers/gas-guard-provider';
@@ -15,6 +14,7 @@ import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import { TOAST_DURATION } from '@/constants/toast';
+import { Z_INDEX } from '@/constants/z-index';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 import useThemeColors from '@/hooks/ui/use-theme-colors';
 import OnboardingView from '@/views/onboarding';
@@ -43,7 +43,7 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
         toastOptions={{
           duration: TOAST_DURATION,
           style: {
-            zIndex: 100,
+            zIndex: Z_INDEX.TOAST,
             maxWidth: '20rem',
             overflow: 'hidden',
             position: 'relative',
@@ -60,7 +60,6 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
       >
         <WalletRegistrationProvider />
         <GasGuardProvider />
-        <BackgroundProvider />
         <OnboardingGate>{children}</OnboardingGate>
       </SkeletonTheme>
     </>

@@ -5,6 +5,8 @@ import { type FC, useState } from 'react';
 import CopyButton from '@/components/ui/copy-button';
 import { LogoutSVG } from '@/components/ui/icons';
 import Motion from '@/components/ui/motion';
+import { Z_INDEX } from '@/constants/z-index';
+import GasBalancesInline from './gas-balances-inline';
 import ExplorerSection from './sections/explorer-section';
 import RpcSection from './sections/rpc-section';
 import ThemeSection from './sections/theme-section';
@@ -23,9 +25,10 @@ const WalletProfileDropdown: FC<
 
   return (
     <Motion
-      className="py-2 z-[1] mt-[4.25rem] w-80 text-text overflow-hidden absolute rounded-2xl flex-col hidden md:flex border border-surface-border max-h-[70vh] overflow-y-auto"
+      className="py-2 mt-[4.25rem] w-80 text-text overflow-hidden absolute rounded-2xl flex-col hidden md:flex border border-surface-border max-h-[70vh] overflow-y-auto"
       style={{
-        backdropFilter: 'blur(24px)',
+        zIndex: Z_INDEX.DROPDOWN,
+        backdropFilter: `blur(var(--blur-lg))`,
         originY: 0,
         right: 0,
         background: 'var(--color-surface-overlay)',
@@ -46,6 +49,8 @@ const WalletProfileDropdown: FC<
         ) : null}
       </div>
       <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
+      <GasBalancesInline />
+      <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
       <ExplorerSection
         show={menu === 'explorer'}
         toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
@@ -63,7 +68,7 @@ const WalletProfileDropdown: FC<
       <hr className="border-b border-b-surface-border mx-4 border-t-0 border-x-0" />
       <button
         type="button"
-        className="mx-4 py-3 flex text-error cursor-pointer items-center justify-between hover:opacity-90 bg-transparent border-none w-auto"
+        className="mx-4 py-3 flex text-error cursor-pointer items-center justify-between hover:opacity-90 bg-transparent border-none w-auto focus-ring rounded"
         onClick={() => {
           onLogout();
           close();

@@ -1,15 +1,13 @@
 'use client';
 
 import { type FC, useState } from 'react';
-
+import { SwapSVG } from '@/components/ui/icons';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
-
-import { SwapSVG } from '@/components/ui/icons';
 
 import {
   BRIDGE_ROUTES,
@@ -125,7 +123,7 @@ const Bridge: FC = () => {
   const handleFlip = () => {
     const reverseKey = REVERSE_ROUTE_KEY[selectedRoute.key];
     const reverseRoute = BRIDGE_ROUTES.find((r) => r.key === reverseKey);
-    if (reverseRoute) setSelectedRoute(reverseRoute);
+    if (reverseRoute?.enabled) setSelectedRoute(reverseRoute);
   };
 
   const destChainName = CHAIN_REGISTRY[selectedRoute.destChain].displayName;
@@ -174,7 +172,7 @@ const Bridge: FC = () => {
         ) : (
           <button
             type="button"
-            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-ring"
             style={{
               background: 'var(--btn-primary-bg)',
               boxShadow: 'var(--btn-primary-shadow)',

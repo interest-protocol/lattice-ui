@@ -2,7 +2,6 @@ import type { FC } from 'react';
 
 import WalletButton from '@/components/composed/wallet-button';
 import { LogoSVG } from '@/components/ui/icons';
-import GasBalances from './gas-balances';
 import HeaderSettings from './header-settings';
 import Navbar from './navbar';
 
@@ -26,7 +25,6 @@ const Header: FC = () => (
       <Navbar />
     </div>
     <div className="flex items-center gap-2">
-      <GasBalances />
       <HeaderSettings />
       <WalletButton />
     </div>

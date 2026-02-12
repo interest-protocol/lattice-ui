@@ -54,7 +54,7 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       iconUrl: '/sol-logo.svg',
       decimals: 9,
     },
-    enabled: true,
+    enabled: false,
     label: 'wSOL → SOL',
   },
   {
@@ -72,7 +72,7 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       iconUrl: '/sui-logo.svg',
       decimals: 9,
     },
-    enabled: true,
+    enabled: false,
     label: 'SUI → wSUI',
   },
   {
@@ -90,7 +90,7 @@ export const BRIDGE_ROUTES: readonly BridgeRoute[] = [
       iconUrl: '/sui-logo.svg',
       decimals: 9,
     },
-    enabled: true,
+    enabled: false,
     label: 'wSUI → SUI',
   },
 ];

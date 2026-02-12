@@ -3,7 +3,9 @@ export interface ToastProps {
   message?: string;
 }
 
-export interface ToastLoadingProps extends Pick<ToastProps, 'message'> {}
+export interface ToastLoadingProps extends Pick<ToastProps, 'message'> {
+  toastId?: string;
+}
 
 export interface ToastSuccessProps extends ToastProps {
   link?: string;

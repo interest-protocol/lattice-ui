@@ -14,7 +14,11 @@ const Navbar: FC = () => {
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === Routes[item];
         return (
-          <Link key={item} href={Routes[item]}>
+          <Link
+            key={item}
+            href={Routes[item]}
+            className="focus-ring rounded-md"
+          >
             <span
               className={`cursor-pointer text-sm font-medium tracking-[0.04em] uppercase transition-colors duration-200 ${isActive ? 'text-accent' : 'text-text-secondary hover:text-text'}`}
             >

@@ -34,7 +34,7 @@ const useGasGuard = () => {
   } = useBalances();
 
   const dismissedRef = useRef(false);
-  const activeChainRef = useRef<ChainKey | null>(null);
+  const [activeChain, setActiveChain] = useState<ChainKey | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -62,80 +62,33 @@ const useGasGuard = () => {
     }
   };
 
-  const openModal = (chain: ChainKey) => {
-    const address = chain === 'sui' ? suiAddress : solAddress;
-    if (!address) return;
-
-    activeChainRef.current = chain;
-    const config = CHAIN_REGISTRY[chain];
-
-    useModal.getState().setContent(
-      createElement(GasRequiredModal, {
-        chain,
-        address,
-        minAmount: config.minGasThreshold,
-        onRefresh: () => handleRefresh(chain),
-        refreshing,
-      }),
-      {
-        title: `${config.nativeToken.symbol} Required`,
-        allowClose: true,
-      }
-    );
-  };
-
   // Open modal when gas is low
-  // biome-ignore lint/correctness/useExhaustiveDependencies: openModal closes over reactive values — only trigger on readiness + balance checks
   useEffect(() => {
     if (!mounted || !isReady || dismissedRef.current) return;
 
     if (suiLow && suiAddress) {
-      openModal('sui');
+      setActiveChain('sui');
     } else if (solLow && solAddress) {
-      openModal('solana');
+      setActiveChain('solana');
     }
   }, [mounted, isReady, suiLow, solLow, suiAddress, solAddress]);
 
-  // Auto-close modal when balance recovers
+  // Sync modal content whenever activeChain or refreshing changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleRefresh reads mutable refs
   useEffect(() => {
-    if (!activeChainRef.current) return;
+    if (!activeChain) return;
 
-    const chain = activeChainRef.current;
-    const recovered = chain === 'sui' ? !suiLow : !solLow;
-
-    if (recovered) {
-      useModal.getState().handleClose();
-      activeChainRef.current = null;
-    }
-  }, [suiLow, solLow]);
-
-  // Track dismiss — when modal content goes to null while we had an active chain
-  useEffect(() => {
-    return useModal.subscribe((state) => {
-      if (activeChainRef.current && state.content === null) {
-        dismissedRef.current = true;
-        activeChainRef.current = null;
-      }
-    });
-  }, []);
-
-  // Update modal content when refreshing state changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-render modal with updated refreshing prop
-  useEffect(() => {
-    const chain = activeChainRef.current;
-    if (!chain) return;
-
-    const address = chain === 'sui' ? suiAddress : solAddress;
+    const address = activeChain === 'sui' ? suiAddress : solAddress;
     if (!address) return;
 
-    const config = CHAIN_REGISTRY[chain];
+    const config = CHAIN_REGISTRY[activeChain];
 
     useModal.getState().setContent(
       createElement(GasRequiredModal, {
-        chain,
+        chain: activeChain,
         address,
         minAmount: config.minGasThreshold,
-        onRefresh: () => handleRefresh(chain),
+        onRefresh: () => handleRefresh(activeChain),
         refreshing,
       }),
       {
@@ -143,7 +96,29 @@ const useGasGuard = () => {
         allowClose: true,
       }
     );
-  }, [refreshing, suiAddress, solAddress]);
+  }, [activeChain, refreshing, suiAddress, solAddress]);
+
+  // Auto-close modal when balance recovers
+  useEffect(() => {
+    if (!activeChain) return;
+
+    const recovered = activeChain === 'sui' ? !suiLow : !solLow;
+
+    if (recovered) {
+      useModal.getState().handleClose();
+      setActiveChain(null);
+    }
+  }, [activeChain, suiLow, solLow]);
+
+  // Track dismiss — when modal content goes to null while we had an active chain
+  useEffect(() => {
+    return useModal.subscribe((state) => {
+      if (activeChain && state.content === null) {
+        dismissedRef.current = true;
+        setActiveChain(null);
+      }
+    });
+  }, [activeChain]);
 };
 
 export default useGasGuard;

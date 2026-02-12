@@ -17,6 +17,7 @@ import {
   voteMint,
 } from '@/lib/xbridge/client';
 import { extractErrorMessage } from '@/utils';
+import { haptic } from '@/utils/haptic';
 
 export type BridgeStatus =
   | 'idle'
@@ -142,6 +143,7 @@ export const useBridge = () => {
       }
 
       setStatus('success');
+      haptic.success();
       toasting.dismiss(BRIDGE_TOAST_ID);
       toasting.success({
         action: 'Bridge',
@@ -150,6 +152,7 @@ export const useBridge = () => {
       return true;
     } catch (err: unknown) {
       setStatus('error');
+      haptic.error();
       const message = extractErrorMessage(err, 'Bridge failed');
       setError(message);
       toasting.dismiss(BRIDGE_TOAST_ID);

@@ -13,12 +13,14 @@ export type { NewRequestProof };
 
 export const fetchNewRequestProof = async (
   digest: string,
-  chainId: ChainId
+  chainId: ChainId,
+  signal?: AbortSignal
 ): Promise<NewRequestProof> => {
-  const raw = await post<NewRequestProofRaw>('/api/enclave/new-request', {
-    digest,
-    chainId,
-  });
+  const raw = await post<NewRequestProofRaw>(
+    '/api/enclave/new-request',
+    { digest, chainId },
+    { signal }
+  );
   return XSwap.parseNewRequestProof(raw);
 };
 

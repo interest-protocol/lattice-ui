@@ -14,23 +14,27 @@ export const toasting = {
   error: (args: ToastProps) => dismissHandler(toast(<ToastError {...args} />)),
   success: (args: ToastSuccessProps) =>
     dismissHandler(toast(<ToastSuccess {...args} />)),
-  loading: (args: ToastLoadingProps) =>
-    dismissHandler(
-      toast.loading(<ToastLoading {...args} />, {
-        duration: Number.POSITIVE_INFINITY,
-      })
-    ),
+  loading: (args: ToastLoadingProps) => {
+    const id = toast.loading(<ToastLoading {...args} />, {
+      duration: Number.POSITIVE_INFINITY,
+    });
+    toast.loading(<ToastLoading {...args} toastId={id} />, {
+      id,
+      duration: Number.POSITIVE_INFINITY,
+    });
+    return dismissHandler(id);
+  },
 
-  loadingWithId: (args: ToastLoadingProps, id: string) =>
-    dismissHandler(
-      toast.loading(<ToastLoading {...args} />, {
-        id,
-        duration: Number.POSITIVE_INFINITY,
-      })
-    ),
+  loadingWithId: (args: ToastLoadingProps, id: string) => {
+    toast.loading(<ToastLoading {...args} toastId={id} />, {
+      id,
+      duration: Number.POSITIVE_INFINITY,
+    });
+    return dismissHandler(id);
+  },
 
   update: (id: string, message: string) => {
-    toast.loading(<ToastLoading message={message} />, {
+    toast.loading(<ToastLoading message={message} toastId={id} />, {
       id,
       duration: Number.POSITIVE_INFINITY,
     });

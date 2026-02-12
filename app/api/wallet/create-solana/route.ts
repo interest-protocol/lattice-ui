@@ -14,7 +14,14 @@ export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (auth instanceof NextResponse) return auth;
 
-  const { data: body, error } = validateBody(await request.json(), schema);
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const { data: body, error } = validateBody(rawBody, schema);
   if (error) return error;
 
   const mismatch = verifyUserMatch(auth.userId, body.userId);

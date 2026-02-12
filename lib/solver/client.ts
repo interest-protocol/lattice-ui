@@ -30,40 +30,58 @@ export interface RequestStatus {
   errorMessage?: string;
 }
 
-export const fetchMetadata = () => get<SolverMetadata>('/api/solver/metadata');
+export const fetchMetadata = (signal?: AbortSignal) =>
+  get<SolverMetadata>('/api/solver/metadata', { signal });
 
-export const fetchPrices = () => get<PriceData>('/api/solver/prices');
+export const fetchPrices = (signal?: AbortSignal) =>
+  get<PriceData>('/api/solver/prices', { signal });
 
-export const fulfill = (params: {
-  requestId: string;
-  userAddress: string;
-  requestInitialSharedVersion?: string;
-}) => post<FulfillResult>('/api/solver/fulfill', params);
+export const fulfill = (
+  params: {
+    requestId: string;
+    userAddress: string;
+    requestInitialSharedVersion?: string;
+  },
+  signal?: AbortSignal
+) => post<FulfillResult>('/api/solver/fulfill', params, { signal });
 
-export const fetchStatus = (requestId: string) =>
+export const fetchStatus = (requestId: string, signal?: AbortSignal) =>
   get<RequestStatus>(
-    `/api/solver/status?requestId=${encodeURIComponent(requestId)}`
+    `/api/solver/status?requestId=${encodeURIComponent(requestId)}`,
+    { signal }
   );
 
 export const waitForSettlement = async (
   requestId: string,
-  options: { maxPolls?: number; intervalMs?: number; signal?: AbortSignal } = {}
+  options: {
+    maxPolls?: number;
+    initialIntervalMs?: number;
+    maxIntervalMs?: number;
+    signal?: AbortSignal;
+  } = {}
 ): Promise<RequestStatus> => {
-  const { maxPolls = 120, intervalMs = 1000, signal } = options;
+  const {
+    maxPolls = 120,
+    initialIntervalMs = 500,
+    maxIntervalMs = 4000,
+    signal,
+  } = options;
 
   for (let i = 0; i < maxPolls; i++) {
     if (signal?.aborted) {
       throw new DOMException('The operation was aborted.', 'AbortError');
     }
 
-    const status = await fetchStatus(requestId);
+    const status = await fetchStatus(requestId, signal);
 
     if (status.status === 'settled' || status.status === 'failed') {
       return status;
     }
 
+    const delay =
+      Math.min(initialIntervalMs * 2 ** i, maxIntervalMs) + Math.random() * 300;
     await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(resolve, intervalMs);
+      const timer = setTimeout(resolve, delay);
       signal?.addEventListener(
         'abort',
         () => {

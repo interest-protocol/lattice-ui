@@ -6,7 +6,6 @@ import invariant from 'tiny-invariant';
 import { toasting } from '@/components/ui/toast';
 import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
 import {
-  BALANCE_POLL_INTERVAL_MS,
   BALANCE_POLL_MAX_ATTEMPTS,
   REQUEST_DEADLINE_MS,
 } from '@/constants/coins';
@@ -23,6 +22,7 @@ import { CurrencyAmount, Token, Trade } from '@/lib/entities';
 import { fetchMetadata, fulfill } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
+import { haptic } from '@/utils/haptic';
 
 export type SwapStatus =
   | 'idle'
@@ -183,17 +183,19 @@ export const useSwap = () => {
       setStatus('verifying');
       toasting.update(SWAP_TOAST_ID, 'Verifying deposit on-chain...');
 
-      const proof = await withRetry(
-        () => fetchNewRequestProof(depositDigest, sourceChain),
-        ENCLAVE_RETRY_ATTEMPTS,
-        ENCLAVE_RETRY_DELAY_MS,
-        signal
-      );
+      const [proof, metadata] = await Promise.all([
+        withRetry(
+          () => fetchNewRequestProof(depositDigest, sourceChain, signal),
+          ENCLAVE_RETRY_ATTEMPTS,
+          ENCLAVE_RETRY_DELAY_MS,
+          signal
+        ),
+        fetchMetadata(signal),
+      ]);
 
       setStatus('creating');
       toasting.update(SWAP_TOAST_ID, 'Creating swap request...');
 
-      const metadata = await fetchMetadata();
       const solverSuiAddress = metadata.solver.sui;
       const solverSolanaAddress = metadata.solver.solana;
 
@@ -233,30 +235,33 @@ export const useSwap = () => {
       const minDestinationAmount = trade.minimumReceived.raw.toString();
 
       const { requestId, requestInitialSharedVersion } =
-        await createSwapRequest({
-          userId: user.id,
-          proof: {
-            signature: Array.from(proof.signature),
-            digest: Array.from(proof.digest),
-            timestampMs: proof.timestampMs.toString(),
-            dwalletAddress: Array.from(proof.dwalletAddress),
-            user: Array.from(proof.user),
-            chainId: proof.chainId,
-            token: Array.from(proof.token),
-            amount: proof.amount.toString(),
+        await createSwapRequest(
+          {
+            userId: user.id,
+            proof: {
+              signature: Array.from(proof.signature),
+              digest: Array.from(proof.digest),
+              timestampMs: proof.timestampMs.toString(),
+              dwalletAddress: Array.from(proof.dwalletAddress),
+              user: Array.from(proof.user),
+              chainId: proof.chainId,
+              token: Array.from(proof.token),
+              amount: proof.amount.toString(),
+            },
+            walletKey: walletKey.toString(),
+            sourceAddress: Array.from(sourceAddress),
+            sourceChain,
+            destinationChain,
+            destinationAddress: Array.from(destinationAddress),
+            destinationToken: Array.from(destinationToken),
+            minDestinationAmount,
+            minConfirmations: 0,
+            deadline: deadline.toString(),
+            solverSender: Array.from(solverSender),
+            solverRecipient: Array.from(solverRecipient),
           },
-          walletKey: walletKey.toString(),
-          sourceAddress: Array.from(sourceAddress),
-          sourceChain,
-          destinationChain,
-          destinationAddress: Array.from(destinationAddress),
-          destinationToken: Array.from(destinationToken),
-          minDestinationAmount,
-          minConfirmations: 0,
-          deadline: deadline.toString(),
-          solverSender: Array.from(solverSender),
-          solverRecipient: Array.from(solverRecipient),
-        });
+          signal
+        );
 
       invariant(requestId, 'Swap request created but requestId is missing');
 
@@ -267,20 +272,28 @@ export const useSwap = () => {
         getBalancesRef(destChainKey)
       );
 
-      const fulfillResult = await fulfill({
-        requestId,
-        userAddress: suiAddress,
-        requestInitialSharedVersion: requestInitialSharedVersion ?? undefined,
-      });
+      const fulfillResult = await fulfill(
+        {
+          requestId,
+          userAddress: suiAddress,
+          requestInitialSharedVersion: requestInitialSharedVersion ?? undefined,
+        },
+        signal
+      );
 
       toasting.update(SWAP_TOAST_ID, 'Waiting for tokens to arrive...');
+
+      const POLL_INITIAL_MS = 500;
+      const POLL_MAX_MS = 5000;
 
       for (let i = 0; i < BALANCE_POLL_MAX_ATTEMPTS; i++) {
         if (signal.aborted) {
           throw new DOMException('The operation was aborted.', 'AbortError');
         }
+
+        const delay = Math.min(POLL_INITIAL_MS * 2 ** i, POLL_MAX_MS);
         await new Promise<void>((resolve, reject) => {
-          const timer = setTimeout(resolve, BALANCE_POLL_INTERVAL_MS);
+          const timer = setTimeout(resolve, delay);
           signal.addEventListener(
             'abort',
             () => {
@@ -323,6 +336,7 @@ export const useSwap = () => {
         startedAt,
       });
       setStatus('success');
+      haptic.success();
       toasting.dismiss(SWAP_TOAST_ID);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -331,6 +345,7 @@ export const useSwap = () => {
         return;
       }
       setStatus('error');
+      haptic.error();
       const message = extractErrorMessage(err, 'Swap failed');
       setError(message);
       toasting.dismiss(SWAP_TOAST_ID);

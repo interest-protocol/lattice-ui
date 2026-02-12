@@ -17,7 +17,7 @@ const Settings: FC = () => {
         type="button"
         aria-label="Settings"
         aria-expanded={show}
-        className="text-text leading-none flex cursor-pointer items-center justify-center w-8 sm:w-auto h-8 sm:h-auto border border-accent-border rounded-lg sm:rounded-xl bg-transparent hover:bg-accent-muted hover:border-accent-border"
+        className="text-text leading-none flex cursor-pointer items-center justify-center w-8 sm:w-auto h-8 sm:h-auto border border-accent-border rounded-lg sm:rounded-xl bg-transparent hover:bg-accent-muted hover:border-accent-border focus-ring"
         onClick={() => setShow((prev) => !prev)}
       >
         <span className="p-1 transition-all duration-300 lg:hidden">

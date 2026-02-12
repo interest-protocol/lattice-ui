@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { type FC, useState } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
-import Tabs from '@/components/ui/tabs';
+import Tabs, { TabPanel } from '@/components/ui/tabs';
 import { toasting } from '@/components/ui/toast';
 import {
   BRIDGED_ASSET_METADATA,
@@ -252,9 +252,10 @@ const AccountContent: FC = () => {
         tab={activeTab}
         setTab={setActiveTab}
         tabs={['Balances', 'Deposit', 'Withdraw']}
+        id="account"
       />
 
-      {activeTab === 0 && (
+      <TabPanel index={0} active={activeTab === 0} id="account">
         <BalancesView
           displaySuiAddress={displaySuiAddress}
           solanaAddress={solanaAddress}
@@ -265,9 +266,9 @@ const AccountContent: FC = () => {
           creatingSuiWallet={creatingSuiWallet}
           createSuiWallet={createSuiWallet}
         />
-      )}
+      </TabPanel>
 
-      {(activeTab === 1 || activeTab === 2) && (
+      <TabPanel index={1} active={activeTab === 1} id="account">
         <div
           className="p-6 rounded-2xl border border-surface-border flex flex-col gap-5"
           style={{
@@ -276,14 +277,22 @@ const AccountContent: FC = () => {
           }}
         >
           <NetworkTabs network={network} setNetwork={setNetwork} />
-
-          {activeTab === 1 ? (
-            <DepositView network={network} />
-          ) : (
-            <WithdrawView network={network} />
-          )}
+          <DepositView network={network} />
         </div>
-      )}
+      </TabPanel>
+
+      <TabPanel index={2} active={activeTab === 2} id="account">
+        <div
+          className="p-6 rounded-2xl border border-surface-border flex flex-col gap-5"
+          style={{
+            background: 'var(--card-bg)',
+            boxShadow: 'var(--card-shadow)',
+          }}
+        >
+          <NetworkTabs network={network} setNetwork={setNetwork} />
+          <WithdrawView network={network} />
+        </div>
+      </TabPanel>
     </div>
   );
 };

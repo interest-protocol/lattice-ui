@@ -20,6 +20,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   timeout?: number;
   retries?: number;
+  signal?: AbortSignal;
 }
 
 const DEFAULT_HEADERS: Record<string, string> = {
@@ -41,8 +42,8 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
   return { Authorization: `Bearer ${token}` };
 };
 
-const DEFAULT_TIMEOUT = 30000;
-const DEFAULT_RETRIES = 0;
+const DEFAULT_TIMEOUT = 10_000;
+const DEFAULT_RETRIES = 2;
 const RETRY_DELAY = 1000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -50,15 +51,20 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const fetchWithTimeout = async (
   url: string,
   init: RequestInit,
-  timeout: number
+  timeout: number,
+  externalSignal?: AbortSignal
 ): Promise<Response> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  const onExternalAbort = () => controller.abort();
+  externalSignal?.addEventListener('abort', onExternalAbort, { once: true });
 
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener('abort', onExternalAbort);
   }
 };
 
@@ -79,18 +85,27 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 
 const executeWithRetry = async <T>(
   fn: () => Promise<T>,
-  retries: number
+  retries: number,
+  signal?: AbortSignal
 ): Promise<T> => {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+    if (signal?.aborted) {
+      throw new DOMException('The operation was aborted.', 'AbortError');
+    }
+
     try {
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
+      // Don't retry if the signal was aborted
+      if (signal?.aborted) throw lastError;
+
       if (attempt < retries) {
-        await sleep(RETRY_DELAY * (attempt + 1));
+        const jitter = Math.random() * 500;
+        await sleep(RETRY_DELAY * (attempt + 1) + jitter);
       }
     }
   }
@@ -106,20 +121,25 @@ export const post = async <TResponse, TBody = unknown>(
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
   const retries = options?.retries ?? DEFAULT_RETRIES;
 
-  return executeWithRetry(async () => {
-    const authHeaders = await getAuthHeaders();
-    const response = await fetchWithTimeout(
-      url,
-      {
-        method: 'POST',
-        headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
-        body: JSON.stringify(body),
-      },
-      timeout
-    );
+  return executeWithRetry(
+    async () => {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: 'POST',
+          headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
+          body: JSON.stringify(body),
+        },
+        timeout,
+        options?.signal
+      );
 
-    return handleResponse<TResponse>(response);
-  }, retries);
+      return handleResponse<TResponse>(response);
+    },
+    retries,
+    options?.signal
+  );
 };
 
 export const get = async <TResponse>(
@@ -129,17 +149,22 @@ export const get = async <TResponse>(
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
   const retries = options?.retries ?? DEFAULT_RETRIES;
 
-  return executeWithRetry(async () => {
-    const authHeaders = await getAuthHeaders();
-    const response = await fetchWithTimeout(
-      url,
-      {
-        method: 'GET',
-        headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
-      },
-      timeout
-    );
+  return executeWithRetry(
+    async () => {
+      const authHeaders = await getAuthHeaders();
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: 'GET',
+          headers: { ...DEFAULT_HEADERS, ...authHeaders, ...options?.headers },
+        },
+        timeout,
+        options?.signal
+      );
 
-    return handleResponse<TResponse>(response);
-  }, retries);
+      return handleResponse<TResponse>(response);
+    },
+    retries,
+    options?.signal
+  );
 };

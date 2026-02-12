@@ -1,5 +1,6 @@
 import { type FC, useState } from 'react';
 
+import { Z_INDEX } from '@/constants/z-index';
 import { useHealth } from '@/hooks/domain/use-health';
 
 type HealthState = 'healthy' | 'degraded' | 'unhealthy' | 'loading';
@@ -35,7 +36,10 @@ const HealthIndicator: FC = () => {
   const overallState = getOverallState(enclaveState, solverState);
 
   return (
-    <div className="fixed bottom-4 left-4 z-[1000] flex flex-col gap-2">
+    <div
+      className="fixed bottom-4 left-4 flex flex-col gap-2"
+      style={{ zIndex: Z_INDEX.HEALTH }}
+    >
       {expanded ? (
         <div className="bg-surface-raised rounded-lg border border-surface-border p-3 flex flex-col gap-2 min-w-[180px]">
           <div className="flex items-center gap-2">
@@ -66,7 +70,7 @@ const HealthIndicator: FC = () => {
         type="button"
         aria-expanded={expanded}
         aria-label="System health status"
-        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border py-2 px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200"
+        className="flex items-center gap-2 bg-surface-raised rounded-lg border border-surface-border py-2 px-3 cursor-pointer hover:bg-surface-overlay transition-colors duration-200 focus-ring"
         onClick={() => setExpanded(!expanded)}
       >
         <div

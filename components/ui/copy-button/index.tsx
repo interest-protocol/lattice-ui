@@ -1,8 +1,9 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect, useRef, useState } from 'react';
 import { toasting } from '@/components/ui/toast';
+import { haptic } from '@/utils/haptic';
 
 interface CopyButtonProps {
   text: string;
@@ -12,6 +13,7 @@ interface CopyButtonProps {
 }
 
 const iconTransition = { duration: 0.15 };
+const instantTransition = { duration: 0 };
 
 const CopyButton: FC<CopyButtonProps> = ({
   text,
@@ -21,6 +23,7 @@ const CopyButton: FC<CopyButtonProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     return () => {
@@ -31,6 +34,7 @@ const CopyButton: FC<CopyButtonProps> = ({
   const handleCopy = async () => {
     try {
       await window.navigator.clipboard.writeText(text);
+      haptic.light();
       toasting.success({ action: 'Copy', message: 'Address copied' });
       setCopied(true);
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -43,7 +47,7 @@ const CopyButton: FC<CopyButtonProps> = ({
   return (
     <button
       type="button"
-      className={`cursor-pointer bg-transparent border-none p-0 transition-colors duration-200 ${className ?? ''}`}
+      className={`cursor-pointer bg-transparent border-none p-0 transition-colors duration-200 focus-ring rounded ${className ?? ''}`}
       style={{ color: copied ? 'var(--color-success)' : undefined }}
       onClick={handleCopy}
       aria-label={ariaLabel}
@@ -60,7 +64,7 @@ const CopyButton: FC<CopyButtonProps> = ({
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
-            transition={iconTransition}
+            transition={reducedMotion ? instantTransition : iconTransition}
           >
             <path
               d="M5 13l4 4L19 7"
@@ -81,7 +85,7 @@ const CopyButton: FC<CopyButtonProps> = ({
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
-            transition={iconTransition}
+            transition={reducedMotion ? instantTransition : iconTransition}
           >
             <path
               fillRule="evenodd"

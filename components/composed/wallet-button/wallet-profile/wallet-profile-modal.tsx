@@ -5,6 +5,7 @@ import { type FC, useState } from 'react';
 import CopyButton from '@/components/ui/copy-button';
 import { LogoutSVG } from '@/components/ui/icons';
 
+import GasBalancesInline from './gas-balances-inline';
 import ExplorerSection from './sections/explorer-section';
 import RpcSection from './sections/rpc-section';
 import ThemeSection from './sections/theme-section';
@@ -39,6 +40,8 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
         ) : null}
       </div>
       <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
+      <GasBalancesInline />
+      <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
       <ExplorerSection
         show={menu === 'explorer'}
         toggleShow={() => setMenu(menu === 'explorer' ? null : 'explorer')}
@@ -56,7 +59,7 @@ const WalletProfileModal: FC<WalletProfileModalProps> = ({
       <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
       <button
         type="button"
-        className="py-3 px-1 flex text-error cursor-pointer items-center justify-between hover:opacity-90 bg-transparent border-none w-full"
+        className="py-3 px-1 flex text-error cursor-pointer items-center justify-between hover:opacity-90 bg-transparent border-none w-full focus-ring rounded"
         onClick={() => {
           onLogout();
           onClose();

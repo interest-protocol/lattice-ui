@@ -5,6 +5,7 @@ import type { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
+import { Z_INDEX } from '@/constants/z-index';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { formatDollars } from '@/utils/money';
 
@@ -15,8 +16,8 @@ const Footer: FC = () => {
 
   return (
     <footer
-      className="sticky bottom-0 z-40 mt-auto backdrop-blur-md border-t border-surface-border"
-      style={{ background: 'var(--color-footer-bg)' }}
+      className="sticky bottom-0 mt-auto backdrop-blur-md border-t border-surface-border"
+      style={{ background: 'var(--color-footer-bg)', zIndex: Z_INDEX.STICKY }}
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-center gap-4 px-4 py-2">
         {CHAINS.map((chain, i) => {

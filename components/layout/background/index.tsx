@@ -1,14 +1,13 @@
-import { AnimatePresence } from 'motion/react';
 import type { FC } from 'react';
 
 import BackgroundBlur from './background-blur';
-import BackgroundParticles from './background-particles';
+import BackgroundStatic from './background-static';
 
 const Background: FC = () => (
-  <AnimatePresence>
-    <BackgroundBlur key="blur" />
-    <BackgroundParticles key="particles" />
-  </AnimatePresence>
+  <>
+    <BackgroundBlur />
+    <BackgroundStatic />
+  </>
 );
 
 export default Background;

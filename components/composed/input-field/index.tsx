@@ -16,13 +16,22 @@ const InputField: FC<InputFieldProps> = ({
   disabled,
   topContent,
   oppositeName,
+  error,
 }) => {
   const { register, setValue, getValues, control } = useFormContext();
   const watchedValue = useWatch({ control, name: `${name}.value` }) as string;
 
+  const errorId = error ? `input-${name}-error` : undefined;
+
   return (
     <div
-      className={`p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border border-surface-border transition-all duration-200 ${disabled ? '' : 'focus-within:border-accent-border'}`}
+      className={`p-4 gap-3 flex text-text-secondary rounded-xl text-sm flex-col border transition-all duration-200 ${
+        error
+          ? 'border-error'
+          : disabled
+            ? 'border-surface-border'
+            : 'border-surface-border focus-within:border-accent-border'
+      }`}
       style={{ background: 'var(--color-surface-inset)' }}
     >
       <div className="flex justify-between">
@@ -46,6 +55,8 @@ const InputField: FC<InputFieldProps> = ({
             className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-2xl"
             placeholder="0"
             autoComplete="off"
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={errorId}
             {...register(`${name}.value`, {
               onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
                 const value = parseInputEventToNumberString(event);
@@ -70,6 +81,11 @@ const InputField: FC<InputFieldProps> = ({
         <InputFieldPrice name={name} />
         <InputFieldBalance name={name} />
       </div>
+      {error && (
+        <p id={errorId} className="text-error text-xs m-0" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

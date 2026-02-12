@@ -44,7 +44,13 @@ const RETRY_DELAYS_MS = [2000, 5000, 10000];
 
 // --- localStorage cache helpers ---
 
-type CacheRecord = Record<string, boolean>;
+interface CachedUser {
+  linked: boolean;
+  suiAddress?: string;
+  solanaAddress?: string;
+}
+
+type CacheRecord = Record<string, boolean | CachedUser>;
 
 const readCache = (): CacheRecord => {
   try {
@@ -55,20 +61,42 @@ const readCache = (): CacheRecord => {
   }
 };
 
-const writeCache = (userId: string) => {
+const readCachedUser = (userId: string): CachedUser | null => {
+  const entry = readCache()[userId];
+  if (!entry) return null;
+  // Backwards-compatible: old format was `true`, new format is an object
+  if (typeof entry === 'boolean') return { linked: entry };
+  return entry;
+};
+
+const writeCache = (
+  userId: string,
+  addresses?: { suiAddress?: string | null; solanaAddress?: string | null }
+) => {
   try {
     const prev = readCache();
     localStorage.setItem(
       REGISTRATION_CACHE_KEY,
-      JSON.stringify({ ...prev, [userId]: true })
+      JSON.stringify({
+        ...prev,
+        [userId]: {
+          linked: true,
+          suiAddress: addresses?.suiAddress ?? undefined,
+          solanaAddress: addresses?.solanaAddress ?? undefined,
+        },
+      })
     );
   } catch {
     // Non-critical — cache write failure is acceptable
   }
 };
 
-export const isUserCached = (userId: string): boolean =>
-  readCache()[userId] ?? false;
+export const isUserCached = (userId: string): boolean => {
+  const entry = readCache()[userId];
+  if (!entry) return false;
+  if (typeof entry === 'boolean') return entry;
+  return entry.linked;
+};
 
 // --- Timer management ---
 
@@ -107,8 +135,27 @@ const doCheckRegistration = async (userId: string) => {
       handleCheckResult(result, userId);
       return;
     } catch {
-      // API failed but cache says linked — trust cache
-      useOnboarding.setState({ step: 'complete', _isProcessing: false });
+      // API failed but cache says linked — recover addresses from cache
+      const cached = readCachedUser(userId);
+      if (cached?.suiAddress && cached?.solanaAddress) {
+        useOnboarding.setState({
+          step: 'complete',
+          suiAddress: cached.suiAddress,
+          solanaAddress: cached.solanaAddress,
+          _isProcessing: false,
+        });
+      } else {
+        // Cache has no addresses — can't safely proceed, retry from scratch
+        useOnboarding.setState({
+          step: 'checking',
+          error: 'Connection lost. Retrying...',
+          _isProcessing: false,
+        });
+        retryTimer = setTimeout(
+          () => doCheckRegistration(userId),
+          RETRY_DELAYS_MS[0]
+        );
+      }
       return;
     }
   }
@@ -130,7 +177,10 @@ const doCheckRegistration = async (userId: string) => {
 
 const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
   if (result.registered) {
-    writeCache(userId);
+    writeCache(userId, {
+      suiAddress: result.suiAddress,
+      solanaAddress: result.solanaAddress,
+    });
     useOnboarding.setState({
       step: 'complete',
       suiAddress: result.suiAddress,
@@ -216,17 +266,22 @@ const doStartLinking = async (retryCount = 0) => {
     if (result.alreadyLinked) {
       const { suiAddress: existingSui, solanaAddress: existingSol } =
         useOnboarding.getState();
-      writeCache(userId);
+      const suiAddr = result.suiAddress ?? existingSui;
+      const solAddr = result.solanaAddress ?? existingSol;
+      writeCache(userId, { suiAddress: suiAddr, solanaAddress: solAddr });
       useOnboarding.setState({
         step: 'complete',
-        suiAddress: result.suiAddress ?? existingSui,
-        solanaAddress: result.solanaAddress ?? existingSol,
+        suiAddress: suiAddr,
+        solanaAddress: solAddr,
         _isProcessing: false,
       });
       return;
     }
 
-    writeCache(userId);
+    writeCache(userId, {
+      suiAddress: result.suiAddress,
+      solanaAddress: result.solanaAddress,
+    });
     useOnboarding.setState({
       step: 'complete',
       suiAddress: result.suiAddress,

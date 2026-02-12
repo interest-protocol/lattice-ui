@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
   try {
     const params = new URLSearchParams(feedIds.map((id) => ['ids[]', id]));
 
-    const response = await fetch(`${PYTH_HERMES_URL}?${params.toString()}`);
+    const response = await fetch(`${PYTH_HERMES_URL}?${params.toString()}`, {
+      signal: AbortSignal.timeout(10_000),
+    });
 
     if (!response.ok) {
       return NextResponse.json(
