@@ -26,7 +26,7 @@ const GasBalancesInline: FC = () => {
 
   return (
     <div className="px-4 py-2 flex flex-col gap-2">
-      <span className="text-text-muted text-xs font-medium">Gas Balances</span>
+      <span className="text-text-muted text-xs font-medium">Balances</span>
       <div className="flex items-center gap-4">
         {items.map(({ chain, config, display, loading }) => (
           <div key={chain} className="flex items-center gap-1.5">
