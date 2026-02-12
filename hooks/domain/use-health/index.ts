@@ -1,17 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 
-import type { EnclaveHealthResponse } from '@/app/api/health/enclave/route';
-import type { SolverHealthResponse } from '@/app/api/health/solver/route';
+import type { CombinedHealthResponse } from '@/app/api/health/route';
 import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 
 export interface HealthStatus {
-  enclave: EnclaveHealthResponse | null;
-  solver: SolverHealthResponse | null;
+  enclave: { healthy: boolean } | null;
+  solver: { healthy: boolean } | null;
   isLoading: boolean;
 }
 
-const fetcher = async <T>(url: string): Promise<T> => {
-  const response = await fetch(url);
+const fetchHealth = async (): Promise<CombinedHealthResponse> => {
+  const response = await fetch('/api/health');
   if (!response.ok) {
     throw new Error(`Health check failed: ${response.status}`);
   }
@@ -19,25 +18,16 @@ const fetcher = async <T>(url: string): Promise<T> => {
 };
 
 export const useHealth = (): HealthStatus => {
-  const { data: enclave, isLoading: enclaveLoading } =
-    useQuery<EnclaveHealthResponse>({
-      queryKey: ['health', 'enclave'],
-      queryFn: () => fetcher<EnclaveHealthResponse>('/api/health/enclave'),
-      refetchInterval: REFETCH_INTERVALS.HEALTH,
-      refetchOnWindowFocus: false,
-    });
-
-  const { data: solver, isLoading: solverLoading } =
-    useQuery<SolverHealthResponse>({
-      queryKey: ['health', 'solver'],
-      queryFn: () => fetcher<SolverHealthResponse>('/api/health/solver'),
-      refetchInterval: REFETCH_INTERVALS.HEALTH,
-      refetchOnWindowFocus: false,
-    });
+  const { data, isLoading } = useQuery<CombinedHealthResponse>({
+    queryKey: ['health'],
+    queryFn: fetchHealth,
+    refetchInterval: REFETCH_INTERVALS.HEALTH,
+    refetchOnWindowFocus: false,
+  });
 
   return {
-    enclave: enclave ?? null,
-    solver: solver ?? null,
-    isLoading: enclaveLoading || solverLoading,
+    enclave: data?.enclave ?? null,
+    solver: data?.solver ?? null,
+    isLoading,
   };
 };

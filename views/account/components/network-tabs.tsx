@@ -24,8 +24,10 @@ const NetworkTabs: FC<NetworkTabsProps> = ({ network, setNetwork }) => (
           key={net}
           type="button"
           role="tab"
+          id={`network-tab-${net}`}
           aria-selected={isSelected}
-          className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
+          aria-controls={`network-tabpanel-${net}`}
+          className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-xl hover:bg-surface-hover transition-colors duration-200 focus-ring"
           style={{
             border: `2px solid ${isSelected ? color : 'var(--color-surface-border)'}`,
             background: isSelected ? `${color}1A` : undefined,

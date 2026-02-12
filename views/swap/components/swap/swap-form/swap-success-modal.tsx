@@ -202,7 +202,7 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
       {/* Close Button */}
       <button
         type="button"
-        className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-all duration-200"
+        className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-colors duration-200 focus-ring"
         style={{
           cursor: 'pointer',
           background: 'var(--btn-primary-bg)',

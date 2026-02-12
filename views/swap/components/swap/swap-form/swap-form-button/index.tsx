@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
@@ -35,6 +35,7 @@ const SwapFormButton: FC = () => {
   const fromValueBN = useWatch({ control, name: 'from.valueBN' }) as bigint;
   const toType = useWatch({ control, name: 'to.type' }) as string;
 
+  const reducedMotion = useReducedMotion();
   const { suiAmounts, solanaAmounts } = useBalances();
   const { swap, isLoading, status, result, reset } = useSwap();
   const setContent = useModal((s) => s.setContent);
@@ -82,12 +83,12 @@ const SwapFormButton: FC = () => {
         boxShadow: isReady ? 'var(--cta-idle-glow)' : 'none',
       }}
       whileHover={
-        isDisabled
+        isDisabled || reducedMotion
           ? undefined
           : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
       }
-      whileTap={isDisabled ? undefined : { scale: 0.98 }}
-      transition={HOVER_SPRING}
+      whileTap={isDisabled || reducedMotion ? undefined : { scale: 0.98 }}
+      transition={reducedMotion ? { duration: 0 } : HOVER_SPRING}
       onClick={handleSwap}
       disabled={isDisabled}
     >

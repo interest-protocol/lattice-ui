@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
@@ -18,6 +18,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   const setContent = useModal((s) => s.setContent);
   const { data: metadata, isLoading } = useMetadata(types);
 
+  const reducedMotion = useReducedMotion();
   const { control } = form;
 
   const type = useWatch({ control, name: `${name}.type` }) as string;
@@ -73,9 +74,13 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       }}
       onClick={handleClick}
       aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      whileHover={reducedMotion ? undefined : { scale: 1.03 }}
+      whileTap={reducedMotion ? undefined : { scale: 0.97 }}
+      transition={
+        reducedMotion
+          ? { duration: 0 }
+          : { type: 'spring', stiffness: 400, damping: 25 }
+      }
     >
       <span className="overflow-hidden rounded-full flex w-7 h-7 min-w-7 items-center justify-center">
         <Image

@@ -116,6 +116,9 @@ const doCheckRegistration = async (userId: string) => {
   const state = useOnboarding.getState();
   if (state._isProcessing) return;
 
+  // Skip if already completed for this user in current session
+  if (state.step === 'complete' && state.userId === userId) return;
+
   useOnboarding.setState({ _isProcessing: true, userId, error: null });
 
   // Fast-path: if localStorage cache says linked, verify on-chain

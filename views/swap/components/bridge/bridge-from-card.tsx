@@ -60,7 +60,7 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
 
   return (
     <div
-      className="p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-all duration-200"
+      className="p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-colors duration-200"
       style={{ background: 'var(--input-from-bg)' }}
     >
       <div className="flex justify-between items-center">
@@ -75,7 +75,8 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
               <button
                 type="button"
                 key={factor}
-                className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-all duration-150"
+                aria-label={`Use ${factor * 100}% of balance`}
+                className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-colors duration-150 focus-ring"
                 onClick={() => handleSetPortion(divisor)}
               >
                 <span className="tabular-nums">{factor * 100}%</span>
@@ -88,7 +89,7 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
 
       <div className="grid max-w-full items-center gap-3 grid-cols-[1fr_auto]">
         <input
-          className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-4xl font-light tracking-tight placeholder:text-text-dimmed"
+          className="appearance-none bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-accent-border rounded text-text min-w-full text-4xl font-light tracking-tight placeholder:text-text-dimmed"
           placeholder="0"
           autoComplete="off"
           value={amount}

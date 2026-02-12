@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import PanelContent from '@/components/composed/panel-content';
@@ -13,6 +13,7 @@ const COG_SPRING = {
 };
 
 const Settings: FC = () => {
+  const reducedMotion = useReducedMotion();
   const openPanel = useSidePanel((s) => s.open);
   const setModalContent = useModal((s) => s.setContent);
 
@@ -41,8 +42,8 @@ const Settings: FC = () => {
       >
         <motion.span
           className="inline-block"
-          whileHover={{ rotate: 90, scale: 1.05 }}
-          transition={COG_SPRING}
+          whileHover={reducedMotion ? undefined : { rotate: 90, scale: 1.05 }}
+          transition={reducedMotion ? { duration: 0 } : COG_SPRING}
         >
           <CogSVG maxWidth="1.5rem" maxHeight="1.5rem" width="100%" />
         </motion.span>

@@ -17,7 +17,7 @@ const BridgeToCard: FC<BridgeToCardProps> = ({ route, amount }) => {
 
   return (
     <div
-      className="p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-all duration-200"
+      className="p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-colors duration-200"
       style={{ background: 'var(--input-to-bg)' }}
     >
       <div className="flex justify-between items-center">

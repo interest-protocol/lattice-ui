@@ -41,7 +41,8 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
           <button
             type="button"
             key={factor}
-            className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-all duration-150"
+            aria-label={`Use ${factor * 100}% of balance`}
+            className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-colors duration-150 focus-ring"
             onClick={() => {
               setValue(`${name}.value`, FixedPointMath.toNumber(scaled));
               setValue(`${name}.valueBN`, scaled);

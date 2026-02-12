@@ -1,4 +1,6 @@
-import Account from '@/views/account';
+import dynamic from 'next/dynamic';
+
+const Account = dynamic(() => import('@/views/account'));
 
 const AccountPage = () => <Account />;
 

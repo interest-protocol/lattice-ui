@@ -33,7 +33,7 @@ const WithdrawTokenModal: FC<WithdrawTokenModalProps> = ({
           <button
             type="button"
             key={token.type}
-            className="p-4 gap-4 flex items-center cursor-pointer rounded-2xl border transition-all duration-200 bg-transparent text-inherit text-left"
+            className="p-4 gap-4 flex items-center cursor-pointer rounded-2xl border transition-colors duration-200 bg-transparent text-inherit text-left focus-ring"
             style={{
               border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
               background: isSelected

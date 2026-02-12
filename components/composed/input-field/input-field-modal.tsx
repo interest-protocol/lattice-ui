@@ -29,7 +29,7 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
           <SearchSVG maxWidth="1.25rem" width="100%" />
         </span>
         <input
-          className="py-4 w-full border-none outline-none bg-transparent text-text-muted"
+          className="py-4 w-full border-none outline-none focus-visible:ring-2 focus-visible:ring-accent-border rounded bg-transparent text-text-muted"
           placeholder="Search asset"
           onChange={(e) => setSearch(e.target.value.toLowerCase())}
         />
@@ -48,7 +48,8 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
             <button
               type="button"
               key={type}
-              className="p-4 gap-2 grid cursor-pointer rounded-2xl border border-surface-border grid-cols-[2fr_1fr_1fr] hover:border-accent-4d hover:bg-accent-33 bg-transparent text-inherit text-left"
+              aria-label={`Select ${symbol}`}
+              className="p-4 gap-2 grid cursor-pointer rounded-2xl border border-surface-border grid-cols-[2fr_1fr_1fr] hover:border-accent-4d hover:bg-accent-33 bg-transparent text-inherit text-left focus-ring"
               onClick={() => {
                 setValue(`${fieldName}.type`, type);
                 handleClose();

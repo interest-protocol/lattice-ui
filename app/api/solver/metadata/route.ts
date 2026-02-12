@@ -22,7 +22,11 @@ export async function GET() {
     }
 
     const json = await response.json();
-    return NextResponse.json(json.data);
+    return NextResponse.json(json.data, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error: unknown) {
     return errorResponse(error, 'Failed to fetch metadata');
   }

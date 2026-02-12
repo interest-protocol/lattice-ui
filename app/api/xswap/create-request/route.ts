@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { withTimeout } from '@/lib/api/with-timeout';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -82,14 +83,22 @@ export async function POST(request: NextRequest) {
 
     xswap.shareRequest({ tx, request: result });
 
-    const rawBytes = await tx.build({ client: suiClient });
+    const rawBytes = await withTimeout(
+      tx.build({ client: suiClient }),
+      30_000,
+      'Transaction build'
+    );
 
-    const txResult = await signAndExecuteSuiTransaction(privy, {
-      walletId: wallet.id,
-      rawBytes,
-      suiClient,
-      options: { showObjectChanges: true },
-    });
+    const txResult = await withTimeout(
+      signAndExecuteSuiTransaction(privy, {
+        walletId: wallet.id,
+        rawBytes,
+        suiClient,
+        options: { showObjectChanges: true },
+      }),
+      30_000,
+      'Transaction sign & execute'
+    );
 
     const requestObject = txResult.objectChanges?.find(
       (change) =>

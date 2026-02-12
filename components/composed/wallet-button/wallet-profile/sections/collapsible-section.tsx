@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { FC, ReactNode } from 'react';
 
 import { ChevronRightSVG } from '@/components/ui/icons';
@@ -15,35 +15,55 @@ const CollapsibleSection: FC<CollapsibleSectionProps> = ({
   show,
   toggleShow,
   children,
-}) => (
-  <div>
-    <button
-      type="button"
-      className="px-4 py-2 flex cursor-pointer items-center justify-between bg-transparent border-none w-full text-inherit"
-      onClick={toggleShow}
-    >
-      <p>{title}</p>
-      <motion.div animate={{ rotate: show ? '90deg' : '0deg' }}>
-        <ChevronRightSVG width="100%" maxWidth="1.25rem" maxHeight="1.25rem" />
-      </motion.div>
-    </button>
-    <AnimatePresence>
-      {show ? (
+}) => {
+  const reducedMotion = useReducedMotion();
+
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={show}
+        className="px-4 py-2 flex cursor-pointer items-center justify-between bg-transparent border-none w-full text-inherit focus-ring rounded"
+        onClick={toggleShow}
+      >
+        <p>{title}</p>
         <motion.div
-          className="ml-6"
-          style={{ originY: 0 }}
-          exit={{ scaleY: 0, height: 0, opacity: 0 }}
-          animate={{
-            scaleY: [0, 1],
-            height: [0, 'auto'],
-            opacity: [0, 1, 1],
-          }}
+          animate={{ rotate: show ? '90deg' : '0deg' }}
+          transition={reducedMotion ? { duration: 0 } : undefined}
         >
-          {children}
+          <ChevronRightSVG
+            width="100%"
+            maxWidth="1.25rem"
+            maxHeight="1.25rem"
+          />
         </motion.div>
-      ) : null}
-    </AnimatePresence>
-  </div>
-);
+      </button>
+      <AnimatePresence initial={false}>
+        {show ? (
+          <motion.div
+            className="ml-6"
+            style={{ originY: 0 }}
+            exit={
+              reducedMotion
+                ? { opacity: 0 }
+                : { scaleY: 0, height: 0, opacity: 0 }
+            }
+            animate={
+              reducedMotion
+                ? { opacity: 1 }
+                : {
+                    scaleY: [0, 1],
+                    height: [0, 'auto'],
+                    opacity: [0, 1, 1],
+                  }
+            }
+          >
+            {children}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default CollapsibleSection;

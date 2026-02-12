@@ -66,6 +66,7 @@ const PanelContent: FC<PanelContentProps> = ({ wallet, onLogout }) => {
           <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
           <button
             type="button"
+            aria-label="Logout"
             className="py-3 flex text-error cursor-pointer items-center justify-between hover:opacity-90 bg-transparent border-none w-full focus-ring rounded"
             onClick={onLogout}
           >

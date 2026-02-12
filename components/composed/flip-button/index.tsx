@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import { SwapSVG } from '@/components/ui/icons';
@@ -27,28 +27,32 @@ interface FlipButtonProps {
   ariaLabel: string;
 }
 
-const FlipButton: FC<FlipButtonProps> = ({ onClick, ariaLabel }) => (
-  <div
-    className="relative flex items-center justify-center"
-    style={{ height: '1px', background: 'var(--details-divider)' }}
-  >
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
-      onClick={onClick}
+const FlipButton: FC<FlipButtonProps> = ({ onClick, ariaLabel }) => {
+  const reducedMotion = useReducedMotion();
+
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ height: '1px', background: 'var(--details-divider)' }}
     >
-      <motion.div
-        className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
-        style={FLIP_BTN_STYLE}
-        whileHover={FLIP_BTN_HOVER}
-        whileTap={{ scale: 0.95 }}
-        transition={FLIP_BTN_SPRING}
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
+        onClick={onClick}
       >
-        <SwapSVG maxHeight="1rem" />
-      </motion.div>
-    </button>
-  </div>
-);
+        <motion.div
+          className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
+          style={FLIP_BTN_STYLE}
+          whileHover={reducedMotion ? undefined : FLIP_BTN_HOVER}
+          whileTap={reducedMotion ? undefined : { scale: 0.95 }}
+          transition={reducedMotion ? { duration: 0 } : FLIP_BTN_SPRING}
+        >
+          <SwapSVG maxHeight="1rem" />
+        </motion.div>
+      </button>
+    </div>
+  );
+};
 
 export default FlipButton;

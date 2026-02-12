@@ -124,7 +124,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         </span>
         <button
           type="button"
-          className="w-full p-3 flex items-center gap-3 cursor-pointer rounded-xl hover:bg-surface-hover transition-all duration-200"
+          className="w-full p-3 flex items-center gap-3 cursor-pointer rounded-xl hover:bg-surface-hover transition-colors duration-200"
           style={{
             border: '1px solid var(--color-surface-border)',
             background: 'var(--color-surface-light)',
@@ -166,7 +166,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         >
           Recipient Address
         </label>
-        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-all duration-200 bg-surface-inset">
+        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-colors duration-200 bg-surface-inset">
           <input
             id="withdraw-recipient"
             className="w-full bg-transparent border-none text-text font-mono text-sm outline-none"
@@ -199,7 +199,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
             </span>
           </button>
         </div>
-        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-all duration-200 bg-surface-inset flex items-center gap-3">
+        <div className="p-4 rounded-xl border border-surface-border focus-within:border-accent-border transition-colors duration-200 bg-surface-inset flex items-center gap-3">
           <input
             id="withdraw-amount"
             className="flex-1 bg-transparent border-none text-text font-mono text-2xl outline-none min-w-0"
@@ -244,7 +244,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
 
       <button
         type="button"
-        className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         style={{
           cursor: sending ? 'wait' : 'pointer',
           opacity: sending ? 0.5 : 1,

@@ -1,28 +1,23 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { createElement, type FC, useEffect, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import { type FC, useState } from 'react';
 import FlipButton from '@/components/composed/flip-button';
-import NonceRequiredModal from '@/components/composed/nonce-required-modal';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
 import useNonceAccount from '@/hooks/domain/use-nonce-account';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
-import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
 
-import {
-  BRIDGE_ROUTES,
-  type BridgeRoute,
-  type ValidationResult,
-} from './bridge.types';
+import { BRIDGE_ROUTES, type BridgeRoute } from './bridge.types';
 import BridgeDetailsInline from './bridge-details-inline';
 import BridgeFromCard from './bridge-from-card';
 import BridgeProgressStepper from './bridge-progress-stepper';
 import BridgeRouteSelector from './bridge-route-selector';
 import BridgeToCard from './bridge-to-card';
+import useBridgeValidation from './use-bridge-validation';
+import useNonceModal from './use-nonce-modal';
 
 const CARD_STYLE = {
   background: 'var(--swap-card-bg)',
@@ -58,68 +53,23 @@ const Bridge: FC = () => {
     solLoading,
     mutateSolanaBalances,
   } = useBalances();
-  const { setContent, handleClose } = useModal(
-    useShallow((s) => ({
-      setContent: s.setContent,
-      handleClose: s.handleClose,
-    }))
-  );
+  const setContent = useModal((s) => s.setContent);
+  const handleClose = useModal((s) => s.handleClose);
   const nonce = useNonceAccount();
 
   const [selectedRoute, setSelectedRoute] = useState<BridgeRoute>(
     BRIDGE_ROUTES[0] as BridgeRoute
   );
   const [amount, setAmount] = useState('');
-  const [nonceModalOpen, setNonceModalOpen] = useState(false);
 
-  // Auto-open nonce modal when query confirms no nonce account
-  useEffect(() => {
-    if (!nonce.isLoading && !nonce.hasNonce && solanaAddress) {
-      setNonceModalOpen(true);
-    }
-  }, [nonce.isLoading, nonce.hasNonce, solanaAddress]);
-
-  // Sync nonce modal content when dependencies change
-  useEffect(() => {
-    if (!nonceModalOpen || !solanaAddress) return;
-    setContent(
-      createElement(NonceRequiredModal, {
-        solanaAddress,
-        solBalance: solanaBalances.sol,
-        requiredLamports: NONCE_REQUIRED_LAMPORTS,
-        isCreating: nonce.isCreating,
-        createError: nonce.createError,
-        onCreate: () => nonce.create(),
-        onRefreshBalance: () => mutateSolanaBalances(),
-        refreshing: solLoading,
-      }),
-      { title: 'Nonce Account Required', allowClose: !nonce.isCreating }
-    );
-  }, [
-    nonceModalOpen,
+  const { openNonceModal } = useNonceModal({
     solanaAddress,
-    solanaBalances.sol,
+    solBalance: solanaBalances.sol,
+    requiredLamports: NONCE_REQUIRED_LAMPORTS,
     nonce,
-    solLoading,
-    setContent,
     mutateSolanaBalances,
-  ]);
-
-  // Auto-close when nonce is created
-  useEffect(() => {
-    if (nonceModalOpen && nonce.hasNonce) {
-      setNonceModalOpen(false);
-      handleClose();
-    }
-  }, [nonceModalOpen, nonce.hasNonce, handleClose]);
-
-  // Track modal dismissal
-  useEffect(() => {
-    if (!nonceModalOpen) return;
-    return useModal.subscribe((state) => {
-      if (!state.content) setNonceModalOpen(false);
-    });
-  }, [nonceModalOpen]);
+    solLoading,
+  });
 
   const routeBalances: Record<string, bigint> = {
     'sol-to-wsol': solanaBalances.sol,
@@ -132,45 +82,12 @@ const Bridge: FC = () => {
     selectedRoute.sourceChain === 'sui' ? suiLoading : solLoading;
   const balance = routeBalances[selectedRoute.key] ?? 0n;
 
-  const sourceConfig = CHAIN_REGISTRY[selectedRoute.sourceChain];
-
-  const validation: ValidationResult = (() => {
-    if (!selectedRoute.enabled) {
-      return { isDisabled: true, message: 'Coming Soon' };
-    }
-
-    const amountNum = Number.parseFloat(amount) || 0;
-
-    if (!amount || amountNum <= 0) {
-      return { isDisabled: true, message: 'Enter amount' };
-    }
-
-    const symbol = selectedRoute.sourceToken.symbol;
-    if (symbol === 'SUI' || symbol === 'SOL') {
-      const alphaError = validateAlphaLimit(symbol, amountNum);
-      if (alphaError) return alphaError;
-    }
-
-    const gasBalance =
-      selectedRoute.sourceChain === 'sui'
-        ? suiBalances.sui
-        : solanaBalances.sol;
-    const isGasToken =
-      selectedRoute.sourceToken.symbol === sourceConfig.nativeToken.symbol;
-
-    const gasError = validateGasBalance({
-      gasBalance,
-      gasDecimals: sourceConfig.decimals,
-      minGas: sourceConfig.minGas,
-      amount: amountNum,
-      isGasToken,
-      symbol: sourceConfig.nativeToken.symbol,
-      displayDecimals: sourceConfig.displayPrecision,
-    });
-    if (gasError) return gasError;
-
-    return { isDisabled: false, message: null };
-  })();
+  const validation = useBridgeValidation({
+    route: selectedRoute,
+    amount,
+    suiBalances,
+    solanaBalances,
+  });
 
   const isDisabled = isLoading || validation.isDisabled;
   const isReady = !isDisabled && !isLoading;
@@ -179,7 +96,7 @@ const Bridge: FC = () => {
     if (!selectedRoute.enabled) return;
 
     if (!nonce.hasNonce) {
-      setNonceModalOpen(true);
+      openNonceModal();
       return;
     }
 

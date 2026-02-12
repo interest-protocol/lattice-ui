@@ -90,7 +90,10 @@ const SlippageSection: FC<SlippageSectionProps> = ({ show, toggleShow }) => {
             onKeyDown={(e) => {
               if (e.key === 'Enter') applyCustom(customInput);
             }}
-            className="w-16 px-2 py-1 text-sm text-right rounded-md border bg-surface-light text-text outline-none focus:border-accent"
+            aria-label="Custom slippage percentage"
+            name="custom-slippage"
+            autoComplete="off"
+            className="w-16 px-2 py-1 text-sm text-right rounded-md border bg-surface-light text-text outline-none focus-visible:ring-2 focus-visible:ring-accent-border focus:border-accent"
             style={{
               borderColor: isCustom
                 ? 'var(--color-accent)'

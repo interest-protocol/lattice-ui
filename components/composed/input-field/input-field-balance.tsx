@@ -18,7 +18,8 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
   return (
     <button
       type="button"
-      className={`flex gap-1.5 items-center cursor-pointer bg-transparent border-none p-0 text-text-muted text-xs transition-colors duration-150 ${name === 'in' ? 'hover:text-accent' : ''}`}
+      aria-label={name === 'in' ? 'Use full balance' : 'Available balance'}
+      className={`flex gap-1.5 items-center cursor-pointer bg-transparent border-none p-0 text-text-muted text-xs transition-colors duration-150 focus-ring rounded ${name === 'in' ? 'hover:text-accent' : ''}`}
       {...(name === 'in' && {
         onClick: () => {
           setValue(`${name}.value`, FixedPointMath.toNumber(balance));

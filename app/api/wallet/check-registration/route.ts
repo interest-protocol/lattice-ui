@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse } from '@/lib/api/validate-params';
+import { withTimeout } from '@/lib/api/with-timeout';
 import { getPrivyClient } from '@/lib/privy/server';
 import { walletAddressKey } from '@/lib/privy/wallet';
 import { createRegistrySdk, SuiAddress } from '@/lib/registry';
@@ -13,7 +14,11 @@ export async function GET(request: NextRequest) {
   try {
     const privy = getPrivyClient();
 
-    const user = await privy.users()._get(auth.userId);
+    const user = await withTimeout(
+      privy.users()._get(auth.userId),
+      10_000,
+      'Privy user lookup'
+    );
     const rawSui = user.custom_metadata?.[walletAddressKey('sui')];
     const rawSol = user.custom_metadata?.[walletAddressKey('solana')];
     const suiAddress = typeof rawSui === 'string' ? rawSui : null;
@@ -33,9 +38,13 @@ export async function GET(request: NextRequest) {
 
     // Check on-chain link
     const { registry } = createRegistrySdk();
-    const links = await registry.getSolanaForSui({
-      suiAddress: new SuiAddress(suiAddress),
-    });
+    const links = await withTimeout(
+      registry.getSolanaForSui({
+        suiAddress: new SuiAddress(suiAddress),
+      }),
+      15_000,
+      'Registry lookup'
+    );
 
     return NextResponse.json({
       registered: links.length > 0,

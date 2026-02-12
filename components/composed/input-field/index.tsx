@@ -29,7 +29,7 @@ const InputField: FC<InputFieldProps> = ({
 
   return (
     <div
-      className={`p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-all duration-200 ${
+      className={`p-5 gap-3 flex text-text-secondary rounded-2xl text-sm flex-col transition-colors duration-200 ${
         error ? 'ring-1 ring-error' : ''
       }`}
       style={{ background: bgVar }}
@@ -55,7 +55,7 @@ const InputField: FC<InputFieldProps> = ({
         ) : (
           <input
             id={`input-${name}`}
-            className="appearance-none bg-transparent border-none outline-none text-text min-w-full text-4xl font-light tracking-tight placeholder:text-text-dimmed"
+            className="appearance-none bg-transparent border-none outline-none focus-visible:ring-2 focus-visible:ring-accent-border rounded text-text min-w-full text-4xl font-light tracking-tight placeholder:text-text-dimmed"
             placeholder="0"
             autoComplete="off"
             aria-invalid={error ? 'true' : undefined}

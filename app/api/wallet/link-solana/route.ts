@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import { authenticateRequest, verifyUserMatch } from '@/lib/api/auth';
 import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { withTimeout } from '@/lib/api/with-timeout';
 import { parseUnits } from '@/lib/bigint-utils';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
@@ -51,9 +52,23 @@ export async function POST(request: NextRequest) {
     const { suiClient, registry } = createRegistrySdk();
 
     const suiAddress = new SuiAddress(suiWallet.address);
-    const existingLinks = await registry.getSolanaForSui({
-      suiAddress,
-    });
+
+    // Parallelize independent checks: existing link + gas balance
+    const [existingLinks, { totalBalance }] = await Promise.all([
+      withTimeout(
+        registry.getSolanaForSui({ suiAddress }),
+        15_000,
+        'Registry lookup'
+      ),
+      withTimeout(
+        suiClient.getBalance({
+          owner: suiWallet.address,
+          coinType: SUI_TYPE_ARG,
+        }),
+        10_000,
+        'SUI balance check'
+      ),
+    ]);
 
     if (existingLinks.length > 0) {
       const linkedAddress = existingLinks[0].toBs58();
@@ -65,11 +80,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { totalBalance } = await suiClient.getBalance({
-      owner: suiWallet.address,
-      coinType: SUI_TYPE_ARG,
-    });
-
     if (BigInt(totalBalance) < MIN_GAS_BALANCE) {
       return NextResponse.json(
         { error: 'Insufficient SUI for gas', code: 'INSUFFICIENT_GAS' },
@@ -80,13 +90,14 @@ export async function POST(request: NextRequest) {
     const messageBytes = Registry.createSolanaLinkMessage(suiWallet.address);
     const solanaPubkeyBytes = bs58.decode(solanaWallet.address);
 
-    const signResult = await privy
-      .wallets()
-      .solana()
-      .signMessage(solanaWallet.id, {
+    const signResult = await withTimeout(
+      privy.wallets().solana().signMessage(solanaWallet.id, {
         message: messageBytes,
         authorization_context: authorizationContext,
-      });
+      }),
+      15_000,
+      'Solana message signing'
+    );
     const solanaSignature = Uint8Array.from(
       Buffer.from(signResult.signature, 'base64')
     );
@@ -111,19 +122,33 @@ export async function POST(request: NextRequest) {
     });
 
     tx.setSender(suiWallet.address);
-    const rawBytes = await tx.build({ client: suiClient });
+    const rawBytes = await withTimeout(
+      tx.build({ client: suiClient }),
+      30_000,
+      'Transaction build'
+    );
 
-    const result = await signAndExecuteSuiTransaction(privy, {
-      walletId: suiWallet.id,
-      rawBytes,
-      suiClient,
-    });
+    const result = await withTimeout(
+      signAndExecuteSuiTransaction(privy, {
+        walletId: suiWallet.id,
+        rawBytes,
+        suiClient,
+      }),
+      30_000,
+      'Transaction sign & execute'
+    );
 
-    await suiClient.waitForTransaction({ digest: result.digest });
+    await withTimeout(
+      suiClient.waitForTransaction({ digest: result.digest }),
+      30_000,
+      'Transaction confirmation'
+    );
 
-    const verifyLinks = await registry.getSolanaForSui({
-      suiAddress,
-    });
+    const verifyLinks = await withTimeout(
+      registry.getSolanaForSui({ suiAddress }),
+      15_000,
+      'Post-link verification'
+    );
     if (verifyLinks.length === 0) {
       throw new Error(
         `On-chain verification failed — no link found after tx ${result.digest}`

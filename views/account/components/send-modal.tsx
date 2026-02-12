@@ -117,7 +117,7 @@ const SendModal: FC = () => {
               <button
                 key={net}
                 type="button"
-                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-colors duration-200"
                 style={{
                   border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
                   background: isSelected
@@ -150,7 +150,7 @@ const SendModal: FC = () => {
               <button
                 key={token.type}
                 type="button"
-                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-all duration-200"
+                className="flex-1 p-3 flex items-center justify-center gap-2 cursor-pointer rounded-lg transition-colors duration-200"
                 style={{
                   border: `1px solid ${isSelected ? 'var(--color-accent-border)' : 'var(--color-surface-border)'}`,
                   background: isSelected
@@ -181,7 +181,7 @@ const SendModal: FC = () => {
           Recipient Address
         </span>
         <input
-          className="w-full p-4 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-sm outline-none focus:border-accent-border transition-all duration-200"
+          className="w-full p-4 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-sm outline-none focus:border-accent-border transition-colors duration-200"
           placeholder={config.addressPlaceholder}
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
@@ -201,7 +201,7 @@ const SendModal: FC = () => {
         </div>
         <div className="relative">
           <input
-            className="w-full p-4 pr-16 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-base outline-none focus:border-accent-border transition-all duration-200"
+            className="w-full p-4 pr-16 text-text bg-surface-inset rounded-lg border border-surface-border font-mono text-base outline-none focus:border-accent-border transition-colors duration-200"
             placeholder="0.0"
             type="text"
             inputMode="decimal"
@@ -246,7 +246,7 @@ const SendModal: FC = () => {
       {/* Send Button */}
       <button
         type="button"
-        className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-all duration-200 disabled:cursor-wait disabled:opacity-60"
+        className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-colors duration-200 disabled:cursor-wait disabled:opacity-60"
         style={{
           cursor: sending ? 'wait' : 'pointer',
           opacity: sending ? 0.6 : 1,
