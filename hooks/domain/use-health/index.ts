@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { EnclaveHealthResponse } from '@/app/api/health/enclave/route';
 import type { SolverHealthResponse } from '@/app/api/health/solver/route';
+import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 
 export interface HealthStatus {
   enclave: EnclaveHealthResponse | null;
@@ -22,7 +23,7 @@ export const useHealth = (): HealthStatus => {
     useQuery<EnclaveHealthResponse>({
       queryKey: ['health', 'enclave'],
       queryFn: () => fetcher<EnclaveHealthResponse>('/api/health/enclave'),
-      refetchInterval: 30_000,
+      refetchInterval: REFETCH_INTERVALS.HEALTH,
       refetchOnWindowFocus: false,
     });
 
@@ -30,7 +31,7 @@ export const useHealth = (): HealthStatus => {
     useQuery<SolverHealthResponse>({
       queryKey: ['health', 'solver'],
       queryFn: () => fetcher<SolverHealthResponse>('/api/health/solver'),
-      refetchInterval: 30_000,
+      refetchInterval: REFETCH_INTERVALS.HEALTH,
       refetchOnWindowFocus: false,
     });
 

@@ -233,6 +233,14 @@
     --bg-blur:
       radial-gradient(ellipse at 50% 0%, #a78bfa08 0%, transparent 60%),
       linear-gradient(180deg, rgba(8, 11, 20, 0.75), rgba(8, 11, 20, 0.95));
+
+    /* Particle system */
+    --particle-1: rgba(167, 139, 250, 0.6);
+    --particle-2: rgba(196, 181, 253, 0.5);
+    --particle-3: rgba(221, 214, 254, 0.4);
+    --particle-4: rgba(139, 92, 246, 0.5);
+    --particle-5: rgba(237, 233, 254, 0.3);
+    --particle-stroke-rgb: 167, 139, 250;
   }
 
   html {
@@ -436,6 +444,15 @@
     --tooltip-shadow:
       0 0 0 1px rgba(124, 58, 237, 0.08), 0 8px 24px rgba(0, 0, 0, 0.14),
       0 2px 8px rgba(124, 58, 237, 0.06);
+
+    /* Particle system (light) */
+    --particle-1: rgba(124, 58, 237, 0.4);
+    --particle-2: rgba(109, 40, 217, 0.3);
+    --particle-3: rgba(139, 92, 246, 0.3);
+    --particle-4: rgba(91, 33, 182, 0.25);
+    --particle-5: rgba(196, 181, 253, 0.2);
+    --particle-stroke-rgb: 124, 58, 237;
+
     --bg-blur:
       radial-gradient(
         ellipse at 50% 0%,

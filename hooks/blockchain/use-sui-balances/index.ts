@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { WSOL_SUI_TYPE } from '@/constants';
+import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import { CurrencyAmount, Token } from '@/lib/entities';
 
@@ -10,7 +11,7 @@ const useSuiBalances = (address: string | null) => {
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
 
-  const queryKey = [useSuiBalances.name, address];
+  const queryKey = ['sui-balances', address];
 
   const fetchBalances = async () => {
     if (!address) return DEFAULT_SUI_BALANCES;
@@ -29,7 +30,7 @@ const useSuiBalances = (address: string | null) => {
     queryKey,
     queryFn: fetchBalances,
     enabled: !!address,
-    refetchInterval: 30_000,
+    refetchInterval: REFETCH_INTERVALS.BALANCES,
     refetchOnWindowFocus: false,
     staleTime: 5_000,
     structuralSharing: false,

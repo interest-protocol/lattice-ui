@@ -18,6 +18,7 @@ const FEED_ID_TO_COIN = Object.fromEntries(
 );
 
 const CACHE_TTL_SECONDS = 30;
+const MAX_CACHE_SIZE = 100;
 
 interface CacheEntry {
   data: unknown;
@@ -84,6 +85,10 @@ export async function POST(request: NextRequest) {
       })
     );
 
+    if (cache.size >= MAX_CACHE_SIZE) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey !== undefined) cache.delete(oldestKey);
+    }
     cache.set(cacheKey, { data, timestamp: now });
 
     return NextResponse.json(data, {

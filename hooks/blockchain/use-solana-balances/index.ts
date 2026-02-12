@@ -2,6 +2,7 @@ import { address } from '@solana/kit';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { WSUI_SOLANA_MINT } from '@/constants';
+import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import { CurrencyAmount, Token } from '@/lib/entities';
 
@@ -16,7 +17,7 @@ const useSolanaBalances = (addr: string | null) => {
   const rpc = useSolanaRpc();
   const queryClient = useQueryClient();
 
-  const queryKey = [useSolanaBalances.name, addr];
+  const queryKey = ['solana-balances', addr];
 
   const fetchBalances = async () => {
     if (!addr) return DEFAULT_SOLANA_BALANCES;
@@ -52,7 +53,7 @@ const useSolanaBalances = (addr: string | null) => {
     queryFn: fetchBalances,
     enabled: !!addr,
     retry: 2,
-    refetchInterval: 30_000,
+    refetchInterval: REFETCH_INTERVALS.BALANCES,
     refetchOnWindowFocus: false,
     staleTime: 5_000,
     structuralSharing: false,

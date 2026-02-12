@@ -5,7 +5,7 @@ const MAX_BPS = 10000n;
 export const ZERO_BIG_INT = 0n;
 
 export const isHexString = (value: unknown, length?: number): boolean => {
-  if (typeof value !== 'string' || !/^0x[0-9A-Fa-f]*$/.test(value)) {
+  if (typeof value !== 'string' || !/^0x[0-9A-Fa-f]+$/.test(value)) {
     return false;
   }
   return !length || value.length === 2 + 2 * length;

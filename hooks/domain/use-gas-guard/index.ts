@@ -74,7 +74,7 @@ const useGasGuard = () => {
   }, [mounted, isReady, suiLow, solLow, suiAddress, solAddress]);
 
   // Sync modal content whenever activeChain or refreshing changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: handleRefresh reads mutable refs
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleRefresh is auto-memoized by React Compiler
   useEffect(() => {
     if (!activeChain) return;
 
@@ -96,7 +96,7 @@ const useGasGuard = () => {
         allowClose: true,
       }
     );
-  }, [activeChain, refreshing, suiAddress, solAddress]);
+  }, [activeChain, refreshing, suiAddress, solAddress, handleRefresh]);
 
   // Auto-close modal when balance recovers
   useEffect(() => {

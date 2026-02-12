@@ -1,20 +1,9 @@
 import { useTheme } from 'next-themes';
 
-const DARK_PARTICLE_PALETTE = [
-  'rgba(167, 139, 250, 0.6)',
-  'rgba(196, 181, 253, 0.5)',
-  'rgba(221, 214, 254, 0.4)',
-  'rgba(139, 92, 246, 0.5)',
-  'rgba(237, 233, 254, 0.3)',
-];
-
-const LIGHT_PARTICLE_PALETTE = [
-  'rgba(124, 58, 237, 0.4)',
-  'rgba(109, 40, 217, 0.3)',
-  'rgba(139, 92, 246, 0.3)',
-  'rgba(91, 33, 182, 0.25)',
-  'rgba(196, 181, 253, 0.2)',
-];
+const getCssVar = (name: string): string =>
+  typeof window === 'undefined'
+    ? ''
+    : getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 const useThemeColors = () => {
   const { resolvedTheme } = useTheme();
@@ -23,18 +12,22 @@ const useThemeColors = () => {
   return {
     isDark,
     toast: {
-      background: isDark ? '#111827' : '#ffffff',
-      border: isDark ? '#ffffff0d' : '#7c3aed22',
-      shadow: isDark
-        ? '0 16px 48px rgba(0,0,0,0.4)'
-        : '0 0 0 1px rgba(124,58,237,0.08), 0 16px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(124,58,237,0.06)',
+      background: getCssVar('--color-toast-bg'),
+      border: getCssVar('--color-toast-border'),
+      shadow: getCssVar('--toast-shadow'),
     },
     skeleton: {
-      baseColor: isDark ? '#FFFFFF0D' : '#7c3aed0d',
-      highlightColor: isDark ? '#FFFFFF1A' : '#7c3aed1a',
+      baseColor: getCssVar('--color-skeleton-base'),
+      highlightColor: getCssVar('--color-skeleton-highlight'),
     },
-    particlePalette: isDark ? DARK_PARTICLE_PALETTE : LIGHT_PARTICLE_PALETTE,
-    particleStrokeRgb: isDark ? '167, 139, 250' : '124, 58, 237',
+    particlePalette: [
+      getCssVar('--particle-1'),
+      getCssVar('--particle-2'),
+      getCssVar('--particle-3'),
+      getCssVar('--particle-4'),
+      getCssVar('--particle-5'),
+    ],
+    particleStrokeRgb: getCssVar('--particle-stroke-rgb'),
   };
 };
 

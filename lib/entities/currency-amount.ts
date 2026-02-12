@@ -12,7 +12,9 @@ const parseBigIntish = (value: BigIntish): bigint => {
   try {
     return BigInt(value);
   } catch {
-    return 0n;
+    throw new Error(
+      `CurrencyAmount: cannot parse "${String(value)}" as BigInt`
+    );
   }
 };
 

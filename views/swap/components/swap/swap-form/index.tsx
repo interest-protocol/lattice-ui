@@ -9,8 +9,8 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { useLocalStorage } from 'usehooks-ts';
+import FlipButton from '@/components/composed/flip-button';
 import InputField from '@/components/composed/input-field';
-import { SwapSVG } from '@/components/ui/icons';
 import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { SOL_TYPE } from '@/constants/coins';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
@@ -19,6 +19,20 @@ import { ZERO_BIG_INT } from '@/utils';
 
 import SwapDetails from '../swap-details';
 import SwapFormButton from './swap-form-button';
+
+const CARD_STYLE = {
+  background: 'var(--swap-card-bg)',
+  boxShadow: 'var(--swap-card-shadow)',
+  border: '1px solid var(--swap-card-border)',
+  backdropFilter: 'blur(24px) saturate(1.5)',
+} as const;
+
+const CARD_SPRING = {
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 30,
+  delay: 0.05,
+};
 
 interface SwapFormValues {
   from: {
@@ -97,20 +111,10 @@ const SwapForm: FC = () => {
       <SwapQuoteSync />
       <motion.div
         className="flex flex-col rounded-3xl relative"
-        style={{
-          background: 'var(--swap-card-bg)',
-          boxShadow: 'var(--swap-card-shadow)',
-          border: '1px solid var(--swap-card-border)',
-          backdropFilter: 'blur(24px) saturate(1.5)',
-        }}
+        style={CARD_STYLE}
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-          delay: 0.05,
-        }}
+        transition={CARD_SPRING}
       >
         <div className="p-5 pb-4">
           <InputField
@@ -123,41 +127,15 @@ const SwapForm: FC = () => {
           />
         </div>
 
-        <div
-          className="relative flex items-center justify-center"
-          style={{ height: '1px', background: 'var(--details-divider)' }}
-        >
-          <button
-            type="button"
-            aria-label="Reverse swap direction"
-            className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
-            onClick={() => {
-              const fromValue = form.getValues('from');
-              const toValue = form.getValues('to');
-              form.setValue('from', toValue);
-              form.setValue('to', fromValue);
-            }}
-          >
-            <motion.div
-              className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
-              style={{
-                background: 'var(--flip-btn-bg)',
-                border: '1px solid var(--flip-btn-border)',
-                boxShadow: 'var(--flip-btn-shadow)',
-                backdropFilter: 'blur(12px)',
-              }}
-              whileHover={{
-                rotate: 180,
-                scale: 1.1,
-                boxShadow: 'var(--flip-btn-hover-shadow)',
-              }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            >
-              <SwapSVG maxHeight="1rem" />
-            </motion.div>
-          </button>
-        </div>
+        <FlipButton
+          ariaLabel="Reverse swap direction"
+          onClick={() => {
+            const fromValue = form.getValues('from');
+            const toValue = form.getValues('to');
+            form.setValue('from', toValue);
+            form.setValue('to', fromValue);
+          }}
+        />
 
         <div className="p-5 pt-4">
           <InputField

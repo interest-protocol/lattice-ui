@@ -1,7 +1,7 @@
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
 import { usePrivy } from '@privy-io/react-auth';
 import bs58 from 'bs58';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 
 import { toasting } from '@/components/ui/toast';
@@ -44,6 +44,13 @@ export const useBridge = () => {
   const { user } = usePrivy();
   const [status, setStatus] = useState<BridgeStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const solanaRpc = useSolanaRpc();
   const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
@@ -52,7 +59,11 @@ export const useBridge = () => {
   const getSolanaAdapter = () =>
     createSolanaAdapter(solanaRpc, mutateSolanaBalances);
 
-  const bridgeSolToWsol = async (amount: bigint, toastId: string) => {
+  const bridgeSolToWsol = async (
+    amount: bigint,
+    toastId: string,
+    signal: AbortSignal
+  ) => {
     invariant(user && solanaAddress && suiAddress, 'Wallets not connected');
 
     const dwalletAddress = DWalletAddress[ChainId.Solana];
@@ -68,6 +79,8 @@ export const useBridge = () => {
     });
 
     await adapter.confirmTransaction(depositSignature);
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
 
     setStatus('creating');
     toasting.update(toastId, 'Creating mint request...');
@@ -82,6 +95,8 @@ export const useBridge = () => {
     });
 
     invariant(requestId && mintCapId, 'Failed to get requestId or mintCapId');
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
 
     setStatus('voting');
     toasting.update(toastId, 'Verifying with enclave...');
@@ -92,11 +107,17 @@ export const useBridge = () => {
       depositSignature,
     });
 
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
+
     await voteMint({
       userId: user.id,
       requestId,
       depositSignature,
     });
+
+    if (signal.aborted)
+      throw new DOMException('The operation was aborted.', 'AbortError');
 
     setStatus('executing');
     toasting.update(toastId, 'Minting tokens...');
@@ -122,6 +143,10 @@ export const useBridge = () => {
       return;
     }
 
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
+
     try {
       setStatus('idle');
       setError(null);
@@ -132,7 +157,7 @@ export const useBridge = () => {
 
       switch (direction) {
         case 'sol-to-wsol':
-          await bridgeSolToWsol(amount, BRIDGE_TOAST_ID);
+          await bridgeSolToWsol(amount, BRIDGE_TOAST_ID, signal);
           break;
         case 'wsol-to-sol':
         case 'sui-to-wsui':
@@ -151,6 +176,11 @@ export const useBridge = () => {
       });
       return true;
     } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setStatus('idle');
+        toasting.dismiss(BRIDGE_TOAST_ID);
+        return;
+      }
       setStatus('error');
       haptic.error();
       const message = extractErrorMessage(err, 'Bridge failed');

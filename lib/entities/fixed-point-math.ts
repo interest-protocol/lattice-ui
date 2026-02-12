@@ -10,6 +10,9 @@ const parseToBigInt = (value: bigint | number | string): bigint => {
   try {
     return BigInt(value);
   } catch {
+    console.warn(
+      `FixedPointMath: cannot parse "${String(value)}" as BigInt, defaulting to 0n`
+    );
     return 0n;
   }
 };
@@ -66,7 +69,7 @@ export class FixedPointMath {
 
   public div(x: BigIntish | FixedPointMath): FixedPointMath {
     const divisor = this.parseValue(x);
-    if (divisor === 0n) return FixedPointMath.from(0n);
+    if (divisor === 0n) throw new Error('FixedPointMath: division by zero');
     return new FixedPointMath((this._value * ONE_COIN) / divisor);
   }
 

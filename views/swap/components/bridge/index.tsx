@@ -2,7 +2,8 @@
 
 import { motion } from 'motion/react';
 import { type FC, useState } from 'react';
-import { SwapSVG } from '@/components/ui/icons';
+import { useShallow } from 'zustand/react/shallow';
+import FlipButton from '@/components/composed/flip-button';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
@@ -21,6 +22,20 @@ import BridgeProgressStepper from './bridge-progress-stepper';
 import BridgeRouteSelector from './bridge-route-selector';
 import BridgeToCard from './bridge-to-card';
 
+const CARD_STYLE = {
+  background: 'var(--swap-card-bg)',
+  boxShadow: 'var(--swap-card-shadow)',
+  border: '1px solid var(--swap-card-border)',
+  backdropFilter: 'blur(24px) saturate(1.5)',
+} as const;
+
+const CARD_SPRING = {
+  type: 'spring' as const,
+  stiffness: 300,
+  damping: 30,
+  delay: 0.05,
+};
+
 const REVERSE_ROUTE_KEY: Record<string, string> = {
   'sol-to-wsol': 'wsol-to-sol',
   'wsol-to-sol': 'sol-to-wsol',
@@ -31,8 +46,12 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
 const Bridge: FC = () => {
   const { bridge, status, isLoading, reset } = useBridge();
   const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
-  const setContent = useModal((s) => s.setContent);
-  const handleClose = useModal((s) => s.handleClose);
+  const { setContent, handleClose } = useModal(
+    useShallow((s) => ({
+      setContent: s.setContent,
+      handleClose: s.handleClose,
+    }))
+  );
 
   const [selectedRoute, setSelectedRoute] = useState<BridgeRoute>(
     BRIDGE_ROUTES[0] as BridgeRoute
@@ -134,20 +153,10 @@ const Bridge: FC = () => {
     <div className="flex flex-col gap-3 w-full max-w-[28rem] mx-auto">
       <motion.div
         className="flex flex-col rounded-3xl relative"
-        style={{
-          background: 'var(--swap-card-bg)',
-          boxShadow: 'var(--swap-card-shadow)',
-          border: '1px solid var(--swap-card-border)',
-          backdropFilter: 'blur(24px) saturate(1.5)',
-        }}
+        style={CARD_STYLE}
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-          delay: 0.05,
-        }}
+        transition={CARD_SPRING}
       >
         <div className="p-5 pb-4">
           <BridgeFromCard
@@ -160,36 +169,7 @@ const Bridge: FC = () => {
           />
         </div>
 
-        <div
-          className="relative flex items-center justify-center"
-          style={{ height: '1px', background: 'var(--details-divider)' }}
-        >
-          <button
-            type="button"
-            aria-label="Reverse bridge direction"
-            className="absolute z-10 flex justify-center items-center cursor-pointer bg-transparent border-none p-0"
-            onClick={handleFlip}
-          >
-            <motion.div
-              className="w-10 h-10 rounded-xl flex justify-center items-center text-text-secondary hover:text-text transition-colors duration-150"
-              style={{
-                background: 'var(--flip-btn-bg)',
-                border: '1px solid var(--flip-btn-border)',
-                boxShadow: 'var(--flip-btn-shadow)',
-                backdropFilter: 'blur(12px)',
-              }}
-              whileHover={{
-                rotate: 180,
-                scale: 1.1,
-                boxShadow: 'var(--flip-btn-hover-shadow)',
-              }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            >
-              <SwapSVG maxHeight="1rem" />
-            </motion.div>
-          </button>
-        </div>
+        <FlipButton ariaLabel="Reverse bridge direction" onClick={handleFlip} />
 
         <div className="p-5 pt-4">
           <BridgeToCard route={selectedRoute} amount={amount} />

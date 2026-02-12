@@ -2,6 +2,7 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { useQuery } from '@tanstack/react-query';
 
 import { SOL_TYPE } from '@/constants/coins';
+import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 import { fetchCoinPrices } from '@/lib/external/client';
 import { normalizeSuiCoinType } from '@/utils/sui';
 
@@ -12,7 +13,7 @@ interface TokenPrices {
 
 const useTokenPrices = () => {
   const { data, isLoading, error } = useQuery<TokenPrices>({
-    queryKey: [useTokenPrices.name],
+    queryKey: ['token-prices'],
     queryFn: async () => {
       const quotes = await fetchCoinPrices([SUI_TYPE_ARG, SOL_TYPE]);
       const byNormalized: Record<string, number> = Object.fromEntries(
@@ -24,7 +25,7 @@ const useTokenPrices = () => {
         [SOL_TYPE]: byNormalized.sol ?? undefined,
       } as TokenPrices;
     },
-    refetchInterval: 60_000,
+    refetchInterval: REFETCH_INTERVALS.PRICES,
     refetchOnWindowFocus: false,
     staleTime: 5_000,
   });
