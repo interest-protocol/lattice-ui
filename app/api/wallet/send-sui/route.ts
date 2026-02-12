@@ -1,5 +1,4 @@
 import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -9,7 +8,7 @@ import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSuiClient } from '@/lib/sui/client';
-import { coinTypeEquals, normalizeSuiAddress } from '@/utils/sui';
+import { normalizeSuiAddress } from '@/utils/sui';
 
 const schema = z.object({
   userId: z.string(),
@@ -32,16 +31,11 @@ export const POST = withAuthPost(
       const tx = new Transaction();
       tx.setSender(wallet.address);
 
-      if (!body.coinType || coinTypeEquals(body.coinType, SUI_TYPE_ARG)) {
-        const [coin] = tx.splitCoins(tx.gas, [BigInt(body.amount)]);
-        tx.transferObjects([coin], normalizeSuiAddress(body.recipient));
-      } else {
-        const coin = coinWithBalance({
-          type: body.coinType,
-          balance: BigInt(body.amount),
-        });
-        tx.transferObjects([coin], body.recipient);
-      }
+      const coin = coinWithBalance({
+        ...(body.coinType && { type: body.coinType }),
+        balance: BigInt(body.amount),
+      });
+      tx.transferObjects([coin], normalizeSuiAddress(body.recipient));
 
       const rawBytes = await tx.build({ client });
 
