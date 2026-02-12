@@ -92,7 +92,7 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">Received</span>
           <span className="text-text font-semibold text-sm">
-            ~{amountDisplay} {result.toSymbol}
+            {amountDisplay} {result.toSymbol}
           </span>
         </div>
 
