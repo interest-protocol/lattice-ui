@@ -154,12 +154,46 @@ describe('Fraction', () => {
     });
   });
 
+  describe('invert', () => {
+    it('swaps numerator and denominator', () => {
+      const f = new Fraction(3, 4);
+      const inv = f.invert();
+      expect(inv.numerator).toBe(4n);
+      expect(inv.denominator).toBe(3n);
+    });
+
+    it('throws when numerator is zero', () => {
+      const f = new Fraction(0, 4);
+      expect(() => f.invert()).toThrow();
+    });
+  });
+
+  describe('zero denominator', () => {
+    it('throws in constructor', () => {
+      expect(() => new Fraction(1, 0)).toThrow(
+        'Fraction: denominator must not be zero'
+      );
+    });
+  });
+
   describe('large values', () => {
     it('handles token-scale numbers', () => {
       const raw = 1500000000n; // 1.5 SUI in raw
       const decimals = 10n ** 9n;
       const f = new Fraction(raw, decimals);
       expect(f.toSignificant(4)).toBe('1.5');
+    });
+
+    it('handles 10^18 scale values', () => {
+      const a = new Fraction(10n ** 18n, 10n ** 18n);
+      expect(a.quotient).toBe(1n);
+    });
+
+    it('arithmetic with large values', () => {
+      const a = new Fraction(10n ** 18n, 1n);
+      const b = new Fraction(10n ** 18n, 1n);
+      const result = a.plus(b);
+      expect(result.numerator).toBe(2n * 10n ** 18n);
     });
   });
 });

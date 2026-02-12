@@ -85,5 +85,45 @@ describe('Percent', () => {
       const total = afterFee.raw + fee.raw;
       expect(total >= amount.raw).toBe(true);
     });
+
+    it('fee from zero amount is zero', () => {
+      const pct = Percent.fromBps(30);
+      const amount = CurrencyAmount.zero(Token.SUI);
+      const [afterFee, fee] = pct.feeFrom(amount);
+      expect(fee.raw).toBe(0n);
+      expect(afterFee.raw).toBe(0n);
+    });
+
+    it('rounds up across multiple inputs', () => {
+      const pct = Percent.fromBps(1); // 0.01%
+      const rawValues = [1n, 999n, 10001n, 123456789n];
+      for (const raw of rawValues) {
+        const amount = CurrencyAmount.fromRawAmount(Token.SUI, raw);
+        const [afterFee, fee] = pct.feeFrom(amount);
+        // afterFee + fee should always >= original (rounding up fee)
+        expect(afterFee.raw + fee.raw).toBeGreaterThanOrEqual(amount.raw);
+      }
+    });
+  });
+
+  describe('fromPercent edge values', () => {
+    it('creates 0% from value 0', () => {
+      const pct = Percent.fromPercent(0);
+      expect(pct.toPercent(2)).toBe('0.00%');
+    });
+
+    it('creates 100% from value 100', () => {
+      const pct = Percent.fromPercent(100);
+      expect(pct.toPercent(2)).toBe('100.00%');
+    });
+  });
+
+  describe('applyTo with zero slippage', () => {
+    it('returns zero when applying 0 bps', () => {
+      const pct = Percent.fromBps(0);
+      const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '100');
+      const result = pct.applyTo(amount);
+      expect(result.raw).toBe(0n);
+    });
   });
 });

@@ -140,5 +140,41 @@ describe('CurrencyAmount', () => {
       const amount = CurrencyAmount.fromRawAmount(Token.SOL, '1000000000');
       expect(amount.toNumber()).toBeCloseTo(1.0, 4);
     });
+
+    it('toExact returns full precision string', () => {
+      const amount = CurrencyAmount.fromRawAmount(Token.SUI, 1_234_567_890n);
+      const exact = amount.toExact();
+      expect(exact).toContain('1.23456789');
+    });
+
+    it('toSignificant with varying digits', () => {
+      const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '1.23456789');
+      const sig3 = amount.toSignificant(3);
+      expect(sig3).toBe('1.23');
+    });
+
+    it('multiply with bigint', () => {
+      const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '2');
+      const result = amount.multiply(5n);
+      expect(result.toNumber()).toBeCloseTo(10.0, 4);
+    });
+
+    it('exceedsBalance with equal amounts returns false', () => {
+      const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '5');
+      const balance = CurrencyAmount.fromHumanAmount(Token.SUI, '5');
+      expect(amount.exceedsBalance(balance)).toBe(false);
+    });
+
+    it('greaterThan throws on token mismatch', () => {
+      const sui = CurrencyAmount.fromHumanAmount(Token.SUI, '1');
+      const sol = CurrencyAmount.fromHumanAmount(Token.SOL, '1');
+      expect(() => sui.greaterThan(sol)).toThrow('Token mismatch');
+    });
+
+    it('lessThan throws on token mismatch', () => {
+      const sui = CurrencyAmount.fromHumanAmount(Token.SUI, '1');
+      const sol = CurrencyAmount.fromHumanAmount(Token.SOL, '1');
+      expect(() => sui.lessThan(sol)).toThrow('Token mismatch');
+    });
   });
 });
