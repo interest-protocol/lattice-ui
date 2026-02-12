@@ -10,109 +10,149 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
     fill="none"
     {...props}
   >
-    {/* Outer lattice frame */}
-    <rect
-      x="4"
-      y="4"
-      width="32"
-      height="32"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
+    <defs>
+      <linearGradient
+        id="lattice-grad"
+        x1="5"
+        y1="3"
+        x2="35"
+        y2="37"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0%" stopColor="#06b6d4" />
+        <stop offset="100%" stopColor="#8b5cf6" />
+      </linearGradient>
+    </defs>
+
+    {/* Top face fill (bright cyan - lit from above) */}
+    <polygon
+      points="5,11.5 20,3 35,11.5 20,20"
+      fill="#22d3ee"
+      fillOpacity="0.25"
+    />
+    {/* Left face fill (deeper cyan - side shadow) */}
+    <polygon
+      points="5,11.5 20,20 20,37 5,28.5"
+      fill="#0891b2"
+      fillOpacity="0.3"
+    />
+    {/* Right face fill (violet - deep shadow) */}
+    <polygon
+      points="35,11.5 35,28.5 20,37 20,20"
+      fill="#7c3aed"
+      fillOpacity="0.3"
+    />
+
+    {/* Hexagonal outline */}
+    <polygon
+      points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.5"
       strokeLinejoin="round"
       fill="none"
     />
 
-    {/* Vertical lattice lines */}
+    {/* 3 internal cube edges meeting at center */}
     <line
-      x1="13.33"
-      y1="4"
-      x2="13.33"
-      y2="36"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="20" y1="20" x2="20" y2="3"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="26.67"
-      y1="4"
-      x2="26.67"
-      y2="36"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-
-    {/* Horizontal lattice lines */}
-    <line
-      x1="4"
-      y1="13.33"
-      x2="36"
-      y2="13.33"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="20" y1="20" x2="35" y2="11.5"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
       strokeLinecap="round"
     />
     <line
-      x1="4"
-      y1="26.67"
-      x2="36"
-      y2="26.67"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="20" y1="20" x2="5" y2="11.5"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
       strokeLinecap="round"
     />
 
-    {/* Center connection nodes (representing swap/exchange) */}
-    <circle cx="20" cy="20" r="3" fill="currentColor" />
+    {/* Bottom internal edges (center to bottom, completing the cube) */}
+    <line
+      x1="20" y1="20" x2="20" y2="37"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <line
+      x1="20" y1="20" x2="35" y2="28.5"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <line
+      x1="20" y1="20" x2="5" y2="28.5"
+      stroke="url(#lattice-grad)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
 
-    {/* Corner nodes */}
-    <circle cx="13.33" cy="13.33" r="2" fill="currentColor" fillOpacity="0.6" />
-    <circle cx="26.67" cy="13.33" r="2" fill="currentColor" fillOpacity="0.6" />
-    <circle cx="13.33" cy="26.67" r="2" fill="currentColor" fillOpacity="0.6" />
-    <circle cx="26.67" cy="26.67" r="2" fill="currentColor" fillOpacity="0.6" />
+    {/* Lattice subdivision lines — top face */}
+    <line
+      x1="12.5" y1="7.25" x2="27.5" y2="15.75"
+      stroke="#22d3ee"
+      strokeWidth="0.75"
+      strokeLinecap="round"
+      opacity="0.5"
+    />
+    <line
+      x1="27.5" y1="7.25" x2="12.5" y2="15.75"
+      stroke="#22d3ee"
+      strokeWidth="0.75"
+      strokeLinecap="round"
+      opacity="0.5"
+    />
 
-    {/* Diagonal connections from center (representing cross-chain flow) */}
+    {/* Lattice subdivision lines — right face */}
     <line
-      x1="20"
-      y1="20"
-      x2="13.33"
-      y2="13.33"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="35" y1="20" x2="20" y2="28.5"
+      stroke="#8b5cf6"
+      strokeWidth="0.75"
       strokeLinecap="round"
-      opacity="0.4"
+      opacity="0.5"
     />
     <line
-      x1="20"
-      y1="20"
-      x2="26.67"
-      y2="13.33"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="27.5" y1="15.75" x2="27.5" y2="32.75"
+      stroke="#8b5cf6"
+      strokeWidth="0.75"
       strokeLinecap="round"
-      opacity="0.4"
+      opacity="0.5"
+    />
+
+    {/* Lattice subdivision lines — left face */}
+    <line
+      x1="5" y1="20" x2="20" y2="28.5"
+      stroke="#0891b2"
+      strokeWidth="0.75"
+      strokeLinecap="round"
+      opacity="0.5"
     />
     <line
-      x1="20"
-      y1="20"
-      x2="13.33"
-      y2="26.67"
-      stroke="currentColor"
-      strokeWidth="1.5"
+      x1="12.5" y1="15.75" x2="12.5" y2="32.75"
+      stroke="#0891b2"
+      strokeWidth="0.75"
       strokeLinecap="round"
-      opacity="0.4"
+      opacity="0.5"
     />
-    <line
-      x1="20"
-      y1="20"
-      x2="26.67"
-      y2="26.67"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      opacity="0.4"
+
+    {/* Center node glow halo */}
+    <circle
+      cx="20" cy="20" r="5"
+      fill="#22d3ee"
+      fillOpacity="0.15"
     />
+    {/* Center node (convergence/swap hub) */}
+    <circle cx="20" cy="20" r="2.5" fill="#e0f7fa" />
+
+    {/* Face-center nodes */}
+    <circle cx="20" cy="11.5" r="1.25" fill="#22d3ee" fillOpacity="0.7" />
+    <circle cx="27.5" cy="24.25" r="1.25" fill="#8b5cf6" fillOpacity="0.6" />
+    <circle cx="12.5" cy="24.25" r="1.25" fill="#0891b2" fillOpacity="0.65" />
   </svg>
 );
 
