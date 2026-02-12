@@ -3,6 +3,13 @@ import type { ChangeEventHandler, FC, PropsWithChildren } from 'react';
 
 import type { CheckedButtonProps } from './toggle.types';
 
+const SPRING_TRANSITION = {
+  type: 'spring' as const,
+  stiffness: 500,
+  damping: 30,
+  mass: 0.8,
+};
+
 export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
   onChange,
   disabled,
@@ -45,24 +52,33 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
           {...props}
         />
         <div
-          className="flex w-11 h-[1.7rem] cursor-pointer items-center rounded-full transition-all duration-300 ease-in-out focus-ring"
+          className="flex w-11 h-[1.7rem] cursor-pointer items-center rounded-full focus-ring"
           style={{
             opacity: disabled ? 0.4 : 1,
-            background: !active
-              ? 'var(--color-toggle-inactive)'
-              : 'var(--color-accent)',
+            background: active
+              ? 'var(--toggle-track-active-bg)'
+              : 'var(--color-toggle-inactive)',
+            boxShadow: active
+              ? 'var(--toggle-track-active-shadow)'
+              : 'var(--toggle-track-inset-shadow)',
+            transition:
+              'background 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
           }}
         >
           <motion.span
+            initial={false}
             className="flex w-5 h-5 items-center rounded-full justify-center"
             style={{
               opacity: disabled ? 0.7 : 1,
               background: disabled
                 ? 'var(--color-toggle-thumb-disabled)'
                 : 'var(--color-toggle-thumb)',
+              boxShadow:
+                'var(--toggle-thumb-shadow), var(--toggle-thumb-highlight)',
             }}
             animate={{ x: active ? '1.3rem' : '0.25rem' }}
-            transition={reducedMotion ? { duration: 0 } : undefined}
+            whileTap={reducedMotion ? undefined : { scale: 1.15 }}
+            transition={reducedMotion ? { duration: 0 } : SPRING_TRANSITION}
           />
         </div>
       </label>
