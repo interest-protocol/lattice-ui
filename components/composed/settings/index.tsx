@@ -26,21 +26,21 @@ const Settings: FC = () => {
       <button
         type="button"
         aria-label="Settings"
-        className="text-text leading-none flex lg:hidden cursor-pointer items-center justify-center w-10 h-10 border border-accent-border rounded-xl bg-transparent hover:bg-accent-muted hover:border-accent-border focus-ring"
+        className="text-text leading-none flex md:hidden cursor-pointer items-center justify-center w-10 h-10 border border-accent-border rounded-xl bg-surface-light hover:bg-surface-hover hover:border-accent-border focus-ring"
+        style={{ backdropFilter: `blur(var(--blur-md))` }}
         onClick={handleMobile}
       >
-        <span className="p-2.5 transition-colors duration-300">
-          <BarsSVG maxWidth="1.125rem" maxHeight="1.125rem" width="100%" />
-        </span>
+        <BarsSVG maxWidth="1.125rem" maxHeight="1.125rem" width="100%" />
       </button>
       <button
         type="button"
         aria-label="Settings"
-        className="text-text leading-none hidden lg:flex cursor-pointer items-center justify-center w-11 h-11 border border-accent-border rounded-xl bg-transparent hover:bg-accent-muted hover:border-accent-border focus-ring"
+        className="text-text leading-none hidden md:flex cursor-pointer items-center justify-center w-11 h-11 border border-accent-border rounded-xl bg-surface-light hover:bg-surface-hover hover:border-accent-border focus-ring"
+        style={{ backdropFilter: `blur(var(--blur-md))` }}
         onClick={handleDesktop}
       >
         <motion.span
-          className="p-2.5 inline-block"
+          className="inline-block"
           whileHover={{ rotate: 90, scale: 1.05 }}
           transition={COG_SPRING}
         >
