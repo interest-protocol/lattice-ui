@@ -24,7 +24,7 @@ export interface FulfillResult {
 }
 
 export interface RequestStatus {
-  status: 'pending' | 'sending' | 'settling' | 'settled' | 'failed';
+  status: 'pending' | 'ready_to_settle' | 'settling' | 'settled' | 'failed';
   destinationTxDigest?: string;
   settleTxDigest?: string;
   errorMessage?: string;

@@ -21,7 +21,7 @@ import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
 import { createSuiAdapter } from '@/lib/chain-adapters/sui-adapter';
 import { fetchNewRequestProof } from '@/lib/enclave/client';
 import { CurrencyAmount, Percent, Token, Trade } from '@/lib/entities';
-import { fetchMetadata, fulfill } from '@/lib/solver/client';
+import { fetchMetadata, fetchStatus, fulfill } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
@@ -42,6 +42,7 @@ export interface SwapResult {
   fromType: string;
   toType: string;
   depositDigest: string;
+  requestId: string;
   destinationTxDigest?: string;
   toAmount: bigint;
   feeAmount: bigint;
@@ -122,6 +123,49 @@ export const useSwap = () => {
       abortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (status !== 'success' || !result || result.destinationTxDigest) return;
+
+    const controller = new AbortController();
+
+    const poll = async () => {
+      const POLL_INTERVAL_MS = 2000;
+      const MAX_POLLS = 30;
+
+      for (let i = 0; i < MAX_POLLS; i++) {
+        if (controller.signal.aborted) return;
+
+        try {
+          const reqStatus = await fetchStatus(
+            result.requestId,
+            controller.signal
+          );
+
+          if (reqStatus.destinationTxDigest) {
+            setResult((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    destinationTxDigest: reqStatus.destinationTxDigest,
+                  }
+                : prev
+            );
+            return;
+          }
+        } catch {
+          // Ignore errors, retry
+        }
+
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, POLL_INTERVAL_MS)
+        );
+      }
+    };
+
+    poll().catch(() => {});
+    return () => controller.abort();
+  }, [status, result?.requestId, result?.destinationTxDigest]);
 
   const suiBalancesRef = useRef(suiBalances);
   suiBalancesRef.current = suiBalances;
@@ -339,7 +383,8 @@ export const useSwap = () => {
         fromType,
         toType,
         depositDigest,
-        destinationTxDigest: fulfillResult.destinationTxDigest,
+        requestId,
+        destinationTxDigest: undefined,
         toAmount: minimumReceived,
         feeAmount,
         startedAt,

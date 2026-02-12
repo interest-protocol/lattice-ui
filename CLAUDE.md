@@ -635,6 +635,7 @@ Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads fr
 - **Never use `fill="currentColor"` inside SVG `<mask>` elements** → masks interpret color as luminance (white=visible, black=hidden). In light theme `currentColor` is dark ≈ black, which hides masked content. Always use `fill="white"` in masks
 - **Always give icon-only buttons explicit dimensions** → SVGs with `width="100%"` collapse to 0 in flex containers without a sized parent. Use `w-10 h-10` (40px mobile) or `w-11 h-11` (44px desktop) on icon-only buttons
 - **Always test both themes** → dark mode is default but light theme has white/bright backgrounds that reveal contrast issues invisible in dark mode
+- **Always inspect icon/SVG components before using them** → read the source to check for `fillOpacity`, `opacity`, or other attributes that make icons faint. For prominent UI (modals, alerts), use full-opacity fills with accent coloring and a sized container (e.g. 48px circle with `accent-wash` background)
 
 ---
 

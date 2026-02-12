@@ -1,12 +1,14 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { type FC, useState } from 'react';
+import { createElement, type FC, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import FlipButton from '@/components/composed/flip-button';
+import NonceRequiredModal from '@/components/composed/nonce-required-modal';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
+import useNonceAccount from '@/hooks/domain/use-nonce-account';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
 import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
@@ -43,20 +45,83 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
   'wsui-to-sui': 'sui-to-wsui',
 };
 
+// Estimated rent (80 bytes) + tx fee — precise check happens server-side
+const NONCE_REQUIRED_LAMPORTS = 1_452_680n;
+
 const Bridge: FC = () => {
   const { bridge, status, isLoading, reset } = useBridge();
-  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
+  const {
+    suiBalances,
+    solanaBalances,
+    solanaAddress,
+    suiLoading,
+    solLoading,
+    mutateSolanaBalances,
+  } = useBalances();
   const { setContent, handleClose } = useModal(
     useShallow((s) => ({
       setContent: s.setContent,
       handleClose: s.handleClose,
     }))
   );
+  const nonce = useNonceAccount();
 
   const [selectedRoute, setSelectedRoute] = useState<BridgeRoute>(
     BRIDGE_ROUTES[0] as BridgeRoute
   );
   const [amount, setAmount] = useState('');
+  const [nonceModalOpen, setNonceModalOpen] = useState(false);
+
+  // Auto-open nonce modal when query confirms no nonce account
+  // TODO: TEMP FORCE — remove this override
+  useEffect(() => {
+    if (solanaAddress) {
+      setNonceModalOpen(true);
+    }
+  }, [solanaAddress]);
+
+  // Sync nonce modal content when dependencies change
+  useEffect(() => {
+    if (!nonceModalOpen || !solanaAddress) return;
+    setContent(
+      createElement(NonceRequiredModal, {
+        solanaAddress,
+        solBalance: solanaBalances.sol,
+        requiredLamports: NONCE_REQUIRED_LAMPORTS,
+        isCreating: nonce.isCreating,
+        createError: nonce.createError,
+        onCreate: () => nonce.create(),
+        onRefreshBalance: () => mutateSolanaBalances(),
+        refreshing: solLoading,
+      }),
+      { title: 'Nonce Account Required', allowClose: !nonce.isCreating }
+    );
+  }, [
+    nonceModalOpen,
+    solanaAddress,
+    solanaBalances.sol,
+    nonce,
+    solLoading,
+    setContent,
+    mutateSolanaBalances,
+  ]);
+
+  // Auto-close when nonce is created
+  // TODO: TEMP FORCE — disabled auto-close
+  useEffect(() => {
+    if (false && nonceModalOpen && nonce.hasNonce) {
+      setNonceModalOpen(false);
+      handleClose();
+    }
+  }, [nonceModalOpen, nonce.hasNonce, handleClose]);
+
+  // Track modal dismissal
+  useEffect(() => {
+    if (!nonceModalOpen) return;
+    return useModal.subscribe((state) => {
+      if (!state.content) setNonceModalOpen(false);
+    });
+  }, [nonceModalOpen]);
 
   const routeBalances: Record<string, bigint> = {
     'sol-to-wsol': solanaBalances.sol,
@@ -109,6 +174,11 @@ const Bridge: FC = () => {
   const isReady = !isDisabled && !isLoading;
 
   const handleBridge = async () => {
+    if (!nonce.hasNonce) {
+      setNonceModalOpen(true);
+      return;
+    }
+
     const amountRaw = parseUnits(amount, selectedRoute.sourceToken.decimals);
     const success = await bridge({
       direction: selectedRoute.key,

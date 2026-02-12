@@ -115,3 +115,11 @@ export const sendTokens = (
   chainKey: ChainKey,
   params: SendTokensParams
 ): Promise<SendTokensResult> => SEND_HANDLERS[chainKey](params);
+
+export interface CreateNonceAccountResult {
+  signature: string;
+  nonceAddress: string;
+}
+
+export const createNonceAccount = (userId: string) =>
+  post<CreateNonceAccountResult>('/api/wallet/create-nonce', { userId });

@@ -25,6 +25,7 @@ interface OnboardingState {
   error: string | null;
   suiAddress: string | null;
   solanaAddress: string | null;
+  nonceAddress: string | null;
   userId: string | null;
   _isProcessing: boolean;
   _retryCount: number;
@@ -319,6 +320,7 @@ const initialState = {
   error: null as string | null,
   suiAddress: null as string | null,
   solanaAddress: null as string | null,
+  nonceAddress: null as string | null,
   userId: null as string | null,
   _isProcessing: false,
   _retryCount: 0,

@@ -3,6 +3,7 @@
 import type { FC } from 'react';
 
 import { CheckSVG, ExternalLinkSVG } from '@/components/ui/icons';
+import Spinner from '@/components/ui/spinner';
 import { ExplorerMode, SolanaExplorerMode } from '@/constants';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
@@ -171,28 +172,31 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
         </div>
 
         {/* Dest Tx */}
-        {destTxUrl && (
-          <>
-            <div
-              className="h-px w-full"
-              style={{ background: 'var(--color-surface-border)' }}
-            />
-            <div className="flex items-center justify-between">
-              <span className="text-text-secondary text-sm">
-                {destChainName} tx
-              </span>
-              <a
-                href={destTxUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
-              >
-                {truncateDigest(result.destinationTxDigest!)}
-                <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
-              </a>
-            </div>
-          </>
-        )}
+        <div
+          className="h-px w-full"
+          style={{ background: 'var(--color-surface-border)' }}
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-text-secondary text-sm">
+            {destChainName} tx
+          </span>
+          {destTxUrl ? (
+            <a
+              href={destTxUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
+            >
+              {truncateDigest(result.destinationTxDigest!)}
+              <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
+            </a>
+          ) : (
+            <span className="flex items-center gap-2 text-text-muted text-sm">
+              <Spinner size="0.75rem" />
+              Confirming...
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Close Button */}
