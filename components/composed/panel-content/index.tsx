@@ -19,17 +19,21 @@ interface PanelContentProps {
 const PanelContent: FC<PanelContentProps> = ({ wallet, onLogout }) => {
   const [menu, setMenu] = useState<MenuSection>(null);
 
+  const isEmail = wallet?.fullAddress?.includes('@');
+
   return (
     <div className="flex flex-col gap-1">
       {wallet ? (
         <>
           <div className="flex items-center justify-between py-2">
-            <span className="font-mono text-sm">{wallet.displayAddress}</span>
+            <span className={`${isEmail ? 'font-sans' : 'font-mono'} text-sm`}>
+              {wallet.displayAddress}
+            </span>
             {wallet.fullAddress ? (
               <CopyButton
                 text={wallet.fullAddress}
                 className="hover:text-accent"
-                ariaLabel="Copy address"
+                ariaLabel={isEmail ? 'Copy email' : 'Copy address'}
               />
             ) : null}
           </div>

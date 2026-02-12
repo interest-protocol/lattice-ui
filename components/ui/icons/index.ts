@@ -9,6 +9,7 @@ export { default as ChevronDownSVG } from './chevron-down';
 export { default as ChevronRightSVG } from './chevron-right';
 export { default as CogSVG } from './cog';
 export { default as CopySVG } from './copy';
+export { default as EmailSVG } from './email';
 export { default as ErrorSVG } from './error';
 export { default as ExternalLinkSVG } from './external-link';
 export { default as GridSVG } from './grid';
