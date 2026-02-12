@@ -64,6 +64,7 @@ const Bridge: FC = () => {
       shownResultRef.current = result;
       setContent(<BridgeSuccessModal result={result} onReset={reset} />, {
         title: 'Bridge Complete',
+        onClose: reset,
       });
     }
   }, [status, result, setContent, reset]);

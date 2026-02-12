@@ -41,7 +41,8 @@ const SendModal: FC = () => {
   const isLoading = network === 'sui' ? suiLoading : solLoading;
   const balance = getBalance();
   const balanceFormatted = formatMoney(
-    FixedPointMath.toNumber(balance, selectedToken.decimals)
+    FixedPointMath.toNumber(balance, selectedToken.decimals),
+    6
   );
 
   const setMaxAmount = () => {

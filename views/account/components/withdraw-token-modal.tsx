@@ -26,7 +26,8 @@ const WithdrawTokenModal: FC<WithdrawTokenModalProps> = ({
         const isSelected = token.type === selectedType;
         const balance = getBalance(index);
         const balanceFormatted = formatMoney(
-          FixedPointMath.toNumber(balance, token.decimals)
+          FixedPointMath.toNumber(balance, token.decimals),
+          6
         );
 
         return (

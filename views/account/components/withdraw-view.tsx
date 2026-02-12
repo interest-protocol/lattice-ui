@@ -47,7 +47,8 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const isLoading = network === 'sui' ? suiLoading : solLoading;
   const balance = getBalanceByIndex(selectedTokenIndex);
   const balanceFormatted = formatMoney(
-    FixedPointMath.toNumber(balance, selectedToken.decimals)
+    FixedPointMath.toNumber(balance, selectedToken.decimals),
+    6
   );
 
   const setMaxAmount = () => {

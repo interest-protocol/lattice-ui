@@ -29,8 +29,9 @@ const AssetRow: FC<{
   iconUrl?: string;
   balance: bigint;
   decimals: number;
+  displayPrecision?: number;
   isLoading: boolean;
-}> = ({ symbol, name, iconUrl, balance, decimals, isLoading }) => (
+}> = ({ symbol, name, iconUrl, balance, decimals, displayPrecision = 4, isLoading }) => (
   <div className="p-4 bg-surface-light flex items-center rounded-xl hover:bg-surface-hover transition-colors duration-150 justify-between">
     <div className="flex items-center gap-4">
       {iconUrl ? (
@@ -51,7 +52,7 @@ const AssetRow: FC<{
       <p className="text-text font-mono font-semibold">
         {isLoading
           ? '...'
-          : formatMoney(FixedPointMath.toNumber(balance, decimals))}
+          : formatMoney(FixedPointMath.toNumber(balance, decimals), displayPrecision)}
       </p>
       <p className="text-text-muted text-sm">{symbol}</p>
     </div>
@@ -121,6 +122,7 @@ const BalancesView: FC<{
             iconUrl={ASSET_METADATA[SUI_TYPE_ARG]?.iconUrl}
             balance={suiBalances.sui}
             decimals={9}
+            displayPrecision={4}
             isLoading={suiLoading}
           />
           <AssetRow
@@ -131,6 +133,7 @@ const BalancesView: FC<{
             iconUrl={BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE]?.iconUrl}
             balance={suiBalances.wsol}
             decimals={XBRIDGE_DECIMALS}
+            displayPrecision={6}
             isLoading={suiLoading}
           />
         </div>
@@ -164,6 +167,7 @@ const BalancesView: FC<{
             iconUrl={ASSET_METADATA.sol?.iconUrl}
             balance={solanaBalances.sol}
             decimals={SOL_DECIMALS}
+            displayPrecision={6}
             isLoading={solLoading}
           />
           <AssetRow
@@ -174,6 +178,7 @@ const BalancesView: FC<{
             iconUrl={BRIDGED_ASSET_METADATA[WSUI_SOLANA_MINT]?.iconUrl}
             balance={solanaBalances.wsui}
             decimals={XBRIDGE_DECIMALS}
+            displayPrecision={6}
             isLoading={solLoading}
           />
         </div>
