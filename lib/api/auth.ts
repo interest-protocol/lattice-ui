@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { getPrivyClient } from '@/lib/privy/server';
 
-interface AuthResult {
+export interface AuthResult {
   userId: string;
   accessToken: string;
 }

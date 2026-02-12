@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { authenticateRequest } from '@/lib/api/auth';
-import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { errorResponse } from '@/lib/api/validate-params';
+import { withAuthPost } from '@/lib/api/with-auth';
 import { SOLVER_API_URL } from '@/lib/config';
 import { SOLVER_API_KEY } from '@/lib/config.server';
 
@@ -12,20 +12,7 @@ const schema = z.object({
   requestInitialSharedVersion: z.string().optional(),
 });
 
-export async function POST(request: NextRequest) {
-  const auth = await authenticateRequest(request);
-  if (auth instanceof NextResponse) return auth;
-
-  let rawBody: unknown;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
-
-  const { data: body, error } = validateBody(rawBody, schema);
-  if (error) return error;
-
+export const POST = withAuthPost(schema, async (body) => {
   if (!SOLVER_API_URL)
     return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
 
@@ -55,4 +42,4 @@ export async function POST(request: NextRequest) {
   } catch (caught: unknown) {
     return errorResponse(caught, 'Failed to fulfill request');
   }
-}
+});

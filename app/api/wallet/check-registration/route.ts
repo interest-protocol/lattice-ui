@@ -1,16 +1,13 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-import { authenticateRequest } from '@/lib/api/auth';
 import { errorResponse } from '@/lib/api/validate-params';
+import { withAuthGet } from '@/lib/api/with-auth';
 import { withTimeout } from '@/lib/api/with-timeout';
 import { getPrivyClient } from '@/lib/privy/server';
 import { walletAddressKey } from '@/lib/privy/wallet';
 import { createRegistrySdk, SuiAddress } from '@/lib/registry';
 
-export async function GET(request: NextRequest) {
-  const auth = await authenticateRequest(request);
-  if (auth instanceof NextResponse) return auth;
-
+export const GET = withAuthGet(async (auth) => {
   try {
     const privy = getPrivyClient();
 
@@ -55,4 +52,4 @@ export async function GET(request: NextRequest) {
   } catch (caught: unknown) {
     return errorResponse(caught, 'Failed to check registration');
   }
-}
+});

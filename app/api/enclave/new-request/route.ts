@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { authenticateRequest } from '@/lib/api/auth';
-import { errorResponse, validateBody } from '@/lib/api/validate-params';
+import { errorResponse } from '@/lib/api/validate-params';
+import { withAuthPost } from '@/lib/api/with-auth';
 import { ENCLAVE_API_KEY, ENCLAVE_URL } from '@/lib/config.server';
 
 interface NewRequestProofRaw {
@@ -23,13 +23,7 @@ const schema = z.object({
   chainId: z.number(),
 });
 
-export async function POST(request: NextRequest) {
-  const auth = await authenticateRequest(request);
-  if (auth instanceof NextResponse) return auth;
-
-  const { data: body, error } = validateBody(await request.json(), schema);
-  if (error) return error;
-
+export const POST = withAuthPost(schema, async (body) => {
   try {
     const response = await fetch(`${ENCLAVE_URL}/new_request`, {
       method: 'POST',
@@ -57,4 +51,4 @@ export async function POST(request: NextRequest) {
   } catch (caught: unknown) {
     return errorResponse(caught, 'Failed to fetch proof');
   }
-}
+});
