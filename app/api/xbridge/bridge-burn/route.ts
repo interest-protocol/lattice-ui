@@ -38,6 +38,7 @@ import {
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
 import { buildSplTransfer } from '@/lib/solana/spl-message';
+import { findCreatedObjectId } from '@/lib/sui/object-changes';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -53,6 +54,7 @@ export const POST = withAuthPost(
   async (body) => {
     let requestId: string | null = null;
     let burnCapId: string | null = null;
+    let presignCapId: string | null = null;
 
     try {
       const privy = getPrivyClient();
@@ -194,6 +196,17 @@ export const POST = withAuthPost(
       tx1.transferObjects([burnCap], walletAddress);
       tx1.transferObjects([refund], walletAddress);
 
+      const presignFee = tx1.splitCoins(tx1.gas, [tx1.pure.u64(0)]);
+      const { result: presignCap } = xbridge.mintPresign({
+        tx: tx1,
+        chainId: ChainId.Solana,
+        fee: presignFee,
+      });
+      tx1.transferObjects(
+        [presignCap as Parameters<typeof tx1.transferObjects>[0][0]],
+        walletAddress
+      );
+
       const rawBytes1 = await tx1.build({ client: suiClient });
 
       const tx1Result = await signAndExecuteSuiTransaction(privy, {
@@ -204,34 +217,31 @@ export const POST = withAuthPost(
         options: { showObjectChanges: true },
       });
 
-      const requestObject = tx1Result.objectChanges?.find(
-        (c) => c.type === 'created' && c.objectType?.includes('BurnRequest')
+      requestId = findCreatedObjectId(tx1Result.objectChanges, 'BurnRequest');
+      burnCapId = findCreatedObjectId(tx1Result.objectChanges, 'BurnCap');
+      presignCapId = findCreatedObjectId(
+        tx1Result.objectChanges,
+        'PresignCap'
       );
-      const burnCapObject = tx1Result.objectChanges?.find(
-        (c) => c.type === 'created' && c.objectType?.includes('BurnCap')
-      );
-
-      requestId =
-        requestObject && 'objectId' in requestObject
-          ? requestObject.objectId
-          : null;
-      burnCapId =
-        burnCapObject && 'objectId' in burnCapObject
-          ? burnCapObject.objectId
-          : null;
 
       invariant(
-        requestId && burnCapId,
-        'Failed to extract requestId or burnCapId from tx1'
+        requestId && burnCapId && presignCapId,
+        'Failed to extract requestId, burnCapId, or presignCapId from tx1'
       );
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 
-      // === Phase 3: Enclave vote + PresignCap + Solver sign ===
-      const burnRequestData = await xbridge.getBurnRequest({ requestId });
+      // === Phase 3: Enclave vote + Solver sign (parallel) ===
+      const [burnRequestData, presignData] = await Promise.all([
+        xbridge.getBurnRequest({ requestId }),
+        xbridge.getFirstPresign({
+          owner: walletAddress,
+          walletKey: WalletKey[ChainId.Solana],
+          appTypeName: WITNESS_TYPE,
+        }),
+      ]);
 
-      // Parallel: enclave vote + presign lookup
-      const [voteData, presignData] = await Promise.all([
+      const [voteData, solverResult] = await Promise.all([
         // Enclave vote
         fetchWithRetry(`${ENCLAVE_URL}/xbridge/vote_burn`, {
           method: 'POST',
@@ -255,65 +265,33 @@ export const POST = withAuthPost(
           (r) =>
             r.json() as Promise<{ signature: string; timestamp_ms: number }>
         ),
-        // PresignCap lookup (create if missing)
-        xbridge
-          .getFirstPresign({
-            owner: walletAddress,
-            walletKey: WalletKey[ChainId.Solana],
-            appTypeName: WITNESS_TYPE,
-          })
-          .catch(async () => {
-            // No PresignCap found — create one
-            const mintTx = new Transaction();
-            mintTx.setSender(walletAddress);
-            const mintFee = mintTx.splitCoins(mintTx.gas, [mintTx.pure.u64(0)]);
-            xbridge.mintPresign({
-              tx: mintTx,
-              chainId: ChainId.Solana,
-              fee: mintFee,
-            });
-            const mintRawBytes = await mintTx.build({ client: suiClient });
-            await signAndExecuteSuiTransaction(privy, {
-              walletId: suiWallet.id,
-              rawBytes: mintRawBytes,
-              suiClient,
-              publicKey,
-            });
-            // Retry after minting
-            return xbridge.getFirstPresign({
-              owner: walletAddress,
-              walletKey: WalletKey[ChainId.Solana],
-              appTypeName: WITNESS_TYPE,
-            });
+        // Solver sign (presign data already resolved)
+        fetch(`${SOLVER_API_URL}/api/v1/sign`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': SOLVER_API_KEY,
+          },
+          signal: AbortSignal.timeout(30_000),
+          body: JSON.stringify({
+            presign: toHex(new Uint8Array(presignData.presign)),
+            message: toHex(new Uint8Array(burnRequestData.message)),
+            chain: 'solana',
           }),
+        }).then(async (solverResponse) => {
+          if (!solverResponse.ok) {
+            const errorText = await solverResponse
+              .text()
+              .catch(() => 'Unknown error');
+            throw new Error(`Solver sign failed: ${errorText}`);
+          }
+          return solverResponse.json() as Promise<{
+            success: boolean;
+            data: { signature: string };
+          }>;
+        }),
       ]);
 
-      // Solver sign (needs presign bytes from above)
-      const solverResponse = await fetch(`${SOLVER_API_URL}/api/v1/sign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': SOLVER_API_KEY,
-        },
-        signal: AbortSignal.timeout(30_000),
-        body: JSON.stringify({
-          presign: toHex(new Uint8Array(presignData.presign)),
-          message: toHex(new Uint8Array(burnRequestData.message)),
-          chain: 'solana',
-        }),
-      });
-
-      if (!solverResponse.ok) {
-        const errorText = await solverResponse
-          .text()
-          .catch(() => 'Unknown error');
-        throw new Error(`Solver sign failed: ${errorText}`);
-      }
-
-      const solverResult = (await solverResponse.json()) as {
-        success: boolean;
-        data: { signature: string };
-      };
       const messageCentralizedSignature = fromHex(solverResult.data.signature);
 
       // === Phase 4: Tx2 (combined PTB: vote + execute) ===
@@ -334,7 +312,7 @@ export const POST = withAuthPost(
         tx: tx2,
         requestId,
         burnCapId,
-        presignCapId: presignData.presignCapId,
+        presignCapId,
         messageCentralizedSignature,
         coinType: body.coinType,
       });
@@ -350,6 +328,7 @@ export const POST = withAuthPost(
       });
 
       // === Phase 5: Get signId + Return ===
+      await suiClient.waitForTransaction({ digest: tx2Result.digest });
       const updatedRequest = await xbridge.getBurnRequest({ requestId });
 
       return NextResponse.json({
@@ -369,7 +348,13 @@ export const POST = withAuthPost(
         const message =
           caught instanceof Error ? caught.message : 'Bridge burn failed';
         return NextResponse.json(
-          { error: message, phase: 'post-create', requestId, burnCapId },
+          {
+            error: message,
+            phase: 'post-create',
+            requestId,
+            burnCapId,
+            presignCapId,
+          },
           { status: 500 }
         );
       }

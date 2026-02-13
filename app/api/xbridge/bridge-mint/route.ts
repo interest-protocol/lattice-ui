@@ -17,6 +17,7 @@ import {
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { findCreatedObjectId } from '@/lib/sui/object-changes';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -76,21 +77,8 @@ export const POST = withAuthPost(
         options: { showObjectChanges: true },
       });
 
-      const requestObject = tx1Result.objectChanges?.find(
-        (c) => c.type === 'created' && c.objectType?.includes('MintRequest')
-      );
-      const mintCapObject = tx1Result.objectChanges?.find(
-        (c) => c.type === 'created' && c.objectType?.includes('MintCap')
-      );
-
-      requestId =
-        requestObject && 'objectId' in requestObject
-          ? requestObject.objectId
-          : null;
-      mintCapId =
-        mintCapObject && 'objectId' in mintCapObject
-          ? mintCapObject.objectId
-          : null;
+      requestId = findCreatedObjectId(tx1Result.objectChanges, 'MintRequest');
+      mintCapId = findCreatedObjectId(tx1Result.objectChanges, 'MintCap');
 
       invariant(
         requestId && mintCapId,

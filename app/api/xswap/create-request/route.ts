@@ -8,6 +8,7 @@ import { withTimeout } from '@/lib/api/with-timeout';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { findCreatedObject } from '@/lib/sui/object-changes';
 import { createXSwapSdk } from '@/lib/xswap';
 
 const bigintString = z
@@ -93,20 +94,12 @@ export const POST = withAuthPost(
         'Transaction sign & execute'
       );
 
-      const requestObject = txResult.objectChanges?.find(
-        (change) =>
-          change.type === 'created' &&
-          change.objectType?.includes('::xswap::Request')
+      const requestObject = findCreatedObject(
+        txResult.objectChanges,
+        '::xswap::Request'
       );
-
-      const requestId =
-        requestObject && 'objectId' in requestObject
-          ? requestObject.objectId
-          : null;
-      const requestInitialSharedVersion =
-        requestObject && 'version' in requestObject
-          ? requestObject.version
-          : null;
+      const requestId = requestObject?.objectId ?? null;
+      const requestInitialSharedVersion = requestObject?.version ?? null;
 
       return NextResponse.json({
         digest: txResult.digest,
