@@ -1,5 +1,5 @@
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import { validateAlphaLimit, validateGasBalance } from '@/utils/gas-validation';
+import { validateGasBalance } from '@/utils/gas-validation';
 
 import type { BridgeRoute, ValidationResult } from './bridge.types';
 
@@ -24,13 +24,6 @@ const useBridgeValidation = ({
 
   if (!amount || amountNum <= 0) {
     return { isDisabled: true, message: 'Enter amount' };
-  }
-
-  const symbol = route.sourceToken.symbol;
-  if (symbol === 'SUI' || symbol === 'SOL' || symbol === 'wSOL') {
-    const alphaToken = symbol === 'wSOL' ? 'SOL' : symbol;
-    const alphaError = validateAlphaLimit(alphaToken, amountNum);
-    if (alphaError) return alphaError;
   }
 
   const sourceConfig = CHAIN_REGISTRY[route.sourceChain];

@@ -4,37 +4,61 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { FC } from 'react';
 
 import { CheckSVG } from '@/components/ui/icons';
-import type { BridgeStatus } from '@/hooks/domain/use-bridge';
+import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
 
 import type { BridgeProgressStepperProps } from './bridge.types';
 
-const BRIDGE_STEPS: readonly { status: BridgeStatus; label: string }[] = [
-  { status: 'depositing', label: 'Deposit' },
-  { status: 'creating', label: 'Mint' },
-  { status: 'waiting', label: 'Confirm' },
-];
+interface StepConfig {
+  readonly steps: readonly { status: BridgeStatus; label: string }[];
+  readonly statusIndex: Record<string, number>;
+  readonly messages: Record<string, string>;
+}
 
-const STATUS_INDEX: Record<string, number> = {
-  depositing: 0,
-  creating: 1,
-  waiting: 2,
-  success: 3,
-  error: -1,
+const MINT_CONFIG: StepConfig = {
+  steps: [
+    { status: 'depositing', label: 'Deposit' },
+    { status: 'creating', label: 'Mint' },
+    { status: 'waiting', label: 'Confirm' },
+  ],
+  statusIndex: { depositing: 0, creating: 1, waiting: 2, success: 3, error: -1 },
+  messages: {
+    depositing: 'Depositing to bridge...',
+    creating: 'Minting bridged tokens...',
+    waiting: 'Confirming transaction...',
+    success: 'Bridge completed!',
+    error: 'Bridge failed',
+  },
 };
 
-const STATUS_MESSAGES: Record<string, string> = {
-  depositing: 'Depositing to bridge...',
-  creating: 'Minting bridged tokens...',
-  waiting: 'Confirming transaction...',
-  success: 'Bridge completed!',
-  error: 'Bridge failed',
+const BURN_CONFIG: StepConfig = {
+  steps: [
+    { status: 'creating', label: 'Burn' },
+    { status: 'waiting', label: 'Sign' },
+    { status: 'success', label: 'Broadcast' },
+  ],
+  statusIndex: { creating: 0, waiting: 1, success: 3, error: -1 },
+  messages: {
+    creating: 'Creating burn request...',
+    waiting: 'Waiting for signature...',
+    success: 'Bridge completed!',
+    error: 'Bridge failed',
+  },
+};
+
+const DIRECTION_CONFIG: Record<BridgeDirection, StepConfig> = {
+  'sol-to-wsol': MINT_CONFIG,
+  'sui-to-wsui': MINT_CONFIG,
+  'wsol-to-sol': BURN_CONFIG,
+  'wsui-to-sui': BURN_CONFIG,
 };
 
 const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
   status,
+  direction,
   onRetry,
 }) => {
-  const activeIndex = STATUS_INDEX[status] ?? -1;
+  const config = DIRECTION_CONFIG[direction];
+  const activeIndex = config.statusIndex[status] ?? -1;
   const isSuccess = status === 'success';
   const isError = status === 'error';
 
@@ -48,7 +72,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
         transition={{ duration: 0.3 }}
       >
         <div className="flex items-center w-full px-2">
-          {BRIDGE_STEPS.map((step, i) => {
+          {config.steps.map((step, i) => {
             const isCompleted = isSuccess || activeIndex > i;
             const isActive = !isSuccess && activeIndex === i;
             const isErrorStep = isError && activeIndex === -1 && i === 0;
@@ -120,7 +144,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                   </span>
                 </div>
 
-                {i < BRIDGE_STEPS.length - 1 && (
+                {i < config.steps.length - 1 && (
                   <div
                     className="flex-1 h-px mx-1 self-start mt-3.5"
                     style={{
@@ -142,7 +166,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
             color: isError ? 'var(--color-error)' : 'var(--color-text-muted)',
           }}
         >
-          {STATUS_MESSAGES[status] ?? ''}
+          {config.messages[status] ?? ''}
         </span>
 
         {isError && (

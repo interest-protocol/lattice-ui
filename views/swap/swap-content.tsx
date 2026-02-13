@@ -47,16 +47,22 @@ const SwapContent: FC = () => {
           </span>
         </div>
         <p className="text-text-secondary text-xs leading-relaxed m-0">
-          This is an early alpha version with limited liquidity. Transactions
-          are capped at{' '}
-          <span className="text-text font-semibold">
-            {CHAIN_REGISTRY.sui.alphaMax} SUI
-          </span>{' '}
-          and{' '}
-          <span className="text-text font-semibold">
-            {CHAIN_REGISTRY.solana.alphaMax} SOL
-          </span>
-          . You must have enough native tokens to cover gas fees.
+          This is an early alpha for testing purposes only. Features and limits
+          are not final.
+          {tab === 0 && (
+            <>
+              {' '}
+              Swap transactions are capped at{' '}
+              <span className="text-text font-semibold">
+                {CHAIN_REGISTRY.sui.alphaMax} SUI
+              </span>{' '}
+              and{' '}
+              <span className="text-text font-semibold">
+                {CHAIN_REGISTRY.solana.alphaMax} SOL
+              </span>
+              .
+            </>
+          )}
         </p>
       </div>
 

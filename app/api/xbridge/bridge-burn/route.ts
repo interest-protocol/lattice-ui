@@ -38,6 +38,7 @@ import {
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
 import { buildSplTransfer } from '@/lib/solana/spl-message';
+import { pollUntil } from '@/lib/poll-until';
 import { findCreatedObjectId } from '@/lib/sui/object-changes';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
@@ -232,14 +233,21 @@ export const POST = withAuthPost(
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 
       // === Phase 3: Enclave vote + Solver sign (parallel) ===
-      const [burnRequestData, presignData] = await Promise.all([
-        xbridge.getBurnRequest({ requestId }),
-        xbridge.getFirstPresign({
-          owner: walletAddress,
-          walletKey: WalletKey[ChainId.Solana],
-          appTypeName: WITNESS_TYPE,
-        }),
-      ]);
+      // Burn request data is available immediately after tx1
+      const burnRequestData = await xbridge.getBurnRequest({ requestId });
+
+      // Poll until MPC completes the presign session
+      const presignData = await pollUntil(
+        () =>
+          xbridge
+            .getFirstPresign({
+              owner: walletAddress,
+              walletKey: WalletKey[ChainId.Solana],
+              appTypeName: WITNESS_TYPE,
+            })
+            .catch(() => null),
+        { maxPolls: 30, intervalMs: 2_000 }
+      );
 
       const [voteData, solverResult] = await Promise.all([
         // Enclave vote

@@ -150,6 +150,7 @@ const Bridge: FC = () => {
     if (reverseRoute) {
       setSelectedRoute(reverseRoute);
       setAmount('');
+      reset();
     }
   };
 
@@ -187,7 +188,7 @@ const Bridge: FC = () => {
 
         <div className="px-5 pb-5 pt-3">
           {isLoading || status === 'success' || status === 'error' ? (
-            <BridgeProgressStepper status={status} onRetry={handleRetry} />
+            <BridgeProgressStepper status={status} direction={selectedRoute.key} onRetry={handleRetry} />
           ) : (
             <motion.button
               type="button"

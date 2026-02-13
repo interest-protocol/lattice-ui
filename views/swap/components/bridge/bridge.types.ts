@@ -124,6 +124,7 @@ export interface BridgeDetailsInlineProps {
 
 export interface BridgeProgressStepperProps {
   status: BridgeStatus;
+  direction: BridgeDirection;
   onRetry: () => void;
 }
 
