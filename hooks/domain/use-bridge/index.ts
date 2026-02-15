@@ -1,8 +1,7 @@
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
 import { fromHex, toBase64 } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { unwrapSimulationError } from '@solana/errors';
-import type { Base64EncodedWireTransaction, Signature } from '@solana/kit';
+import { unwrapSimulationError, type Base64EncodedWireTransaction, type Signature } from '@solana/kit';
 import bs58 from 'bs58';
 import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
