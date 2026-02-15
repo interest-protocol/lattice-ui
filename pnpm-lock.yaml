@@ -11,21 +11,24 @@ importers:
 
   .:
     dependencies:
+      '@ika.xyz/sdk':
+        specifier: ^0.2.7
+        version: 0.2.7(typescript@5.9.3)
       '@interest-protocol/enclave-sdk':
-        specifier: ^0.0.1
-        version: 0.0.1(typescript@5.9.3)
+        specifier: ^0.0.4
+        version: 0.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/registry-sdk':
-        specifier: ^1.0.1
-        version: 1.0.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: ^1.0.3
+        version: 1.0.3(@mysten/sui@1.45.2(typescript@5.9.3))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@interest-protocol/xbridge-sdk':
-        specifier: ^1.1.1
-        version: 1.1.1(typescript@5.9.3)
+        specifier: ^1.1.5
+        version: 1.1.5(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/xcore-sdk':
-        specifier: ^1.0.1
-        version: 1.0.1(typescript@5.9.3)
+        specifier: ^1.0.4
+        version: 1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/xswap-sdk':
-        specifier: ^1.0.1
-        version: 1.0.1(typescript@5.9.3)
+        specifier: ^1.0.4
+        version: 1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
       '@mysten/sui':
         specifier: ^1.45.2
         version: 1.45.2(typescript@5.9.3)
@@ -764,6 +767,16 @@ packages:
     resolution: {integrity: sha512-4xfckZuPaIodeu0HpuTRIdtmajhRHXM/6rjS2N62Ns9aOCkGbbeYRwktqR3bUScuhCwyEBsEQqtIh9f0iLP3WQ==}
     engines: {node: '>=16.0.0'}
 
+  '@iarna/toml@2.2.5':
+    resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
+
+  '@ika.xyz/ika-wasm@0.2.1':
+    resolution: {integrity: sha512-Zq528aTdAHA7mW4+vqUoc/fhornMo8EHcS8hKJx1ZBs9tAepWw07ZReMsZuCtQRmpi1vmYh2mIi2PhZRV0M4dA==}
+
+  '@ika.xyz/sdk@0.2.7':
+    resolution: {integrity: sha512-Yee5I483gUEgOU7WMOd3p8vqsGm9SsHV+DHbbkgvNEiAzAJOgUiUBq8iaKjj9LT9xnDZRUwYl59dFTjFW2zWqA==}
+    engines: {node: '>=18'}
+
   '@img/colour@1.0.0':
     resolution: {integrity: sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw==}
     engines: {node: '>=18'}
@@ -901,20 +914,30 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@interest-protocol/enclave-sdk@0.0.1':
-    resolution: {integrity: sha512-dk3mgjFp3aF2/YNXq4L+7cSSamd2JArD9IXNI/4Dqa4W5HDgL2NyqAcgn7QzSahvM2U7PpGK5do24wipwL4JCA==}
+  '@interest-protocol/enclave-sdk@0.0.4':
+    resolution: {integrity: sha512-as5rN1grGCQp2BwsrbdAfOexzGNkyImRbjMRqaDWCiuvxCy3dMq1nPw2wCEbafikxJjidEXaYb91HDXIUeLmUg==}
+    peerDependencies:
+      '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/registry-sdk@1.0.1':
-    resolution: {integrity: sha512-XnrXvub6WpFgOcSNmI8LFdXRM5rzbgVVrZNP3cPiMcBCpZeF5Dx1nqHMnArHGIXW76xcDJt5cLKuGRR/WN1jHg==}
+  '@interest-protocol/registry-sdk@1.0.3':
+    resolution: {integrity: sha512-NMh5wKXG+KQvnvdRzN77wwht1cQ2GqV9PgRF7xjEwNvqpZn0ZEI62YghVlYnawoUdslxnh32BlCDWA1Ud3xwOQ==}
+    peerDependencies:
+      '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xbridge-sdk@1.1.1':
-    resolution: {integrity: sha512-Fq4gsn8yphAd5NyVVGzqOYa2pmOS2A5PDxG/UoRRzzseYQ2HxnJ+A7n21ry/RInB/BFnzI+XNFULpdHatlaQlA==}
+  '@interest-protocol/xbridge-sdk@1.1.5':
+    resolution: {integrity: sha512-HHaGkfdzS8L6ddeQKwJGmEWpwe5jXIsI/5uE4wVDb/gLvwXTY3I5uNZqfyzE1ftRSvpkpMnueM9KcrAUr+8O7w==}
+    peerDependencies:
+      '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xcore-sdk@1.0.1':
-    resolution: {integrity: sha512-T8x4GjFYYqtWn7fHK+nE0IZW3gwv9pAKw1Mp1WDSKA53QyQDiK8O4JsJ52kp8Fn67UdTKso7DEqzNVjkEexM2g==}
+  '@interest-protocol/xcore-sdk@1.0.4':
+    resolution: {integrity: sha512-C/xpwuSdG3HGZjUTpa4HITifOANPSWEC6WXphM2MZ5ma+BdUh6o88kLnNgouNARkzftlqcuQeGMk6oX0jKvTvA==}
+    peerDependencies:
+      '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xswap-sdk@1.0.1':
-    resolution: {integrity: sha512-C55fHIURh1If05+1wsbgseDA3wq8wSwwYCwk3enXL1JfXAlPapA5r7DUVIZavvQfw6oZv3w3PaZydagdwmxMkQ==}
+  '@interest-protocol/xswap-sdk@1.0.4':
+    resolution: {integrity: sha512-mzWineKQxnxDjh0dVQPJsG+i4gBtPS4bM8HKcmI8Yz3zwL+WhNRg5HoaD4W2b6u77LdG3xIQkj0onsHNf8loBA==}
+    peerDependencies:
+      '@mysten/sui': ^1.45.2
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -5767,6 +5790,24 @@ snapshots:
     dependencies:
       '@hpke/common': 1.8.1
 
+  '@iarna/toml@2.2.5': {}
+
+  '@ika.xyz/ika-wasm@0.2.1': {}
+
+  '@ika.xyz/sdk@0.2.7(typescript@5.9.3)':
+    dependencies:
+      '@iarna/toml': 2.2.5
+      '@ika.xyz/ika-wasm': 0.2.1
+      '@mysten/bcs': 1.9.2
+      '@mysten/sui': 1.45.2(typescript@5.9.3)
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      js-yaml: 4.1.1
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
   '@img/colour@1.0.0':
     optional: true
 
@@ -5864,18 +5905,14 @@ snapshots:
   '@img/sharp-win32-x64@0.34.5':
     optional: true
 
-  '@interest-protocol/enclave-sdk@0.0.1(typescript@5.9.3)':
+  '@interest-protocol/enclave-sdk@0.0.4(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       '@polymedia/suitcase-core': 0.0.67(@mysten/sui@1.45.2(typescript@5.9.3))
       tiny-invariant: 1.3.3
       zod: 4.3.6
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
-  '@interest-protocol/registry-sdk@1.0.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@interest-protocol/registry-sdk@1.0.3(@mysten/sui@1.45.2(typescript@5.9.3))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       '@polymedia/suitcase-core': 0.0.67(@mysten/sui@1.45.2(typescript@5.9.3))
@@ -5884,41 +5921,27 @@ snapshots:
       viem: 2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       zod: 4.3.6
     transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
       - bufferutil
       - typescript
       - utf-8-validate
 
-  '@interest-protocol/xbridge-sdk@1.1.1(typescript@5.9.3)':
+  '@interest-protocol/xbridge-sdk@1.1.5(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       tiny-invariant: 1.3.3
       zod: 4.3.6
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
-  '@interest-protocol/xcore-sdk@1.0.1(typescript@5.9.3)':
+  '@interest-protocol/xcore-sdk@1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       '@polymedia/suitcase-core': 0.0.67(@mysten/sui@1.45.2(typescript@5.9.3))
       tiny-invariant: 1.3.3
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
-  '@interest-protocol/xswap-sdk@1.0.1(typescript@5.9.3)':
+  '@interest-protocol/xswap-sdk@1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       tiny-invariant: 1.3.3
       zod: 4.3.6
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -10616,8 +10639,8 @@ snapshots:
       '@adraffy/ens-normalize': 1.11.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
       abitype: 1.2.3(typescript@5.9.3)(zod@3.25.76)
       eventemitter3: 5.0.1
     optionalDependencies:

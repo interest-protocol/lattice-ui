@@ -21,11 +21,12 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@interest-protocol/enclave-sdk": "^0.0.1",
-    "@interest-protocol/registry-sdk": "^1.0.1",
-    "@interest-protocol/xbridge-sdk": "^1.1.1",
-    "@interest-protocol/xcore-sdk": "^1.0.1",
-    "@interest-protocol/xswap-sdk": "^1.0.1",
+    "@ika.xyz/sdk": "^0.2.7",
+    "@interest-protocol/enclave-sdk": "^0.0.4",
+    "@interest-protocol/registry-sdk": "^1.0.3",
+    "@interest-protocol/xbridge-sdk": "^1.1.5",
+    "@interest-protocol/xcore-sdk": "^1.0.4",
+    "@interest-protocol/xswap-sdk": "^1.0.4",
     "@mysten/sui": "^1.45.2",
     "@noble/curves": "^1.9.4",
     "@privy-io/node": "^0.8.0",

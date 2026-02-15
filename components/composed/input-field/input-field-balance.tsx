@@ -32,7 +32,9 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
         {isLoading ? (
           <Skeleton width="2rem" />
         ) : (
-          FixedPointMath.toNumber(balance)
+          FixedPointMath.toNumber(balance).toLocaleString('en-US', {
+            maximumFractionDigits: 4,
+          })
         )}
       </span>
     </button>

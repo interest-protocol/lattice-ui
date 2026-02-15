@@ -43,8 +43,10 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
   const price = getPrice(route.sourceToken.type);
   const amountNum = Number.parseFloat(amount) || 0;
   const chainName = CHAIN_REGISTRY[route.sourceChain].displayName;
+  const balanceNum = FixedPointMath.toNumber(balance, route.sourceToken.decimals);
   const balanceFormatted = formatMoney(
-    FixedPointMath.toNumber(balance, route.sourceToken.decimals)
+    balanceNum,
+    balanceNum < 0.01 && balanceNum > 0 ? 6 : 4
   );
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

@@ -1,4 +1,5 @@
 import type { ChainId } from '@interest-protocol/xswap-sdk';
+import { Transaction } from '@mysten/sui/transactions';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -51,7 +52,11 @@ export const POST = withAuthPost(
 
       const { suiClient, xswap } = createXSwapSdk();
 
-      const { tx, result } = xswap.newRequest({
+      const tx = new Transaction();
+      const fee = tx.splitCoins(tx.gas, [0]);
+
+      const { result } = xswap.newRequest({
+        tx,
         params: {
           signature: new Uint8Array(body.proof.signature),
           digest: new Uint8Array(body.proof.digest),
@@ -71,6 +76,7 @@ export const POST = withAuthPost(
           solverSender: new Uint8Array(body.solverSender),
           solverRecipient: new Uint8Array(body.solverRecipient),
         },
+        fee,
       });
 
       tx.setSender(wallet.address);

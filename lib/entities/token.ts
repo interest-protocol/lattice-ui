@@ -2,6 +2,11 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import invariant from 'tiny-invariant';
 
 import type { ChainKey } from '@/constants/chains';
+import {
+  BRIDGED_ASSET_METADATA,
+  WSOL_SUI_TYPE,
+  XBRIDGE_DECIMALS,
+} from '@/constants/bridged-tokens';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import type { AssetMetadata } from '@/interface';
 import { coinTypeEquals, normalizeSuiCoinType } from '@/utils/sui';
@@ -74,9 +79,19 @@ export class Token {
     iconUrl: ASSET_METADATA[SOL_TYPE].iconUrl,
   });
 
+  static readonly WSOL = new Token({
+    chainId: 'sui',
+    type: WSOL_SUI_TYPE,
+    decimals: XBRIDGE_DECIMALS,
+    symbol: 'wSOL',
+    name: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE].name,
+    iconUrl: BRIDGED_ASSET_METADATA[WSOL_SUI_TYPE].iconUrl,
+  });
+
   private static readonly BY_TYPE: Record<string, Token> = {
     [normalizeSuiCoinType(SUI_TYPE_ARG)]: Token.SUI,
     [SOL_TYPE]: Token.SOL,
+    [normalizeSuiCoinType(WSOL_SUI_TYPE)]: Token.WSOL,
   };
 
   static fromType(type: string): Token {

@@ -1,10 +1,15 @@
 /**
- * Builds a raw Solana legacy message (425 bytes) encoding:
+ * Builds a raw Solana legacy message encoding:
  *   1. AdvanceNonce instruction
- *   2. SPL TransferChecked instruction
+ *   2. CreateAssociatedTokenAccount (idempotent)
+ *   3. SPL TransferChecked instruction
  *
  * This is used for the wSOL→SOL burn flow, where the message is signed
  * by both the user (nonceAuthority) and the dWallet (tokenOwner).
+ *
+ * Automatically deduplicates accounts when nonceAuthority == destinationWallet
+ * (the frontend case where the user's Privy wallet serves both roles) to avoid
+ * Solana's "Account loaded twice" rejection.
  *
  * Ported from core/scripts/src/flows/xbridge/wsol-to-sol/1-create-burn-request.ts
  */
@@ -44,13 +49,30 @@ export interface BuildSplTransferParams {
 }
 
 /**
- * Builds a 425-byte Solana legacy message with:
- * - Header: [2 signers, 1 readonly signer, 6 readonly non-signers, 11 accounts]
- * - Account keys (0-10): nonceAuthority, tokenOwner, nonceAccount, destinationAta,
- *   sourceAta, SYSTEM_PROGRAM, NONCE_SYSVAR, SPL_ATA_PROGRAM, destinationWallet,
- *   mint, SPL_TOKEN_PROGRAM
- * - Nonce value (32 bytes, replaces recent blockhash)
- * - 3 instructions: AdvanceNonce, CreateATA (idempotent), TransferChecked
+ * Builds a Solana legacy message encoding:
+ *   1. AdvanceNonce instruction
+ *   2. CreateAssociatedTokenAccount (idempotent)
+ *   3. SPL TransferChecked instruction
+ *
+ * Two layouts exist depending on whether nonceAuthority and destinationWallet
+ * are the same pubkey (which happens in the frontend where the user's Privy
+ * wallet is both the nonce authority and the recipient):
+ *
+ * **11-account layout** (nonceAuthority ≠ destinationWallet — core scripts):
+ *   Header: [2, 1, 6, 11]
+ *   [0] nonceAuthority (writable signer), [1] tokenOwner (readonly signer),
+ *   [2] nonceAccount (writable), [3] destinationAta (writable),
+ *   [4] sourceAta (writable), [5] SYSTEM_PROGRAM, [6] NONCE_SYSVAR,
+ *   [7] SPL_ATA_PROGRAM, [8] destinationWallet, [9] mint, [10] SPL_TOKEN_PROGRAM
+ *
+ * **10-account layout** (nonceAuthority == destinationWallet — frontend):
+ *   Header: [2, 1, 5, 10]
+ *   [0] nonceAuthority/destinationWallet (writable signer),
+ *   [1] tokenOwner (readonly signer), [2] nonceAccount (writable),
+ *   [3] destinationAta (writable), [4] sourceAta (writable),
+ *   [5] SYSTEM_PROGRAM, [6] NONCE_SYSVAR, [7] SPL_ATA_PROGRAM,
+ *   [8] mint, [9] SPL_TOKEN_PROGRAM
+ *   destinationWallet reuses index 0 to avoid Solana's "Account loaded twice" error.
  */
 export const buildSplTransfer = ({
   tokenOwner,
@@ -63,11 +85,42 @@ export const buildSplTransfer = ({
   destinationWallet,
   destinationAta,
   amount,
-}: BuildSplTransferParams): Uint8Array =>
-  Buffer.concat([
-    // Message header: [numSigners, numReadonlySigners, numReadonlyUnsigned, numAccounts]
+}: BuildSplTransferParams): Uint8Array => {
+  const sameAuthAndDest =
+    nonceAuthority.length === destinationWallet.length &&
+    nonceAuthority.every((b, i) => b === destinationWallet[i]);
+
+  if (sameAuthAndDest) {
+    // 10-account layout: destinationWallet reuses index 0 (nonceAuthority)
+    return Buffer.concat([
+      Buffer.from([2, 1, 5, 10]),
+      nonceAuthority, // [0] signer — also destinationWallet
+      tokenOwner, // [1] signer (dWallet Solana address)
+      nonceAccount, // [2] writable
+      destinationAta, // [3] writable
+      sourceAta, // [4] writable
+      SYSTEM_PROGRAM, // [5] readonly
+      NONCE_SYSVAR, // [6] readonly
+      SPL_ATA_PROGRAM, // [7] readonly
+      mint, // [8] readonly (was [9])
+      SPL_TOKEN_PROGRAM, // [9] readonly (was [10])
+      nonce,
+      Buffer.from([3]),
+      // AdvanceNonce — unchanged
+      Buffer.from([5, 3, 2, 6, 0, 4]),
+      ADVANCE_NONCE_DISCRIMINATOR,
+      // CreateATA — destWallet 8→0, mint 9→8, SPL_TOKEN 10→9
+      Buffer.from([7, 6, 0, 3, 0, 8, 5, 9, 1, 1]),
+      // TransferChecked — progId 10→9, mint 9→8
+      Buffer.from([9, 4, 4, 8, 3, 1, 10, TRANSFER_CHECKED_DISCRIMINATOR]),
+      u64ToLeBytes(amount),
+      Buffer.from([decimals]),
+    ]);
+  }
+
+  // 11-account layout: nonceAuthority and destinationWallet are distinct
+  return Buffer.concat([
     Buffer.from([2, 1, 6, 11]),
-    // Account keys (32 bytes each, 11 total)
     nonceAuthority, // [0] signer (user's Solana wallet)
     tokenOwner, // [1] signer (dWallet Solana address)
     nonceAccount, // [2] writable
@@ -79,20 +132,16 @@ export const buildSplTransfer = ({
     destinationWallet, // [8] readonly
     mint, // [9] readonly
     SPL_TOKEN_PROGRAM, // [10] readonly
-    // Recent blockhash (replaced by nonce value)
     nonce,
-    // Instruction count
     Buffer.from([3]),
-    // Instruction 1: AdvanceNonce
-    // programIdIndex=5 (SYSTEM_PROGRAM), 3 accounts, 4 bytes data
+    // AdvanceNonce
     Buffer.from([5, 3, 2, 6, 0, 4]),
     ADVANCE_NONCE_DISCRIMINATOR,
-    // Instruction 2: CreateAssociatedTokenAccount (idempotent)
-    // programIdIndex=7 (SPL_ATA_PROGRAM), 6 accounts, no data
+    // CreateATA (idempotent)
     Buffer.from([7, 6, 0, 3, 8, 9, 5, 10, 1, 1]),
-    // Instruction 3: TransferChecked
-    // programIdIndex=10 (SPL_TOKEN_PROGRAM), 4 accounts, 10 bytes data
+    // TransferChecked
     Buffer.from([10, 4, 4, 9, 3, 1, 10, TRANSFER_CHECKED_DISCRIMINATOR]),
     u64ToLeBytes(amount),
     Buffer.from([decimals]),
   ]);
+};

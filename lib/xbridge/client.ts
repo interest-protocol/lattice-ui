@@ -22,23 +22,75 @@ export const bridgeMint = (params: {
     retries: 0,
   });
 
-export interface BridgeBurnResult {
+export interface BridgeBurnCreateResult {
   createDigest: string;
-  executeDigest: string;
   requestId: string;
-  signId: string;
+  burnCapId: string;
+  presignCapId: string;
+  suiWalletId: string;
   userSignature: string;
   message: string;
 }
 
-export const bridgeBurn = (params: {
+export const bridgeBurnCreate = (params: {
   userId: string;
   sourceAmount: string;
   destinationAddress: number[];
   nonceAddress: string;
   coinType: string;
 }) =>
-  post<BridgeBurnResult>('/api/xbridge/bridge-burn', params, {
-    timeout: 60_000,
+  post<BridgeBurnCreateResult>('/api/xbridge/bridge-burn/create', params, {
+    timeout: 30_000,
+    retries: 0,
+  });
+
+export interface BridgeBurnVoteResult {
+  signature: string;
+  timestampMs: number;
+}
+
+export const bridgeBurnVote = (params: {
+  userId: string;
+  requestId: string;
+  coinType: string;
+}) =>
+  post<BridgeBurnVoteResult>('/api/xbridge/bridge-burn/vote', params, {
+    timeout: 20_000,
+    retries: 0,
+  });
+
+export interface BridgeBurnSignResult {
+  solverSignature: string;
+}
+
+export const bridgeBurnSign = (params: {
+  userId: string;
+  requestId: string;
+  coinType: string;
+  presignCapId: string;
+}) =>
+  post<BridgeBurnSignResult>('/api/xbridge/bridge-burn/sign', params, {
+    timeout: 120_000,
+    retries: 0,
+  });
+
+export interface BridgeBurnFinalizeResult {
+  executeDigest: string;
+  signId: string;
+}
+
+export const bridgeBurnFinalize = (params: {
+  userId: string;
+  requestId: string;
+  burnCapId: string;
+  presignCapId: string;
+  coinType: string;
+  voteSignature: string;
+  voteTimestampMs: number;
+  solverSignature: string;
+  suiWalletId: string;
+}) =>
+  post<BridgeBurnFinalizeResult>('/api/xbridge/bridge-burn/finalize', params, {
+    timeout: 30_000,
     retries: 0,
   });

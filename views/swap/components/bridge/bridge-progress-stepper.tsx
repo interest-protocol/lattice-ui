@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import type { FC } from 'react';
+import { type FC, useRef } from 'react';
 
 import { CheckSVG } from '@/components/ui/icons';
 import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
@@ -20,7 +20,13 @@ const MINT_CONFIG: StepConfig = {
     { status: 'creating', label: 'Mint' },
     { status: 'waiting', label: 'Confirm' },
   ],
-  statusIndex: { depositing: 0, creating: 1, waiting: 2, success: 3, error: -1 },
+  statusIndex: {
+    depositing: 0,
+    creating: 1,
+    waiting: 2,
+    success: 3,
+    error: -1,
+  },
   messages: {
     depositing: 'Depositing to bridge...',
     creating: 'Minting bridged tokens...',
@@ -34,12 +40,13 @@ const BURN_CONFIG: StepConfig = {
   steps: [
     { status: 'creating', label: 'Burn' },
     { status: 'waiting', label: 'Sign' },
-    { status: 'success', label: 'Broadcast' },
+    { status: 'executing', label: 'Broadcast' },
   ],
-  statusIndex: { creating: 0, waiting: 1, success: 3, error: -1 },
+  statusIndex: { creating: 0, waiting: 1, executing: 2, success: 3, error: -1 },
   messages: {
     creating: 'Creating burn request...',
     waiting: 'Waiting for signature...',
+    executing: 'Broadcasting to Solana...',
     success: 'Bridge completed!',
     error: 'Bridge failed',
   },
@@ -58,9 +65,16 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
   onRetry,
 }) => {
   const config = DIRECTION_CONFIG[direction];
-  const activeIndex = config.statusIndex[status] ?? -1;
+  const rawIndex = config.statusIndex[status] ?? -1;
   const isSuccess = status === 'success';
   const isError = status === 'error';
+
+  const lastActiveRef = useRef(0);
+  if (rawIndex >= 0 && !isSuccess) {
+    lastActiveRef.current = rawIndex;
+  }
+
+  const activeIndex = isError ? lastActiveRef.current : rawIndex;
 
   return (
     <AnimatePresence>
@@ -74,8 +88,8 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
         <div className="flex items-center w-full px-2">
           {config.steps.map((step, i) => {
             const isCompleted = isSuccess || activeIndex > i;
-            const isActive = !isSuccess && activeIndex === i;
-            const isErrorStep = isError && activeIndex === -1 && i === 0;
+            const isActive = !isSuccess && !isError && activeIndex === i;
+            const isErrorStep = isError && activeIndex === i;
 
             return (
               <div
