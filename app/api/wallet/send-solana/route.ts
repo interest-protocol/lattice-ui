@@ -25,7 +25,7 @@ import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import {
   BLOCKHASH_RETRY_ATTEMPTS,
   BLOCKHASH_RETRY_DELAY_MS,
-  isBlockhashError,
+  isRetryableSendError,
 } from '@/lib/solana/blockhash-retry';
 import { getSolanaRpc } from '@/lib/solana/server';
 
@@ -133,7 +133,7 @@ export const POST = withAuthPost(
         } catch (err) {
           lastError = err;
           if (
-            !isBlockhashError(err) ||
+            !isRetryableSendError(err) ||
             attempt === BLOCKHASH_RETRY_ATTEMPTS - 1
           )
             throw err;
