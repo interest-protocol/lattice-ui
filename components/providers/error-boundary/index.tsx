@@ -1,9 +1,19 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
 
+export interface ErrorReport {
+  error: Error;
+  componentStack: string | null;
+  timestamp: number;
+  url: string;
+}
+
+export type ErrorReporter = (report: ErrorReport) => void;
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: ErrorReporter;
 }
 
 interface ErrorBoundaryState {
@@ -23,6 +33,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    const report: ErrorReport = {
+      error,
+      componentStack: errorInfo.componentStack ?? null,
+      timestamp: Date.now(),
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    };
+
+    this.props.onError?.(report);
   }
 
   handleRetry = (): void => {
