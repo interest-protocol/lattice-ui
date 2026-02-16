@@ -32,7 +32,7 @@ const FundingStep: FC = () => {
 
   const handleCheckBalance = async () => {
     const result = await mutate();
-    if (result.sui >= MIN_GAS_RAW && !hasAdvanced.current) {
+    if (result && result.sui >= MIN_GAS_RAW && !hasAdvanced.current) {
       hasAdvanced.current = true;
       startLinking();
     }

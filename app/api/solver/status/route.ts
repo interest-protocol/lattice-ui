@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { errorResponse, validateQueryParam } from '@/lib/api/validate-params';
+import { errorResponse } from '@/lib/api/validate-params';
 import { getRequestStatus } from '@/lib/solver/server';
 
 export async function GET(request: NextRequest) {
   const requestId = request.nextUrl.searchParams.get('requestId');
 
-  const paramError = validateQueryParam(requestId, 'requestId');
-  if (paramError) return paramError;
+  if (!requestId) {
+    return NextResponse.json({ error: 'Missing requestId' }, { status: 400 });
+  }
 
   try {
     const data = await getRequestStatus(requestId);

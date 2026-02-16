@@ -20,6 +20,7 @@ const useSolanaBalances = (addr: string | null) => {
   const queryKey = ['solana-balances', addr];
 
   const fetchBalances = async () => {
+    if (!addr) throw new Error('Missing Solana address');
     const pubkey = address(addr);
     const wsuiMint = address(WSUI_SOLANA_MINT);
 
@@ -68,8 +69,10 @@ const useSolanaBalances = (addr: string | null) => {
     sol: CurrencyAmount.fromRawAmount(Token.SOL, balances.sol),
   };
 
-  const mutate = () =>
-    queryClient.invalidateQueries({ queryKey });
+  const mutate = async () => {
+    await queryClient.invalidateQueries({ queryKey });
+    return queryClient.getQueryData<{ sol: bigint; wsui: bigint }>(queryKey);
+  };
 
   return {
     balances,

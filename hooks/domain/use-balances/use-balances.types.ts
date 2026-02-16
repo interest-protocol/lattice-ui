@@ -14,8 +14,8 @@ export interface UseBalancesReturn {
   suiLoading: boolean;
   solLoading: boolean;
   isLoading: boolean;
-  mutateSuiBalances: () => Promise<{ sui: bigint; wsol: bigint }>;
-  mutateSolanaBalances: () => Promise<{ sol: bigint; wsui: bigint }>;
+  mutateSuiBalances: () => Promise<{ sui: bigint; wsol: bigint } | undefined>;
+  mutateSolanaBalances: () => Promise<{ sol: bigint; wsui: bigint } | undefined>;
   getBalance: (type: string) => bigint;
   allBalances: Record<string, bigint>;
 }

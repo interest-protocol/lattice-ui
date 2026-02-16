@@ -14,6 +14,7 @@ const useSuiBalances = (address: string | null) => {
   const queryKey = ['sui-balances', address];
 
   const fetchBalances = async () => {
+    if (!address) throw new Error('Missing Sui address');
     const [suiBalance, wsolBalance] = await Promise.all([
       suiClient.getBalance({ owner: address }),
       suiClient.getBalance({ owner: address, coinType: WSOL_SUI_TYPE }),
@@ -41,8 +42,10 @@ const useSuiBalances = (address: string | null) => {
     sui: CurrencyAmount.fromRawAmount(Token.SUI, balances.sui),
   };
 
-  const mutate = () =>
-    queryClient.invalidateQueries({ queryKey });
+  const mutate = async () => {
+    await queryClient.invalidateQueries({ queryKey });
+    return queryClient.getQueryData<{ sui: bigint; wsol: bigint }>(queryKey);
+  };
 
   return {
     balances,

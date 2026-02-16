@@ -10,9 +10,9 @@ import invariant from 'tiny-invariant';
 
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 
-export const authorizationContext = Object.freeze({
-  authorization_private_keys: Object.freeze([PRIVY_AUTHORIZATION_KEY]),
-});
+export const authorizationContext: { authorization_private_keys: string[] } = {
+  authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
+};
 
 interface SignAndExecuteParams {
   walletId: string;
