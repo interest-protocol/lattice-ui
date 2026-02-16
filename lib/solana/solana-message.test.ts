@@ -26,14 +26,12 @@ describe('solana-message', () => {
       expect(msg).toHaveLength(224);
       expect(Array.from(msg.slice(0, 4))).toEqual([2, 0, 2, 5]);
 
-      // destination wallet is signer #0; dWallet is signer #1
       expect(Array.from(msg.slice(4, 36))).toEqual(
         Array.from(destinationWallet)
       );
       expect(Array.from(msg.slice(36, 68))).toEqual(Array.from(dWallet));
       expect(Array.from(msg.slice(68, 100))).toEqual(Array.from(nonceAccount));
 
-      // amount (100_000_000) in little-endian u64
       expect(Array.from(msg.slice(216, 224))).toEqual([
         0x00, 0xe1, 0xf5, 0x05, 0x00, 0x00, 0x00, 0x00,
       ]);

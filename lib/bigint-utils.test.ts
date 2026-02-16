@@ -63,7 +63,6 @@ describe('bigint-utils', () => {
     });
 
     it('truncates excess decimals', () => {
-      // "1.1234567891" has 10 decimal places, should truncate to 9
       expect(parseUnits('1.1234567891', 9)).toBe(1_123_456_789n);
     });
 
@@ -123,12 +122,10 @@ describe('bigint-utils', () => {
     });
 
     it('handles zero', () => {
-      // 0 → toPrecision returns "0.00000" → stripped to "0"
       expect(toSignificant(0n, 9, 4)).toBe('0');
     });
 
     it('formats small fractional values', () => {
-      // 0.001 SUI = 1_000_000 raw
       const result = toSignificant(1_000_000n, 9, 3);
       expect(result).toBe('0.001');
     });

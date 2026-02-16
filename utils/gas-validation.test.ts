@@ -89,7 +89,6 @@ describe('gas-validation', () => {
     });
 
     it('returns error when gas + amount insufficient (gas token)', () => {
-      // Need 0.5 amount + 0.01 gas = 0.51, but only have 0.4
       const result = validateGasBalance({
         gasBalance: parseUnits('0.4', gasDecimals),
         gasDecimals,
@@ -104,7 +103,6 @@ describe('gas-validation', () => {
     });
 
     it('returns null when gas + amount exactly sufficient', () => {
-      // Need 0.01 gas + 0.5 amount = 0.51, have 0.51
       const result = validateGasBalance({
         gasBalance: parseUnits('0.51', gasDecimals),
         gasDecimals,
@@ -200,14 +198,12 @@ describe('gas-validation', () => {
     });
 
     it('respects isGasToken flag', () => {
-      // Enough gas on its own (10), but not if we also need 9.99 from the same balance
       const result = validateSwapInput({
         amount: '0.0001',
         token: 'SOL',
         gasBalance: parseUnits('0.001', 9),
         isGasToken: true,
       });
-      // amount (0.0001) + minGas (0.00001) = 0.00011 <= 0.001
       expect(result.isDisabled).toBe(false);
     });
   });
@@ -249,7 +245,6 @@ describe('gas-validation', () => {
       const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '0.1');
       const gasBalance = CurrencyAmount.fromHumanAmount(Token.SUI, '10');
       const result = validateSwapAmount(amount, gasBalance);
-      // Should internally detect isGasToken = true (both SUI)
       expect(result.isDisabled).toBe(false);
     });
 
