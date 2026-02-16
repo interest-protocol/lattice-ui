@@ -166,8 +166,13 @@ export const useSwap = () => {
     const sourceAdapter = getAdapter(sourceChainKey);
     const destAdapter = getAdapter(destChainKey);
 
+    let requestId: string | null | undefined;
+    let depositDigest: string | undefined;
+    let trade: Trade | undefined;
+    let startedAt: number | undefined;
+
     try {
-      const startedAt = Date.now();
+      startedAt = Date.now();
       setStatus('depositing');
       setError(null);
       toasting.loadingWithId(
@@ -177,11 +182,11 @@ export const useSwap = () => {
 
       invariant(suiAddress && solanaAddress, 'Both wallets must be connected');
 
-      const { txId: depositDigest } = await sourceAdapter.deposit({
+      ({ txId: depositDigest } = await sourceAdapter.deposit({
         userId: user.id,
         recipient: dwalletAddress,
         amount: fromAmount.toString(),
-      });
+      }));
 
       await sourceAdapter.confirmTransaction(depositDigest);
 
@@ -190,7 +195,7 @@ export const useSwap = () => {
 
       const [proof, metadata] = await Promise.all([
         withRetry(
-          () => fetchNewRequestProof(depositDigest, sourceChain, signal),
+          () => fetchNewRequestProof(depositDigest!, sourceChain, signal),
           ENCLAVE_RETRY_ATTEMPTS,
           ENCLAVE_RETRY_BASE_DELAY_MS,
           signal,
@@ -234,7 +239,7 @@ export const useSwap = () => {
         'Token prices unavailable — cannot calculate safe minimum amount'
       );
 
-      const trade = Trade.fromOraclePrices({
+      trade = Trade.fromOraclePrices({
         inputAmount: CurrencyAmount.fromRawAmount(inputToken, fromAmount),
         outputToken,
         inputPriceUsd,
@@ -243,7 +248,9 @@ export const useSwap = () => {
       });
       const minDestinationAmount = trade.minimumReceived.raw.toString();
 
-      const {
+      let requestInitialSharedVersion: string | null | undefined;
+      let createDigest: string;
+      ({
         digest: createDigest,
         requestId,
         requestInitialSharedVersion,
@@ -273,7 +280,7 @@ export const useSwap = () => {
           solverRecipient: Array.from(solverRecipient),
         },
         signal
-      );
+      ));
 
       invariant(requestId, 'Swap request created but requestId is missing');
 
@@ -282,11 +289,15 @@ export const useSwap = () => {
       setStatus('waiting');
       toasting.update(SWAP_TOAST_ID, 'Waiting for solver to fulfill...');
 
-      const fulfillResult = await withRetry(
+      const minimumReceived = trade.minimumReceived.raw;
+      const expectedOutput = trade.expectedOutput.raw;
+      const feeAmount = expectedOutput - minimumReceived;
+
+      await withRetry(
         () =>
           fulfill(
             {
-              requestId,
+              requestId: requestId!,
               userAddress: suiAddress,
               requestInitialSharedVersion:
                 requestInitialSharedVersion ?? undefined,
@@ -299,10 +310,7 @@ export const useSwap = () => {
         5000
       );
 
-      const minimumReceived = trade.minimumReceived.raw;
-      const expectedOutput = trade.expectedOutput.raw;
-      const feeAmount = expectedOutput - minimumReceived;
-
+      // Don't use fulfillResult.destinationTxDigest — always poll for it
       setResult({
         sourceChainKey,
         destChainKey,
@@ -311,7 +319,6 @@ export const useSwap = () => {
         toType,
         depositDigest,
         requestId,
-        destinationTxDigest: fulfillResult.destinationTxDigest,
         toAmount: minimumReceived,
         feeAmount,
         startedAt,
@@ -328,6 +335,34 @@ export const useSwap = () => {
         toasting.dismiss(SWAP_TOAST_ID);
         return;
       }
+
+      // If we have a requestId, the solver may still be processing —
+      // set partial result so the polling effect can retrieve the digest
+      if (requestId && trade && depositDigest && startedAt) {
+        const minimumReceived = trade.minimumReceived.raw;
+        const expectedOutput = trade.expectedOutput.raw;
+        const feeAmount = expectedOutput - minimumReceived;
+
+        setResult({
+          sourceChainKey,
+          destChainKey,
+          fromAmount,
+          fromType,
+          toType,
+          depositDigest,
+          requestId,
+          toAmount: minimumReceived,
+          feeAmount,
+          startedAt,
+        });
+        setStatus('success');
+        haptic.success();
+        toasting.dismiss(SWAP_TOAST_ID);
+        mutateSuiBalances();
+        mutateSolanaBalances();
+        return;
+      }
+
       setStatus('error');
       haptic.error();
       const message = extractErrorMessage(err, 'Swap failed');
