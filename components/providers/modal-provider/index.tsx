@@ -127,7 +127,7 @@ const ModalProvider: FC = () => {
                   type="button"
                   aria-label="Close modal"
                   className="w-8 h-8 flex items-center justify-center bg-surface-lighter cursor-pointer rounded-lg border-none text-text-secondary hover:text-text transition-colors duration-150 focus-ring"
-                  onClick={handleClose}
+                  onClick={onHandleClose}
                 >
                   <svg
                     aria-hidden="true"

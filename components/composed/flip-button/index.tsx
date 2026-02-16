@@ -7,7 +7,7 @@ const FLIP_BTN_STYLE = {
   background: 'var(--flip-btn-bg)',
   border: '1px solid var(--flip-btn-border)',
   boxShadow: 'var(--flip-btn-shadow)',
-  backdropFilter: 'blur(12px)',
+  backdropFilter: 'blur(var(--blur-md))',
 } as const;
 
 const FLIP_BTN_HOVER = {

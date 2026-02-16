@@ -10,6 +10,7 @@ import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
 import GasGuardProvider from '@/components/providers/gas-guard-provider';
 import ModalProvider from '@/components/providers/modal-provider';
+import PresignGuardProvider from '@/components/providers/presign-guard-provider';
 import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import SidePanelProvider from '@/components/providers/side-panel-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
@@ -65,6 +66,7 @@ const ThemedProviders = ({ children }: { children: ReactNode }) => {
       >
         <WalletRegistrationProvider />
         <GasGuardProvider />
+        <PresignGuardProvider />
         <OnboardingGate>{children}</OnboardingGate>
       </SkeletonTheme>
     </>

@@ -23,6 +23,7 @@ import { fetchMetadata, fetchStatus, fulfill } from '@/lib/solver/client';
 import { createSwapRequest } from '@/lib/xswap/client';
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
+import { withRetry } from '@/utils/with-retry';
 
 export type SwapStatus =
   | 'idle'
@@ -56,42 +57,6 @@ interface SwapParams {
 const ENCLAVE_RETRY_ATTEMPTS = 5;
 const ENCLAVE_RETRY_BASE_DELAY_MS = 500;
 const ENCLAVE_RETRY_MAX_DELAY_MS = 4000;
-
-const withRetry = async <T>(
-  fn: () => Promise<T>,
-  attempts: number,
-  baseDelayMs: number,
-  signal?: AbortSignal,
-  maxDelayMs?: number
-): Promise<T> => {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      if (i === attempts - 1) throw err;
-      if (signal?.aborted) {
-        throw new DOMException('The operation was aborted.', 'AbortError');
-      }
-      const delay = maxDelayMs
-        ? Math.min(baseDelayMs * 2 ** i, maxDelayMs)
-        : baseDelayMs;
-      await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, delay);
-        signal?.addEventListener(
-          'abort',
-          () => {
-            clearTimeout(timer);
-            reject(
-              new DOMException('The operation was aborted.', 'AbortError')
-            );
-          },
-          { once: true }
-        );
-      });
-    }
-  }
-  throw new Error('Retry exhausted');
-};
 
 export const useSwap = () => {
   const { user } = usePrivy();

@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type FC, useRef } from 'react';
 
 import { CheckSVG } from '@/components/ui/icons';
@@ -64,6 +64,7 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
   direction,
   onRetry,
 }) => {
+  const reducedMotion = useReducedMotion();
   const config = DIRECTION_CONFIG[direction];
   const rawIndex = config.statusIndex[status] ?? -1;
   const isSuccess = status === 'success';
@@ -115,10 +116,12 @@ const BridgeProgressStepper: FC<BridgeProgressStepperProps> = ({
                           : 'var(--color-accent-wash)',
                       }}
                       animate={
-                        isErrorStep ? undefined : { scale: [1, 1.15, 1] }
+                        isErrorStep || reducedMotion
+                          ? undefined
+                          : { scale: [1, 1.15, 1] }
                       }
                       transition={
-                        isErrorStep
+                        isErrorStep || reducedMotion
                           ? undefined
                           : { repeat: Number.POSITIVE_INFINITY, duration: 1.5 }
                       }

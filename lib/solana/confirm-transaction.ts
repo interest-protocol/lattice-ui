@@ -1,32 +1,34 @@
 import type { Signature } from '@solana/kit';
 
+import { pollUntil } from '@/lib/poll-until';
+
 import type { SolanaRpc } from './server';
 
 export const confirmSolanaTransaction = async (
   rpc: SolanaRpc,
-  signature: Signature
+  signature: Signature,
+  signal?: AbortSignal
 ): Promise<void> => {
-  // Poll for confirmation
-  const maxRetries = 30;
-  for (let i = 0; i < maxRetries; i++) {
-    const { value: statuses } = await rpc
-      .getSignatureStatuses([signature])
-      .send();
+  await pollUntil(
+    async () => {
+      const { value: statuses } = await rpc
+        .getSignatureStatuses([signature])
+        .send();
 
-    const status = statuses[0];
-    if (
-      status?.confirmationStatus === 'finalized' ||
-      status?.confirmationStatus === 'confirmed'
-    ) {
-      return;
-    }
+      const status = statuses[0];
+      if (status?.err) {
+        throw new Error(`Transaction failed: ${JSON.stringify(status.err)}`);
+      }
 
-    if (status?.err) {
-      throw new Error(`Transaction failed: ${JSON.stringify(status.err)}`);
-    }
+      if (
+        status?.confirmationStatus === 'finalized' ||
+        status?.confirmationStatus === 'confirmed'
+      ) {
+        return status;
+      }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-
-  throw new Error('Transaction confirmation timed out');
+      return null;
+    },
+    { maxPolls: 30, intervalMs: 2_000, signal }
+  );
 };

@@ -22,6 +22,7 @@ export const useHealth = (): HealthStatus => {
     queryKey: ['health'],
     queryFn: fetchHealth,
     refetchInterval: REFETCH_INTERVALS.HEALTH,
+    staleTime: 10_000,
     refetchOnWindowFocus: false,
   });
 

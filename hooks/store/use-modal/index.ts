@@ -33,8 +33,12 @@ const defaultValues = {
   containerProps: undefined,
 };
 
-export const useModal = create<UseModal>((set) => ({
+export const useModal = create<UseModal>((set, get) => ({
   ...defaultValues,
-  handleClose: () => set(defaultValues),
+  handleClose: () => {
+    const { onClose } = get();
+    if (onClose) onClose();
+    set(defaultValues);
+  },
   setContent: (content, options) => set({ content, ...options }),
 }));

@@ -1,33 +1,17 @@
 import { NextResponse } from 'next/server';
 
 import { errorResponse } from '@/lib/api/validate-params';
-import { SOLVER_API_URL } from '@/lib/config';
-import { SOLVER_API_KEY } from '@/lib/config.server';
+import { getPrices } from '@/lib/solver/server';
 
 export async function GET() {
-  if (!SOLVER_API_URL)
-    return NextResponse.json({ error: 'Service unavailable' }, { status: 500 });
-
   try {
-    const response = await fetch(`${SOLVER_API_URL}/api/v1/prices`, {
-      headers: { 'x-api-key': SOLVER_API_KEY },
-      signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch prices' },
-        { status: response.status }
-      );
-    }
-
-    const json = await response.json();
-    return NextResponse.json(json.data, {
+    const data = await getPrices();
+    return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30',
       },
     });
-  } catch (error: unknown) {
-    return errorResponse(error, 'Failed to fetch prices');
+  } catch (caught: unknown) {
+    return errorResponse(caught, 'Failed to fetch prices');
   }
 }

@@ -1,7 +1,15 @@
+import {
+  getNetworkConfig,
+  IkaClient,
+} from '@ika.xyz/sdk';
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
 import { fromHex, toBase64 } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
-import { unwrapSimulationError, type Base64EncodedWireTransaction, type Signature } from '@solana/kit';
+import {
+  type Base64EncodedWireTransaction,
+  type Signature,
+  unwrapSimulationError,
+} from '@solana/kit';
 import bs58 from 'bs58';
 import { useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
@@ -13,13 +21,8 @@ import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useBalances from '@/hooks/domain/use-balances';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
+import { post } from '@/lib/api/client';
 import { createSolanaAdapter } from '@/lib/chain-adapters/solana-adapter';
-import {
-  Curve,
-  IkaClient,
-  SignatureAlgorithm,
-  getNetworkConfig,
-} from '@ika.xyz/sdk';
 import { confirmSolanaTransaction } from '@/lib/solana/confirm-transaction';
 import {
   bridgeBurnCreate,
@@ -28,6 +31,7 @@ import {
   bridgeBurnVote,
   bridgeMint,
 } from '@/lib/xbridge/client';
+import { waitForIkaSignature } from '@/lib/xbridge/wait-for-ika-signature';
 
 import { extractErrorMessage } from '@/utils';
 import { haptic } from '@/utils/haptic';
@@ -73,6 +77,7 @@ export const useBridge = () => {
   const [result, setResult] = useState<BridgeResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const ikaClientRef = useRef<IkaClient | null>(null);
+  const ikaClientInitPromiseRef = useRef<Promise<IkaClient> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -82,19 +87,35 @@ export const useBridge = () => {
 
   const solanaRpc = useSolanaRpc();
   const suiClient = useSuiClient();
-
-  useEffect(() => {
-    (async () => {
-      const client = new IkaClient({
-        suiClient,
-        config: getNetworkConfig('mainnet'),
-      });
-      await client.initialize();
-      ikaClientRef.current = client;
-    })();
-  }, [suiClient]);
   const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
     useBalances();
+
+  const ensureIkaClient = async (): Promise<IkaClient> => {
+    if (ikaClientRef.current) return ikaClientRef.current;
+    if (!ikaClientInitPromiseRef.current) {
+      ikaClientInitPromiseRef.current = (async () => {
+        try {
+          const client = new IkaClient({
+            suiClient,
+            config: getNetworkConfig('mainnet'),
+          });
+          await client.initialize();
+          ikaClientRef.current = client;
+          return client;
+        } catch (err) {
+          ikaClientInitPromiseRef.current = null;
+          throw err;
+        }
+      })();
+    }
+    return ikaClientInitPromiseRef.current;
+  };
+
+  useEffect(() => {
+    ensureIkaClient().catch((error) => {
+      console.error('[bridge] IKA client init failed', error);
+    });
+  }, [suiClient]);
 
   const getSolanaAdapter = () =>
     createSolanaAdapter(solanaRpc, mutateSolanaBalances);
@@ -141,6 +162,7 @@ export const useBridge = () => {
 
     setStatus('waiting');
     toasting.update(toastId, 'Confirming transaction...');
+    await suiClient.waitForTransaction({ digest });
     await mutateSuiBalances();
 
     return { depositDigest: depositSignature, mintDigest: digest };
@@ -157,7 +179,7 @@ export const useBridge = () => {
 
     const coinType = WSOL_SUI_TYPE.split('<')[1].replace('>', '');
 
-    // Phase A: Sui-side burn create (setup + SPL message + Tx1)
+    // Phase A: Sui-side burn create (setup + native SOL message + Tx1)
     setStatus('creating');
     toasting.update(toastId, 'Creating burn request...');
 
@@ -195,7 +217,7 @@ export const useBridge = () => {
 
     // Phase C: Finalize (Tx2: on-chain vote + execute burn)
     setStatus('executing');
-    toasting.update(toastId, 'Broadcasting to Solana...');
+    toasting.update(toastId, 'Finalizing burn on Sui...');
 
     const finalizeResult = await bridgeBurnFinalize({
       userId: user.id,
@@ -206,23 +228,30 @@ export const useBridge = () => {
       voteSignature: voteResult.signature,
       voteTimestampMs: voteResult.timestampMs,
       solverSignature: signResult.solverSignature,
-      suiWalletId: createResult.suiWalletId,
     });
 
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
 
     // Phase D: Poll IKA for dWallet signature
-    invariant(ikaClientRef.current, 'IKA client not initialized');
-
-    const sign = await ikaClientRef.current.getSignInParticularState(
-      finalizeResult.signId,
-      Curve.ED25519,
-      SignatureAlgorithm.EdDSA,
-      'Completed',
-      { timeout: 120_000, interval: 3_000, signal }
+    console.log(
+      '[bridge] Phase D: waiting for dWallet signature, signId=',
+      finalizeResult.signId
     );
-    const dwalletSignature = new Uint8Array(sign.state.Completed.signature);
+    toasting.update(toastId, 'Waiting for dWallet signature...');
+    const ikaClient = await ensureIkaClient();
+    const dwalletSignature = await waitForIkaSignature({
+      ikaClient,
+      signId: finalizeResult.signId,
+      timeoutMs: 120_000,
+      intervalMs: 3_000,
+      signal,
+    });
+    console.log(
+      '[bridge] Phase D: dWallet signature received,',
+      dwalletSignature.length,
+      'bytes'
+    );
 
     invariant(
       dwalletSignature.length === 64,
@@ -230,6 +259,8 @@ export const useBridge = () => {
     );
 
     // Phase E: Build raw Solana tx and broadcast
+    console.log('[bridge] Phase E: building Solana transaction');
+    toasting.update(toastId, 'Broadcasting to Solana...');
     const messageBytes = fromHex(createResult.message);
     const userSigBytes = fromHex(createResult.userSignature);
 
@@ -244,19 +275,22 @@ export const useBridge = () => {
 
     let solanaSignature: string;
     try {
-      solanaSignature = await solanaRpc
+      solanaSignature = (await solanaRpc
         .sendTransaction(base64Tx, {
           encoding: 'base64',
           preflightCommitment: 'confirmed',
         })
-        .send() as string;
+        .send()) as string;
     } catch (err) {
       const cause = unwrapSimulationError(err);
       console.error('[bridge] Solana sendTransaction failed:', cause);
       throw cause;
     }
 
+    console.log('[bridge] Phase E: Solana tx sent, sig=', solanaSignature);
+    toasting.update(toastId, 'Confirming Solana transaction...');
     await confirmSolanaTransaction(solanaRpc, solanaSignature as Signature);
+    console.log('[bridge] Phase E: Solana tx confirmed');
 
     await Promise.all([mutateSuiBalances(), mutateSolanaBalances()]);
     return {
@@ -325,6 +359,18 @@ export const useBridge = () => {
       setStatus('success');
       haptic.success();
       toasting.dismiss(BRIDGE_TOAST_ID);
+
+      post(
+        '/api/presign/ensure',
+        { userId: user.id },
+        {
+          timeout: 30_000,
+          retries: 0,
+        }
+      ).catch((err) => {
+        console.warn('[bridge] presign ensure failed:', err);
+      });
+
       return true;
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {

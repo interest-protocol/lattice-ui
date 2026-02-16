@@ -1,27 +1,10 @@
 import type { FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
-import {
-  PizzaPart25PercentSVG,
-  PizzaPart50PercentSVG,
-  PizzaPart100PercentSVG,
-} from '@/components/ui/icons';
-import type { SVGProps } from '@/components/ui/icons/icons.types';
 import useBalances from '@/hooks/domain/use-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+import { FACTOR_DIVISORS, PIZZA_ICONS } from './constants';
 import type { InputFieldGenericProps } from './input-field.types';
-
-const PIZZA_ICONS: Record<number, FC<SVGProps>> = {
-  0.25: PizzaPart25PercentSVG,
-  0.5: PizzaPart50PercentSVG,
-  1: PizzaPart100PercentSVG,
-};
-
-const FACTOR_DIVISORS: Record<number, bigint> = {
-  0.25: 4n,
-  0.5: 2n,
-  1: 1n,
-};
 
 const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
   const { getBalance } = useBalances();

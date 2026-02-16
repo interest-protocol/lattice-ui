@@ -20,7 +20,6 @@ const useSolanaBalances = (addr: string | null) => {
   const queryKey = ['solana-balances', addr];
 
   const fetchBalances = async () => {
-    if (!addr) return DEFAULT_SOLANA_BALANCES;
     const pubkey = address(addr);
     const wsuiMint = address(WSUI_SOLANA_MINT);
 
@@ -69,14 +68,8 @@ const useSolanaBalances = (addr: string | null) => {
     sol: CurrencyAmount.fromRawAmount(Token.SOL, balances.sol),
   };
 
-  const mutate = async () => {
-    const result = await queryClient.fetchQuery({
-      queryKey,
-      queryFn: fetchBalances,
-      staleTime: 0,
-    });
-    return result;
-  };
+  const mutate = () =>
+    queryClient.invalidateQueries({ queryKey });
 
   return {
     balances,

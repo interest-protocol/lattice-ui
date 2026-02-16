@@ -1,10 +1,17 @@
 import invariant from 'tiny-invariant';
 
+import { parseUnits } from '@/lib/bigint-utils';
+
 import { CurrencyAmount } from './currency-amount';
+import { Fraction } from './fraction';
 import { Percent } from './percent';
 import type { Token } from './token';
 
 const DEFAULT_SLIPPAGE = Percent.fromBps(50); // 0.5%
+
+/** Scale factor for converting floating-point USD prices to bigint fractions. */
+const PRICE_SCALE_DECIMALS = 18;
+const PRICE_SCALE = 10n ** BigInt(PRICE_SCALE_DECIMALS);
 
 interface TradeParams {
   inputAmount: CurrencyAmount;
@@ -19,20 +26,20 @@ export class Trade {
   readonly expectedOutput: CurrencyAmount;
   readonly minimumReceived: CurrencyAmount;
   readonly slippage: Percent;
-  readonly rate: number;
+  readonly rateFraction: Fraction;
 
   private constructor(
     inputAmount: CurrencyAmount,
     expectedOutput: CurrencyAmount,
     minimumReceived: CurrencyAmount,
     slippage: Percent,
-    rate: number
+    rateFraction: Fraction
   ) {
     this.inputAmount = inputAmount;
     this.expectedOutput = expectedOutput;
     this.minimumReceived = minimumReceived;
     this.slippage = slippage;
-    this.rate = rate;
+    this.rateFraction = rateFraction;
   }
 
   static fromOraclePrices({
@@ -45,12 +52,26 @@ export class Trade {
     invariant(inputPriceUsd > 0, 'Input price must be positive');
     invariant(outputPriceUsd > 0, 'Output price must be positive');
 
-    const rate = inputPriceUsd / outputPriceUsd;
-    const outputHuman = inputAmount.toNumber() * rate;
-    const expectedOutput = CurrencyAmount.fromHumanAmount(
-      outputToken,
-      outputHuman
+    // Scale float prices to bigint fractions to avoid floating-point arithmetic
+    const inputPriceScaled = parseUnits(
+      String(inputPriceUsd),
+      PRICE_SCALE_DECIMALS
     );
+    const outputPriceScaled = parseUnits(
+      String(outputPriceUsd),
+      PRICE_SCALE_DECIMALS
+    );
+
+    const rateFraction = Fraction.from(inputPriceScaled, outputPriceScaled);
+
+    // outputRaw = inputRaw * inputPrice / outputPrice * (10^outputDecimals / 10^inputDecimals)
+    const inputDecimals = BigInt(inputAmount.token.decimals);
+    const outputDecimals = BigInt(outputToken.decimals);
+    const outputRaw =
+      (inputAmount.raw * inputPriceScaled * 10n ** outputDecimals) /
+      (outputPriceScaled * 10n ** inputDecimals);
+
+    const expectedOutput = CurrencyAmount.fromRawAmount(outputToken, outputRaw);
     const slippageAmount = slippage.applyTo(expectedOutput);
     const minimumReceived = expectedOutput.subtract(slippageAmount);
 
@@ -59,7 +80,14 @@ export class Trade {
       expectedOutput,
       minimumReceived,
       slippage,
-      rate
+      rateFraction
+    );
+  }
+
+  get rate(): number {
+    return (
+      Number(this.rateFraction.numerator * PRICE_SCALE) /
+      Number(this.rateFraction.denominator * PRICE_SCALE)
     );
   }
 
@@ -68,6 +96,6 @@ export class Trade {
   }
 
   get rateDisplay(): string {
-    return `1 ${this.inputAmount.token.symbol} ≈ ${this.rate.toFixed(6)} ${this.expectedOutput.token.symbol}`;
+    return `1 ${this.inputAmount.token.symbol} ≈ ${this.rateFraction.toSignificant(6)} ${this.expectedOutput.token.symbol}`;
   }
 }

@@ -3,13 +3,26 @@ import type { ZodSchema } from 'zod';
 
 import { extractErrorMessage } from '@/utils/extract-error-message';
 
+const isVercelProduction = (): boolean =>
+  process.env.VERCEL_ENV === 'production';
+
+export const toClientErrorMessage = (
+  detailed: string,
+  fallback: string
+): string => (isVercelProduction() ? fallback : detailed);
+
 export const errorResponse = (
   error: unknown,
   fallback: string,
   status = 500
 ): NextResponse =>
   NextResponse.json(
-    { error: extractErrorMessage(error, fallback) },
+    {
+      error: toClientErrorMessage(
+        extractErrorMessage(error, fallback),
+        fallback
+      ),
+    },
     { status }
   );
 

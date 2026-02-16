@@ -1,16 +1,13 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import type { ChangeEvent, FC } from 'react';
-
 import {
-  ChevronDownSVG,
-  PizzaPart25PercentSVG,
-  PizzaPart50PercentSVG,
-  PizzaPart100PercentSVG,
-} from '@/components/ui/icons';
-import type { SVGProps } from '@/components/ui/icons/icons.types';
+  FACTOR_DIVISORS,
+  PIZZA_ICONS,
+} from '@/components/composed/input-field/constants';
+import { ChevronDownSVG } from '@/components/ui/icons';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
@@ -19,16 +16,10 @@ import { parseInputEventToNumberString } from '@/utils/number';
 
 import type { BridgeFromCardProps } from './bridge.types';
 
-const PIZZA_ICONS: Record<number, FC<SVGProps>> = {
-  0.25: PizzaPart25PercentSVG,
-  0.5: PizzaPart50PercentSVG,
-  1: PizzaPart100PercentSVG,
-};
-
-const FACTOR_DIVISORS: Record<number, bigint> = {
-  0.25: 4n,
-  0.5: 2n,
-  1: 1n,
+const TOKEN_PILL_SPRING = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 25,
 };
 
 const BridgeFromCard: FC<BridgeFromCardProps> = ({
@@ -39,11 +30,15 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
   balanceLoading,
   onOpenRouteSelector,
 }) => {
+  const reducedMotion = useReducedMotion();
   const { getPrice } = useTokenPrices();
   const price = getPrice(route.sourceToken.type);
   const amountNum = Number.parseFloat(amount) || 0;
   const chainName = CHAIN_REGISTRY[route.sourceChain].displayName;
-  const balanceNum = FixedPointMath.toNumber(balance, route.sourceToken.decimals);
+  const balanceNum = FixedPointMath.toNumber(
+    balance,
+    route.sourceToken.decimals
+  );
   const balanceFormatted = formatMoney(
     balanceNum,
     balanceNum < 0.01 && balanceNum > 0 ? 6 : 4
@@ -107,9 +102,9 @@ const BridgeFromCard: FC<BridgeFromCardProps> = ({
           }}
           onClick={onOpenRouteSelector}
           aria-label={`Select ${route.sourceToken.symbol}`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          whileHover={reducedMotion ? undefined : { scale: 1.03 }}
+          whileTap={reducedMotion ? undefined : { scale: 0.97 }}
+          transition={reducedMotion ? { duration: 0 } : TOKEN_PILL_SPRING}
         >
           <span className="overflow-hidden rounded-full flex w-7 h-7 min-w-7 items-center justify-center">
             <Image

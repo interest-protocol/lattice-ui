@@ -21,14 +21,14 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3(@mysten/sui@1.45.2(typescript@5.9.3))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@interest-protocol/xbridge-sdk':
-        specifier: ^1.1.5
-        version: 1.1.5(@mysten/sui@1.45.2(typescript@5.9.3))
+        specifier: ^1.2.0
+        version: 1.2.0(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/xcore-sdk':
         specifier: ^1.0.4
         version: 1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/xswap-sdk':
-        specifier: ^1.0.4
-        version: 1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
+        specifier: ^1.0.5
+        version: 1.0.5(@mysten/sui@1.45.2(typescript@5.9.3))
       '@mysten/sui':
         specifier: ^1.45.2
         version: 1.45.2(typescript@5.9.3)
@@ -924,8 +924,8 @@ packages:
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xbridge-sdk@1.1.5':
-    resolution: {integrity: sha512-HHaGkfdzS8L6ddeQKwJGmEWpwe5jXIsI/5uE4wVDb/gLvwXTY3I5uNZqfyzE1ftRSvpkpMnueM9KcrAUr+8O7w==}
+  '@interest-protocol/xbridge-sdk@1.2.0':
+    resolution: {integrity: sha512-Mx2pVIkb7BPJnZTJLAz8Sn2EiCgY2DFl0gbFqY2sUv/UUcjNVFlYMY1h5jXKO1E27VmImaMIa5u/IP3qliPlcQ==}
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
@@ -934,8 +934,8 @@ packages:
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xswap-sdk@1.0.4':
-    resolution: {integrity: sha512-mzWineKQxnxDjh0dVQPJsG+i4gBtPS4bM8HKcmI8Yz3zwL+WhNRg5HoaD4W2b6u77LdG3xIQkj0onsHNf8loBA==}
+  '@interest-protocol/xswap-sdk@1.0.5':
+    resolution: {integrity: sha512-bBvRgD0X+U2SpyfPhgtcuTNvAnuznT2OeJ6MtkmFdY83IXRTV+UMI5IEepJa1Oy5i5DovYE2HGwMduYK8HRmJg==}
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
@@ -5925,7 +5925,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@interest-protocol/xbridge-sdk@1.1.5(@mysten/sui@1.45.2(typescript@5.9.3))':
+  '@interest-protocol/xbridge-sdk@1.2.0(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       tiny-invariant: 1.3.3
@@ -5937,7 +5937,7 @@ snapshots:
       '@polymedia/suitcase-core': 0.0.67(@mysten/sui@1.45.2(typescript@5.9.3))
       tiny-invariant: 1.3.3
 
-  '@interest-protocol/xswap-sdk@1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))':
+  '@interest-protocol/xswap-sdk@1.0.5(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       tiny-invariant: 1.3.3

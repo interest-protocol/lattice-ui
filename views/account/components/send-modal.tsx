@@ -1,4 +1,3 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
@@ -7,13 +6,11 @@ import Spinner from '@/components/ui/spinner';
 import { toasting } from '@/components/ui/toast';
 import { CHAIN_KEYS, CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
-import { SOL_TYPE } from '@/constants/coins';
 import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
-import { extractErrorMessage, formatMoney } from '@/utils';
-import { coinTypeEquals } from '@/utils/sui';
+import { extractErrorMessage, formatMoney, isNativeToken } from '@/utils';
 
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
@@ -50,9 +47,6 @@ const SendModal: FC = () => {
       FixedPointMath.toNumber(balance, selectedToken.decimals).toString()
     );
   };
-
-  const isNativeToken = (type: string, chain: ChainKey): boolean =>
-    chain === 'sui' ? coinTypeEquals(type, SUI_TYPE_ARG) : type === SOL_TYPE;
 
   const handleSend = async () => {
     if (!authenticated) {

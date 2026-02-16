@@ -9,6 +9,12 @@ import { useModal } from '@/hooks/store/use-modal';
 import type { InputFieldAssetProps } from './input-field.types';
 import InputFieldModal from './input-field-modal';
 
+const TOKEN_PILL_SPRING = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 25,
+};
+
 const InputFieldAsset: FC<InputFieldAssetProps> = ({
   name,
   types,
@@ -76,11 +82,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
       whileHover={reducedMotion ? undefined : { scale: 1.03 }}
       whileTap={reducedMotion ? undefined : { scale: 0.97 }}
-      transition={
-        reducedMotion
-          ? { duration: 0 }
-          : { type: 'spring', stiffness: 400, damping: 25 }
-      }
+      transition={reducedMotion ? { duration: 0 } : TOKEN_PILL_SPRING}
     >
       <span className="overflow-hidden rounded-full flex w-7 h-7 min-w-7 items-center justify-center">
         <Image

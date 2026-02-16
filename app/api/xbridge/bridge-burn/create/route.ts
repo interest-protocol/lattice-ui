@@ -3,10 +3,6 @@ import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
 import { fromBase64, toBase64, toHex } from '@mysten/sui/utils';
 import { address } from '@solana/kit';
 import { fetchMaybeNonce } from '@solana-program/system';
-import {
-  findAssociatedTokenPda,
-  TOKEN_PROGRAM_ADDRESS,
-} from '@solana-program/token';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
 import invariant from 'tiny-invariant';
@@ -14,17 +10,18 @@ import { z } from 'zod';
 
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
+import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
-  extractPublicKey,
+  getWalletPublicKey,
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
-import { buildSplTransfer } from '@/lib/solana/spl-message';
+import { buildNativeSolTransfer } from '@/lib/solana/solana-message';
 import { findCreatedObjectId } from '@/lib/sui/object-changes';
 import { createXBridgeSdk } from '@/lib/xbridge';
 
@@ -39,11 +36,8 @@ const schema = z.object({
 export const POST = withAuthPost(
   schema,
   async (body) => {
-    const t0 = performance.now();
-    const elapsed = () => ((performance.now() - t0) / 1000).toFixed(1);
-    console.log(
-      `[bridge-burn/create] start sourceAmount=${body.sourceAmount} coinType=${body.coinType}`
-    );
+    const log = createRouteLogger('bridge-burn/create');
+    log.start(`sourceAmount=${body.sourceAmount} coinType=${body.coinType}`);
 
     try {
       const privy = getPrivyClient();
@@ -56,39 +50,15 @@ export const POST = withAuthPost(
 
       const { suiClient, xbridge } = createXBridgeSdk();
 
-      const walletInfo = await privy.wallets().get(suiWallet.id);
-      invariant(
-        walletInfo.public_key,
-        `Wallet ${suiWallet.id} has no public key`
-      );
-      const publicKey = extractPublicKey(walletInfo.public_key);
+      const publicKey = await getWalletPublicKey(privy, suiWallet.id);
 
       const walletAddress = suiWallet.address;
       const userSolanaAddress = solanaWallet.address;
-      console.log(`[bridge-burn/create] Phase 0 setup done (${elapsed()}s)`);
+      log.info('Phase 0 setup done');
 
-      // === Phase 1: Build SPL message + user pre-sign ===
+      // === Phase 1: Build native SOL transfer message + user pre-sign ===
       const dwalletSolana = DWalletAddress[ChainId.Solana];
-      const nativeSolMint = address(NATIVE_SOL_MINT);
 
-      // Derive ATAs
-      const [sourceAtaPda, destinationAtaPda] = await Promise.all([
-        findAssociatedTokenPda({
-          owner: address(dwalletSolana),
-          mint: nativeSolMint,
-          tokenProgram: TOKEN_PROGRAM_ADDRESS,
-        }),
-        findAssociatedTokenPda({
-          owner: address(userSolanaAddress),
-          mint: nativeSolMint,
-          tokenProgram: TOKEN_PROGRAM_ADDRESS,
-        }),
-      ]);
-
-      const sourceAtaAddress = sourceAtaPda[0];
-      const destinationAtaAddress = destinationAtaPda[0];
-
-      // Fetch nonce value from Solana RPC
       const rpc = getSolanaRpc();
       const nonceResult = await fetchMaybeNonce(
         rpc,
@@ -98,27 +68,37 @@ export const POST = withAuthPost(
       const nonceValue = nonceResult.data.blockhash;
       const nonceBytes = bs58.decode(nonceValue as string);
 
-      // Build SPL transfer message
-      const tokenOwnerBytes = bs58.decode(dwalletSolana);
-      const sourceAtaBytes = bs58.decode(sourceAtaAddress as string);
-      const destinationAtaBytes = bs58.decode(destinationAtaAddress as string);
-      const mintBytes = bs58.decode(NATIVE_SOL_MINT);
+      const dWalletBytes = bs58.decode(dwalletSolana);
       const nonceAccountBytes = bs58.decode(body.nonceAddress);
-      const userSolanaBytes = bs58.decode(userSolanaAddress);
       const destinationWalletBytes = new Uint8Array(body.destinationAddress);
 
-      const messageBytes = buildSplTransfer({
-        tokenOwner: tokenOwnerBytes,
-        sourceAta: sourceAtaBytes,
-        mint: mintBytes,
-        decimals: SOL_DECIMALS,
+      if (destinationWalletBytes.length !== 32) {
+        return NextResponse.json(
+          { error: 'Destination Solana address must be 32 bytes' },
+          { status: 400 }
+        );
+      }
+      if (bs58.encode(destinationWalletBytes) !== userSolanaAddress) {
+        return NextResponse.json(
+          {
+            error:
+              'Destination wallet must match the connected Solana wallet for native SOL burn',
+          },
+          { status: 400 }
+        );
+      }
+
+      const messageBytes = buildNativeSolTransfer({
+        dWallet: dWalletBytes,
         nonce: nonceBytes,
         nonceAccount: nonceAccountBytes,
-        nonceAuthority: userSolanaBytes,
         destinationWallet: destinationWalletBytes,
-        destinationAta: destinationAtaBytes,
         amount: BigInt(body.sourceAmount),
       });
+      invariant(
+        messageBytes.length === 224,
+        `Invalid native SOL message length: ${messageBytes.length}`
+      );
 
       // Sign as Solana transaction (not signMessage — message signing adds a prefix
       // that invalidates the signature for on-chain transaction verification)
@@ -143,9 +123,7 @@ export const POST = withAuthPost(
       const signedTxBytes = fromBase64(signResult.signed_transaction);
       const userSolanaSignature = signedTxBytes.subarray(1, 65);
 
-      console.log(
-        `[bridge-burn/create] Phase 1 SPL message + presign done (${elapsed()}s)`
-      );
+      log.info('Phase 1 native SOL message + presign done');
 
       // === Phase 2: Tx1 (create burn request + mint presign) ===
       const tx1 = new Transaction();
@@ -170,12 +148,12 @@ export const POST = withAuthPost(
         sourceDecimals: SOL_DECIMALS,
         destinationAddress: new Uint8Array(body.destinationAddress),
         sourceAmount: BigInt(body.sourceAmount),
-        dwalletAddress: bs58.decode(dwalletSolana),
+        dwalletAddress: dWalletBytes,
         message: messageBytes,
         nonce: nonceBytes,
         nonceAccount: nonceAccountBytes,
         destinationWallet: destinationWalletBytes,
-        destinationAta: destinationAtaBytes,
+        destinationAta: destinationWalletBytes,
         burnCoin,
         fee: feeCoin,
         coinType: body.coinType,
@@ -189,10 +167,13 @@ export const POST = withAuthPost(
       tx1.transferObjects([burnCap], walletAddress);
       tx1.transferObjects([refund], walletAddress);
 
-      xbridge.mintPresign({
+      const presignFee = tx1.splitCoins(tx1.gas, [tx1.pure.u64(0)]);
+      const { result: presignCap } = xbridge.takePresign({
         tx: tx1,
         chainId: ChainId.Solana,
+        fee: presignFee,
       });
+      tx1.transferObjects([presignCap], walletAddress);
 
       const rawBytes1 = await tx1.build({ client: suiClient });
 
@@ -218,12 +199,12 @@ export const POST = withAuthPost(
         requestId && burnCapId && presignCapId,
         'Failed to extract requestId, burnCapId, or presignCapId from tx1'
       );
-      console.log(
-        `[bridge-burn/create] Phase 2 Tx1 done requestId=${requestId} burnCapId=${burnCapId} presignCapId=${presignCapId} digest=${tx1Result.digest} (${elapsed()}s)`
+      log.info(
+        `Phase 2 Tx1 done requestId=${requestId} burnCapId=${burnCapId} presignCapId=${presignCapId} digest=${tx1Result.digest}`
       );
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
-      console.log(`[bridge-burn/create] done in ${elapsed()}s`);
+      log.info('done');
 
       return NextResponse.json({
         createDigest: tx1Result.digest,
@@ -235,7 +216,7 @@ export const POST = withAuthPost(
         message: toHex(messageBytes),
       });
     } catch (caught: unknown) {
-      console.error(`[bridge-burn/create] error after ${elapsed()}s`, caught);
+      log.error('error', caught);
 
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);

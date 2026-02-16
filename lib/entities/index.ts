@@ -1,3 +1,5 @@
+export type { BigIntish } from './fraction';
+export { toBigInt } from './fraction';
 export { CurrencyAmount } from './currency-amount';
 export { FixedPointMath } from './fixed-point-math';
 export { Fraction, Rounding } from './fraction';

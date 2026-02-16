@@ -22,6 +22,10 @@ export const RPC_DISPLAY = {
   [RPC.Suiet]: 'Suiet',
 };
 
+export const SOLANA_RPC_URL =
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
+  'https://api.mainnet-beta.solana.com';
+
 export const RPC_MAP: Record<RPC, string> = {
   [RPC.Shinami]:
     process.env.NEXT_PUBLIC_SHINAMI_RPC_URL ||

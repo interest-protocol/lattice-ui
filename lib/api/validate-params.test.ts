@@ -1,7 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { errorResponse, validateBody, validateQueryParam } from './validate-params';
+import {
+  errorResponse,
+  toClientErrorMessage,
+  validateBody,
+  validateQueryParam,
+} from './validate-params';
+
+const ORIGINAL_VERCEL_ENV = process.env.VERCEL_ENV;
+
+afterEach(() => {
+  if (ORIGINAL_VERCEL_ENV === undefined) {
+    delete process.env.VERCEL_ENV;
+    return;
+  }
+  process.env.VERCEL_ENV = ORIGINAL_VERCEL_ENV;
+});
 
 describe('validate-params', () => {
   describe('validateBody', () => {
@@ -72,11 +87,20 @@ describe('validate-params', () => {
   });
 
   describe('errorResponse', () => {
-    it('returns correct status and message from Error', async () => {
+    it('returns detailed message in non-production', async () => {
+      process.env.VERCEL_ENV = 'preview';
       const res = errorResponse(new Error('Something failed'), 'Fallback', 422);
       expect(res.status).toBe(422);
       const body = await res.json();
       expect(body.error).toBe('Something failed');
+    });
+
+    it('returns fallback message in production', async () => {
+      process.env.VERCEL_ENV = 'production';
+      const res = errorResponse(new Error('Something failed'), 'Fallback', 422);
+      expect(res.status).toBe(422);
+      const body = await res.json();
+      expect(body.error).toBe('Fallback');
     });
 
     it('uses fallback when not Error', async () => {
@@ -88,6 +112,18 @@ describe('validate-params', () => {
     it('defaults to status 500', () => {
       const res = errorResponse(new Error('fail'), 'fallback');
       expect(res.status).toBe(500);
+    });
+  });
+
+  describe('toClientErrorMessage', () => {
+    it('returns detailed message in non-production', () => {
+      process.env.VERCEL_ENV = 'preview';
+      expect(toClientErrorMessage('Detailed', 'Fallback')).toBe('Detailed');
+    });
+
+    it('returns fallback in production', () => {
+      process.env.VERCEL_ENV = 'production';
+      expect(toClientErrorMessage('Detailed', 'Fallback')).toBe('Fallback');
     });
   });
 });

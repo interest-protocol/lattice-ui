@@ -10,9 +10,9 @@ import invariant from 'tiny-invariant';
 
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 
-export const authorizationContext = {
-  authorization_private_keys: [PRIVY_AUTHORIZATION_KEY],
-};
+export const authorizationContext = Object.freeze({
+  authorization_private_keys: Object.freeze([PRIVY_AUTHORIZATION_KEY]),
+});
 
 interface SignAndExecuteParams {
   walletId: string;
@@ -24,6 +24,15 @@ interface SignAndExecuteParams {
     showObjectChanges?: boolean;
   };
 }
+
+export const getWalletPublicKey = async (
+  privy: PrivyClient,
+  walletId: string
+): Promise<Ed25519PublicKey> => {
+  const walletInfo = await privy.wallets().get(walletId);
+  invariant(walletInfo.public_key, `Wallet ${walletId} has no public key`);
+  return extractPublicKey(walletInfo.public_key);
+};
 
 export const extractPublicKey = (rawString: string): Ed25519PublicKey => {
   const isHex = /^(0x)?[0-9a-fA-F]+$/.test(rawString) && rawString.length >= 64;

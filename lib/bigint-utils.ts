@@ -23,17 +23,6 @@ export const parseUnits = (value: string, decimals: number): bigint => {
   return isNeg ? -raw : raw;
 };
 
-export const toFixed = (
-  value: bigint,
-  decimals: number,
-  dp: number
-): string => {
-  const full = formatUnits(value, decimals);
-  const [intPart = '0', fracPart = ''] = full.split('.');
-  const padded = fracPart.padEnd(dp, '0').slice(0, dp);
-  return dp > 0 ? `${intPart}.${padded}` : intPart;
-};
-
 export const toSignificant = (
   value: bigint,
   decimals: number,
@@ -42,11 +31,6 @@ export const toSignificant = (
   const num = Number(formatUnits(value, decimals));
   return num.toPrecision(sig).replace(/\.?0+$/, '');
 };
-
-export const bigintAbs = (value: bigint): bigint =>
-  value < 0n ? -value : value;
-
-export const bigintDivDown = (a: bigint, b: bigint): bigint => a / b;
 
 export const bigintDivUp = (a: bigint, b: bigint): bigint => {
   invariant(b !== 0n, 'Division by zero');

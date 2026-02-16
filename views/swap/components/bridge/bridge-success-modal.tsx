@@ -10,6 +10,7 @@ import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
 import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
 import { useModal } from '@/hooks/store/use-modal';
 import { toSignificant } from '@/lib/bigint-utils';
+import { formatAddress } from '@/utils';
 
 interface BridgeSuccessModalProps {
   result: BridgeResult;
@@ -48,11 +49,6 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
     result.destChainKey === 'sui'
       ? getSuiExplorerUrl(result.mintDigest, ExplorerMode.Transaction)
       : getSolanaExplorerUrl(result.mintDigest, SolanaExplorerMode.Transaction);
-
-  const truncateDigest = (digest: string) => {
-    if (digest.length <= 16) return digest;
-    return `${digest.slice(0, 8)}...${digest.slice(-6)}`;
-  };
 
   const close = () => {
     handleClose();
@@ -121,7 +117,7 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
           >
-            {truncateDigest(result.depositDigest)}
+            {formatAddress(result.depositDigest, 8, 6)}
             <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
           </a>
         </div>
@@ -141,7 +137,7 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
           >
-            {truncateDigest(result.mintDigest)}
+            {formatAddress(result.mintDigest, 8, 6)}
             <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
           </a>
         </div>

@@ -143,6 +143,7 @@ export const POST = withAuthPost(
 
       throw lastError;
     } catch (caught: unknown) {
+      console.error('[send-solana] error:', caught);
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
       return errorResponse(caught, 'Failed to send transaction');

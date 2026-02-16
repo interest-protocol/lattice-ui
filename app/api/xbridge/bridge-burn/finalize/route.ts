@@ -2,16 +2,17 @@ import { XSWAP_TYPE } from '@interest-protocol/xswap-sdk';
 import { Transaction } from '@mysten/sui/transactions';
 import { fromHex } from '@mysten/sui/utils';
 import { NextResponse } from 'next/server';
-import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
+import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
-  extractPublicKey,
+  getWalletPublicKey,
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
+import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -23,27 +24,21 @@ const schema = z.object({
   voteSignature: z.string(),
   voteTimestampMs: z.number(),
   solverSignature: z.string(),
-  suiWalletId: z.string(),
 });
 
 export const POST = withAuthPost(
   schema,
   async (body) => {
-    const t0 = performance.now();
-    const elapsed = () => ((performance.now() - t0) / 1000).toFixed(1);
-    console.log(`[bridge-burn/finalize] start requestId=${body.requestId}`);
+    const log = createRouteLogger('bridge-burn/finalize');
+    log.start(`requestId=${body.requestId}`);
 
     try {
       const privy = getPrivyClient();
-      const suiWallet = await privy.wallets().get(body.suiWalletId);
+      const suiWallet = await getFirstWallet(privy, body.userId, 'sui');
 
       const { suiClient, xbridge } = createXBridgeSdk();
 
-      invariant(
-        suiWallet.public_key,
-        `Wallet ${suiWallet.id} has no public key`
-      );
-      const publicKey = extractPublicKey(suiWallet.public_key);
+      const publicKey = await getWalletPublicKey(privy, suiWallet.id);
 
       const walletAddress = suiWallet.address;
 
@@ -80,28 +75,23 @@ export const POST = withAuthPost(
         options: { showEffects: true },
       });
 
-      console.log(
-        `[bridge-burn/finalize] Tx2 executed digest=${tx2Result.digest} (${elapsed()}s)`
-      );
+      log.info(`Tx2 executed digest=${tx2Result.digest}`);
 
       await suiClient.waitForTransaction({ digest: tx2Result.digest });
       const updatedRequest = await xbridge.getBurnRequest({
         requestId: body.requestId,
       });
-      console.log(
-        `[bridge-burn/finalize] signId=${updatedRequest.signId} done in ${elapsed()}s`
-      );
+      log.info(`signId=${updatedRequest.signId} done`);
 
       return NextResponse.json({
         executeDigest: tx2Result.digest,
         signId: updatedRequest.signId,
       });
     } catch (caught: unknown) {
-      console.error(
-        `[bridge-burn/finalize] error after ${elapsed()}s`,
-        caught
-      );
+      log.error('error', caught);
 
+      if (caught instanceof WalletNotFoundError)
+        return errorResponse(caught, caught.message, 404);
       return errorResponse(caught, 'Bridge burn finalize failed');
     }
   },

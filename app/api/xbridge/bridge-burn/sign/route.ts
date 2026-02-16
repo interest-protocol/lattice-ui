@@ -1,19 +1,17 @@
-import {
-  ChainId,
-  WalletKey,
-  WITNESS_TYPE,
-} from '@interest-protocol/xbridge-sdk';
-import { toHex } from '@mysten/sui/utils';
+import { ChainId, WalletKey } from '@interest-protocol/xbridge-sdk';
 import { NextResponse } from 'next/server';
 import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
+import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
-import { SOLVER_API_URL } from '@/lib/config';
-import { SOLVER_API_KEY } from '@/lib/config.server';
 import { pollUntil } from '@/lib/poll-until';
+import { sign } from '@/lib/solver/server';
 import { createXBridgeSdk } from '@/lib/xbridge';
+
+const toHexNoPrefix = (bytes: Uint8Array): string =>
+  Buffer.from(bytes).toString('hex');
 
 const schema = z.object({
   userId: z.string(),
@@ -25,9 +23,8 @@ const schema = z.object({
 export const POST = withAuthPost(
   schema,
   async (body) => {
-    const t0 = performance.now();
-    const elapsed = () => ((performance.now() - t0) / 1000).toFixed(1);
-    console.log(`[bridge-burn/sign] start requestId=${body.requestId}`);
+    const log = createRouteLogger('bridge-burn/sign');
+    log.start(`requestId=${body.requestId}`);
 
     try {
       const { suiClient, xbridge } = createXBridgeSdk();
@@ -51,14 +48,11 @@ export const POST = withAuthPost(
       const presignData = await pollUntil(
         () => {
           pollAttempt++;
-          console.log(
-            `[bridge-burn/sign] presign poll attempt ${pollAttempt}/45 (${elapsed()}s)`
-          );
+          log.info(`presign poll attempt ${pollAttempt}/45`);
           return xbridge
             .getPresignCaps({
               owner,
               walletKey: WalletKey[ChainId.Solana],
-              appTypeName: WITNESS_TYPE,
             })
             .then(
               (caps) =>
@@ -68,51 +62,38 @@ export const POST = withAuthPost(
         },
         { maxPolls: 45, intervalMs: 2_000 }
       );
-      console.log(
-        `[bridge-burn/sign] presign resolved for cap ${body.presignCapId} after ${pollAttempt} attempts (${elapsed()}s)`
+      log.info(
+        `presign resolved for cap ${body.presignCapId} after ${pollAttempt} attempts`
       );
 
-      // Fetch the burn request to get the SPL transfer message bytes
+      // Fetch the burn request to get the native SOL transfer message bytes
       const burnRequestData = await xbridge.getBurnRequest({
         requestId: body.requestId,
       });
-      console.log(`[bridge-burn/sign] getBurnRequest ok (${elapsed()}s)`);
+      invariant(
+        burnRequestData.message.length === 224,
+        `Invalid native SOL message length: ${burnRequestData.message.length}`
+      );
+      log.info('getBurnRequest ok');
 
-      console.log(`[bridge-burn/sign] calling solver sign (${elapsed()}s)`);
-      const solverResponse = await fetch(`${SOLVER_API_URL}/api/v1/sign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': SOLVER_API_KEY,
-        },
-        signal: AbortSignal.timeout(30_000),
-        body: JSON.stringify({
-          presign: toHex(new Uint8Array(presignData.presign)).replace(/^0x/, ''),
-          message: toHex(new Uint8Array(burnRequestData.message)).replace(/^0x/, ''),
-          chain: 'solana',
-        }),
+      // Compute centralized signature through solver-api.
+      // This follows core/solver-api's cached protocol-parameter strategy.
+      log.info('computing centralized signature');
+
+      const solverSignature = await sign({
+        presign: toHexNoPrefix(new Uint8Array(presignData.presign)),
+        message: toHexNoPrefix(new Uint8Array(burnRequestData.message)),
+        chain: 'solana',
       });
 
-      if (!solverResponse.ok) {
-        const errorText = await solverResponse
-          .text()
-          .catch(() => 'Unknown error');
-        throw new Error(`Solver sign failed: ${errorText}`);
-      }
-
-      const solverResult = (await solverResponse.json()) as {
-        success: boolean;
-        data: { signature: string };
-      };
-
-      console.log(`[bridge-burn/sign] solver sign ok (${elapsed()}s)`);
-      console.log(`[bridge-burn/sign] done in ${elapsed()}s`);
+      log.info('centralized signature computed');
+      log.info('done');
 
       return NextResponse.json({
-        solverSignature: solverResult.data.signature,
+        solverSignature,
       });
     } catch (caught: unknown) {
-      console.error(`[bridge-burn/sign] error after ${elapsed()}s`, caught);
+      log.error('error', caught);
 
       return errorResponse(caught, 'Bridge burn sign failed');
     }

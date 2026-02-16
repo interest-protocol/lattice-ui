@@ -3,22 +3,8 @@ import invariant from 'tiny-invariant';
 import { parseUnits, toSignificant } from '@/lib/bigint-utils';
 
 import { FixedPointMath } from './fixed-point-math';
-import { Fraction } from './fraction';
+import { type BigIntish, Fraction, toBigInt } from './fraction';
 import type { Token } from './token';
-
-export type BigIntish = bigint | number | string;
-
-const parseBigIntish = (value: BigIntish): bigint => {
-  if (typeof value === 'bigint') return value;
-  if (typeof value === 'number') return BigInt(Math.trunc(value));
-  try {
-    return BigInt(value);
-  } catch {
-    throw new Error(
-      `CurrencyAmount: cannot parse "${String(value)}" as BigInt`
-    );
-  }
-};
 
 export class CurrencyAmount {
   readonly token: Token;
@@ -32,7 +18,7 @@ export class CurrencyAmount {
   // --- Factories ---
 
   static fromRawAmount(token: Token, raw: BigIntish): CurrencyAmount {
-    return new CurrencyAmount(token, parseBigIntish(raw));
+    return new CurrencyAmount(token, toBigInt(raw));
   }
 
   static fromHumanAmount(
@@ -84,7 +70,7 @@ export class CurrencyAmount {
   }
 
   multiply(other: BigIntish): CurrencyAmount {
-    const factor = parseBigIntish(other);
+    const factor = toBigInt(other);
     return new CurrencyAmount(this.token, this.raw * factor);
   }
 

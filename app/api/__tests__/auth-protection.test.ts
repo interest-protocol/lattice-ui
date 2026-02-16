@@ -131,8 +131,8 @@ vi.mock('@/lib/solana/nonce', () => ({
   deriveNonceAddress: vi.fn(),
   NONCE_SEED: 'nonce',
 }));
-vi.mock('@/lib/solana/spl-message', () => ({
-  buildSplTransfer: vi.fn().mockReturnValue(new Uint8Array(32)),
+vi.mock('@/lib/solana/solana-message', () => ({
+  buildNativeSolTransfer: vi.fn().mockReturnValue(new Uint8Array(32)),
 }));
 vi.mock('@/lib/solana/confirm-transaction', () => ({
   confirmSolanaTransaction: vi.fn(),
@@ -266,8 +266,8 @@ const PROTECTED_ROUTES: ProtectedRoute[] = [
     },
   },
   {
-    name: 'xbridge/bridge-burn',
-    importPath: '@/app/api/xbridge/bridge-burn/route',
+    name: 'xbridge/bridge-burn/create',
+    importPath: '@/app/api/xbridge/bridge-burn/create/route',
     method: 'POST',
     requiresUserId: true,
     body: {
@@ -279,16 +279,42 @@ const PROTECTED_ROUTES: ProtectedRoute[] = [
     },
   },
   {
-    name: 'xbridge/broadcast-burn',
-    importPath: '@/app/api/xbridge/broadcast-burn/route',
+    name: 'xbridge/bridge-burn/vote',
+    importPath: '@/app/api/xbridge/bridge-burn/vote/route',
     method: 'POST',
     requiresUserId: true,
     body: {
       userId: 'user-123',
       requestId: 'req-1',
-      signId: 'sign-1',
-      userSignature: 'aabb',
-      message: 'ccdd',
+      coinType: '0x::test::TEST',
+    },
+  },
+  {
+    name: 'xbridge/bridge-burn/sign',
+    importPath: '@/app/api/xbridge/bridge-burn/sign/route',
+    method: 'POST',
+    requiresUserId: true,
+    body: {
+      userId: 'user-123',
+      requestId: 'req-1',
+      coinType: '0x::test::TEST',
+      presignCapId: '0xpresign',
+    },
+  },
+  {
+    name: 'xbridge/bridge-burn/finalize',
+    importPath: '@/app/api/xbridge/bridge-burn/finalize/route',
+    method: 'POST',
+    requiresUserId: true,
+    body: {
+      userId: 'user-123',
+      requestId: 'req-1',
+      burnCapId: '0xburncap',
+      presignCapId: '0xpresign',
+      coinType: '0x::test::TEST',
+      voteSignature: '0xabc',
+      voteTimestampMs: 1_700_000_000_000,
+      solverSignature: '0xdef',
     },
   },
   {
@@ -330,19 +356,15 @@ describe('Auth protection — protected routes', () => {
     describe(`${route.method} /api/${route.name}`, () => {
       const makeRequest = () => {
         if (route.method === 'GET') {
-          return new NextRequest(
-            `http://localhost:3000/api/${route.name}`,
-            { method: 'GET' }
-          );
+          return new NextRequest(`http://localhost:3000/api/${route.name}`, {
+            method: 'GET',
+          });
         }
-        return new NextRequest(
-          `http://localhost:3000/api/${route.name}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(route.body),
-          }
-        );
+        return new NextRequest(`http://localhost:3000/api/${route.name}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(route.body),
+        });
       };
 
       it('returns 401 when no token is provided', async () => {
@@ -386,10 +408,7 @@ describe('Auth protection — protected routes', () => {
             accessToken: 'tok',
           });
           mockVerifyUserMatch.mockReturnValue(
-            NextResponse.json(
-              { error: 'User ID mismatch' },
-              { status: 403 }
-            )
+            NextResponse.json({ error: 'User ID mismatch' }, { status: 403 })
           );
 
           const mod = await import(route.importPath);
@@ -472,16 +491,11 @@ describe('Auth protection — public routes (no auth required)', () => {
 
       let req: NextRequest;
       if (route.method === 'POST') {
-        req = new NextRequest(
-          `http://localhost:3000/api/${route.name}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-              (route as { body?: unknown }).body ?? {}
-            ),
-          }
-        );
+        req = new NextRequest(`http://localhost:3000/api/${route.name}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify((route as { body?: unknown }).body ?? {}),
+        });
       } else {
         req = new NextRequest(
           (route as { url?: string }).url ??

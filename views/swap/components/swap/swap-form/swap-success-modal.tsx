@@ -12,6 +12,7 @@ import type { SwapResult } from '@/hooks/domain/use-swap';
 import { useModal } from '@/hooks/store/use-modal';
 import { toSignificant } from '@/lib/bigint-utils';
 import { Token } from '@/lib/entities';
+import { formatAddress } from '@/utils';
 
 interface SwapSuccessModalProps {
   result: SwapResult;
@@ -59,11 +60,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
 
   const sourceChainName = CHAIN_REGISTRY[result.sourceChainKey].displayName;
   const destChainName = CHAIN_REGISTRY[result.destChainKey].displayName;
-
-  const truncateDigest = (digest: string) => {
-    if (digest.length <= 16) return digest;
-    return `${digest.slice(0, 8)}...${digest.slice(-6)}`;
-  };
 
   const elapsedMs = Date.now() - result.startedAt;
   const totalSeconds = Math.round(elapsedMs / 1000);
@@ -166,7 +162,7 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
           >
-            {truncateDigest(result.depositDigest)}
+            {formatAddress(result.depositDigest, 8, 6)}
             <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
           </a>
         </div>
@@ -187,7 +183,7 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-accent text-sm font-mono hover:opacity-70 transition-opacity"
             >
-              {truncateDigest(result.destinationTxDigest!)}
+              {formatAddress(result.destinationTxDigest!, 8, 6)}
               <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
             </a>
           ) : (

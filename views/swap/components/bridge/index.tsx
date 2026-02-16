@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect, useRef, useState } from 'react';
 import FlipButton from '@/components/composed/flip-button';
 import { CHAIN_REGISTRY } from '@/constants/chains';
@@ -9,6 +9,7 @@ import useBridge from '@/hooks/domain/use-bridge';
 import useNonceAccount from '@/hooks/domain/use-nonce-account';
 import { useModal } from '@/hooks/store/use-modal';
 import { parseUnits } from '@/lib/bigint-utils';
+import { CARD_SPRING, CARD_STYLE } from '@/views/swap/constants';
 
 import { BRIDGE_ROUTES, type BridgeRoute } from './bridge.types';
 import BridgeDetailsInline from './bridge-details-inline';
@@ -20,20 +21,6 @@ import BridgeToCard from './bridge-to-card';
 import useBridgeValidation from './use-bridge-validation';
 import useNonceModal from './use-nonce-modal';
 
-const CARD_STYLE = {
-  background: 'var(--swap-card-bg)',
-  boxShadow: 'var(--swap-card-shadow)',
-  border: '1px solid var(--swap-card-border)',
-  backdropFilter: 'blur(24px) saturate(1.5)',
-} as const;
-
-const CARD_SPRING = {
-  type: 'spring' as const,
-  stiffness: 300,
-  damping: 30,
-  delay: 0.05,
-};
-
 const REVERSE_ROUTE_KEY: Record<string, string> = {
   'sol-to-wsol': 'wsol-to-sol',
   'wsol-to-sol': 'sol-to-wsol',
@@ -44,7 +31,10 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
 // Estimated rent (80 bytes) + tx fee — precise check happens server-side
 const NONCE_REQUIRED_LAMPORTS = 1_452_680n;
 
+const CTA_SPRING = { type: 'spring' as const, stiffness: 400, damping: 25 };
+
 const Bridge: FC = () => {
+  const reducedMotion = useReducedMotion();
   const { bridge, status, isLoading, result, reset } = useBridge();
   const {
     suiBalances,
@@ -161,9 +151,9 @@ const Bridge: FC = () => {
       <motion.div
         className="flex flex-col rounded-3xl relative"
         style={CARD_STYLE}
-        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        initial={reducedMotion ? false : { opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={CARD_SPRING}
+        transition={reducedMotion ? { duration: 0 } : CARD_SPRING}
       >
         <div className="p-5 pb-4">
           <BridgeFromCard
@@ -188,7 +178,11 @@ const Bridge: FC = () => {
 
         <div className="px-5 pb-5 pt-3">
           {isLoading || status === 'success' || status === 'error' ? (
-            <BridgeProgressStepper status={status} direction={selectedRoute.key} onRetry={handleRetry} />
+            <BridgeProgressStepper
+              status={status}
+              direction={selectedRoute.key}
+              onRetry={handleRetry}
+            />
           ) : (
             <motion.button
               type="button"
@@ -199,12 +193,14 @@ const Bridge: FC = () => {
                 boxShadow: isReady ? 'var(--cta-idle-glow)' : 'none',
               }}
               whileHover={
-                isDisabled
+                isDisabled || reducedMotion
                   ? undefined
                   : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
               }
-              whileTap={isDisabled ? undefined : { scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              whileTap={
+                isDisabled || reducedMotion ? undefined : { scale: 0.98 }
+              }
+              transition={reducedMotion ? { duration: 0 } : CTA_SPRING}
               onClick={handleBridge}
               disabled={isDisabled}
             >

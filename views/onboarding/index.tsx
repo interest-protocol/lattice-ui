@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import { CheckSVG, LogoSVG } from '@/components/ui/icons';
@@ -12,7 +12,10 @@ import OnboardingStepper from './onboarding-stepper';
 
 const stepTransition = { duration: 0.25, ease: 'easeOut' as const };
 
+const ENTRANCE_TRANSITION = { duration: 0.4, ease: 'easeOut' as const };
+
 const OnboardingView: FC = () => {
+  const reducedMotion = useReducedMotion();
   const step = useOnboarding((s) => s.step);
   const error = useOnboarding((s) => s.error);
   const retry = useOnboarding((s) => s.retry);
@@ -33,9 +36,9 @@ const OnboardingView: FC = () => {
           boxShadow: 'var(--card-shadow)',
           border: '1px solid var(--color-surface-border)',
         }}
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        transition={reducedMotion ? { duration: 0 } : ENTRANCE_TRANSITION}
       >
         <LogoSVG
           width="100%"

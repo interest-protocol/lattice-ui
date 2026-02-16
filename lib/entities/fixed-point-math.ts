@@ -2,35 +2,20 @@ import invariant from 'tiny-invariant';
 
 import { formatUnits, parseUnits } from '@/lib/bigint-utils';
 
-import { Fraction } from './fraction';
+import { type BigIntish, Fraction, toBigInt } from './fraction';
 
 const ONE_COIN = 10n ** 9n;
 
-const parseToBigInt = (value: bigint | number | string): bigint => {
-  if (typeof value === 'bigint') return value;
-  if (typeof value === 'number') return BigInt(Math.trunc(value));
-  try {
-    return BigInt(value);
-  } catch {
-    console.warn(
-      `FixedPointMath: cannot parse "${String(value)}" as BigInt, defaulting to 0n`
-    );
-    return 0n;
-  }
-};
-
-type BigIntish = bigint | number | string;
-
 export class FixedPointMath {
-  private _value = 0n;
+  private readonly _value: bigint;
 
-  protected constructor(_value: BigIntish) {
-    this._value = parseToBigInt(_value);
+  private constructor(_value: BigIntish) {
+    this._value = toBigInt(_value);
   }
 
   private parseValue(x: BigIntish | FixedPointMath): bigint {
     if (x instanceof FixedPointMath) return x.value();
-    return parseToBigInt(x);
+    return toBigInt(x);
   }
 
   public static from(value: BigIntish): FixedPointMath {

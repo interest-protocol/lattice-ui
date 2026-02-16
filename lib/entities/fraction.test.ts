@@ -42,11 +42,11 @@ describe('Fraction', () => {
     });
   });
 
-  describe('plus', () => {
+  describe('add', () => {
     it('adds fractions with same denominator', () => {
       const a = new Fraction(1, 4);
       const b = new Fraction(2, 4);
-      const result = a.plus(b);
+      const result = a.add(b);
       expect(result.numerator).toBe(3n);
       expect(result.denominator).toBe(4n);
     });
@@ -54,7 +54,7 @@ describe('Fraction', () => {
     it('adds fractions with different denominators', () => {
       const a = new Fraction(1, 3);
       const b = new Fraction(1, 4);
-      const result = a.plus(b);
+      const result = a.add(b);
       // 1/3 + 1/4 = 4/12 + 3/12 = 7/12
       expect(result.numerator).toBe(7n);
       expect(result.denominator).toBe(12n);
@@ -62,7 +62,7 @@ describe('Fraction', () => {
 
     it('adds a scalar value', () => {
       const a = new Fraction(1, 2);
-      const result = a.plus(1);
+      const result = a.add(1);
       // 1/2 + 1 = 3/2, quotient is integer division = 1
       expect(result.numerator).toBe(3n);
       expect(result.denominator).toBe(2n);
@@ -192,7 +192,7 @@ describe('Fraction', () => {
     it('arithmetic with large values', () => {
       const a = new Fraction(10n ** 18n, 1n);
       const b = new Fraction(10n ** 18n, 1n);
-      const result = a.plus(b);
+      const result = a.add(b);
       expect(result.numerator).toBe(2n * 10n ** 18n);
     });
   });

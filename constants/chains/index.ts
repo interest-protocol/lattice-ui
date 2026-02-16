@@ -45,8 +45,5 @@ export const CHAIN_REGISTRY: Record<ChainKey, ChainConfig> = {
   },
 };
 
-export const getChainConfig = (key: ChainKey): ChainConfig =>
-  CHAIN_REGISTRY[key];
-
 export const chainKeyFromTokenType = (tokenType: string): ChainKey =>
   coinTypeEquals(tokenType, SUI_TYPE_ARG) ? 'sui' : 'solana';

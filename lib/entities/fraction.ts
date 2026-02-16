@@ -8,7 +8,7 @@ export enum Rounding {
 
 export type BigIntish = bigint | number | string;
 
-const toBigInt = (value: BigIntish): bigint => {
+export const toBigInt = (value: BigIntish): bigint => {
   if (typeof value === 'bigint') return value;
   if (typeof value === 'number') return BigInt(Math.trunc(value));
   return BigInt(value);
@@ -56,7 +56,7 @@ export class Fraction {
     throw new Error('Could not parse fraction');
   }
 
-  public plus(other: Fraction | BigIntish): Fraction {
+  public add(other: Fraction | BigIntish): Fraction {
     const otherParsed = Fraction.tryParseFraction(other);
     if (otherParsed.denominator === this.denominator)
       return new Fraction(

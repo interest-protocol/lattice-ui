@@ -17,22 +17,10 @@ import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { CurrencyAmount, Percent, Token, Trade } from '@/lib/entities';
 import { ZERO_BIG_INT } from '@/utils';
 
+import { CARD_SPRING, CARD_STYLE } from '@/views/swap/constants';
+
 import SwapDetails from '../swap-details';
 import SwapFormButton from './swap-form-button';
-
-const CARD_STYLE = {
-  background: 'var(--swap-card-bg)',
-  boxShadow: 'var(--swap-card-shadow)',
-  border: '1px solid var(--swap-card-border)',
-  backdropFilter: 'blur(24px) saturate(1.5)',
-} as const;
-
-const CARD_SPRING = {
-  type: 'spring' as const,
-  stiffness: 300,
-  damping: 30,
-  delay: 0.05,
-};
 
 interface SwapFormValues {
   from: {

@@ -39,10 +39,10 @@ export const withAuthPost = <T>(
     if (error) return error;
 
     if (options.verifyUserId) {
-      const mismatch = verifyUserMatch(
-        auth.userId,
-        (body as Record<string, unknown>).userId as string
-      );
+      const bodyRecord = body as Record<string, unknown>;
+      const bodyUserId =
+        typeof bodyRecord.userId === 'string' ? bodyRecord.userId : '';
+      const mismatch = verifyUserMatch(auth.userId, bodyUserId);
       if (mismatch) return mismatch;
     }
 

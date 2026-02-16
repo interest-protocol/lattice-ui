@@ -7,13 +7,12 @@ import { NextResponse } from 'next/server';
 import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
-import { fetchWithRetry } from '@/lib/api/fetch-with-retry';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
-import { ENCLAVE_API_KEY, ENCLAVE_URL } from '@/lib/config.server';
+import { voteMint } from '@/lib/enclave/server';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
-  extractPublicKey,
+  getWalletPublicKey,
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -43,9 +42,7 @@ export const POST = withAuthPost(
       const { suiClient, xbridge } = createXBridgeSdk();
 
       // Pre-fetch public key once for both transactions
-      const walletInfo = await privy.wallets().get(wallet.id);
-      invariant(walletInfo.public_key, `Wallet ${wallet.id} has no public key`);
-      const publicKey = extractPublicKey(walletInfo.public_key);
+      const publicKey = await getWalletPublicKey(privy, wallet.id);
 
       // === Sui Tx 1: create + share mint request + transfer mint cap ===
       const tx1 = new Transaction();
@@ -92,31 +89,15 @@ export const POST = withAuthPost(
       const sourceTokenHex = toHex(new Uint8Array(body.sourceToken));
       const sourceAddressHex = toHex(new Uint8Array(body.sourceAddress));
 
-      const enclaveResponse = await fetchWithRetry(
-        `${ENCLAVE_URL}/xbridge/vote_mint`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': ENCLAVE_API_KEY,
-          },
-          signal: AbortSignal.timeout(10_000),
-          body: JSON.stringify({
-            request_id: requestId.replace(/^0x/, ''),
-            chain_id: body.sourceChain,
-            source_token: sourceTokenHex,
-            source_decimals: body.sourceDecimals,
-            source_address: sourceAddressHex,
-            source_amount: body.sourceAmount,
-            digest: body.depositSignature,
-          }),
-        }
-      );
-
-      const voteData = (await enclaveResponse.json()) as {
-        signature: string;
-        timestamp_ms: number;
-      };
+      const voteData = await voteMint({
+        request_id: requestId.replace(/^0x/, ''),
+        chain_id: body.sourceChain,
+        source_token: sourceTokenHex,
+        source_decimals: body.sourceDecimals,
+        source_address: sourceAddressHex,
+        source_amount: body.sourceAmount,
+        digest: body.depositSignature,
+      });
 
       const signature = fromHex(voteData.signature);
       const timestampMs = BigInt(voteData.timestamp_ms);

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import { CheckSVG } from '@/components/ui/icons';
@@ -33,6 +33,7 @@ interface OnboardingStepperProps {
 }
 
 const OnboardingStepper: FC<OnboardingStepperProps> = ({ step, hasError }) => {
+  const reducedMotion = useReducedMotion();
   const activeIndex = getStepIndex(step);
   const isComplete = step === 'complete';
 
@@ -67,9 +68,13 @@ const OnboardingStepper: FC<OnboardingStepperProps> = ({ step, hasError }) => {
                       ? 'var(--color-error-wash)'
                       : 'var(--color-accent-wash)',
                   }}
-                  animate={isErrorStep ? undefined : { scale: [1, 1.15, 1] }}
+                  animate={
+                    isErrorStep || reducedMotion
+                      ? undefined
+                      : { scale: [1, 1.15, 1] }
+                  }
                   transition={
-                    isErrorStep
+                    isErrorStep || reducedMotion
                       ? undefined
                       : { repeat: Number.POSITIVE_INFINITY, duration: 1.5 }
                   }
