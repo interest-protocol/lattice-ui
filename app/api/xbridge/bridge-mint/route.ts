@@ -148,6 +148,7 @@ export const POST = withAuthPost(
         createDigest: tx1Result.digest,
       });
     } catch (caught: unknown) {
+      console.error('[bridge-mint] error:', caught);
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
 

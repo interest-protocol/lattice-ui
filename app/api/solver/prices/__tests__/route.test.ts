@@ -46,7 +46,7 @@ describe('GET /api/solver/prices', () => {
     expect(mockFetch).toHaveBeenCalledWith(
       'https://solver.test/api/v1/prices',
       expect.objectContaining({
-        headers: { 'x-api-key': 'test-api-key' },
+        headers: expect.objectContaining({ 'x-api-key': 'test-api-key' }),
       })
     );
   });
@@ -55,6 +55,7 @@ describe('GET /api/solver/prices', () => {
     mockFetch.mockResolvedValue({
       ok: false,
       status: 503,
+      json: async () => ({ error: 'Failed to fetch prices' }),
     });
 
     const res = await GET();

@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const data = await getRequestStatus(requestId);
     return NextResponse.json(data);
   } catch (caught: unknown) {
+    console.error('[solver/status] error:', caught);
     const status = (caught as { status?: number })?.status ?? 500;
     return errorResponse(caught, 'Failed to fetch status', status);
   }

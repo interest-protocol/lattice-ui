@@ -48,6 +48,7 @@ export const GET = withAuthGet(async (auth) => {
       hasWallets,
     });
   } catch (caught: unknown) {
+    console.error('[check-registration] error:', caught);
     return errorResponse(caught, 'Failed to check registration');
   }
 });

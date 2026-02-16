@@ -7,6 +7,7 @@ export interface HealthStatus {
   enclave: { healthy: boolean } | null;
   solver: { healthy: boolean } | null;
   isLoading: boolean;
+  error: Error | null;
 }
 
 const fetchHealth = async (): Promise<CombinedHealthResponse> => {
@@ -18,7 +19,7 @@ const fetchHealth = async (): Promise<CombinedHealthResponse> => {
 };
 
 export const useHealth = (): HealthStatus => {
-  const { data, isLoading } = useQuery<CombinedHealthResponse>({
+  const { data, isLoading, error } = useQuery<CombinedHealthResponse>({
     queryKey: ['health'],
     queryFn: fetchHealth,
     refetchInterval: REFETCH_INTERVALS.HEALTH,
@@ -30,5 +31,6 @@ export const useHealth = (): HealthStatus => {
     enclave: data?.enclave ?? null,
     solver: data?.solver ?? null,
     isLoading,
+    error,
   };
 };

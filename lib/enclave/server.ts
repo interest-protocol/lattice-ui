@@ -27,7 +27,8 @@ const enclavePost = async <T>(
     throw Object.assign(new Error(text), { status: response.status });
   }
 
-  return response.json() as Promise<T>;
+  const json: T = await response.json();
+  return json;
 };
 
 const enclavePostWithRetry = async <T>(
@@ -42,7 +43,8 @@ const enclavePostWithRetry = async <T>(
     body: JSON.stringify(body),
   });
 
-  return response.json() as Promise<T>;
+  const json: T = await response.json();
+  return json;
 };
 
 export interface NewRequestProofRaw {

@@ -36,6 +36,9 @@ const solverGet = async <T>(
   if (!response.ok) await handleSolverError(response, path);
 
   const json = await response.json();
+  if (json.data === undefined) {
+    throw new Error(`Solver API ${path}: response missing 'data' field`);
+  }
   return json.data as T;
 };
 
@@ -54,6 +57,9 @@ const solverPost = async <T>(
   if (!response.ok) await handleSolverError(response, path);
 
   const json = await response.json();
+  if (json.data === undefined) {
+    throw new Error(`Solver API ${path}: response missing 'data' field`);
+  }
   return json.data as T;
 };
 

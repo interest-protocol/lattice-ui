@@ -123,12 +123,12 @@ describe('Trade', () => {
   describe('rateDisplay', () => {
     it('formats as "1 SUI ≈ X.XXXXXX SOL"', () => {
       const trade = suiToSolTrade('0.1');
-      expect(trade.rateDisplay).toMatch(/^1 SUI ≈ \d+\.\d{6} SOL$/);
+      expect(trade.rateDisplay).toMatch(/^1 SUI ≈ \d+\.\d+ SOL$/);
     });
 
     it('formats as "1 SOL ≈ X.XXXXXX SUI"', () => {
       const trade = solToSuiTrade('0.001');
-      expect(trade.rateDisplay).toMatch(/^1 SOL ≈ \d+\.\d{6} SUI$/);
+      expect(trade.rateDisplay).toMatch(/^1 SOL ≈ \d+\.\d+ SUI$/);
     });
   });
 

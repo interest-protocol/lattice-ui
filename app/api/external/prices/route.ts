@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (caught: unknown) {
+    console.error('[external/prices] error:', caught);
     return errorResponse(caught, 'Failed to fetch prices');
   }
 }

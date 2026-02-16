@@ -100,9 +100,10 @@ export const POST = withAuthPost(
       );
 
       if (!localVerify) {
+        console.error('[link-solana] Solana signature verification failed locally');
         return NextResponse.json(
           { error: 'Solana signature verification failed locally' },
-          { status: 500 }
+          { status: 400 }
         );
       }
 
@@ -158,6 +159,7 @@ export const POST = withAuthPost(
           msg
         );
       if (isGasError) {
+        console.error('[link-solana] gas error:', msg);
         return NextResponse.json(
           { error: 'Insufficient SUI for gas', code: 'INSUFFICIENT_GAS' },
           { status: 402 }
@@ -175,6 +177,7 @@ export const POST = withAuthPost(
         });
       }
 
+      console.error('[link-solana] error:', caught);
       return errorResponse(caught, 'Failed to link Solana');
     }
   },

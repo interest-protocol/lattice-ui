@@ -110,6 +110,7 @@ export const POST = withAuthPost(
         requestInitialSharedVersion,
       });
     } catch (caught: unknown) {
+      console.error('[xswap/create-request] error:', caught);
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
       return errorResponse(caught, 'Failed to create request');

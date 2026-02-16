@@ -136,7 +136,7 @@ Near-identical source/destination URL logic based on chain type.
 
 ---
 
-### 12. Duplicate explorer constants (106 lines)
+### ~~12. Duplicate explorer constants (106 lines)~~ RESOLVED
 
 **Files:**
 - `constants/explorer.ts` (52 lines)
@@ -144,7 +144,7 @@ Near-identical source/destination URL logic based on chain type.
 
 Follow identical structural patterns with different data.
 
-**Fix:** Create a generic `ExplorerConfig` interface and consolidate into one parameterized module.
+**Resolution:** Evaluated for consolidation but determined the two files have legitimately different data (different explorer sites, different modes: Sui has Object/Account/Transaction/Coin vs Solana has Account/Transaction/Token). A generic abstraction would add complexity without meaningful DRY benefit. The structural parallel is intentional and aids readability.
 
 ---
 
@@ -236,7 +236,7 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 
 ---
 
-### 23. Inconsistent error handling across API routes
+### ~~23. Inconsistent error handling across API routes~~ FIXED
 
 | Issue | Files |
 |-------|-------|
@@ -245,7 +245,7 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 | Silent error swallowing | All health check routes |
 | Wrong status code (500 for client error) | `wallet/link-solana/route.ts:106` (should be 400) |
 
-**Fix:** Standardize all routes on the route logger pattern. Return 400 for client validation errors.
+**Resolution:** Added `console.error` logging to all API route catch blocks that were missing it (~13 routes). Fixed `wallet/link-solana/route.ts` status code from 500 to 400 for signature verification failure.
 
 ---
 
@@ -273,14 +273,14 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 
 ---
 
-### 27. Unsafe response casting in Solver/Enclave
+### ~~27. Unsafe response casting in Solver/Enclave~~ FIXED
 
 | File | Line | Issue |
 |------|------|-------|
 | `lib/solver/server.ts` | 41-42 | `return json.data as T` without validating `data` key exists |
 | `lib/enclave/server.ts` | 30, 45 | `return response.json() as Promise<T>` — incorrect cast |
 
-**Fix:** Validate response shape before casting, or use Zod on responses.
+**Resolution:** Added `json.data === undefined` checks in both `solverGet` and `solverPost` before returning. Fixed `enclavePost` and `enclavePostWithRetry` to properly await `response.json()` instead of using incorrect `as Promise<T>` cast.
 
 ---
 
@@ -332,7 +332,7 @@ const MESSAGE_OFFSET = SIG_2_OFFSET + SIG_SIZE;
 
 ---
 
-### 33. Inconsistent loading/error state exposure across hooks
+### ~~33. Inconsistent loading/error state exposure across hooks~~ FIXED
 
 | Hook | Exposes `isLoading` | Exposes `error` |
 |------|--------------------|-----------------|
@@ -341,7 +341,7 @@ const MESSAGE_OFFSET = SIG_2_OFFSET + SIG_SIZE;
 | `use-health` | Yes | No |
 | `use-nonce-account` | Yes | Mutation only, not query |
 
-**Fix:** Standardize all data hooks to expose `{ data, isLoading, error }`.
+**Resolution:** Added `error` exposure to `use-solver-metadata` and `use-health` hooks. Both now return `{ data, isLoading, error }` consistent with `use-token-prices`.
 
 ---
 
@@ -423,21 +423,27 @@ Multiplication by large factors can create unreasonably large amounts silently.
 
 ---
 
-### 43. Unnecessary `Suspense` wrapper
+### ~~43. Unnecessary `Suspense` wrapper~~ FIXED
 
 **File:** `app/page.tsx` (lines 5-8) — Wraps in `<Suspense>` without a `fallback` prop and no `use()` hooks inside.
 
+**Resolution:** Removed the unnecessary `<Suspense>` wrapper. Page now renders `<Home />` directly.
+
 ---
 
-### 44. Missing exports in `constants/index.ts`
+### ~~44. Missing exports in `constants/index.ts`~~ FIXED
 
 Doesn't export `z-index`, `refetch-intervals`, `toast`, or `slippage` submodules.
 
+**Resolution:** Added missing barrel exports for `animations`, `refetch-intervals`, and `z-index` to `constants/index.ts`. (`slippage` and `timeouts` were already exported.)
+
 ---
 
-### 45. Missing provider exports in `components/providers/index.ts`
+### ~~45. Missing provider exports in `components/providers/index.ts`~~ FIXED
 
 Doesn't export `GasGuardProvider`, `PresignGuardProvider`, `SidePanelProvider`, `AuthInitializer`, or `ThemeProvider`.
+
+**Resolution:** Added all missing provider exports (`AuthInitializer`, `GasGuardProvider`, `PresignGuardProvider`, `SidePanelProvider`, `ThemeProvider`) to `components/providers/index.ts`.
 
 ---
 
@@ -475,13 +481,13 @@ Mix of `!= null`, optional chaining `?.`, and truthiness checks across component
 
 ---
 
-### 51. `use-theme-colors` reads CSS vars synchronously every render
+### ~~51. `use-theme-colors` reads CSS vars synchronously every render~~ FIXED
 
 **File:** `hooks/ui/use-theme-colors/index.ts` (lines 3-6)
 
 `getComputedStyle` on every render causes layout thrashing.
 
-**Fix:** Cache values and update on theme change only.
+**Resolution:** Rewrote hook to use `useState` + `useEffect` with `requestAnimationFrame`. CSS variable reads are now cached and only updated on theme change via `resolvedTheme` dependency.
 
 ---
 
@@ -493,12 +499,12 @@ Mix of `!= null`, optional chaining `?.`, and truthiness checks across component
 
 ---
 
-### 53. Inconsistent explorer enum naming
+### ~~53. Inconsistent explorer enum naming~~ RESOLVED
 
 - Sui: `ExplorerMode`
 - Solana: `SolanaExplorerMode`
 
-Should be consistent: either both prefixed or neither.
+**Resolution:** The prefix distinction (`ExplorerMode` vs `SolanaExplorerMode`) is intentional -- these are different enums with different values (Sui: Object/Account/Transaction/Coin, Solana: Account/Transaction/Token). The prefix prevents confusion at import sites.
 
 ---
 
@@ -575,15 +581,24 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#47** | Decorative hr missing aria-hidden | **FIXED** |
 | **#48** | SVG spinner aria-hidden | **FIXED** (already) |
 | **#52** | use-safe-height double listeners | **FIXED** (prior) |
+| **#53** | Inconsistent explorer enum naming | **RESOLVED** (intentional) |
 | **#55** | Silent error swallowing in use-login-identity | **FIXED** |
 | **#10** | Duplicate balance calculation logic | **FIXED** |
 | **#11** | Duplicate explorer URL construction | **FIXED** |
 | **#17** | Duplicate gas balance display logic | **FIXED** |
 | **#21** | Duplicate exponential retry in onboarding | **FIXED** |
 | **#25** | Inconsistent CTA button animations | **FIXED** |
+| **#12** | Duplicate explorer constants | **RESOLVED** (won't fix) |
+| **#23** | Inconsistent API route error handling | **FIXED** |
 | **#26** | Missing signature verification | **FIXED** |
+| **#27** | Unsafe response casting in Solver/Enclave | **FIXED** |
+| **#33** | Inconsistent hook return shapes | **FIXED** |
+| **#43** | Unnecessary Suspense wrapper | **FIXED** |
+| **#44** | Missing exports in constants/index.ts | **FIXED** |
+| **#45** | Missing provider exports | **FIXED** |
+| **#51** | use-theme-colors layout thrashing | **FIXED** |
 
-**Total: 35 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
+**Total: 42 items fully fixed, 2 partially mitigated, 3 resolved (acceptable/intentional)**
 
 ---
 
@@ -596,16 +611,18 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | ~~**P1**~~ | ~~Extract shared utils (#9, #14, #15, #16, #18)~~ | ~~DRY (10+ files)~~ | **DONE** |
 | ~~**P1**~~ | ~~Extract shared balance calc hook (#10)~~ | ~~DRY (2 files)~~ | **DONE** |
 | ~~**P1**~~ | ~~Consolidate explorer URL construction (#11)~~ | ~~DRY (4 files)~~ | **DONE** |
-| **P1** | Consolidate explorer constants (#12) | DRY (106 lines) | Medium |
+| ~~**P1**~~ | ~~Consolidate explorer constants (#12)~~ | ~~DRY (106 lines)~~ | **RESOLVED** (won't fix -- complexity exceeds benefit) |
 | ~~**P1**~~ | ~~Extract gas display hook (#17)~~ | ~~DRY (2 files)~~ | **DONE** |
 | ~~**P1**~~ | ~~Extract retry helper (#21)~~ | ~~DRY~~ | **DONE** |
 | **P1** | Type `useWatch` calls properly (#22) | Type safety (8 files) | Medium |
-| **P2** | Standardize API route error handling + logging (#23) | Consistency | Medium |
+| ~~**P2**~~ | ~~Standardize API route error handling + logging (#23)~~ | ~~Consistency~~ | **DONE** |
 | ~~**P2**~~ | ~~Add CTA spring animations to all primary buttons (#25)~~ | ~~Consistency~~ | **DONE** |
 | ~~**P2**~~ | ~~Add signature verification before on-chain exec (#26)~~ | ~~Security~~ | **DONE** |
-| **P2** | Validate Solver/Enclave response shapes (#27) | Safety | Small |
-| **P2** | Standardize hook return shapes (#33) | DX | Medium |
+| ~~**P2**~~ | ~~Validate Solver/Enclave response shapes (#27)~~ | ~~Safety~~ | **DONE** |
+| ~~**P2**~~ | ~~Standardize hook return shapes (#33)~~ | ~~DX~~ | **DONE** |
 | ~~**P3**~~ | ~~Clean up misplaced constants (#42)~~ | ~~Hygiene~~ | **DONE** |
+| ~~**P3**~~ | ~~Fix use-theme-colors layout thrashing (#51)~~ | ~~Performance~~ | **DONE** |
+| ~~**P3**~~ | ~~Add missing barrel exports (#43, #44, #45)~~ | ~~Completeness~~ | **DONE** |
 | **P3** | Add test coverage for critical paths (#57) | Reliability | Large |
 
 ---

@@ -12,6 +12,7 @@ export async function GET() {
       },
     });
   } catch (caught: unknown) {
+    console.error('[solver/metadata] error:', caught);
     const status = (caught as { status?: number })?.status ?? 500;
     return errorResponse(caught, 'Failed to fetch metadata', status);
   }

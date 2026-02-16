@@ -46,7 +46,7 @@ describe('GET /api/solver/metadata', () => {
     expect(mockFetch).toHaveBeenCalledWith(
       'https://solver.test/api/v1/metadata',
       expect.objectContaining({
-        headers: { 'x-api-key': 'test-api-key' },
+        headers: expect.objectContaining({ 'x-api-key': 'test-api-key' }),
       })
     );
   });
@@ -55,6 +55,7 @@ describe('GET /api/solver/metadata', () => {
     mockFetch.mockResolvedValue({
       ok: false,
       status: 502,
+      json: async () => ({ error: 'Failed to fetch metadata' }),
     });
 
     const res = await GET();

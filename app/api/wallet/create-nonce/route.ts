@@ -163,6 +163,7 @@ export const POST = withAuthPost(
 
       throw lastError;
     } catch (caught: unknown) {
+      console.error('[create-nonce] error:', caught);
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
       return errorResponse(caught, 'Failed to create nonce account');

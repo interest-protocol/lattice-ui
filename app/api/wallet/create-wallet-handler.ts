@@ -25,6 +25,7 @@ export const createWalletHandler = (chainType: ChainKey) =>
           chainType: wallet.chain_type,
         });
       } catch (caught: unknown) {
+        console.error(`[create-wallet/${chainType}] error:`, caught);
         return errorResponse(caught, 'Failed to create wallet');
       }
     },

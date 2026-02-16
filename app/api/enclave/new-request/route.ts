@@ -19,6 +19,7 @@ export const POST = withAuthPost(schema, async (body) => {
 
     return NextResponse.json(raw);
   } catch (caught: unknown) {
+    console.error('[enclave/new-request] error:', caught);
     return errorResponse(caught, 'Failed to fetch proof');
   }
 });

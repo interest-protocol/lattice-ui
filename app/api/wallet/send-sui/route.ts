@@ -52,6 +52,7 @@ export const POST = withAuthPost(
         headers: { 'Cache-Control': 'no-store' },
       });
     } catch (caught: unknown) {
+      console.error('[send-sui] error:', caught);
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
       return errorResponse(caught, 'Failed to send transaction');

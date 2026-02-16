@@ -16,6 +16,7 @@ export const POST = withAuthPost(schema, async (body) => {
     const data = await fulfill(body);
     return NextResponse.json(data);
   } catch (caught: unknown) {
+    console.error('[solver/fulfill] error:', caught);
     return errorResponse(caught, 'Fulfillment request failed');
   }
 });

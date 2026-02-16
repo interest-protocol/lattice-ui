@@ -1,4 +1,9 @@
+export { default as AuthInitializer } from './auth-initializer';
 export { default as ErrorBoundary } from './error-boundary';
+export { default as GasGuardProvider } from './gas-guard-provider';
 export { default as ModalProvider } from './modal-provider';
+export { default as PresignGuardProvider } from './presign-guard-provider';
 export { default as PrivyProvider } from './privy-provider';
+export { default as SidePanelProvider } from './side-panel-provider';
+export { default as ThemeProvider } from './theme-provider';
 export { default as WalletRegistrationProvider } from './wallet-registration-provider';
