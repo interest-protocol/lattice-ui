@@ -233,7 +233,7 @@ describe('POST /api/wallet/link-solana', () => {
     const res = await POST(makeRequest({ userId: 'user-123' }));
     const body = await res.json();
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
     expect(body.error).toBe('Solana signature verification failed locally');
   });
 
