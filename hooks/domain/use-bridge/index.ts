@@ -1,9 +1,4 @@
-import {
-  getNetworkConfig,
-  IkaClient,
-} from '@ika.xyz/sdk';
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
-import type { SuiClient } from '@mysten/sui/client';
 import { fromHex, toBase64 } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import {
@@ -18,6 +13,7 @@ import { toasting } from '@/components/ui/toast';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import type { ChainKey } from '@/constants/chains';
 import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
+import useIkaClient from '@/hooks/blockchain/use-ika-client';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useBalances from '@/hooks/domain/use-balances';
@@ -77,11 +73,6 @@ export const useBridge = () => {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BridgeResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const ikaClientStateRef = useRef<{
-    suiClient: SuiClient | null;
-    client: IkaClient | null;
-    promise: Promise<IkaClient> | null;
-  }>({ suiClient: null, client: null, promise: null });
 
   useEffect(() => {
     return () => {
@@ -89,48 +80,11 @@ export const useBridge = () => {
     };
   }, []);
 
+  const ensureIkaClient = useIkaClient();
   const solanaRpc = useSolanaRpc();
   const suiClient = useSuiClient();
   const { suiAddress, solanaAddress, mutateSuiBalances, mutateSolanaBalances } =
     useBalances();
-
-  const ensureIkaClient = async (): Promise<IkaClient> => {
-    const state = ikaClientStateRef.current;
-
-    // Reset if suiClient changed (user switched RPC)
-    if (state.suiClient !== suiClient) {
-      ikaClientStateRef.current = { suiClient, client: null, promise: null };
-    }
-
-    const current = ikaClientStateRef.current;
-    if (current.client) return current.client;
-
-    if (!current.promise) {
-      current.promise = (async () => {
-        try {
-          const client = new IkaClient({
-            suiClient,
-            config: getNetworkConfig('mainnet'),
-          });
-          await client.initialize();
-          current.client = client;
-          return client;
-        } catch (err) {
-          // Reset both fields so next call retries cleanly
-          current.client = null;
-          current.promise = null;
-          throw err;
-        }
-      })();
-    }
-    return current.promise;
-  };
-
-  useEffect(() => {
-    ensureIkaClient().catch((error) => {
-      console.error('[bridge] IKA client init failed', error);
-    });
-  }, [suiClient]);
 
   const getSolanaAdapter = () =>
     createSolanaAdapter(solanaRpc, mutateSolanaBalances);
