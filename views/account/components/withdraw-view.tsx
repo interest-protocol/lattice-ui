@@ -1,18 +1,20 @@
 import { usePrivy } from '@privy-io/react-auth';
+import { motion, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import { type FC, useState } from 'react';
 
 import { ChevronDownSVG, InfoSVG, WalletSVG } from '@/components/ui/icons';
 import Spinner from '@/components/ui/spinner';
 import { toasting } from '@/components/ui/toast';
+import { SPRING_CONTROLLED } from '@/constants/animations';
 import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { CHAIN_TOKENS } from '@/constants/chains/chain-tokens';
-import useBalances from '@/hooks/domain/use-balances';
+import useChainBalance from '@/hooks/domain/use-chain-balance';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import { sendTokens } from '@/lib/wallet/client';
-import { extractErrorMessage, formatMoney } from '@/utils';
 import { isNativeToken } from '@/lib/entities/token-utils';
+import { sendTokens } from '@/lib/wallet/client';
+import { extractErrorMessage } from '@/utils';
 import { filterDecimalInput } from '@/utils/decimal-input';
 import WithdrawTokenModal from './withdraw-token-modal';
 
@@ -22,6 +24,7 @@ interface WithdrawViewProps {
 
 const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const { authenticated, user } = usePrivy();
+  const reducedMotion = useReducedMotion();
 
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
   const [recipient, setRecipient] = useState('');
@@ -32,28 +35,16 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
   const selectedToken = tokens[selectedTokenIndex];
   const config = CHAIN_REGISTRY[network];
 
-  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
+  const { getBalanceByIndex, isLoading, formatBalance, toHumanAmount } =
+    useChainBalance(network);
 
   const setContent = useModal((s) => s.setContent);
 
-  const getBalanceByIndex = (index: number): bigint => {
-    if (network === 'sui') {
-      return index === 0 ? suiBalances.sui : suiBalances.wsol;
-    }
-    return index === 0 ? solanaBalances.sol : solanaBalances.wsui;
-  };
-
-  const isLoading = network === 'sui' ? suiLoading : solLoading;
   const balance = getBalanceByIndex(selectedTokenIndex);
-  const balanceFormatted = formatMoney(
-    FixedPointMath.toNumber(balance, selectedToken.decimals),
-    6
-  );
+  const balanceFormatted = formatBalance(balance, selectedToken.decimals);
 
   const setMaxAmount = () => {
-    setAmount(
-      FixedPointMath.toNumber(balance, selectedToken.decimals).toString()
-    );
+    setAmount(toHumanAmount(balance, selectedToken.decimals).toString());
   };
 
   const handleSend = async () => {
@@ -228,15 +219,22 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
         </p>
       </div>
 
-      <button
+      <motion.button
         type="button"
-        className="w-full py-4 px-6 text-white text-base font-semibold rounded-xl border-none transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full py-[18px] px-6 text-white text-base font-semibold rounded-2xl border-none disabled:cursor-not-allowed focus-ring"
         style={{
           cursor: sending ? 'wait' : 'pointer',
           opacity: sending ? 0.5 : 1,
           background: 'var(--btn-primary-bg)',
-          boxShadow: 'var(--btn-primary-shadow)',
+          boxShadow: sending ? 'none' : 'var(--cta-idle-glow)',
         }}
+        whileHover={
+          sending || reducedMotion
+            ? undefined
+            : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
+        }
+        whileTap={sending || reducedMotion ? undefined : { scale: 0.98 }}
+        transition={reducedMotion ? { duration: 0 } : SPRING_CONTROLLED}
         onClick={handleSend}
         disabled={sending}
       >
@@ -246,7 +244,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
             ? 'Sending...'
             : `Withdraw ${selectedToken.symbol} on ${config.displayName}`}
         </span>
-      </button>
+      </motion.button>
     </div>
   );
 };

@@ -3,14 +3,12 @@
 import type { FC } from 'react';
 
 import { CheckSVG, ExternalLinkSVG } from '@/components/ui/icons';
-import { ExplorerMode, SolanaExplorerMode } from '@/constants';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import type { BridgeResult } from '@/hooks/domain/use-bridge';
-import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
-import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
+import { useGetChainExplorerUrl } from '@/hooks/domain/use-get-chain-explorer-url';
 import { useModal } from '@/hooks/store/use-modal';
-import { toSignificant } from '@/utils/bigint';
 import { formatAddress } from '@/utils';
+import { toSignificant } from '@/utils/bigint';
 
 interface BridgeSuccessModalProps {
   result: BridgeResult;
@@ -22,8 +20,7 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
   onReset,
 }) => {
   const handleClose = useModal((s) => s.handleClose);
-  const getSuiExplorerUrl = useGetExplorerUrl();
-  const getSolanaExplorerUrl = useGetSolanaExplorerUrl();
+  const getExplorerUrl = useGetChainExplorerUrl();
 
   const amountDisplay = toSignificant(result.amount, result.decimals, 6);
 
@@ -37,18 +34,11 @@ const BridgeSuccessModal: FC<BridgeSuccessModalProps> = ({
   const sourceChainName = CHAIN_REGISTRY[result.sourceChainKey].displayName;
   const destChainName = CHAIN_REGISTRY[result.destChainKey].displayName;
 
-  const depositTxUrl =
-    result.sourceChainKey === 'solana'
-      ? getSolanaExplorerUrl(
-          result.depositDigest,
-          SolanaExplorerMode.Transaction
-        )
-      : getSuiExplorerUrl(result.depositDigest, ExplorerMode.Transaction);
-
-  const mintTxUrl =
-    result.destChainKey === 'sui'
-      ? getSuiExplorerUrl(result.mintDigest, ExplorerMode.Transaction)
-      : getSolanaExplorerUrl(result.mintDigest, SolanaExplorerMode.Transaction);
+  const depositTxUrl = getExplorerUrl(
+    result.depositDigest,
+    result.sourceChainKey
+  );
+  const mintTxUrl = getExplorerUrl(result.mintDigest, result.destChainKey);
 
   const close = () => {
     handleClose();

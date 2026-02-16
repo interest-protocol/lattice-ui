@@ -6,7 +6,6 @@ export const SOL_TYPE = 'sol';
 
 export const NATIVE_SOL_MINT = 'So11111111111111111111111111111111111111112';
 export const SOL_DECIMALS = 9;
-export const REQUEST_DEADLINE_MS = 60 * 60 * 1000;
 
 export const ASSET_METADATA: Record<string, AssetMetadata> = {
   [SUI_TYPE_ARG]: {

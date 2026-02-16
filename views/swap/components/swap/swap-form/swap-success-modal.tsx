@@ -4,15 +4,13 @@ import type { FC } from 'react';
 
 import { CheckSVG, ExternalLinkSVG } from '@/components/ui/icons';
 import Spinner from '@/components/ui/spinner';
-import { ExplorerMode, SolanaExplorerMode } from '@/constants';
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
-import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
+import { useGetChainExplorerUrl } from '@/hooks/domain/use-get-chain-explorer-url';
 import type { SwapResult } from '@/hooks/domain/use-swap';
 import { useModal } from '@/hooks/store/use-modal';
-import { toSignificant } from '@/utils/bigint';
 import { Token } from '@/lib/entities';
 import { formatAddress } from '@/utils';
+import { toSignificant } from '@/utils/bigint';
 
 interface SwapSuccessModalProps {
   result: SwapResult;
@@ -21,8 +19,7 @@ interface SwapSuccessModalProps {
 
 const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
   const handleClose = useModal((s) => s.handleClose);
-  const getSuiExplorerUrl = useGetExplorerUrl();
-  const getSolanaExplorerUrl = useGetSolanaExplorerUrl();
+  const getExplorerUrl = useGetChainExplorerUrl();
 
   const fromToken = Token.fromType(result.fromType);
   const toToken = Token.fromType(result.toType);
@@ -31,32 +28,13 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
   const toDisplay = toSignificant(result.toAmount, toToken.decimals, 6);
   const feeDisplay = toSignificant(result.feeAmount, toToken.decimals, 4);
 
-  const getSourceTxUrl = () => {
-    if (result.sourceChainKey === 'sui') {
-      return getSuiExplorerUrl(result.depositDigest, ExplorerMode.Transaction);
-    }
-    return getSolanaExplorerUrl(
-      result.depositDigest,
-      SolanaExplorerMode.Transaction
-    );
-  };
-
-  const getDestTxUrl = () => {
-    if (!result.destinationTxDigest) return null;
-    if (result.destChainKey === 'sui') {
-      return getSuiExplorerUrl(
-        result.destinationTxDigest,
-        ExplorerMode.Transaction
-      );
-    }
-    return getSolanaExplorerUrl(
-      result.destinationTxDigest,
-      SolanaExplorerMode.Transaction
-    );
-  };
-
-  const sourceTxUrl = getSourceTxUrl();
-  const destTxUrl = getDestTxUrl();
+  const sourceTxUrl = getExplorerUrl(
+    result.depositDigest,
+    result.sourceChainKey
+  );
+  const destTxUrl = result.destinationTxDigest
+    ? getExplorerUrl(result.destinationTxDigest, result.destChainKey)
+    : null;
 
   const sourceChainName = CHAIN_REGISTRY[result.sourceChainKey].displayName;
   const destChainName = CHAIN_REGISTRY[result.destChainKey].displayName;

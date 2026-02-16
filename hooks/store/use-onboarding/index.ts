@@ -39,6 +39,19 @@ interface OnboardingState {
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [2000, 5000, 10000];
 
+const scheduleRetry = (
+  retryCount: number,
+  fn: (nextCount: number) => void
+): boolean => {
+  if (retryCount >= MAX_RETRY_ATTEMPTS) return false;
+  useOnboarding.setState({ _isProcessing: false });
+  retryTimer = setTimeout(
+    () => fn(retryCount + 1),
+    RETRY_DELAYS_MS[retryCount]
+  );
+  return true;
+};
+
 interface CachedUser {
   linked: boolean;
   suiAddress?: string;
@@ -216,14 +229,7 @@ const doRegisterWallets = async (retryCount = 0) => {
       _isProcessing: false,
     });
   } catch {
-    if (retryCount < MAX_RETRY_ATTEMPTS) {
-      useOnboarding.setState({ _isProcessing: false });
-      retryTimer = setTimeout(
-        () => doRegisterWallets(retryCount + 1),
-        RETRY_DELAYS_MS[retryCount]
-      );
-      return;
-    }
+    if (scheduleRetry(retryCount, doRegisterWallets)) return;
     useOnboarding.setState({
       error: 'Wallet setup failed. Please try again.',
       _isProcessing: false,
@@ -280,14 +286,7 @@ const doStartLinking = async (retryCount = 0) => {
       return;
     }
 
-    if (retryCount < MAX_RETRY_ATTEMPTS) {
-      useOnboarding.setState({ _isProcessing: false });
-      retryTimer = setTimeout(
-        () => doStartLinking(retryCount + 1),
-        RETRY_DELAYS_MS[retryCount]
-      );
-      return;
-    }
+    if (scheduleRetry(retryCount, doStartLinking)) return;
     useOnboarding.setState({
       error: 'Wallet linking failed. Please try again.',
       _isProcessing: false,

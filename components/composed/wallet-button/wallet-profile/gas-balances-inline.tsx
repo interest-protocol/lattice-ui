@@ -4,25 +4,10 @@ import Image from 'next/image';
 import type { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
-import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
-import useBalances from '@/hooks/domain/use-balances';
-import { FixedPointMath } from '@/lib/entities';
-import { formatMoney } from '@/utils/money';
-
-const CHAINS: readonly ChainKey[] = ['sui', 'solana'];
+import useGasDisplay from '@/hooks/domain/use-gas-display';
 
 const GasBalancesInline: FC = () => {
-  const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances();
-
-  const items = CHAINS.map((chain) => {
-    const config = CHAIN_REGISTRY[chain];
-    const raw = chain === 'sui' ? suiBalances.sui : solanaBalances.sol;
-    const amount = FixedPointMath.toNumber(raw, config.decimals);
-    const display = formatMoney(amount, config.displayPrecision);
-    const loading = chain === 'sui' ? suiLoading : solLoading;
-
-    return { chain, config, display, loading };
-  });
+  const items = useGasDisplay();
 
   return (
     <div className="px-4 py-2 flex flex-col gap-2">

@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect, useRef, useState } from 'react';
 import FlipButton from '@/components/composed/flip-button';
+import { SPRING_CONTROLLED } from '@/constants/animations';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
@@ -29,8 +30,6 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
 };
 
 const NONCE_REQUIRED_LAMPORTS = 1_452_680n;
-
-const CTA_SPRING = { type: 'spring' as const, stiffness: 400, damping: 25 };
 
 const Bridge: FC = () => {
   const reducedMotion = useReducedMotion();
@@ -199,7 +198,7 @@ const Bridge: FC = () => {
               whileTap={
                 isDisabled || reducedMotion ? undefined : { scale: 0.98 }
               }
-              transition={reducedMotion ? { duration: 0 } : CTA_SPRING}
+              transition={reducedMotion ? { duration: 0 } : SPRING_CONTROLLED}
               onClick={handleBridge}
               disabled={isDisabled}
             >

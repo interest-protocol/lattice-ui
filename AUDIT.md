@@ -112,7 +112,7 @@ Module-level `Map` caches grow unbounded. Old clients are never evicted or destr
 
 ---
 
-### 10. Duplicate balance calculation logic (2 files)
+### ~~10. Duplicate balance calculation logic (2 files)~~ FIXED
 
 **Files:**
 - `views/account/components/withdraw-view.tsx` (lines 37-42)
@@ -120,11 +120,11 @@ Module-level `Map` caches grow unbounded. Old clients are never evicted or destr
 
 Nearly identical `getBalance()` functions checking `network === 'sui'` and returning from balance objects.
 
-**Fix:** Extract to a shared hook: `hooks/domain/use-chain-balance/index.ts`.
+**Resolution:** Extracted `useChainBalance` hook to `hooks/domain/use-chain-balance/index.ts`. Both `withdraw-view.tsx` and `send-modal.tsx` now import `getBalanceByIndex`, `isLoading`, `formatBalance`, and `toHumanAmount` from the shared hook.
 
 ---
 
-### 11. Duplicate explorer URL construction (2 files)
+### ~~11. Duplicate explorer URL construction (2 files)~~ FIXED
 
 **Files:**
 - `views/swap/components/swap/swap-form/swap-success-modal.tsx` (lines 34-56)
@@ -132,9 +132,7 @@ Nearly identical `getBalance()` functions checking `network === 'sui'` and retur
 
 Near-identical source/destination URL logic based on chain type.
 
-**Status:** Partially addressed — swap-success-modal now uses `useGetExplorerUrl` hooks.
-
-**Fix:** Extract to `utils/explorer-urls.ts`.
+**Resolution:** Created unified `useGetChainExplorerUrl` hook in `hooks/domain/use-get-chain-explorer-url/index.ts`. Both success modals now call `getExplorerUrl(digest, chainKey)` instead of switching between Sui/Solana hooks.
 
 ---
 
@@ -178,7 +176,7 @@ Follow identical structural patterns with different data.
 
 ---
 
-### 17. Duplicate gas balance display logic
+### ~~17. Duplicate gas balance display logic~~ FIXED
 
 **Files:**
 - `components/composed/header/gas-balances/index.tsx` (lines 19-26)
@@ -186,7 +184,7 @@ Follow identical structural patterns with different data.
 
 Identical balance computation and display logic.
 
-**Fix:** Extract to a shared hook: `hooks/domain/use-gas-display/index.ts`.
+**Resolution:** Extracted `useGasDisplay` hook to `hooks/domain/use-gas-display/index.ts`. Both `gas-balances/index.tsx` and `gas-balances-inline.tsx` now import from the shared hook.
 
 ---
 
@@ -211,13 +209,13 @@ Identical balance computation and display logic.
 
 ---
 
-### 21. Duplicate exponential retry in onboarding
+### ~~21. Duplicate exponential retry in onboarding~~ FIXED
 
 **File:** `hooks/store/use-onboarding/index.ts` (lines 195-296)
 
 Both `doRegisterWallets` and `doStartLinking` duplicate the retry pattern.
 
-**Fix:** Extract `withExponentialRetry` helper.
+**Resolution:** Extracted `scheduleRetry(retryCount, fn)` helper within the module. Both `doRegisterWallets` and `doStartLinking` now call `scheduleRetry` instead of duplicating the retry scheduling logic.
 
 ---
 
@@ -257,24 +255,21 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 
 ---
 
-### 25. Inconsistent CTA button animations
+### ~~25. Inconsistent CTA button animations~~ FIXED
 
 `SwapFormButton` uses spring animations + `cta-ready-pulse` class. `WithdrawView` button uses `transition-colors duration-200` with no spring or pulse. All primary CTAs should be consistent.
 
-**Fix:** Ensure all primary CTAs use the same motion treatment.
+**Resolution:** Updated both `withdraw-view.tsx` and `send-modal.tsx` to use `motion.button` with `SPRING_CONTROLLED`, `whileHover` (y: -3, scale: 1.01, cta-hover-glow), `whileTap` (scale: 0.98), and `useReducedMotion` fallback. Also consolidated `HOVER_SPRING` in swap-form-button and `CTA_SPRING` in bridge to import `SPRING_CONTROLLED` from `constants/animations.ts`.
 
 ---
 
-### 26. Missing signature verification before on-chain execution
+### ~~26. Missing signature verification before on-chain execution~~ FIXED
 
 **File:** `lib/privy/signing.ts` (lines 46-90)
 
-`signAndExecuteSuiTransaction` doesn't verify signatures locally before submitting. The CLAUDE.md guidelines explicitly require this:
-```typescript
-import { ed25519 } from '@noble/curves/ed25519';
-const valid = ed25519.verify(signature, message, publicKey);
-if (!valid) throw new Error('Signature verification failed locally');
-```
+`signAndExecuteSuiTransaction` doesn't verify signatures locally before submitting.
+
+**Resolution:** Added local signature verification using `Ed25519PublicKey.verify(intentMessage, signatureBytes)` before `executeTransactionBlock`. Throws with descriptive error on verification failure, preventing gas waste on invalid signatures.
 
 ---
 
@@ -420,9 +415,11 @@ Multiplication by large factors can create unreasonably large amounts silently.
 
 ---
 
-### 42. Misplaced `REQUEST_DEADLINE_MS`
+### ~~42. Misplaced `REQUEST_DEADLINE_MS`~~ FIXED
 
-**File:** `constants/coins.ts` (line 9) — This timeout constant has nothing to do with coin metadata. Move to `constants/timeouts.ts`.
+**File:** `constants/coins.ts` (line 9) — This timeout constant has nothing to do with coin metadata.
+
+**Resolution:** Moved `REQUEST_DEADLINE_MS` to `constants/timeouts.ts`. Updated `hooks/domain/use-swap/index.ts` to import from the new location. Added `timeouts` to `constants/index.ts` barrel export.
 
 ---
 
@@ -458,11 +455,11 @@ Doesn't export `GasGuardProvider`, `PresignGuardProvider`, `SidePanelProvider`, 
 
 ---
 
-### 48. SVG spinners missing `aria-hidden="true"`
+### ~~48. SVG spinners missing `aria-hidden="true"`~~ FIXED (already)
 
-**File:** `components/ui/toast/toast-loading.tsx` (line 22)
+**File:** `components/ui/toast/toast-loading.tsx` (line 32)
 
-**Note:** `components/ui/spinner/index.tsx` was updated to use `role="status"` with `aria-label="Loading"` — properly accessible now.
+**Resolution:** Already has `aria-hidden="true"` on the spinner SVG (line 32). `components/ui/spinner/index.tsx` uses `role="status"` with `aria-label="Loading"` — both properly accessible.
 
 ---
 
@@ -573,12 +570,20 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#35** | Solana message builder validation | **FIXED** |
 | **#38** | use-swap ref pattern | Acceptable (React Compiler) |
 | **#41** | Unused ZERO_BIG_INT export | **RESOLVED** |
+| **#42** | Misplaced REQUEST_DEADLINE_MS | **FIXED** |
 | **#46** | Trade.rate dead math | **FIXED** |
 | **#47** | Decorative hr missing aria-hidden | **FIXED** |
+| **#48** | SVG spinner aria-hidden | **FIXED** (already) |
 | **#52** | use-safe-height double listeners | **FIXED** (prior) |
 | **#55** | Silent error swallowing in use-login-identity | **FIXED** |
+| **#10** | Duplicate balance calculation logic | **FIXED** |
+| **#11** | Duplicate explorer URL construction | **FIXED** |
+| **#17** | Duplicate gas balance display logic | **FIXED** |
+| **#21** | Duplicate exponential retry in onboarding | **FIXED** |
+| **#25** | Inconsistent CTA button animations | **FIXED** |
+| **#26** | Missing signature verification | **FIXED** |
 
-**Total: 26 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
+**Total: 35 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
 
 ---
 
@@ -589,17 +594,18 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | ~~**P0**~~ | ~~All P0 items~~ | | **DONE** |
 | ~~**P1**~~ | ~~Create `constants/animations.ts` (#8, #19)~~ | ~~DRY (8 files)~~ | **DONE** |
 | ~~**P1**~~ | ~~Extract shared utils (#9, #14, #15, #16, #18)~~ | ~~DRY (10+ files)~~ | **DONE** |
-| **P1** | Extract shared balance calc hook (#10) | DRY (2 files) | Small |
-| **P1** | Consolidate explorer URL + constants (#11, #12) | DRY (4 files) | Medium |
-| **P1** | Extract gas display hook (#17) | DRY (2 files) | Small |
-| **P1** | Extract `withExponentialRetry` helper (#21) | DRY | Small |
+| ~~**P1**~~ | ~~Extract shared balance calc hook (#10)~~ | ~~DRY (2 files)~~ | **DONE** |
+| ~~**P1**~~ | ~~Consolidate explorer URL construction (#11)~~ | ~~DRY (4 files)~~ | **DONE** |
+| **P1** | Consolidate explorer constants (#12) | DRY (106 lines) | Medium |
+| ~~**P1**~~ | ~~Extract gas display hook (#17)~~ | ~~DRY (2 files)~~ | **DONE** |
+| ~~**P1**~~ | ~~Extract retry helper (#21)~~ | ~~DRY~~ | **DONE** |
 | **P1** | Type `useWatch` calls properly (#22) | Type safety (8 files) | Medium |
 | **P2** | Standardize API route error handling + logging (#23) | Consistency | Medium |
-| **P2** | Add CTA spring animations to all primary buttons (#25) | Consistency | Small |
-| **P2** | Add signature verification before on-chain exec (#26) | Security | Small |
+| ~~**P2**~~ | ~~Add CTA spring animations to all primary buttons (#25)~~ | ~~Consistency~~ | **DONE** |
+| ~~**P2**~~ | ~~Add signature verification before on-chain exec (#26)~~ | ~~Security~~ | **DONE** |
 | **P2** | Validate Solver/Enclave response shapes (#27) | Safety | Small |
 | **P2** | Standardize hook return shapes (#33) | DX | Medium |
-| **P3** | Clean up misplaced constants (#42) | Hygiene | Small |
+| ~~**P3**~~ | ~~Clean up misplaced constants (#42)~~ | ~~Hygiene~~ | **DONE** |
 | **P3** | Add test coverage for critical paths (#57) | Reliability | Large |
 
 ---

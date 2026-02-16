@@ -7,7 +7,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import { toasting } from '@/components/ui/toast';
 import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { type ChainKey, chainKeyFromTokenType } from '@/constants/chains';
-import { REQUEST_DEADLINE_MS } from '@/constants/coins';
+import { REQUEST_DEADLINE_MS } from '@/constants/timeouts';
 import useSolanaRpc from '@/hooks/blockchain/use-solana-connection';
 import useSuiClient from '@/hooks/blockchain/use-sui-client';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';

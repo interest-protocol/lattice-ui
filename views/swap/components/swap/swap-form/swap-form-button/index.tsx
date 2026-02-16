@@ -3,6 +3,7 @@ import { type FC, useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
 import Spinner from '@/components/ui/spinner';
+import { SPRING_CONTROLLED } from '@/constants/animations';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useBalances from '@/hooks/domain/use-balances';
 import type { SwapStatus } from '@/hooks/domain/use-swap';
@@ -20,12 +21,6 @@ const STATUS_LABELS: Record<SwapStatus, string> = {
   waiting: 'Waiting for solver...',
   success: '',
   error: '',
-};
-
-const HOVER_SPRING = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 25,
 };
 
 const SwapFormButton: FC = () => {
@@ -88,7 +83,7 @@ const SwapFormButton: FC = () => {
           : { y: -3, scale: 1.01, boxShadow: 'var(--cta-hover-glow)' }
       }
       whileTap={isDisabled || reducedMotion ? undefined : { scale: 0.98 }}
-      transition={reducedMotion ? { duration: 0 } : HOVER_SPRING}
+      transition={reducedMotion ? { duration: 0 } : SPRING_CONTROLLED}
       onClick={handleSwap}
       disabled={isDisabled}
     >
