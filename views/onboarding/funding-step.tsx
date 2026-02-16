@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useEffect, useRef } from 'react';
+import type { FC } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
 import { WalletSVG } from '@/components/ui/icons';
@@ -17,23 +17,14 @@ const SUI_DECIMALS = CHAIN_REGISTRY.sui.decimals;
 const FundingStep: FC = () => {
   const suiAddress = useOnboarding((s) => s.suiAddress);
   const startLinking = useOnboarding((s) => s.startLinking);
-  const hasAdvanced = useRef(false);
 
   const { balances, isLoading, mutate } = useSuiBalances(suiAddress);
   const suiBalance = balances.sui;
-  const hasSufficientBalance = suiBalance >= MIN_GAS_RAW;
-
-  useEffect(() => {
-    if (hasSufficientBalance && !hasAdvanced.current) {
-      hasAdvanced.current = true;
-      startLinking();
-    }
-  }, [hasSufficientBalance, startLinking]);
 
   const handleCheckBalance = async () => {
+    if (isLoading) return;
     const result = await mutate();
-    if (result && result.sui >= MIN_GAS_RAW && !hasAdvanced.current) {
-      hasAdvanced.current = true;
+    if (result && result.sui >= MIN_GAS_RAW) {
       startLinking();
     }
   };

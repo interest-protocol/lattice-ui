@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 
-import {
-  PARTIAL_WALLETS_KEY,
-  REGISTRATION_CACHE_KEY,
-} from '@/constants/storage-keys';
+import { REGISTRATION_CACHE_KEY } from '@/constants/storage-keys';
 import { ApiRequestError } from '@/lib/api/client';
 import {
   type CheckRegistrationResult,
@@ -108,47 +105,6 @@ export const isUserCached = (userId: string): boolean => {
   return entry.linked;
 };
 
-// ---------------------------------------------------------------------------
-// Partial wallet persistence — survives page refresh so we never re-create
-// a wallet that was already created but whose registration hasn't completed.
-// ---------------------------------------------------------------------------
-
-const readPartialWallets = (
-  userId: string
-): { suiAddress?: string; solanaAddress?: string } => {
-  try {
-    const raw = localStorage.getItem(PARTIAL_WALLETS_KEY);
-    if (!raw) return {};
-    const data = JSON.parse(raw);
-    return data[userId] ?? {};
-  } catch {
-    return {};
-  }
-};
-
-const writePartialWallet = (
-  userId: string,
-  chain: 'sui' | 'solana',
-  address: string
-) => {
-  try {
-    const raw = localStorage.getItem(PARTIAL_WALLETS_KEY);
-    const data = raw ? JSON.parse(raw) : {};
-    data[userId] = { ...data[userId], [`${chain}Address`]: address };
-    localStorage.setItem(PARTIAL_WALLETS_KEY, JSON.stringify(data));
-  } catch {}
-};
-
-const clearPartialWallets = (userId: string) => {
-  try {
-    const raw = localStorage.getItem(PARTIAL_WALLETS_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    delete data[userId];
-    localStorage.setItem(PARTIAL_WALLETS_KEY, JSON.stringify(data));
-  } catch {}
-};
-
 const clearRetryTimer = () => {
   const { _retryTimerId } = useOnboarding.getState();
   if (_retryTimerId !== undefined) {
@@ -210,22 +166,21 @@ const doCheckRegistration = async (userId: string) => {
     const result = await checkRegistrationApi();
     handleCheckResult(result, userId);
   } catch {
-    // Restore any partially-created wallet addresses from localStorage so
-    // doRegisterWallets skips wallets that already exist.
-    const partial = readPartialWallets(userId);
+    const timerId = setTimeout(
+      () => doCheckRegistration(userId),
+      RETRY_DELAYS_MS[0]
+    );
     useOnboarding.setState({
-      step: 'creating-wallets',
-      suiAddress: partial.suiAddress ?? null,
-      solanaAddress: partial.solanaAddress ?? null,
+      step: 'checking',
+      error: 'Connection lost. Retrying...',
       _isProcessing: false,
+      _retryTimerId: timerId,
     });
-    doRegisterWallets(0);
   }
 };
 
 const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
   if (result.registered) {
-    clearPartialWallets(userId);
     writeCache(userId, {
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
@@ -276,15 +231,9 @@ const doRegisterWallets = async (retryCount = 0) => {
     const { suiAddress: stateSui, solanaAddress: stateSol } =
       useOnboarding.getState();
 
-    // Hydrate from localStorage — covers the case where Zustand state was
-    // lost on refresh but a wallet was already created in a prior session.
-    const partial = readPartialWallets(userId);
-    const existingSui = stateSui ?? partial.suiAddress ?? null;
-    const existingSol = stateSol ?? partial.solanaAddress ?? null;
-
     const [suiSettled, solanaSettled] = await Promise.allSettled([
-      existingSui ? { address: existingSui } : createSuiWallet(userId),
-      existingSol ? { address: existingSol } : createSolanaWallet(userId),
+      stateSui ? { address: stateSui } : createSuiWallet(userId),
+      stateSol ? { address: stateSol } : createSolanaWallet(userId),
     ]);
 
     const suiAddr =
@@ -292,18 +241,14 @@ const doRegisterWallets = async (retryCount = 0) => {
     const solAddr =
       solanaSettled.status === 'fulfilled' ? solanaSettled.value.address : null;
 
-    // Persist to both Zustand state and localStorage so neither a retry
-    // within this session nor a full page refresh will re-create wallets.
-    const newSui = suiAddr ?? existingSui;
-    const newSol = solAddr ?? existingSol;
+    const newSui = suiAddr ?? stateSui;
+    const newSol = solAddr ?? stateSol;
 
     if (newSui || newSol) {
       useOnboarding.setState({
         suiAddress: newSui,
         solanaAddress: newSol,
       });
-      if (suiAddr) writePartialWallet(userId, 'sui', suiAddr);
-      if (solAddr) writePartialWallet(userId, 'solana', solAddr);
     }
 
     if (newSui && newSol) {
@@ -349,7 +294,6 @@ const doStartLinking = async (retryCount = 0) => {
         useOnboarding.getState();
       const suiAddr = result.suiAddress ?? existingSui;
       const solAddr = result.solanaAddress ?? existingSol;
-      clearPartialWallets(userId);
       writeCache(userId, { suiAddress: suiAddr, solanaAddress: solAddr });
       useOnboarding.setState({
         step: 'complete',
@@ -360,7 +304,6 @@ const doStartLinking = async (retryCount = 0) => {
       return;
     }
 
-    clearPartialWallets(userId);
     writeCache(userId, {
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
