@@ -8,7 +8,7 @@ import useBalances from '@/hooks/domain/use-balances';
 import useBridge from '@/hooks/domain/use-bridge';
 import useNonceAccount from '@/hooks/domain/use-nonce-account';
 import { useModal } from '@/hooks/store/use-modal';
-import { parseUnits } from '@/lib/bigint-utils';
+import { parseUnits } from '@/utils/bigint';
 import { CARD_SPRING, CARD_STYLE } from '@/views/swap/constants';
 
 import { BRIDGE_ROUTES, type BridgeRoute } from './bridge.types';

@@ -9,7 +9,7 @@ import { CHAIN_REGISTRY } from '@/constants/chains';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { withTimeout } from '@/lib/api/with-timeout';
-import { parseUnits } from '@/lib/bigint-utils';
+import { parseUnits } from '@/utils/bigint';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
   authorizationContext,

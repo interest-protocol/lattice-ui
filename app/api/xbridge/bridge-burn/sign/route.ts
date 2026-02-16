@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
-import { pollUntil } from '@/lib/poll-until';
+import { pollUntil } from '@/utils/poll-until';
 import { sign } from '@/lib/solver/server';
 import { createXBridgeSdk } from '@/lib/xbridge';
 

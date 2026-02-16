@@ -10,7 +10,7 @@ import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
 import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
 import type { SwapResult } from '@/hooks/domain/use-swap';
 import { useModal } from '@/hooks/store/use-modal';
-import { toSignificant } from '@/lib/bigint-utils';
+import { toSignificant } from '@/utils/bigint';
 import { Token } from '@/lib/entities';
 import { formatAddress } from '@/utils';
 

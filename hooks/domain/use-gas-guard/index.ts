@@ -7,7 +7,7 @@ import { CHAIN_REGISTRY, type ChainKey } from '@/constants/chains';
 import { REGISTRATION_CACHE_KEY } from '@/constants/storage-keys';
 import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
-import { parseUnits } from '@/lib/bigint-utils';
+import { parseUnits } from '@/utils/bigint';
 
 type LinkedUsers = Record<string, boolean>;
 

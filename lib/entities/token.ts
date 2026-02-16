@@ -9,7 +9,7 @@ import {
 } from '@/constants/bridged-tokens';
 import { ASSET_METADATA, SOL_TYPE } from '@/constants/coins';
 import type { AssetMetadata } from '@/interface';
-import { coinTypeEquals, normalizeSuiCoinType } from '@/utils/sui';
+import { coinTypeEquals, normalizeSuiCoinType } from '@/lib/sui/utils';
 
 interface TokenParams {
   chainId: ChainKey;

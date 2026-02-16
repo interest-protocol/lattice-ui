@@ -9,7 +9,7 @@ import type { BridgeResult } from '@/hooks/domain/use-bridge';
 import { useGetExplorerUrl } from '@/hooks/domain/use-get-explorer-url';
 import { useGetSolanaExplorerUrl } from '@/hooks/domain/use-get-solana-explorer-url';
 import { useModal } from '@/hooks/store/use-modal';
-import { toSignificant } from '@/lib/bigint-utils';
+import { toSignificant } from '@/utils/bigint';
 import { formatAddress } from '@/utils';
 
 interface BridgeSuccessModalProps {

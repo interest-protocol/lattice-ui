@@ -1,5 +1,5 @@
 import { get, post } from '@/lib/api/client';
-import { pollUntil } from '@/lib/poll-until';
+import { pollUntil } from '@/utils/poll-until';
 
 export interface SolverMetadata {
   solver: {

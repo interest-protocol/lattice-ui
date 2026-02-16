@@ -43,11 +43,11 @@ lattice-ui/
 │   ├── domain/                 # Business logic (use-swap, use-bridge, use-wallet-*, use-health, use-metadata, use-get-explorer-url)
 │   └── ui/                     # Component utilities (use-event-listener, use-click-outside, etc.)
 │
-├── lib/                        # Core business logic
+├── lib/                        # Core business logic (domain models, SDK wrappers, API clients)
 │   ├── config.ts               # Environment variables
 │   ├── api/                    # API utilities + Zod validation
 │   ├── chain-adapters/         # Chain abstraction (ChainAdapter interface, sui-adapter, solana-adapter)
-│   ├── entities/               # DeFi domain models (Token, CurrencyAmount, Fraction, Percent, Trade)
+│   ├── entities/               # DeFi domain models (Token, CurrencyAmount, Fraction, Percent, Trade, gas-validation, token-utils)
 │   ├── enclave/                # Enclave SDK wrapper
 │   ├── solver/                 # Solver API client
 │   ├── xswap/                  # Cross-chain swap SDK
@@ -56,8 +56,7 @@ lattice-ui/
 │   ├── registry/               # On-chain registry SDK
 │   ├── wallet/                 # Wallet operations
 │   ├── solana/                 # Solana helpers (server client, tx confirmation)
-│   ├── sui/                    # Sui helpers (server client)
-│   ├── bigint-utils.ts          # BigInt formatting (formatUnits, parseUnits)
+│   ├── sui/                    # Sui helpers (server client, coinType/address normalization)
 │   └── external/               # External API clients (Pyth prices)
 │
 ├── views/                      # Page-level view components
@@ -76,13 +75,15 @@ lattice-ui/
 │   ├── toast.tsx               # Toast duration constant
 │   └── bridged-tokens.ts       # XBridge token metadata
 │
-├── utils/                      # Pure utility functions
+├── utils/                      # Pure stateless helpers (no domain imports, no I/O, no side effects)
+│   ├── bigint.ts               # BigInt formatting (formatUnits, parseUnits, toSignificant)
 │   ├── bn.ts                   # BigInt helpers (feesCalcUp, parseBigNumberish)
+│   ├── poll-until.ts           # Generic async polling with backoff
+│   ├── with-retry.ts           # Generic async retry with exponential backoff
 │   ├── money.ts                # Number formatting (Intl)
 │   ├── number.ts               # Input parsing
 │   ├── format-address.ts       # Address truncation
 │   ├── extract-error-message.ts # Error message extraction
-│   ├── gas-validation.ts       # Gas + alpha limit validation
 │   └── handle-key-down.ts      # Keyboard event handler for a11y
 │
 ├── interface/                  # Shared TypeScript types
@@ -324,7 +325,7 @@ For runtime-dependent values, use `style` prop with CSS variables:
 Token amounts use native `bigint`:
 
 ```typescript
-import { parseUnits, formatUnits } from '@/lib/bigint-utils';
+import { parseUnits, formatUnits } from '@/utils/bigint';
 
 const raw = parseUnits('1.5', 9);      // 1500000000n
 const display = formatUnits(raw, 9);   // '1.5'
@@ -636,6 +637,40 @@ Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads fr
 - **Always give icon-only buttons explicit dimensions** → SVGs with `width="100%"` collapse to 0 in flex containers without a sized parent. Use `w-10 h-10` (40px mobile) or `w-11 h-11` (44px desktop) on icon-only buttons
 - **Always test both themes** → dark mode is default but light theme has white/bright backgrounds that reveal contrast issues invisible in dark mode
 - **Always inspect icon/SVG components before using them** → read the source to check for `fillOpacity`, `opacity`, or other attributes that make icons faint. For prominent UI (modals, alerts), use full-opacity fills with accent coloring and a sized container (e.g. 48px circle with `accent-wash` background)
+- **Never put domain-dependent code in `utils/`** → if a file imports from `@/lib/entities`, `@/constants/chains`, or chain SDKs, it belongs in `lib/`. See the `lib/` vs `utils/` Boundary section
+
+---
+
+## `lib/` vs `utils/` Boundary
+
+These two directories serve different purposes. Respect the boundary when adding new files:
+
+| | `lib/` | `utils/` |
+|---|---|---|
+| **Contains** | Domain models, SDK wrappers, API clients, infrastructure | Pure stateless helper functions |
+| **Side effects** | May have I/O, caching, singletons | No side effects, no I/O |
+| **Imports** | May import SDKs, constants, config, entities | Minimal imports (at most other utils or tiny-invariant) |
+| **Environment** | Server + client code | Environment-agnostic |
+
+### Decision checklist for new files
+
+1. Does it import from `@/lib/entities`, `@/constants/chains`, SDKs, or config? → **`lib/`**
+2. Does it perform I/O (fetch, RPC calls, file system)? → **`lib/`**
+3. Does it use singletons or caching? → **`lib/`**
+4. Is it a pure function that only transforms inputs to outputs? → **`utils/`**
+5. Could it be copy-pasted into an unrelated project and still work? → **`utils/`**
+
+### Key file locations
+
+| File | Location | Why |
+|------|----------|-----|
+| `bigint.ts` (formatUnits, parseUnits) | `utils/` | Pure math, no domain knowledge |
+| `poll-until.ts` | `utils/` | Generic async polling, no domain knowledge |
+| `with-retry.ts` | `utils/` | Generic async retry, no domain knowledge |
+| `gas-validation.ts` | `lib/entities/` | Imports CurrencyAmount, FixedPointMath, CHAIN_REGISTRY |
+| `token-utils.ts` (isNativeToken) | `lib/entities/` | Chain-aware token detection, depends on Sui utils |
+| `sui/utils.ts` (coinTypeEquals, normalizeSuiCoinType) | `lib/sui/` | Sui-specific normalization, uses @mysten/sui SDK |
+| `fetch-with-retry.ts` | `lib/api/` | Fetch-specific retry (checks response.ok) — distinct from generic `utils/with-retry.ts` |
 
 ---
 
@@ -980,6 +1015,6 @@ import {
 
 ---
 
-**Last Updated**: 2026-02-11
+**Last Updated**: 2026-02-16
 **Active Views**: `views/swap` and `views/account`
 **Main Features**: Cross-chain SUI/SOL token swapping

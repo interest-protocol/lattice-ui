@@ -1,5 +1,5 @@
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import { validateGasBalance } from '@/utils/gas-validation';
+import { validateGasBalance } from '@/lib/entities/gas-validation';
 
 import type { BridgeRoute, ValidationResult } from './bridge.types';
 

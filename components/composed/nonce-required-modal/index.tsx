@@ -4,7 +4,7 @@ import type { FC } from 'react';
 
 import CopyButton from '@/components/ui/copy-button';
 import { CHAIN_REGISTRY } from '@/constants/chains';
-import { formatUnits } from '@/lib/bigint-utils';
+import { formatUnits } from '@/utils/bigint';
 
 interface NonceRequiredModalProps {
   solanaAddress: string;

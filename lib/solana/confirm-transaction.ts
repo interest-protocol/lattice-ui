@@ -1,6 +1,6 @@
 import type { Signature } from '@solana/kit';
 
-import { pollUntil } from '@/lib/poll-until';
+import { pollUntil } from '@/utils/poll-until';
 
 import type { SolanaRpc } from './server';
 

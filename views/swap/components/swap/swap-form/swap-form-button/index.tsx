@@ -9,7 +9,7 @@ import type { SwapStatus } from '@/hooks/domain/use-swap';
 import useSwap from '@/hooks/domain/use-swap';
 import { useModal } from '@/hooks/store/use-modal';
 import { CurrencyAmount, Token } from '@/lib/entities';
-import { validateSwapAmount } from '@/utils/gas-validation';
+import { validateSwapAmount } from '@/lib/entities/gas-validation';
 import SwapSuccessModal from '../swap-success-modal';
 
 const STATUS_LABELS: Record<SwapStatus, string> = {

@@ -8,7 +8,7 @@ import {
   parseUnits,
   toFixed,
   toSignificant,
-} from './bigint-utils';
+} from './bigint';
 
 describe('bigint-utils', () => {
   describe('formatUnits', () => {

@@ -5,7 +5,7 @@ import { SOL_TYPE } from '@/constants/coins';
 import useSolanaBalances from '@/hooks/blockchain/use-solana-balances';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import useWalletAddresses from '@/hooks/domain/use-wallet-addresses';
-import { normalizeSuiCoinType } from '@/utils/sui';
+import { normalizeSuiCoinType } from '@/lib/sui/utils';
 
 import type {
   UseBalancesOptions,

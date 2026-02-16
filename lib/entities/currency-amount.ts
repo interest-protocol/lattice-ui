@@ -1,6 +1,6 @@
 import invariant from 'tiny-invariant';
 
-import { parseUnits, toSignificant } from '@/lib/bigint-utils';
+import { parseUnits, toSignificant } from '@/utils/bigint';
 
 import { FixedPointMath } from './fixed-point-math';
 import { type BigIntish, Fraction, toBigInt } from './fraction';

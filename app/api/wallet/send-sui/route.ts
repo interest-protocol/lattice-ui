@@ -8,7 +8,7 @@ import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSuiClient } from '@/lib/sui/client';
-import { normalizeSuiAddress } from '@/utils/sui';
+import { normalizeSuiAddress } from '@/lib/sui/utils';
 
 const schema = z.object({
   userId: z.string(),

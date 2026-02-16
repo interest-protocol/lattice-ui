@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SOL_TYPE } from '@/constants/coins';
 import { REFETCH_INTERVALS } from '@/constants/refetch-intervals';
 import { fetchCoinPrices } from '@/lib/external/client';
-import { normalizeSuiCoinType } from '@/utils/sui';
+import { normalizeSuiCoinType } from '@/lib/sui/utils';
 
 interface TokenPrices {
   [SUI_TYPE_ARG]: number | undefined;

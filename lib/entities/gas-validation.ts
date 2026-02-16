@@ -1,8 +1,8 @@
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import type { ValidationResult } from '@/interface';
-import { parseUnits } from '@/lib/bigint-utils';
 import type { CurrencyAmount } from '@/lib/entities/currency-amount';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
+import { parseUnits } from '@/utils/bigint';
 
 const ALPHA_LIMITS: Record<string, { max: number; symbol: string }> = {
   SUI: { max: CHAIN_REGISTRY.sui.alphaMax, symbol: 'SUI' },

@@ -1,3 +1,5 @@
+/** Fetch-specific retry that checks `response.ok`. For generic async retry
+ *  with exponential backoff, see `utils/with-retry.ts`. */
 export const fetchWithRetry = async (
   input: RequestInfo | URL,
   init: RequestInit,

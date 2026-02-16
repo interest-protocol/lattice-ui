@@ -10,7 +10,8 @@ import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
-import { extractErrorMessage, formatMoney, isNativeToken } from '@/utils';
+import { extractErrorMessage, formatMoney } from '@/utils';
+import { isNativeToken } from '@/lib/entities/token-utils';
 import { filterDecimalInput } from '@/utils/decimal-input';
 
 const SendModal: FC = () => {

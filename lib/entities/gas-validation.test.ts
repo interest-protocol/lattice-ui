@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import { CurrencyAmount, Token } from '@/lib/entities';
-import { parseUnits } from '@/lib/bigint-utils';
+import { parseUnits } from '@/utils/bigint';
 
 import {
   validateAlphaLimit,

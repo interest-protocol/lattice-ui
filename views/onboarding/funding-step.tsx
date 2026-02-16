@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/spinner';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import useSuiBalances from '@/hooks/blockchain/use-sui-balances';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
-import { formatUnits, parseUnits } from '@/lib/bigint-utils';
+import { formatUnits, parseUnits } from '@/utils/bigint';
 
 const MIN_GAS = CHAIN_REGISTRY.sui.minGas;
 const MIN_GAS_RAW = parseUnits(String(MIN_GAS), CHAIN_REGISTRY.sui.decimals);

@@ -1,6 +1,6 @@
 import invariant from 'tiny-invariant';
 
-import { parseUnits } from '@/lib/bigint-utils';
+import { parseUnits } from '@/utils/bigint';
 
 import { CurrencyAmount } from './currency-amount';
 import { Fraction } from './fraction';
