@@ -65,7 +65,23 @@ export const getOrCreateWallet = async (
     }
 
     const wallet = await privy.wallets().create({ chain_type: chainType });
-    await storeWalletMetadata(privy, userId, chainType, wallet);
+
+    // Retry metadata storage to prevent orphaned wallets if the first
+    // attempt fails (e.g. transient network error after wallet creation).
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await storeWalletMetadata(privy, userId, chainType, wallet);
+        lastErr = null;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (attempt < 2)
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+      }
+    }
+    if (lastErr) throw lastErr;
+
     return wallet;
   })();
 

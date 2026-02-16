@@ -4,3 +4,4 @@ export const THEME_STORAGE_KEY = 'lattice-theme';
 export const SOLANA_EXPLORER_STORAGE_KEY = 'lattice-solana-explorer';
 export const SLIPPAGE_STORAGE_KEY = 'lattice-slippage-bps';
 export const REGISTRATION_CACHE_KEY = 'lattice-wallets-linked';
+export const PARTIAL_WALLETS_KEY = 'lattice-partial-wallets';
