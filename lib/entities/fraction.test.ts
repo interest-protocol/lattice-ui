@@ -55,7 +55,6 @@ describe('Fraction', () => {
       const a = new Fraction(1, 3);
       const b = new Fraction(1, 4);
       const result = a.add(b);
-      // 1/3 + 1/4 = 4/12 + 3/12 = 7/12
       expect(result.numerator).toBe(7n);
       expect(result.denominator).toBe(12n);
     });
@@ -63,7 +62,6 @@ describe('Fraction', () => {
     it('adds a scalar value', () => {
       const a = new Fraction(1, 2);
       const result = a.add(1);
-      // 1/2 + 1 = 3/2, quotient is integer division = 1
       expect(result.numerator).toBe(3n);
       expect(result.denominator).toBe(2n);
     });
@@ -82,7 +80,6 @@ describe('Fraction', () => {
       const a = new Fraction(1, 2);
       const b = new Fraction(1, 3);
       const result = a.subtract(b);
-      // 1/2 - 1/3 = 3/6 - 2/6 = 1/6
       expect(result.numerator).toBe(1n);
       expect(result.denominator).toBe(6n);
     });
@@ -117,7 +114,6 @@ describe('Fraction', () => {
       const a = new Fraction(1, 2);
       const b = new Fraction(1, 4);
       const result = a.divide(b);
-      // (1/2) / (1/4) = (1*4)/(2*1) = 4/2 = 2
       expect(result.quotient).toBe(2n);
     });
   });
@@ -127,7 +123,6 @@ describe('Fraction', () => {
       const a = new Fraction(1, 2);
       const b = new Fraction(2, 3);
       const result = a.multiply(b);
-      // (1*2)/(2*3) = 2/6
       expect(result.numerator).toBe(2n);
       expect(result.denominator).toBe(6n);
     });

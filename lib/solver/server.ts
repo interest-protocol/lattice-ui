@@ -3,10 +3,6 @@ import invariant from 'tiny-invariant';
 import { SOLVER_API_URL } from '@/lib/config';
 import { SOLVER_API_KEY } from '@/lib/config.server';
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 interface SolverRequestOptions {
   timeoutMs?: number;
 }
@@ -16,10 +12,6 @@ const authHeaders = (): Record<string, string> => ({
   'x-api-key': SOLVER_API_KEY,
 });
 
-/**
- * GET with automatic `{ data: T }` unwrap.
- * All solver data endpoints return responses wrapped in a `data` envelope.
- */
 const solverGet = async <T>(
   path: string,
   { timeoutMs = 10_000 }: SolverRequestOptions = {}
@@ -42,9 +34,6 @@ const solverGet = async <T>(
   return json.data as T;
 };
 
-/**
- * POST with automatic `{ data: T }` unwrap.
- */
 const solverPost = async <T>(
   path: string,
   body: unknown,
@@ -69,10 +58,6 @@ const solverPost = async <T>(
   const json = await response.json();
   return json.data as T;
 };
-
-// ---------------------------------------------------------------------------
-// Response types (mirrored from client for server-side use)
-// ---------------------------------------------------------------------------
 
 export interface SolverMetadata {
   solver: {
@@ -104,21 +89,14 @@ export interface SolverRequestStatus {
   errorMessage?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-/** GET /api/v1/metadata */
 export const getMetadata = (
   opts?: SolverRequestOptions
 ): Promise<SolverMetadata> => solverGet<SolverMetadata>('/api/v1/metadata', opts);
 
-/** GET /api/v1/prices */
 export const getPrices = (
   opts?: SolverRequestOptions
 ): Promise<SolverPriceData> => solverGet<SolverPriceData>('/api/v1/prices', opts);
 
-/** GET /api/v1/requests/{requestId} */
 export const getRequestStatus = (
   requestId: string,
   opts?: SolverRequestOptions
@@ -128,7 +106,6 @@ export const getRequestStatus = (
     opts
   );
 
-/** POST /api/v1/fulfill */
 export const fulfill = (
   body: {
     requestId: string;
@@ -139,7 +116,6 @@ export const fulfill = (
 ): Promise<SolverFulfillResult> =>
   solverPost<SolverFulfillResult>('/api/v1/fulfill', body, opts);
 
-/** POST /api/v1/sign — returns the raw signature string. */
 export const sign = async (
   body: { presign: string; message: string; chain: string },
   opts?: SolverRequestOptions
@@ -156,7 +132,6 @@ export const sign = async (
   return data.signature;
 };
 
-/** GET /api/health — graceful boolean, no auth key required. */
 export const checkHealth = async (
   opts: SolverRequestOptions = {}
 ): Promise<boolean> => {

@@ -32,6 +32,26 @@ export const toSignificant = (
   return num.toPrecision(sig).replace(/\.?0+$/, '');
 };
 
+export const toFixed = (
+  value: bigint,
+  decimals: number,
+  dp: number
+): string => {
+  const str = formatUnits(value, decimals);
+  const [intPart = '0', fracPart = ''] = str.split('.');
+  if (dp === 0) return intPart;
+  const padded = fracPart.padEnd(dp, '0').slice(0, dp);
+  return `${intPart}.${padded}`;
+};
+
+export const bigintAbs = (value: bigint): bigint =>
+  value < 0n ? -value : value;
+
+export const bigintDivDown = (a: bigint, b: bigint): bigint => {
+  invariant(b !== 0n, 'Division by zero');
+  return a / b;
+};
+
 export const bigintDivUp = (a: bigint, b: bigint): bigint => {
   invariant(b !== 0n, 'Division by zero');
   const result = a / b;

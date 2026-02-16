@@ -16,14 +16,17 @@ const bigintString = z
   .string()
   .regex(/^\d+$/, 'Must be a non-negative integer');
 
+const byteArray = (maxLen: number) =>
+  z.array(z.number().int().min(0).max(255)).max(maxLen);
+
 const proofSchema = z.object({
-  signature: z.array(z.number()),
-  digest: z.array(z.number()),
+  signature: byteArray(128),
+  digest: byteArray(64),
   timestampMs: bigintString,
-  dwalletAddress: z.array(z.number()),
-  user: z.array(z.number()),
+  dwalletAddress: byteArray(64),
+  user: byteArray(64),
   chainId: z.number(),
-  token: z.array(z.number()),
+  token: byteArray(64),
   amount: bigintString,
 });
 
@@ -31,16 +34,16 @@ const schema = z.object({
   userId: z.string(),
   proof: proofSchema,
   walletKey: z.string(),
-  sourceAddress: z.array(z.number()),
+  sourceAddress: byteArray(64),
   sourceChain: z.number(),
   destinationChain: z.number(),
-  destinationAddress: z.array(z.number()),
-  destinationToken: z.array(z.number()),
+  destinationAddress: byteArray(64),
+  destinationToken: byteArray(64),
   minDestinationAmount: bigintString,
   minConfirmations: z.number(),
   deadline: bigintString,
-  solverSender: z.array(z.number()),
-  solverRecipient: z.array(z.number()),
+  solverSender: byteArray(64),
+  solverRecipient: byteArray(64),
 });
 
 export const POST = withAuthPost(

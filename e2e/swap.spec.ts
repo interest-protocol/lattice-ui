@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Swap Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock all API calls
     await page.route('**/api/**', (route) =>
       route.fulfill({ status: 200, body: JSON.stringify({ data: {} }) })
     );
@@ -16,7 +15,6 @@ test.describe('Swap Page', () => {
     await expect(swapTab).toBeVisible();
     await expect(bridgeTab).toBeVisible();
 
-    // Swap tab is active by default
     await expect(swapTab).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -25,14 +23,11 @@ test.describe('Swap Page', () => {
     const swapPanel = page.locator('#swap-tabpanel-0');
     const bridgePanel = page.locator('#swap-tabpanel-1');
 
-    // Initially swap panel is visible
     await expect(swapPanel).not.toHaveAttribute('hidden', '');
 
-    // Click bridge tab
     await bridgeTab.click();
     await expect(bridgeTab).toHaveAttribute('aria-selected', 'true');
 
-    // Bridge panel should now be visible
     await expect(bridgePanel).not.toHaveAttribute('hidden', '');
   });
 

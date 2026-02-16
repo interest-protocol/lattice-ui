@@ -14,7 +14,6 @@ describe('CurrencyAmount', () => {
     it('creates from human amount', () => {
       const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '1.5');
       expect(amount.raw > 0n).toBe(true);
-      // 1.5 * 10^9 = 1500000000
       expect(amount.raw).toBe(1500000000n);
     });
 

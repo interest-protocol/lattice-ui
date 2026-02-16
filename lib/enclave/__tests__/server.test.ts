@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// --- Mocks ---
-
 vi.mock('@/lib/config.server', () => ({
   ENCLAVE_URL: 'https://enclave.test',
   ENCLAVE_API_KEY: 'test-enclave-key',
@@ -21,15 +19,11 @@ const { newRequest, voteBurn, voteMint, checkHealth } = await import(
   '../server'
 );
 
-// --- Helpers ---
-
 const okJson = (data: unknown) => ({
   ok: true,
   json: async () => data,
   text: async () => JSON.stringify(data),
 });
-
-// --- Tests ---
 
 describe('enclavePost (no retry)', () => {
   beforeEach(() => vi.clearAllMocks());

@@ -50,7 +50,6 @@ export const POST = withAuthPost(
       const walletAddress = address(wallet.address);
       const nonceAddress = await deriveNonceAddress(walletAddress);
 
-      // Check if nonce account already exists and is initialized
       const existingNonce = await fetchMaybeNonce(rpc, nonceAddress);
       if (
         existingNonce.exists &&
@@ -66,14 +65,12 @@ export const POST = withAuthPost(
         );
       }
 
-      // Calculate rent exemption
       const nonceSize = BigInt(getNonceSize());
       const rentLamports = await rpc
         .getMinimumBalanceForRentExemption(nonceSize)
         .send();
       const requiredLamports = rentLamports + TX_FEE_LAMPORTS;
 
-      // Check balance
       const balanceResult = await rpc
         .getBalance(walletAddress, { commitment: 'confirmed' })
         .send();

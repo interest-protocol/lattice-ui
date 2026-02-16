@@ -37,7 +37,10 @@ const schema = z.object({
   amount: z
     .string()
     .regex(/^\d+$/, 'Amount must be a non-negative integer string'),
-  mint: z.string().optional(),
+  mint: z
+    .string()
+    .regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, 'Invalid Solana mint address')
+    .optional(),
 });
 
 async function findAta(

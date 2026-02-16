@@ -29,21 +29,15 @@ export const POST = withAuthPost(
     try {
       const { suiClient, xbridge } = createXBridgeSdk();
 
-      // Resolve the owner from the cap object itself (not from metadata)
       const capObj = await suiClient.getObject({
         id: body.presignCapId,
         options: { showOwner: true },
       });
-      // biome-ignore lint/suspicious/noExplicitAny: SUI RPC owner shape
       const owner = (capObj.data?.owner as any)?.AddressOwner as
         | string
         | undefined;
       invariant(owner, 'Could not determine presign cap owner');
 
-      // Poll until MPC completes the presign session for THIS specific cap.
-      // getPresignCaps only returns caps whose session state is Completed
-      // (i.e. presign bytes exist). We filter by presignCapId to avoid
-      // matching stale caps from previous sessions.
       let pollAttempt = 0;
       const presignData = await pollUntil(
         () => {
@@ -66,7 +60,6 @@ export const POST = withAuthPost(
         `presign resolved for cap ${body.presignCapId} after ${pollAttempt} attempts`
       );
 
-      // Fetch the burn request to get the native SOL transfer message bytes
       const burnRequestData = await xbridge.getBurnRequest({
         requestId: body.requestId,
       });
@@ -76,8 +69,6 @@ export const POST = withAuthPost(
       );
       log.info('getBurnRequest ok');
 
-      // Compute centralized signature through solver-api.
-      // This follows core/solver-api's cached protocol-parameter strategy.
       log.info('computing centralized signature');
 
       const solverSignature = await sign({

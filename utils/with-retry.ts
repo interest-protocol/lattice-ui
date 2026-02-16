@@ -1,6 +1,3 @@
-/**
- * Retries an async function with exponential backoff and abort support.
- */
 export const withRetry = async <T>(
   fn: () => Promise<T>,
   attempts: number,

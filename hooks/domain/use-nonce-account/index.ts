@@ -48,7 +48,6 @@ const useNonceAccount = () => {
   const hasNonce = data?.exists ?? false;
   const nonceAddress = data?.nonceAddress ?? null;
 
-  // Sync nonce address to Zustand for global access
   useEffect(() => {
     if (hasNonce && nonceAddress) {
       useOnboarding.setState({ nonceAddress });
@@ -69,7 +68,6 @@ const useNonceAccount = () => {
       try {
         return await createNonceAccount(user.id);
       } catch (err) {
-        // 409 = nonce already exists — treat as success
         if (err instanceof ApiRequestError && err.code === 'NONCE_EXISTS') {
           return { signature: '', nonceAddress: nonceAddress ?? '' };
         }

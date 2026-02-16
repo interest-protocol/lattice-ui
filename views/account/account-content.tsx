@@ -197,7 +197,6 @@ const AccountContent: FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [network, setNetwork] = useState<ChainKey>('solana');
 
-  // Use newly created address if the hook doesn't have one yet
   const displaySuiAddress = suiAddress ?? newSuiAddress;
 
   const { suiBalances, solanaBalances, suiLoading, solLoading } = useBalances({

@@ -1,7 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-// --- Mocks ---
-
 vi.mock('@/lib/config', () => ({
   SOLVER_API_URL: 'https://solver.test',
 }));
@@ -13,10 +10,7 @@ vi.mock('@/lib/config.server', () => ({
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-// Import after mocks
 const { GET } = await import('../route');
-
-// --- Tests ---
 
 describe('GET /api/solver/metadata', () => {
   beforeEach(() => {

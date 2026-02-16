@@ -16,7 +16,10 @@ const schema = z.object({
   amount: z
     .string()
     .regex(/^\d+$/, 'Amount must be a non-negative integer string'),
-  coinType: z.string().optional(),
+  coinType: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]+::.+::.+$/, 'Invalid Sui coin type')
+    .optional(),
 });
 
 export const POST = withAuthPost(

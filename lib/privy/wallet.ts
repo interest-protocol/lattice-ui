@@ -24,7 +24,6 @@ export const storeWalletMetadata = async (
   const user = await privy.users()._get(userId);
   const existing = user.custom_metadata ?? {};
 
-  // Never overwrite — first wallet stored wins
   if (typeof existing[walletIdKey(chainType)] === 'string') return;
 
   await privy.users().setCustomMetadata(userId, {

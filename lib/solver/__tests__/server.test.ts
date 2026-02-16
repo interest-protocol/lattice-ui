@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// --- Mocks ---
-
 vi.mock('@/lib/config', () => ({
   SOLVER_API_URL: 'https://solver.test',
 }));
@@ -22,8 +20,6 @@ const {
   checkHealth,
 } = await import('../server');
 
-// --- Helpers ---
-
 const okJson = (data: unknown) => ({
   ok: true,
   json: async () => ({ data }),
@@ -34,8 +30,6 @@ const errorJson = (status: number, body?: unknown) => ({
   status,
   json: async () => body ?? null,
 });
-
-// --- Tests ---
 
 describe('solverGet', () => {
   beforeEach(() => vi.clearAllMocks());

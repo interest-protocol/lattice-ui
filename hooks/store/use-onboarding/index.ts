@@ -10,8 +10,6 @@ import {
   linkSolanaWallet,
 } from '@/lib/wallet/client';
 
-// --- Types ---
-
 export type OnboardingStep =
   | 'checking'
   | 'creating-wallets'
@@ -38,12 +36,8 @@ interface OnboardingState {
   cleanup: () => void;
 }
 
-// --- Constants ---
-
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAYS_MS = [2000, 5000, 10000];
-
-// --- localStorage cache helpers ---
 
 interface CachedUser {
   linked: boolean;
@@ -65,7 +59,6 @@ const readCache = (): CacheRecord => {
 const readCachedUser = (userId: string): CachedUser | null => {
   const entry = readCache()[userId];
   if (!entry) return null;
-  // Backwards-compatible: old format was `true`, new format is an object
   if (typeof entry === 'boolean') return { linked: entry };
   return entry;
 };
@@ -87,9 +80,7 @@ const writeCache = (
         },
       })
     );
-  } catch {
-    // Non-critical — cache write failure is acceptable
-  }
+  } catch {}
 };
 
 export const isUserCached = (userId: string): boolean => {
@@ -98,8 +89,6 @@ export const isUserCached = (userId: string): boolean => {
   if (typeof entry === 'boolean') return entry;
   return entry.linked;
 };
-
-// --- Timer management ---
 
 let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -110,19 +99,14 @@ const clearRetryTimer = () => {
   }
 };
 
-// --- Async business logic ---
-
 const doCheckRegistration = async (userId: string) => {
   const state = useOnboarding.getState();
   if (state._isProcessing) return;
 
-  // Skip if already completed for this user in current session
   if (state.step === 'complete' && state.userId === userId) return;
 
   useOnboarding.setState({ _isProcessing: true, userId, error: null });
 
-  // Fast-path: if localStorage cache says linked, verify on-chain
-  // If cache says not linked, still check on-chain (source of truth)
   if (isUserCached(userId)) {
     try {
       const result = await checkRegistrationApi();
@@ -135,11 +119,9 @@ const doCheckRegistration = async (userId: string) => {
         });
         return;
       }
-      // Cache was stale — fall through to normal check logic
       handleCheckResult(result, userId);
       return;
     } catch {
-      // API failed but cache says linked — recover addresses from cache
       const cached = readCachedUser(userId);
       if (cached?.suiAddress && cached?.solanaAddress) {
         useOnboarding.setState({
@@ -149,7 +131,6 @@ const doCheckRegistration = async (userId: string) => {
           _isProcessing: false,
         });
       } else {
-        // Cache has no addresses — can't safely proceed, retry from scratch
         useOnboarding.setState({
           step: 'checking',
           error: 'Connection lost. Retrying...',
@@ -170,7 +151,6 @@ const doCheckRegistration = async (userId: string) => {
     const result = await checkRegistrationApi();
     handleCheckResult(result, userId);
   } catch {
-    // On API failure, assume not registered and start from scratch
     useOnboarding.setState({
       step: 'creating-wallets',
       _isProcessing: false,
@@ -209,7 +189,6 @@ const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
     _isProcessing: false,
   });
 
-  // Automatically trigger wallet creation
   doRegisterWallets(0);
 };
 
@@ -315,8 +294,6 @@ const doStartLinking = async (retryCount = 0) => {
     });
   }
 };
-
-// --- Store ---
 
 const initialState = {
   step: 'checking' as OnboardingStep,

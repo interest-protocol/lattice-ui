@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-
-// --- Mocks ---
-
 const mockAuthenticateRequest = vi.fn();
 const mockVerifyUserMatch = vi.fn();
 
@@ -13,8 +10,6 @@ vi.mock('@/lib/api/auth', () => ({
 }));
 
 const { withAuthPost, withAuthGet } = await import('../with-auth');
-
-// --- Helpers ---
 
 const AUTH_SUCCESS = { userId: 'user-123', accessToken: 'tok' };
 const AUTH_401 = NextResponse.json(
@@ -39,8 +34,6 @@ const schema = z.object({
   userId: z.string(),
   amount: z.string(),
 });
-
-// --- Tests ---
 
 describe('withAuthGet', () => {
   it('returns 401 when auth fails', async () => {
@@ -85,7 +78,6 @@ describe('withAuthPost', () => {
     const handler = vi.fn();
     const route = withAuthPost(schema, handler);
 
-    // Create a request with invalid JSON body
     const req = new NextRequest('http://localhost/api/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

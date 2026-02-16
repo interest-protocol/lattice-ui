@@ -116,9 +116,7 @@ export const useSwap = () => {
             );
             return;
           }
-        } catch {
-          // Ignore errors, retry
-        }
+        } catch {}
 
         await new Promise<void>((resolve) =>
           setTimeout(resolve, POLL_INTERVAL_MS)

@@ -28,8 +28,10 @@ import { createXBridgeSdk } from '@/lib/xbridge';
 const schema = z.object({
   userId: z.string(),
   sourceAmount: z.string().regex(/^\d+$/, 'Must be a non-negative integer'),
-  destinationAddress: z.array(z.number()),
-  nonceAddress: z.string(),
+  destinationAddress: z.array(z.number().int().min(0).max(255)).length(32),
+  nonceAddress: z
+    .string()
+    .regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, 'Invalid Solana nonce address'),
   coinType: z.string(),
 });
 
@@ -42,7 +44,6 @@ export const POST = withAuthPost(
     try {
       const privy = getPrivyClient();
 
-      // === Phase 0: Setup ===
       const [suiWallet, solanaWallet] = await Promise.all([
         getFirstWallet(privy, body.userId, 'sui'),
         getFirstWallet(privy, body.userId, 'solana'),
@@ -56,7 +57,6 @@ export const POST = withAuthPost(
       const userSolanaAddress = solanaWallet.address;
       log.info('Phase 0 setup done');
 
-      // === Phase 1: Build native SOL transfer message + user pre-sign ===
       const dwalletSolana = DWalletAddress[ChainId.Solana];
 
       const rpc = getSolanaRpc();
@@ -100,12 +100,10 @@ export const POST = withAuthPost(
         `Invalid native SOL message length: ${messageBytes.length}`
       );
 
-      // Sign as Solana transaction (not signMessage — message signing adds a prefix
-      // that invalidates the signature for on-chain transaction verification)
       const wireTx = Buffer.concat([
-        Buffer.from([2]), // compact-u16: 2 signatures
-        Buffer.alloc(64), // placeholder for user sig (position 0: nonceAuthority)
-        Buffer.alloc(64), // placeholder for dWallet sig (position 1: tokenOwner)
+        Buffer.from([2]),
+        Buffer.alloc(64),
+        Buffer.alloc(64),
         messageBytes,
       ]);
 
@@ -119,13 +117,11 @@ export const POST = withAuthPost(
           },
         });
 
-      // Extract user's 64-byte Ed25519 signature from position 0 of signed wire tx
       const signedTxBytes = fromBase64(signResult.signed_transaction);
       const userSolanaSignature = signedTxBytes.subarray(1, 65);
 
       log.info('Phase 1 native SOL message + presign done');
 
-      // === Phase 2: Tx1 (create burn request + mint presign) ===
       const tx1 = new Transaction();
       tx1.setSender(walletAddress);
 

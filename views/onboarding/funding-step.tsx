@@ -23,7 +23,6 @@ const FundingStep: FC = () => {
   const suiBalance = balances.sui;
   const hasSufficientBalance = suiBalance >= MIN_GAS_RAW;
 
-  // Auto-advance when balance is sufficient
   useEffect(() => {
     if (hasSufficientBalance && !hasAdvanced.current) {
       hasAdvanced.current = true;

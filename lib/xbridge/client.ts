@@ -93,21 +93,3 @@ export const bridgeBurnFinalize = (params: {
     timeout: 30_000,
     retries: 0,
   });
-
-export interface BridgeBurnWaitSignatureResult {
-  dWalletSignature: string;
-}
-
-export const bridgeBurnWaitSignature = (params: {
-  userId: string;
-  requestId: string;
-  signId: string;
-}) =>
-  post<BridgeBurnWaitSignatureResult>(
-    '/api/xbridge/bridge-burn/wait-signature',
-    params,
-    {
-      timeout: 130_000,
-      retries: 0,
-    }
-  );

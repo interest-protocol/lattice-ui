@@ -44,7 +44,6 @@ describe('Percent', () => {
       const pct = Percent.fromBps(50);
       const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '100');
       const result = pct.applyTo(amount);
-      // 0.5% of 100 = 0.5
       expect(result.toNumber()).toBeCloseTo(0.5, 4);
     });
 
@@ -62,7 +61,6 @@ describe('Percent', () => {
       const amount = CurrencyAmount.fromHumanAmount(Token.SUI, '100');
       const [afterFee, fee] = pct.feeFrom(amount);
 
-      // Fee should be ~0.3 SUI, afterFee should be ~99.7 SUI
       expect(fee.toNumber()).toBeCloseTo(0.3, 1);
       expect(afterFee.toNumber()).toBeCloseTo(99.7, 1);
     });
@@ -72,7 +70,6 @@ describe('Percent', () => {
       const amount = CurrencyAmount.fromRawAmount(Token.SUI, '999');
       const [afterFee, fee] = pct.feeFrom(amount);
 
-      // 0.01% of 999 = 0.0999 raw → rounds up to 1
       expect(fee.raw).toBe(1n);
       expect(afterFee.raw).toBe(998n);
     });
@@ -100,7 +97,6 @@ describe('Percent', () => {
       for (const raw of rawValues) {
         const amount = CurrencyAmount.fromRawAmount(Token.SUI, raw);
         const [afterFee, fee] = pct.feeFrom(amount);
-        // afterFee + fee should always >= original (rounding up fee)
         expect(afterFee.raw + fee.raw).toBeGreaterThanOrEqual(amount.raw);
       }
     });

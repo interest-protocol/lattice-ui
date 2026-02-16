@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// =============================================================================
-// Global mocks — prevent heavy SDK imports from failing
-// =============================================================================
-
 const mockAuthenticateRequest = vi.fn();
 const mockVerifyUserMatch = vi.fn();
 
@@ -13,7 +9,6 @@ vi.mock('@/lib/api/auth', () => ({
   verifyUserMatch: (...args: unknown[]) => mockVerifyUserMatch(...args),
 }));
 
-// Privy
 vi.mock('@/lib/privy/server', () => ({
   getPrivyClient: () => ({}),
 }));
@@ -29,7 +24,6 @@ vi.mock('@/lib/privy/signing', () => ({
   authorizationContext: {},
 }));
 
-// SDK stubs
 vi.mock('@/lib/xswap', () => ({
   createXSwapSdk: () => ({ suiClient: {}, xswap: {} }),
 }));
@@ -47,7 +41,6 @@ vi.mock('@/lib/registry', () => ({
   SuiAddress: class {},
 }));
 
-// Chain SDKs
 vi.mock('@mysten/sui/transactions', () => ({
   Transaction: class {},
 }));
@@ -61,7 +54,6 @@ vi.mock('bs58', () => ({
   default: { decode: vi.fn().mockReturnValue(new Uint8Array(32)) },
 }));
 
-// Solana
 vi.mock('@solana/kit', () => ({
   address: vi.fn(),
   pipe: vi.fn(),
@@ -98,7 +90,6 @@ vi.mock('@interest-protocol/xbridge-sdk', () => ({
   WRAPPED_SOL_OTW: 'wrapped-sol',
 }));
 
-// Server config
 vi.mock('@/lib/config.server', () => ({
   PRIVY_AUTHORIZATION_KEY: 'test-key',
   PRIVY_APP_SECRET: 'test-secret',
@@ -110,7 +101,6 @@ vi.mock('@/lib/config', () => ({
   SOLVER_API_URL: 'http://localhost:9090',
 }));
 
-// Misc
 vi.mock('@/lib/api/with-timeout', () => ({
   withTimeout: vi.fn((_p: unknown) => _p),
 }));
@@ -154,10 +144,6 @@ vi.mock('@/utils/sui', () => ({
   coinTypeEquals: vi.fn(),
   normalizeSuiAddress: vi.fn(),
 }));
-
-// =============================================================================
-// Route table
-// =============================================================================
 
 interface ProtectedRoute {
   name: string;
@@ -339,10 +325,6 @@ const PROTECTED_ROUTES: ProtectedRoute[] = [
   },
 ];
 
-// =============================================================================
-// Tests
-// =============================================================================
-
 describe('Auth protection — protected routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -427,7 +409,6 @@ describe('Auth protection — protected routes', () => {
 describe('Auth protection — public routes (no auth required)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock global fetch for public routes that call external services
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -506,9 +487,7 @@ describe('Auth protection — public routes (no auth required)', () => {
 
       const res = await handler(req);
 
-      // Public routes must NOT return 401
       expect(res.status).not.toBe(401);
-      // Confirm authenticateRequest was never called for these routes
       expect(mockAuthenticateRequest).not.toHaveBeenCalled();
     });
   }

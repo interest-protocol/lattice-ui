@@ -11,7 +11,6 @@ const BackgroundStatic: FC = () => (
       overflow: 'hidden',
     }}
   >
-    {/* Orb 1 — cyan, top-left */}
     <div
       className="bg-orb"
       style={{
@@ -29,7 +28,6 @@ const BackgroundStatic: FC = () => (
         animation: 'orb-drift-1 25s ease-in-out infinite',
       }}
     />
-    {/* Orb 2 — violet, bottom-right */}
     <div
       className="bg-orb"
       style={{
@@ -47,7 +45,6 @@ const BackgroundStatic: FC = () => (
         animation: 'orb-drift-2 30s ease-in-out infinite',
       }}
     />
-    {/* Orb 3 — subtle accent, center */}
     <div
       className="bg-orb"
       style={{

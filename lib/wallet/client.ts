@@ -75,8 +75,6 @@ export interface CheckRegistrationResult {
 export const checkRegistration = () =>
   get<CheckRegistrationResult>('/api/wallet/check-registration');
 
-// Unified send interface
-
 interface SendTokensParams {
   userId: string;
   recipient: string;

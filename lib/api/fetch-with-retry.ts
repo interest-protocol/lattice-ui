@@ -1,7 +1,3 @@
-/**
- * Retry wrapper for server-side fetch calls.
- * Retries on non-ok responses with a fixed delay between attempts.
- */
 export const fetchWithRetry = async (
   input: RequestInfo | URL,
   init: RequestInit,

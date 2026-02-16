@@ -100,7 +100,6 @@ const executeWithRetry = async <T>(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // Don't retry if the signal was aborted
       if (signal?.aborted) throw lastError;
 
       if (attempt < retries) {

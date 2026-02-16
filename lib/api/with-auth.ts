@@ -9,12 +9,6 @@ import {
 } from '@/lib/api/auth';
 import { validateBody } from '@/lib/api/validate-params';
 
-/**
- * HOF wrapper for authenticated POST routes with Zod body validation.
- *
- * Handles: auth check → JSON parse → schema validation → optional userId verification.
- * The handler only receives validated data.
- */
 export const withAuthPost = <T>(
   schema: ZodSchema<T>,
   handler: (
@@ -50,11 +44,6 @@ export const withAuthPost = <T>(
   };
 };
 
-/**
- * HOF wrapper for authenticated GET routes (no body parsing).
- *
- * Handles: auth check only. The handler receives the authenticated user info.
- */
 export const withAuthGet = (
   handler: (
     auth: AuthResult,

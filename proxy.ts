@@ -34,7 +34,6 @@ const isRateLimited = (key: string, limit: number): boolean => {
   return entry.count > limit;
 };
 
-// Periodic cleanup of expired entries
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of rateLimitStore) {

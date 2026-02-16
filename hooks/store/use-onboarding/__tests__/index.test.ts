@@ -1,7 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-// --- Mocks ---
-
 const mockCheckRegistration = vi.fn();
 const mockCreateSuiWallet = vi.fn();
 const mockCreateSolanaWallet = vi.fn();
@@ -33,10 +30,8 @@ vi.mock('@/constants/storage-keys', () => ({
   REGISTRATION_CACHE_KEY: 'test-registration-cache',
 }));
 
-// Import after mocks
 const { useOnboarding } = await import('../index');
 
-// Helper to wait for async state updates
 const waitForState = (
   predicate: () => boolean,
   timeout = 2000
@@ -58,7 +53,6 @@ describe('useOnboarding store', () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     useOnboarding.getState().reset();
 
-    // Mock localStorage
     const storage: Record<string, string> = {};
     vi.stubGlobal('localStorage', {
       getItem: (key: string) => storage[key] ?? null,
@@ -135,10 +129,8 @@ describe('useOnboarding store', () => {
 
       useOnboarding.getState().checkRegistration('user-1');
 
-      // Wait for _isProcessing to be true
       await waitForState(() => useOnboarding.getState()._isProcessing);
 
-      // Second call should be a no-op
       useOnboarding.getState().checkRegistration('user-1');
 
       expect(mockCheckRegistration).toHaveBeenCalledTimes(1);
@@ -221,24 +213,19 @@ describe('useOnboarding store', () => {
 
       useOnboarding.getState().checkRegistration('user-1');
 
-      // Wait for creating-wallets step (first attempt)
       await waitForState(
         () => useOnboarding.getState().step === 'creating-wallets'
       );
 
-      // First attempt fails, retry at 2s
       await vi.advanceTimersByTimeAsync(2100);
       expect(mockCreateSuiWallet).toHaveBeenCalledTimes(2);
 
-      // Second retry at 5s
       await vi.advanceTimersByTimeAsync(5100);
       expect(mockCreateSuiWallet).toHaveBeenCalledTimes(3);
 
-      // Third retry at 10s
       await vi.advanceTimersByTimeAsync(10100);
       expect(mockCreateSuiWallet).toHaveBeenCalledTimes(4);
 
-      // After all retries exhausted, should show error
       await waitForState(() => useOnboarding.getState().error !== null);
       expect(useOnboarding.getState().error).toBe(
         'Wallet setup failed. Please try again.'
@@ -258,18 +245,14 @@ describe('useOnboarding store', () => {
 
       useOnboarding.getState().startLinking();
 
-      // Wait for linking attempt to fail and schedule retry
       await waitForState(() => !useOnboarding.getState()._isProcessing);
 
-      // Cleanup before retry fires
       useOnboarding.getState().cleanup();
 
       const callsBefore = mockLinkSolanaWallet.mock.calls.length;
 
-      // Advance past all retry delays
       await vi.advanceTimersByTimeAsync(20000);
 
-      // No new calls should have been made
       expect(mockLinkSolanaWallet).toHaveBeenCalledTimes(callsBefore);
     });
   });

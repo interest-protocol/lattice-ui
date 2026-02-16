@@ -24,26 +24,22 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       </linearGradient>
     </defs>
 
-    {/* Top face fill (bright cyan - lit from above) */}
     <polygon
       points="5,11.5 20,3 35,11.5 20,20"
       fill="#22d3ee"
       fillOpacity="0.25"
     />
-    {/* Left face fill (deeper cyan - side shadow) */}
     <polygon
       points="5,11.5 20,20 20,37 5,28.5"
       fill="#0891b2"
       fillOpacity="0.3"
     />
-    {/* Right face fill (violet - deep shadow) */}
     <polygon
       points="35,11.5 35,28.5 20,37 20,20"
       fill="#7c3aed"
       fillOpacity="0.3"
     />
 
-    {/* Hexagonal outline */}
     <polygon
       points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5"
       stroke="url(#lattice-grad)"
@@ -52,7 +48,6 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       fill="none"
     />
 
-    {/* 3 internal cube edges meeting at center */}
     <line
       x1="20"
       y1="20"
@@ -81,7 +76,6 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       strokeLinecap="round"
     />
 
-    {/* Bottom internal edges (center to bottom, completing the cube) */}
     <line
       x1="20"
       y1="20"
@@ -110,7 +104,6 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       strokeLinecap="round"
     />
 
-    {/* Lattice subdivision lines — top face */}
     <line
       x1="12.5"
       y1="7.25"
@@ -132,7 +125,6 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       opacity="0.5"
     />
 
-    {/* Lattice subdivision lines — right face */}
     <line
       x1="35"
       y1="20"
@@ -154,7 +146,6 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       opacity="0.5"
     />
 
-    {/* Lattice subdivision lines — left face */}
     <line
       x1="5"
       y1="20"
@@ -176,12 +167,9 @@ const Logo: FC<SVGProps> = ({ maxWidth, maxHeight, ...props }) => (
       opacity="0.5"
     />
 
-    {/* Center node glow halo */}
     <circle cx="20" cy="20" r="5" fill="#22d3ee" fillOpacity="0.15" />
-    {/* Center node (convergence/swap hub) */}
     <circle cx="20" cy="20" r="2.5" fill="#e0f7fa" />
 
-    {/* Face-center nodes */}
     <circle cx="20" cy="11.5" r="1.25" fill="#22d3ee" fillOpacity="0.7" />
     <circle cx="27.5" cy="24.25" r="1.25" fill="#8b5cf6" fillOpacity="0.6" />
     <circle cx="12.5" cy="24.25" r="1.25" fill="#0891b2" fillOpacity="0.65" />

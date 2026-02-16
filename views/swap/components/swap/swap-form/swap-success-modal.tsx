@@ -75,7 +75,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
 
   return (
     <div className="flex flex-col gap-5 p-6">
-      {/* Success Icon */}
       <div className="flex justify-center">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -85,7 +84,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
         </div>
       </div>
 
-      {/* Swap Details */}
       <div
         className="flex flex-col gap-3 p-4 rounded-lg"
         style={{
@@ -93,7 +91,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           border: '1px solid var(--color-surface-border)',
         }}
       >
-        {/* Sent */}
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">
             Sent on {sourceChainName}
@@ -103,13 +100,11 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           </span>
         </div>
 
-        {/* Divider */}
         <div
           className="h-px w-full"
           style={{ background: 'var(--color-surface-border)' }}
         />
 
-        {/* Received */}
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">
             Received on {destChainName}
@@ -119,13 +114,11 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           </span>
         </div>
 
-        {/* Divider */}
         <div
           className="h-px w-full"
           style={{ background: 'var(--color-surface-border)' }}
         />
 
-        {/* Fee */}
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">Slippage fee</span>
           <span className="text-text-muted text-sm">
@@ -133,25 +126,21 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           </span>
         </div>
 
-        {/* Divider */}
         <div
           className="h-px w-full"
           style={{ background: 'var(--color-surface-border)' }}
         />
 
-        {/* Time */}
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">Time</span>
           <span className="text-text-muted text-sm">{elapsedDisplay}</span>
         </div>
 
-        {/* Divider */}
         <div
           className="h-px w-full"
           style={{ background: 'var(--color-surface-border)' }}
         />
 
-        {/* Source Tx */}
         <div className="flex items-center justify-between">
           <span className="text-text-secondary text-sm">
             {sourceChainName} tx
@@ -167,7 +156,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
           </a>
         </div>
 
-        {/* Dest Tx */}
         <div
           className="h-px w-full"
           style={{ background: 'var(--color-surface-border)' }}
@@ -195,7 +183,6 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
         </div>
       </div>
 
-      {/* Close Button */}
       <button
         type="button"
         className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-colors duration-200 focus-ring"

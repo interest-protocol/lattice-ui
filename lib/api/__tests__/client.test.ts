@@ -14,8 +14,6 @@ import {
   setAccessTokenGetter,
 } from '../client';
 
-// --- Helpers ---
-
 const mockFetch = vi.fn();
 
 const jsonResponse = (data: unknown, status = 200) =>
@@ -24,12 +22,10 @@ const jsonResponse = (data: unknown, status = 200) =>
     headers: { 'Content-Type': 'application/json' },
   });
 
-// --- Setup ---
-
 beforeEach(() => {
   mockFetch.mockReset();
   vi.stubGlobal('fetch', mockFetch);
-  vi.spyOn(Math, 'random').mockReturnValue(0); // deterministic jitter
+  vi.spyOn(Math, 'random').mockReturnValue(0);
   setAccessTokenGetter(null as unknown as () => Promise<string | null>);
 });
 
@@ -189,7 +185,6 @@ describe('API client', () => {
       await expect(get('/api/fail', { retries: 1 })).rejects.toThrow(
         'always fails'
       );
-      // 1 retry = 2 total attempts
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 

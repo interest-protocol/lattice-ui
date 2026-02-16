@@ -9,7 +9,6 @@ const Background: FC = () => (
   <>
     <BackgroundBlur />
     <BackgroundStatic />
-    {/* Noise grain overlay */}
     <div
       aria-hidden
       style={{

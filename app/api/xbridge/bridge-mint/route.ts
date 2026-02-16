@@ -22,9 +22,9 @@ import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 const schema = z.object({
   userId: z.string(),
   sourceChain: z.number(),
-  sourceToken: z.array(z.number()),
+  sourceToken: z.array(z.number().int().min(0).max(255)).min(1).max(64),
   sourceDecimals: z.number(),
-  sourceAddress: z.array(z.number()),
+  sourceAddress: z.array(z.number().int().min(0).max(255)).length(32),
   sourceAmount: z.string().regex(/^\d+$/, 'Must be a non-negative integer'),
   coinType: z.string(),
   depositSignature: z.string(),
@@ -41,10 +41,8 @@ export const POST = withAuthPost(
       const wallet = await getFirstWallet(privy, body.userId, 'sui');
       const { suiClient, xbridge } = createXBridgeSdk();
 
-      // Pre-fetch public key once for both transactions
       const publicKey = await getWalletPublicKey(privy, wallet.id);
 
-      // === Sui Tx 1: create + share mint request + transfer mint cap ===
       const tx1 = new Transaction();
       tx1.setSender(wallet.address);
 
@@ -82,10 +80,8 @@ export const POST = withAuthPost(
         'Failed to extract requestId or mintCapId from tx1'
       );
 
-      // Wait for tx1 to be indexed before the enclave tries to read it on-chain
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 
-      // === Enclave: get vote signature (with retry for RPC propagation) ===
       const sourceTokenHex = toHex(new Uint8Array(body.sourceToken));
       const sourceAddressHex = toHex(new Uint8Array(body.sourceAddress));
 
@@ -102,7 +98,6 @@ export const POST = withAuthPost(
       const signature = fromHex(voteData.signature);
       const timestampMs = BigInt(voteData.timestamp_ms);
 
-      // === Sui Tx 2: setDigest + vote + execute (combined PTB) ===
       const tx2 = new Transaction();
       tx2.setSender(wallet.address);
 
@@ -154,7 +149,6 @@ export const POST = withAuthPost(
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);
 
-      // If tx1 succeeded but a later phase failed, include recovery info
       if (requestId && mintCapId) {
         const message =
           caught instanceof Error ? caught.message : 'Bridge mint failed';

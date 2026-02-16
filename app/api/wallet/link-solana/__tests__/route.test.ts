@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// --- Mocks ---
-
 const mockGetPrivyClient = vi.fn();
 const mockGetOrCreateWallet = vi.fn();
 const mockSignAndExecuteSuiTransaction = vi.fn();
@@ -65,10 +63,7 @@ vi.mock('@/lib/bigint-utils', () => ({
   },
 }));
 
-// Import after mocks
 const { POST } = await import('../route');
-
-// --- Helpers ---
 
 const makeRequest = (body: Record<string, unknown>) =>
   new NextRequest('http://localhost:3000/api/wallet/link-solana', {
@@ -98,8 +93,6 @@ const mockPrivy = {
     }),
   }),
 };
-
-// --- Tests ---
 
 describe('POST /api/wallet/link-solana', () => {
   beforeEach(() => {
@@ -204,7 +197,6 @@ describe('POST /api/wallet/link-solana', () => {
   });
 
   it('returns digest and addresses on successful link', async () => {
-    // Second call (post-tx verification) returns the new link
     mockRegistry.getSolanaForSui
       .mockResolvedValueOnce([]) // idempotency check
       .mockResolvedValueOnce([

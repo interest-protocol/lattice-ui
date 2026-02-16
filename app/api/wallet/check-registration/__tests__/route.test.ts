@@ -1,8 +1,5 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-// --- Mocks ---
-
 const mockAuthenticateRequest = vi.fn();
 const mockGetPrivyClient = vi.fn();
 const mockCreateRegistrySdk = vi.fn();
@@ -25,18 +22,13 @@ vi.mock('@/lib/config.server', () => ({
   PRIVY_APP_SECRET: 'test-secret',
 }));
 
-// Import after mocks
 const { GET } = await import('../route');
-
-// --- Helpers ---
 
 const makeRequest = () =>
   new NextRequest('http://localhost:3000/api/wallet/check-registration', {
     method: 'GET',
     headers: { Authorization: 'Bearer test-token' },
   });
-
-// --- Tests ---
 
 describe('GET /api/wallet/check-registration', () => {
   const mockRegistry = {

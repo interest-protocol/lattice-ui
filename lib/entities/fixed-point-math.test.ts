@@ -86,7 +86,6 @@ describe('FixedPointMath', () => {
       const a = FixedPointMath.from(3n * ONE_COIN);
       const b = FixedPointMath.from(2n * ONE_COIN);
       const result = a.div(b);
-      // (3e9 * 1e9) / 2e9 = 1.5e9
       expect(result.value()).toBe(1_500_000_000n);
     });
 
@@ -101,7 +100,6 @@ describe('FixedPointMath', () => {
       const a = FixedPointMath.from(2n * ONE_COIN);
       const b = FixedPointMath.from(3n * ONE_COIN);
       const result = a.mul(b);
-      // (2e9 * 3e9) / 1e9 = 6e9
       expect(result.value()).toBe(6n * ONE_COIN);
     });
 
@@ -174,10 +172,6 @@ describe('FixedPointMath', () => {
 
   describe('toPercentage', () => {
     it('formats as percentage', () => {
-      // 50% = 50 * ONE_COIN * 100 / ONE_COIN = ...
-      // Actually, toPercentage creates Fraction(value, ONE_COIN * 100)
-      // For 50%: value = 50 * ONE_COIN * 100 (= 5e12)
-      // Fraction(5e12, 1e11) = 50
       const fp = FixedPointMath.from(50n * ONE_COIN * 100n);
       expect(fp.toPercentage(2)).toContain('%');
     });

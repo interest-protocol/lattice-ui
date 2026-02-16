@@ -47,7 +47,6 @@ export const POST = withAuthPost(
 
       const suiAddress = new SuiAddress(suiWallet.address);
 
-      // Parallelize independent checks: existing link + gas balance
       const [existingLinks, { totalBalance }] = await Promise.all([
         withTimeout(
           registry.getSolanaForSui({ suiAddress }),

@@ -179,7 +179,6 @@ export const useBridge = () => {
 
     const coinType = WSOL_SUI_TYPE.split('<')[1].replace('>', '');
 
-    // Phase A: Sui-side burn create (setup + native SOL message + Tx1)
     setStatus('creating');
     toasting.update(toastId, 'Creating burn request...');
 
@@ -194,7 +193,6 @@ export const useBridge = () => {
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
 
-    // Phase B: Enclave vote + solver sign (parallel)
     setStatus('waiting');
     toasting.update(toastId, 'Waiting for signature...');
 
@@ -215,7 +213,6 @@ export const useBridge = () => {
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
 
-    // Phase C: Finalize (Tx2: on-chain vote + execute burn)
     setStatus('executing');
     toasting.update(toastId, 'Finalizing burn on Sui...');
 
@@ -233,11 +230,6 @@ export const useBridge = () => {
     if (signal.aborted)
       throw new DOMException('The operation was aborted.', 'AbortError');
 
-    // Phase D: Poll IKA for dWallet signature
-    console.log(
-      '[bridge] Phase D: waiting for dWallet signature, signId=',
-      finalizeResult.signId
-    );
     toasting.update(toastId, 'Waiting for dWallet signature...');
     const ikaClient = await ensureIkaClient();
     const dwalletSignature = await waitForIkaSignature({
@@ -247,29 +239,27 @@ export const useBridge = () => {
       intervalMs: 3_000,
       signal,
     });
-    console.log(
-      '[bridge] Phase D: dWallet signature received,',
-      dwalletSignature.length,
-      'bytes'
-    );
-
     invariant(
       dwalletSignature.length === 64,
       `Expected 64-byte Ed25519 signature, got ${dwalletSignature.length} bytes`
     );
 
-    // Phase E: Build raw Solana tx and broadcast
-    console.log('[bridge] Phase E: building Solana transaction');
     toasting.update(toastId, 'Broadcasting to Solana...');
     const messageBytes = fromHex(createResult.message);
     const userSigBytes = fromHex(createResult.userSignature);
 
-    // Wire format: [num_sigs(1)][sig0(64)][sig1(64)][message]
-    const rawTx = new Uint8Array(1 + 64 + 64 + messageBytes.length);
-    rawTx[0] = 2; // 2 required signatures
-    rawTx.set(userSigBytes, 1); // position 0: user (nonceAuthority)
-    rawTx.set(dwalletSignature, 65); // position 1: dWallet (tokenOwner)
-    rawTx.set(messageBytes, 129);
+    const NUM_SIGS = 2;
+    const SIG_SIZE = 64;
+    const NUM_SIGS_OFFSET = 0;
+    const SIG_1_OFFSET = 1;
+    const SIG_2_OFFSET = SIG_1_OFFSET + SIG_SIZE;
+    const MESSAGE_OFFSET = SIG_2_OFFSET + SIG_SIZE;
+
+    const rawTx = new Uint8Array(1 + SIG_SIZE * NUM_SIGS + messageBytes.length);
+    rawTx[NUM_SIGS_OFFSET] = NUM_SIGS;
+    rawTx.set(userSigBytes, SIG_1_OFFSET);
+    rawTx.set(dwalletSignature, SIG_2_OFFSET);
+    rawTx.set(messageBytes, MESSAGE_OFFSET);
 
     const base64Tx = toBase64(rawTx) as Base64EncodedWireTransaction;
 
@@ -287,11 +277,8 @@ export const useBridge = () => {
       throw cause;
     }
 
-    console.log('[bridge] Phase E: Solana tx sent, sig=', solanaSignature);
     toasting.update(toastId, 'Confirming Solana transaction...');
     await confirmSolanaTransaction(solanaRpc, solanaSignature as Signature);
-    console.log('[bridge] Phase E: Solana tx confirmed');
-
     await Promise.all([mutateSuiBalances(), mutateSolanaBalances()]);
     return {
       depositDigest: finalizeResult.executeDigest,

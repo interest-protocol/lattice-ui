@@ -23,7 +23,6 @@ export const GET = withAuthGet(async (auth) => {
 
     const hasWallets = Boolean(suiAddress && solanaAddress);
 
-    // If no Sui wallet, can't be registered on-chain
     if (!suiAddress) {
       return NextResponse.json({
         registered: false,
@@ -33,7 +32,6 @@ export const GET = withAuthGet(async (auth) => {
       });
     }
 
-    // Check on-chain link
     const { registry } = createRegistrySdk();
     const links = await withTimeout(
       registry.getSolanaForSui({

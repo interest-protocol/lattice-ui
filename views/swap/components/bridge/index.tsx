@@ -28,7 +28,6 @@ const REVERSE_ROUTE_KEY: Record<string, string> = {
   'wsui-to-sui': 'sui-to-wsui',
 };
 
-// Estimated rent (80 bytes) + tx fee — precise check happens server-side
 const NONCE_REQUIRED_LAMPORTS = 1_452_680n;
 
 const CTA_SPRING = { type: 'spring' as const, stiffness: 400, damping: 25 };

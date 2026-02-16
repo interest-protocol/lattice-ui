@@ -5,16 +5,9 @@ export interface LoginIdentity {
   method: 'email' | 'wallet';
   rawValue: string;
   walletClientType?: string;
-  /** Wallet icon data URI from the Wallet Standard registry */
   walletIcon?: string;
 }
 
-/**
- * Finds the wallet icon from the Wallet Standard browser registry.
- * This is more reliable than Privy's `useWallets()` because multi-chain wallets
- * like Nightly register under their real name in the standard, while Privy may
- * report them as "phantom" (since Nightly implements the Phantom adapter).
- */
 const getWalletIcon = (walletClientType: string): string | undefined => {
   try {
     const { get } = getWallets();
@@ -23,7 +16,8 @@ const getWalletIcon = (walletClientType: string): string | undefined => {
       (w) => w.name.toLowerCase() === walletClientType.toLowerCase()
     );
     return match?.icon;
-  } catch {
+  } catch (err) {
+    console.warn('[login-identity] Failed to resolve wallet icon:', err);
     return undefined;
   }
 };
@@ -33,11 +27,9 @@ export const useLoginIdentity = (): LoginIdentity => {
 
   if (!user) return { method: 'email', rawValue: 'Logged in' };
 
-  // Check email-based login first
   const email = user.email?.address ?? user.google?.email;
   if (email) return { method: 'email', rawValue: email };
 
-  // Check for external (non-Privy) wallet in linkedAccounts
   const externalWallet = user.linkedAccounts.find(
     (account) =>
       account.type === 'wallet' &&

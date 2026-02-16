@@ -8,15 +8,6 @@ export interface AuthResult {
   accessToken: string;
 }
 
-/**
- * Authenticate a request using the Privy access token from the Authorization header.
- * Returns the authenticated userId or a 401 NextResponse.
- *
- * Usage:
- *   const auth = await authenticateRequest(request);
- *   if (auth instanceof NextResponse) return auth;
- *   // auth.userId is now the verified user ID
- */
 export const authenticateRequest = async (
   request: NextRequest
 ): Promise<AuthResult | NextResponse> => {
@@ -42,10 +33,6 @@ export const authenticateRequest = async (
   }
 };
 
-/**
- * Verify that the authenticated user matches the userId in the request body.
- * Returns a 403 NextResponse if they don't match, or null if valid.
- */
 export const verifyUserMatch = (
   authenticatedUserId: string,
   requestUserId: string

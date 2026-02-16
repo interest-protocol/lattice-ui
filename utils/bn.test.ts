@@ -120,23 +120,17 @@ describe('bn utilities', () => {
 
   describe('feesCalcUp', () => {
     it('calculates fees correctly for standard amount', () => {
-      // 30 bps (0.3%) on 1000000000 (1 SUI)
       const amount = 1000000000n;
       const [afterFee, fee] = feesCalcUp(30, amount);
 
-      // 30 / 10000 * 1000000000 = 3000000
       expect(fee).toBe(3000000n);
       expect(afterFee).toBe(997000000n);
     });
 
     it('rounds fees up when there is a remainder', () => {
-      // 30 bps on 1000000001 - should round up
       const amount = 1000000001n;
       const [afterFee, fee] = feesCalcUp(30, amount);
 
-      // fee * value = 30 * 1000000001 = 30000000030
-      // 30000000030 / 10000 = 3000000 remainder 30
-      // Since remainder > 0, fee = 3000001
       expect(fee).toBe(3000001n);
       expect(afterFee).toBe(997000000n);
     });
@@ -153,7 +147,6 @@ describe('bn utilities', () => {
       const amount = 100n;
       const [afterFee, fee] = feesCalcUp(30, amount);
 
-      // 30 * 100 / 10000 = 0.3 → rounds up to 1
       expect(fee >= 0n).toBe(true);
       expect(afterFee + fee >= amount).toBe(true);
     });

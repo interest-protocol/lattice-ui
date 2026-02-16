@@ -7,9 +7,8 @@ import { Fraction } from './fraction';
 import { Percent } from './percent';
 import type { Token } from './token';
 
-const DEFAULT_SLIPPAGE = Percent.fromBps(50); // 0.5%
+const DEFAULT_SLIPPAGE = Percent.fromBps(50);
 
-/** Scale factor for converting floating-point USD prices to bigint fractions. */
 const PRICE_SCALE_DECIMALS = 18;
 const PRICE_SCALE = 10n ** BigInt(PRICE_SCALE_DECIMALS);
 
@@ -52,7 +51,6 @@ export class Trade {
     invariant(inputPriceUsd > 0, 'Input price must be positive');
     invariant(outputPriceUsd > 0, 'Output price must be positive');
 
-    // Scale float prices to bigint fractions to avoid floating-point arithmetic
     const inputPriceScaled = parseUnits(
       String(inputPriceUsd),
       PRICE_SCALE_DECIMALS
@@ -64,7 +62,6 @@ export class Trade {
 
     const rateFraction = Fraction.from(inputPriceScaled, outputPriceScaled);
 
-    // outputRaw = inputRaw * inputPrice / outputPrice * (10^outputDecimals / 10^inputDecimals)
     const inputDecimals = BigInt(inputAmount.token.decimals);
     const outputDecimals = BigInt(outputToken.decimals);
     const outputRaw =
@@ -86,8 +83,8 @@ export class Trade {
 
   get rate(): number {
     return (
-      Number(this.rateFraction.numerator * PRICE_SCALE) /
-      Number(this.rateFraction.denominator * PRICE_SCALE)
+      Number(this.rateFraction.numerator) /
+      Number(this.rateFraction.denominator)
     );
   }
 

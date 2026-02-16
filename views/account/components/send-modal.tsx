@@ -100,7 +100,6 @@ const SendModal: FC = () => {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* Network Selection */}
       <div>
         <span className="text-text-secondary text-sm font-medium mb-2 block">
           Network
@@ -133,7 +132,6 @@ const SendModal: FC = () => {
         </div>
       </div>
 
-      {/* Token Selection */}
       <div>
         <span className="text-text-secondary text-sm font-medium mb-2 block">
           Token
@@ -170,7 +168,6 @@ const SendModal: FC = () => {
         </div>
       </div>
 
-      {/* Recipient Address */}
       <div>
         <span className="text-text-secondary text-sm font-medium mb-2 block">
           Recipient Address
@@ -183,7 +180,6 @@ const SendModal: FC = () => {
         />
       </div>
 
-      {/* Amount */}
       <div>
         <div className="flex justify-between mb-2">
           <span className="text-text-secondary text-sm font-medium">
@@ -224,7 +220,6 @@ const SendModal: FC = () => {
         </div>
       </div>
 
-      {/* Warning */}
       <div
         className="p-4 rounded-lg"
         style={{
@@ -238,7 +233,6 @@ const SendModal: FC = () => {
         </p>
       </div>
 
-      {/* Send Button */}
       <button
         type="button"
         className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-colors duration-200 disabled:cursor-wait disabled:opacity-60"

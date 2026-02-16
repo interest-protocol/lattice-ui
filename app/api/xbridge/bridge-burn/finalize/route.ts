@@ -42,7 +42,6 @@ export const POST = withAuthPost(
 
       const walletAddress = suiWallet.address;
 
-      // Tx2: combined PTB (vote + execute burn)
       const tx2 = new Transaction();
       tx2.setSender(walletAddress);
 

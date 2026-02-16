@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Account Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock all API calls
     await page.route('**/api/**', (route) =>
       route.fulfill({ status: 200, body: JSON.stringify({ data: {} }) })
     );
@@ -10,7 +9,6 @@ test.describe('Account Page', () => {
   });
 
   test('account page loads at /account', async ({ page }) => {
-    // Page heading should be visible
     const heading = page.getByRole('heading', { name: 'Account' });
     await expect(heading).toBeVisible();
   });

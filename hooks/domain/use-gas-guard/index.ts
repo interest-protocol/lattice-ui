@@ -62,7 +62,6 @@ const useGasGuard = () => {
     }
   };
 
-  // Open modal when gas is low
   useEffect(() => {
     if (!mounted || !isReady || dismissedRef.current) return;
 
@@ -73,7 +72,6 @@ const useGasGuard = () => {
     }
   }, [mounted, isReady, suiLow, solLow, suiAddress, solAddress]);
 
-  // Sync modal content whenever activeChain or refreshing changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: handleRefresh is auto-memoized by React Compiler
   useEffect(() => {
     if (!activeChain) return;
@@ -98,7 +96,6 @@ const useGasGuard = () => {
     );
   }, [activeChain, refreshing, suiAddress, solAddress, handleRefresh]);
 
-  // Auto-close modal when balance recovers
   useEffect(() => {
     if (!activeChain) return;
 
@@ -110,7 +107,6 @@ const useGasGuard = () => {
     }
   }, [activeChain, suiLow, solLow]);
 
-  // Track dismiss — when modal content goes to null while we had an active chain
   useEffect(() => {
     return useModal.subscribe((state) => {
       if (activeChain && state.content === null) {

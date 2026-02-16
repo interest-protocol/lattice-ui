@@ -33,6 +33,7 @@ export class Fraction {
   }
 
   public invert(): Fraction {
+    invariant(this.numerator !== 0n, 'Cannot invert a zero fraction');
     return new Fraction(this.denominator, this.numerator);
   }
 
@@ -135,7 +136,6 @@ export class Fraction {
     significantDigits: number,
     rounding: Rounding = Rounding.ROUND_HALF_UP
   ): string {
-    // Use bigint-safe path for large values
     const safeDecimalPlaces = significantDigits + 4;
     const raw = this.toBigIntDecimal(safeDecimalPlaces);
     const num = Number(raw);

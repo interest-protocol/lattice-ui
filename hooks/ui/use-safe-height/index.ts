@@ -13,10 +13,8 @@ export const useSafeHeight = () => {
       setSafeHeight((prev) => (prev === value ? prev : value));
     };
 
-    // Initial update (handles SSR case where initial value was 0)
     updateHeight();
 
-    // Single resize handler for both viewport types
     window.visualViewport?.addEventListener('resize', updateHeight);
     window.addEventListener('resize', updateHeight);
 

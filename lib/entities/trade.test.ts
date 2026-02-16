@@ -33,8 +33,6 @@ describe('Trade', () => {
   describe('fromOraclePrices', () => {
     it('calculates SUI→SOL output at known prices', () => {
       const trade = suiToSolTrade('0.1');
-      // rate = 3.5 / 180 ≈ 0.019444
-      // output = 0.1 * rate ≈ 0.001944
       expect(trade.expectedOutput.toNumber()).toBeCloseTo(
         0.1 * (3.5 / 180),
         4
@@ -43,8 +41,6 @@ describe('Trade', () => {
 
     it('calculates SOL→SUI output at known prices', () => {
       const trade = solToSuiTrade('0.001');
-      // rate = 180 / 3.5 ≈ 51.4286
-      // output = 0.001 * rate ≈ 0.0514286
       expect(trade.expectedOutput.toNumber()).toBeCloseTo(
         0.001 * (180 / 3.5),
         3
@@ -144,7 +140,6 @@ describe('Trade', () => {
         inputPriceUsd: 3.5,
         outputPriceUsd: 180.0,
       });
-      // Should not throw, output may be 0 due to precision
       expect(trade.expectedOutput.raw).toBeGreaterThanOrEqual(0n);
     });
 

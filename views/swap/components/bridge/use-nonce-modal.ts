@@ -33,14 +33,12 @@ const useNonceModal = ({
 
   const open = () => setIsOpen(true);
 
-  // Auto-open when query confirms no nonce account
   useEffect(() => {
     if (!nonce.isLoading && !nonce.hasNonce && solanaAddress) {
       setIsOpen(true);
     }
   }, [nonce.isLoading, nonce.hasNonce, solanaAddress]);
 
-  // Sync modal content when dependencies change
   useEffect(() => {
     if (!isOpen || !solanaAddress) return;
     setContent(
@@ -67,7 +65,6 @@ const useNonceModal = ({
     requiredLamports,
   ]);
 
-  // Auto-close when nonce is created
   useEffect(() => {
     if (isOpen && nonce.hasNonce) {
       setIsOpen(false);
@@ -75,7 +72,6 @@ const useNonceModal = ({
     }
   }, [isOpen, nonce.hasNonce, handleClose]);
 
-  // Track modal dismissal
   useEffect(() => {
     if (!isOpen) return;
     return useModal.subscribe((state) => {

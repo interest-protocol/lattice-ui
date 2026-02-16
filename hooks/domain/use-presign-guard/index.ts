@@ -7,8 +7,14 @@ const usePresignGuard = () => {
   const { authenticated, ready, user } = usePrivy();
   const step = useOnboarding((s) => s.step);
   const calledRef = useRef(false);
+  const prevUserIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    if (prevUserIdRef.current && prevUserIdRef.current !== user?.id) {
+      calledRef.current = false;
+    }
+    prevUserIdRef.current = user?.id;
+
     if (!ready || !authenticated || !user?.id || step !== 'complete') return;
     if (calledRef.current) return;
 

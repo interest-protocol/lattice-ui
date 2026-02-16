@@ -15,8 +15,6 @@ export class CurrencyAmount {
     this.raw = raw;
   }
 
-  // --- Factories ---
-
   static fromRawAmount(token: Token, raw: BigIntish): CurrencyAmount {
     return new CurrencyAmount(token, toBigInt(raw));
   }
@@ -34,8 +32,6 @@ export class CurrencyAmount {
   static zero(token: Token): CurrencyAmount {
     return new CurrencyAmount(token, 0n);
   }
-
-  // --- Display ---
 
   toExact(): string {
     return Fraction.from(
@@ -57,8 +53,6 @@ export class CurrencyAmount {
     return FixedPointMath.toNumber(this.raw, this.token.decimals);
   }
 
-  // --- Arithmetic (returns new CurrencyAmount, same token) ---
-
   add(other: CurrencyAmount): CurrencyAmount {
     this.assertSameToken(other);
     return new CurrencyAmount(this.token, this.raw + other.raw);
@@ -73,8 +67,6 @@ export class CurrencyAmount {
     const factor = toBigInt(other);
     return new CurrencyAmount(this.token, this.raw * factor);
   }
-
-  // --- Comparisons ---
 
   greaterThan(other: CurrencyAmount): boolean {
     this.assertSameToken(other);
@@ -103,8 +95,6 @@ export class CurrencyAmount {
     this.assertSameToken(balance);
     return this.raw > balance.raw;
   }
-
-  // --- Internal ---
 
   private assertSameToken(other: CurrencyAmount): void {
     invariant(

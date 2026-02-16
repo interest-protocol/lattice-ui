@@ -22,7 +22,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // TODO: Send to error reporting service (e.g. Sentry)
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
