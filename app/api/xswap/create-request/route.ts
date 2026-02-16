@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { withTimeout } from '@/lib/api/with-timeout';
-import { bigintString, byteArray } from '@/lib/api/zod-schemas';
+import { bigintString, byteArray, byteArrayUnbounded } from '@/lib/api/zod-schemas';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -20,7 +20,7 @@ const proofSchema = z.object({
   dwalletAddress: byteArray(64),
   user: byteArray(64),
   chainId: z.number(),
-  token: byteArray(64),
+  token: byteArrayUnbounded,
   amount: bigintString,
 });
 
@@ -32,7 +32,7 @@ const schema = z.object({
   sourceChain: z.number(),
   destinationChain: z.number(),
   destinationAddress: byteArray(64),
-  destinationToken: byteArray(64),
+  destinationToken: byteArrayUnbounded,
   minDestinationAmount: bigintString,
   minConfirmations: z.number(),
   deadline: bigintString,

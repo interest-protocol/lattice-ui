@@ -8,3 +8,6 @@ export const bigintString = z
 /** Validates a byte array with configurable max length. */
 export const byteArray = (maxLen: number) =>
   z.array(z.number().int().min(0).max(255)).max(maxLen);
+
+/** Validates a byte array with no max length (for variable-length data like Sui coin types). */
+export const byteArrayUnbounded = z.array(z.number().int().min(0).max(255));
