@@ -74,7 +74,11 @@ export const signAndExecuteSuiTransaction = async (
     publicKey = extractPublicKey(walletInfo.public_key);
   }
 
-  const isValid = await publicKey.verify(intentMessage, signatureBytes);
+  const isValid = await publicKey.verifyWithIntent(
+    rawBytes,
+    signatureBytes,
+    'TransactionData'
+  );
   if (!isValid) {
     throw new Error(
       'Signature verification failed locally — aborting before on-chain submission'

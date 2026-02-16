@@ -102,6 +102,12 @@ const executeWithRetry = async <T>(
 
       if (signal?.aborted) throw lastError;
 
+      const isClientError =
+        error instanceof ApiRequestError &&
+        error.status >= 400 &&
+        error.status < 500;
+      if (isClientError) throw lastError;
+
       if (attempt < retries) {
         const jitter = Math.random() * 500;
         await sleep(RETRY_DELAY * (attempt + 1) + jitter);

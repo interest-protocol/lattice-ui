@@ -94,7 +94,7 @@ describe('signAndExecuteSuiTransaction', () => {
     const fakeSignatureHex = 'ab'.repeat(64); // 64-byte fake signature
 
     const mockPublicKey = {
-      verify: vi.fn().mockResolvedValue(true),
+      verifyWithIntent: vi.fn().mockResolvedValue(true),
       toSuiBytes: vi.fn().mockReturnValue(new Uint8Array(33).fill(0xaa)),
       toSuiPublicKey: vi.fn().mockReturnValue('base64pubkey'),
       toRawBytes: vi.fn().mockReturnValue(new Uint8Array(32).fill(0xaa)),
@@ -122,7 +122,11 @@ describe('signAndExecuteSuiTransaction', () => {
     });
 
     expect(result).toEqual(mockExecuteResult);
-    expect(mockPublicKey.verify).toHaveBeenCalled();
+    expect(mockPublicKey.verifyWithIntent).toHaveBeenCalledWith(
+      rawBytes,
+      expect.any(Uint8Array),
+      'TransactionData'
+    );
     expect(mockSuiClient.executeTransactionBlock).toHaveBeenCalledWith(
       expect.objectContaining({
         transactionBlock: toBase64(rawBytes),
@@ -135,7 +139,7 @@ describe('signAndExecuteSuiTransaction', () => {
     const fakeSignatureHex = 'ab'.repeat(64);
 
     const mockPublicKey = {
-      verify: vi.fn().mockResolvedValue(false),
+      verifyWithIntent: vi.fn().mockResolvedValue(false),
       toSuiBytes: vi.fn().mockReturnValue(new Uint8Array(33).fill(0xaa)),
       toRawBytes: vi.fn().mockReturnValue(new Uint8Array(32).fill(0xaa)),
       flag: vi.fn().mockReturnValue(0),

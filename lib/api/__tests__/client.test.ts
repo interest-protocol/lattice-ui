@@ -179,6 +179,27 @@ describe('API client', () => {
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
+    it('does not retry on 4xx client errors', async () => {
+      mockFetch.mockResolvedValue(
+        jsonResponse({ error: 'Bad request' }, 400)
+      );
+
+      await expect(get('/api/bad')).rejects.toThrow(ApiRequestError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries on 5xx server errors', async () => {
+      mockFetch
+        .mockResolvedValueOnce(
+          jsonResponse({ error: 'Internal error' }, 500)
+        )
+        .mockResolvedValueOnce(jsonResponse({ ok: true }));
+
+      const result = await get('/api/flaky', { retries: 1 });
+      expect(result).toEqual({ ok: true });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
     it('respects custom retry count', async () => {
       mockFetch.mockRejectedValue(new Error('always fails'));
 

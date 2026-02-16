@@ -35,6 +35,10 @@ export const validateBody = <T>(
     const firstIssue = result.error.issues[0];
     const field = firstIssue.path.join('.');
     const message = field ? `Missing ${field}` : firstIssue.message;
+    console.warn(
+      '[validateBody] Validation failed:',
+      JSON.stringify(result.error.issues, null, 2)
+    );
     return { error: NextResponse.json({ error: message }, { status: 400 }) };
   }
   return { data: result.data };

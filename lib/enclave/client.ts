@@ -19,7 +19,7 @@ export const fetchNewRequestProof = async (
   const raw = await post<NewRequestProofRaw>(
     '/api/enclave/new-request',
     { digest, chainId },
-    { signal }
+    { signal, retries: 0 }
   );
   return XSwap.parseNewRequestProof(raw);
 };

@@ -11,12 +11,7 @@ export type BigIntish = bigint | number | string;
 export const toBigInt = (value: BigIntish): bigint => {
   if (typeof value === 'bigint') return value;
   if (typeof value === 'number') return BigInt(Math.trunc(value));
-  try {
-    return BigInt(value);
-  } catch {
-    console.warn(`toBigInt: could not convert "${value}", defaulting to 0n`);
-    return 0n;
-  }
+  return BigInt(value);
 };
 
 export class Fraction {

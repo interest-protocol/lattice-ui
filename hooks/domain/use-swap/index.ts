@@ -243,47 +243,60 @@ export const useSwap = () => {
       });
       const minDestinationAmount = trade.minimumReceived.raw.toString();
 
-      const { requestId, requestInitialSharedVersion } =
-        await createSwapRequest(
-          {
-            userId: user.id,
-            proof: {
-              signature: Array.from(proof.signature),
-              digest: Array.from(proof.digest),
-              timestampMs: proof.timestampMs.toString(),
-              dwalletAddress: Array.from(proof.dwalletAddress),
-              user: Array.from(proof.user),
-              chainId: proof.chainId,
-              token: Array.from(proof.token),
-              amount: proof.amount.toString(),
-            },
-            walletKey: walletKey.toString(),
-            sourceAddress: Array.from(sourceAddress),
-            sourceChain,
-            destinationChain,
-            destinationAddress: Array.from(destinationAddress),
-            destinationToken: Array.from(destinationToken),
-            minDestinationAmount,
-            minConfirmations: 0,
-            deadline: deadline.toString(),
-            solverSender: Array.from(solverSender),
-            solverRecipient: Array.from(solverRecipient),
+      const {
+        digest: createDigest,
+        requestId,
+        requestInitialSharedVersion,
+      } = await createSwapRequest(
+        {
+          userId: user.id,
+          proof: {
+            signature: Array.from(proof.signature),
+            digest: Array.from(proof.digest),
+            timestampMs: proof.timestampMs.toString(),
+            dwalletAddress: Array.from(proof.dwalletAddress),
+            user: Array.from(proof.user),
+            chainId: proof.chainId,
+            token: Array.from(proof.token),
+            amount: proof.amount.toString(),
           },
-          signal
-        );
+          walletKey: walletKey.toString(),
+          sourceAddress: Array.from(sourceAddress),
+          sourceChain,
+          destinationChain,
+          destinationAddress: Array.from(destinationAddress),
+          destinationToken: Array.from(destinationToken),
+          minDestinationAmount,
+          minConfirmations: 0,
+          deadline: deadline.toString(),
+          solverSender: Array.from(solverSender),
+          solverRecipient: Array.from(solverRecipient),
+        },
+        signal
+      );
 
       invariant(requestId, 'Swap request created but requestId is missing');
+
+      await suiClient.waitForTransaction({ digest: createDigest });
 
       setStatus('waiting');
       toasting.update(SWAP_TOAST_ID, 'Waiting for solver to fulfill...');
 
-      const fulfillResult = await fulfill(
-        {
-          requestId,
-          userAddress: suiAddress,
-          requestInitialSharedVersion: requestInitialSharedVersion ?? undefined,
-        },
-        signal
+      const fulfillResult = await withRetry(
+        () =>
+          fulfill(
+            {
+              requestId,
+              userAddress: suiAddress,
+              requestInitialSharedVersion:
+                requestInitialSharedVersion ?? undefined,
+            },
+            signal
+          ),
+        3,
+        1000,
+        signal,
+        5000
       );
 
       const minimumReceived = trade.minimumReceived.raw;

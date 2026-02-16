@@ -190,11 +190,8 @@ describe('FixedPointMath', () => {
       expect(FixedPointMath.from('100').value()).toBe(100n);
     });
 
-    it('invalid string defaults to 0n with warning', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      expect(FixedPointMath.from('not-a-number').value()).toBe(0n);
-      expect(warnSpy).toHaveBeenCalled();
-      warnSpy.mockRestore();
+    it('invalid string throws', () => {
+      expect(() => FixedPointMath.from('not-a-number')).toThrow();
     });
   });
 });
