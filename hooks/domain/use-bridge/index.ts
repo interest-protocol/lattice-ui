@@ -3,6 +3,7 @@ import {
   IkaClient,
 } from '@ika.xyz/sdk';
 import { ChainId, DWalletAddress } from '@interest-protocol/xbridge-sdk';
+import type { SuiClient } from '@mysten/sui/client';
 import { fromHex, toBase64 } from '@mysten/sui/utils';
 import { usePrivy } from '@privy-io/react-auth';
 import {
@@ -76,8 +77,11 @@ export const useBridge = () => {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BridgeResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const ikaClientRef = useRef<IkaClient | null>(null);
-  const ikaClientInitPromiseRef = useRef<Promise<IkaClient> | null>(null);
+  const ikaClientStateRef = useRef<{
+    suiClient: SuiClient | null;
+    client: IkaClient | null;
+    promise: Promise<IkaClient> | null;
+  }>({ suiClient: null, client: null, promise: null });
 
   useEffect(() => {
     return () => {
@@ -91,24 +95,35 @@ export const useBridge = () => {
     useBalances();
 
   const ensureIkaClient = async (): Promise<IkaClient> => {
-    if (ikaClientRef.current) return ikaClientRef.current;
-    if (!ikaClientInitPromiseRef.current) {
-      ikaClientInitPromiseRef.current = (async () => {
+    const state = ikaClientStateRef.current;
+
+    // Reset if suiClient changed (user switched RPC)
+    if (state.suiClient !== suiClient) {
+      ikaClientStateRef.current = { suiClient, client: null, promise: null };
+    }
+
+    const current = ikaClientStateRef.current;
+    if (current.client) return current.client;
+
+    if (!current.promise) {
+      current.promise = (async () => {
         try {
           const client = new IkaClient({
             suiClient,
             config: getNetworkConfig('mainnet'),
           });
           await client.initialize();
-          ikaClientRef.current = client;
+          current.client = client;
           return client;
         } catch (err) {
-          ikaClientInitPromiseRef.current = null;
+          // Reset both fields so next call retries cleanly
+          current.client = null;
+          current.promise = null;
           throw err;
         }
       })();
     }
-    return ikaClientInitPromiseRef.current;
+    return current.promise;
   };
 
   useEffect(() => {

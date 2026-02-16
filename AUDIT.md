@@ -46,25 +46,25 @@ Tests import `bigintAbs`, `bigintDivDown`, and `toFixed` but these functions don
 
 ---
 
-### 3. Race condition in IKA client initialization
+### ~~3. Race condition in IKA client initialization~~ FIXED
 
-**File:** `hooks/domain/use-bridge/index.ts` (lines 93-112)
+**File:** `hooks/domain/use-bridge/index.ts`
 
 Two refs manage initialization state (`ikaClientRef` and `ikaClientInitPromiseRef`). If `suiClient` changes during init, parallel initializations race. If init fails, `ikaClientRef` isn't reset but `ikaClientInitPromiseRef` is — creating inconsistent state on retry.
 
-**Fix:** Use a single ref with a state machine (`idle | initializing | ready | error`) or consolidate into Zustand.
+**Resolution:** Consolidated two refs (`ikaClientRef` + `ikaClientInitPromiseRef`) into a single `ikaClientStateRef` with `{ suiClient, client, promise }`. Now detects `suiClient` changes via identity comparison and resets the entire state, ensuring reinitialization with the new client. On failure, both `client` and `promise` are reset atomically so retries start clean.
 
 ---
 
-### 4. Memory leak in RPC client caches
+### ~~4. Memory leak in RPC client caches~~ FIXED
 
 **Files:**
-- `hooks/blockchain/use-sui-client/index.ts` (lines 6-16)
-- `hooks/blockchain/use-solana-connection/index.ts` (lines 5-13)
+- `hooks/blockchain/use-sui-client/index.ts`
+- `hooks/blockchain/use-solana-connection/index.ts`
 
 Module-level `Map` caches grow unbounded. Old clients are never evicted or destroyed.
 
-**Fix:** Use a single cached client (not a Map) or add an eviction policy.
+**Resolution:** Replaced `Map` caches with single-slot caches. Sui client uses a `{ url, client }` tuple that replaces the old entry when the RPC URL changes. Solana client uses a simple singleton (only one URL possible).
 
 ---
 
@@ -645,8 +645,8 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 |------|-------------|--------|
 | **#1** | Missing `bigint-utils` + `bn.ts` implementations | **FIXED** |
 | **#2** | Race condition in onboarding store | Partially mitigated |
-| **#3** | Race condition in IKA client init | Open |
-| **#4** | Memory leak in RPC caches | Open |
+| **#3** | Race condition in IKA client init | **FIXED** |
+| **#4** | Memory leak in RPC caches | **FIXED** |
 | **#5** | Missing Zod array size validation | **FIXED** |
 | **#6** | Missing API param validation | **FIXED** |
 | **#7** | `Fraction.invert()` zero denominator | **FIXED** |
@@ -660,7 +660,7 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#52** | use-safe-height double listeners | **FIXED** (prior) |
 | **#55** | Silent error swallowing in use-login-identity | **FIXED** |
 
-**Total: 12 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
+**Total: 14 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
 
 ---
 
@@ -668,8 +668,8 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 
 | Priority | Action | Impact | Effort |
 |----------|--------|--------|--------|
-| **P0** | Fix RPC client cache leak (#4) | Memory | Small |
-| **P0** | Fix IKA client init race (#3) | Reliability | Medium |
+| ~~**P0**~~ | ~~Fix RPC client cache leak (#4)~~ | ~~Memory~~ | **DONE** |
+| ~~**P0**~~ | ~~Fix IKA client init race (#3)~~ | ~~Reliability~~ | **DONE** |
 | **P1** | Create `constants/animations.ts` (#8) | DRY (6 files) | Small |
 | **P1** | Extract shared utils (decimal input, balance calc, explorer URLs, health) (#9-12,14) | DRY (14 files) | Medium |
 | **P1** | Extract `withExponentialRetry` helper (#21) | DRY | Small |
