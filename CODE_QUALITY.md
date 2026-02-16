@@ -1,5 +1,7 @@
 # Code Quality Report - Lattice UI
 
+> Note for AI assistants: this is a historical audit snapshot. Use `frontend/CLAUDE.md` as the normative source for current coding rules and architecture decisions.
+
 ## Scorecard
 
 | Category | Grade | Notes |

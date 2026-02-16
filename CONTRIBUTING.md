@@ -1,35 +1,55 @@
 # Contributing
 
-Feel free to contribute in any way you like, and if you feel comfortable doing so, follow our standard instructions below and learn how to do it.
+## Before You Start
 
-## Project structure
+1. Use Node.js `22.x`.
+2. Install dependencies with `pnpm install`.
+3. Configure env vars needed by `lib/config.ts` and `lib/config.server.ts`.
 
-- `.husky` contains git hooks configurations.
-- `components` contains the generic components used inside the application.
-- `constants` contains the constant values and settings.
-- `pages` contains page components for next.js.
-- `public` contains static assets to be used in whole website (fonts, images, etc.).
-- `styles` contains the global styles for the website.
-- `views` contains the view building blocks for each page.
+## Project Structure
 
-## Issue reports
+- `app/` — Next.js App Router pages, layouts, route handlers.
+- `views/` — page-level view composition.
+- `components/` — UI building blocks and providers.
+- `hooks/` — store, domain, blockchain, and UI hooks.
+- `lib/` — protocol clients, adapters, entities, API utilities.
+- `constants/` — chain/token/rpc and shared app constants.
+- `utils/` — pure utility helpers.
 
-A bug usually happens when something doesn't work as expected, and it can be caused by some code in the repository. Reports are important to help us overcome them.
+## Local Quality Gate
 
-Below are instructions on how to optimally report a bug:
+Run this before opening a PR:
 
-- **Try to reproduce the bug in the main branch**: The bug may have already been passed in the latest version, always check before reporting the issue.
-- **Check to see if the issue hasn't already been reported**: It could be that your issue has already been reported by someone else, make sure it is not on the list.
-- **Open a git issue**: Explain what happened, and give as much detail as possible so we can try to reproduce the same situation.
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test:run
+```
 
-_A good bug report shouldn't leave others needing to chase you up for more._
+If needed:
 
-## Commit
+```bash
+pnpm lint:fix
+pnpm format
+```
 
-To commit, you must:
+## Code Standards
 
-- Certify if your code is valid to linters;
-- Use commit rules in [Gitmoji Commitlint](https://github.com/arvinxx/gitmoji-commit-workflow/tree/master/packages/commitlint-config#readme):
-  - Starting with one of these emojis ([Gitmoji](https://gitmoji.dev));
+- Use TypeScript strict types; avoid `any`.
+- Follow established folder/module patterns from `CLAUDE.md`.
+- Keep business logic in hooks/lib, not in UI primitives.
+- Use Biome for linting/formatting (not ESLint/Prettier in this repo).
 
-_Don't forget to setup your IDE with `eslint` and `prettier`._
+## Commits
+
+- Follow the Gitmoji commitlint format configured in this project.
+- Keep commit scope focused and include tests when behavior changes.
+
+## AI-Specific Notes
+
+When an AI assistant contributes:
+
+1. Read `frontend/CLAUDE.md` before editing.
+2. Verify assumptions against existing code (routes, env vars, constants).
+3. Avoid broad refactors unless explicitly requested.
+4. Include exact file paths and verification commands in handoff notes.

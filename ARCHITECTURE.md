@@ -1,5 +1,7 @@
 # Architecture Guide - Lattice UI
 
+> Note for AI assistants: this file explains system design. For day-to-day implementation rules and anti-patterns, follow `frontend/CLAUDE.md` first.
+
 ## System Overview
 
 **Lattice UI** (package: `lattice-ui` v1.1.0) is a DeFi cross-chain swap application enabling token exchanges between the **Sui** and **Solana** blockchains. Users can swap SUI for SOL (and vice versa), bridge tokens across chains, and manage wallet balances.
