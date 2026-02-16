@@ -4,29 +4,25 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import {
+  OVERLAY_ANIMATE,
+  OVERLAY_EXIT,
+  OVERLAY_TRANSITION,
+  REDUCED_CONTAINER_TRANSITION,
+  SPRING_PANEL_SLIDE,
+} from '@/constants/animations';
 import { Z_INDEX } from '@/constants/z-index';
 import { useSidePanel } from '@/hooks/store/use-side-panel';
 import useEventListener from '@/hooks/ui/use-event-listener';
 import { useSafeHeight } from '@/hooks/ui/use-safe-height';
 
-const OVERLAY_ANIMATE = { opacity: [0, 1] };
-const OVERLAY_EXIT = { opacity: 0 };
-const OVERLAY_TRANSITION = { duration: 0.25, ease: 'easeOut' as const };
-
 const PANEL_INITIAL = { x: '100%' };
 const PANEL_ANIMATE = { x: '0%' };
 const PANEL_EXIT = { x: '105%' };
-const PANEL_TRANSITION = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 32,
-  mass: 0.8,
-};
 
 const REDUCED_PANEL_INITIAL = { opacity: 0, x: '2%' };
 const REDUCED_PANEL_ANIMATE = { opacity: 1, x: '0%' };
 const REDUCED_PANEL_EXIT = { opacity: 0, x: '2%' };
-const REDUCED_PANEL_TRANSITION = { duration: 0.15 };
 
 const CONTENT_ANIMATE = { opacity: [0, 1], y: [8, 0] };
 const CONTENT_TRANSITION = {
@@ -99,7 +95,7 @@ const SidePanelProvider: FC = () => {
             animate={reducedMotion ? REDUCED_PANEL_ANIMATE : PANEL_ANIMATE}
             exit={reducedMotion ? REDUCED_PANEL_EXIT : PANEL_EXIT}
             transition={
-              reducedMotion ? REDUCED_PANEL_TRANSITION : PANEL_TRANSITION
+              reducedMotion ? REDUCED_CONTAINER_TRANSITION : SPRING_PANEL_SLIDE
             }
             onClick={(e) => e.stopPropagation()}
           >

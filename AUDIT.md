@@ -100,51 +100,15 @@ Module-level `Map` caches grow unbounded. Old clients are never evicted or destr
 
 ## P1 — High (DRY / Architecture / Reliability)
 
-### 8. Duplicate spring animation configs (6 files)
+### ~~8. Duplicate spring animation configs (6 files)~~ FIXED
 
-The same `{ type: 'spring', stiffness: 400-500, damping: 25-30 }` is independently defined in:
-
-| File | Constant Name |
-|------|--------------|
-| `components/composed/flip-button/index.tsx` | `FLIP_BTN_SPRING` |
-| `components/composed/input-field/input-field-asset.tsx` | `TOKEN_PILL_SPRING` |
-| `components/composed/wallet-button/connect-wallet/index.tsx` | `HOVER_SPRING` |
-| `components/composed/settings/index.tsx` | `COG_SPRING` |
-| `components/ui/tabs/index.tsx` | `SPRING_TRANSITION` |
-| `components/ui/toggle/index.tsx` | `SPRING_TRANSITION` |
-
-**Fix:** Create `constants/animations.ts`:
-```typescript
-export const SPRING_SNAPPY = { type: 'spring', stiffness: 500, damping: 30, mass: 0.8 } as const;
-export const SPRING_CONTROLLED = { type: 'spring', stiffness: 400, damping: 25 } as const;
-export const SPRING_FLIP = { type: 'spring', stiffness: 400, damping: 22 } as const;
-export const SPRING_CARD_ENTRY = { type: 'spring', stiffness: 300, damping: 30, delay: 0.05 } as const;
-export const SPRING_PANEL_SLIDE = { type: 'spring', stiffness: 400, damping: 32, mass: 0.8 } as const;
-export const SPRING_MODAL_POP = { type: 'spring', stiffness: 500, damping: 35 } as const;
-export const SPRING_COG = { type: 'spring', stiffness: 300, damping: 20 } as const;
-```
+**Resolution:** Created `constants/animations.ts` with shared spring configs (`SPRING_SNAPPY`, `SPRING_CONTROLLED`, `SPRING_FLIP`, `SPRING_TABS`, `SPRING_PANEL_SLIDE`, `SPRING_MODAL_POP`, `SPRING_COG`) plus `INSTANT_TRANSITION`, overlay animation constants, and reduced-motion fallbacks. All 6 component files and 2 provider files now import from the shared module.
 
 ---
 
-### 9. Duplicate number input filtering (2 files)
+### ~~9. Duplicate number input filtering (2 files)~~ FIXED
 
-**Files:**
-- `views/account/components/withdraw-view.tsx` (lines 206-216)
-- `views/account/components/send-modal.tsx` (lines 204-215)
-
-Identical decimal-only input regex logic.
-
-**Fix:** Extract to `utils/decimal-input.ts`:
-```typescript
-export const filterDecimalInput = (value: string): string => {
-  const filtered = value.replace(/[^0-9.]/g, '');
-  const firstDot = filtered.indexOf('.');
-  if (firstDot !== -1) {
-    return filtered.slice(0, firstDot + 1) + filtered.slice(firstDot + 1).replace(/\./g, '');
-  }
-  return filtered;
-};
-```
+**Resolution:** Extracted `filterDecimalInput` to `utils/decimal-input.ts`. Both `withdraw-view.tsx` and `send-modal.tsx` now import from the shared module.
 
 ---
 
@@ -196,40 +160,21 @@ Follow identical structural patterns with different data.
 
 ---
 
-### 14. Duplicate health check pattern (3 routes)
+### ~~14. Duplicate health check pattern (3 routes)~~ FIXED
 
-**Files:**
-- `app/api/health/route.ts`
-- `app/api/health/enclave/route.ts`
-- `app/api/health/solver/route.ts`
-
-Identical fetch-with-timeout patterns.
-
-**Fix:** Extract to `lib/api/health-check.ts`:
-```typescript
-export const checkHealth = async (url: string, timeout = 5_000): Promise<boolean> => { ... };
-```
+**Resolution:** Extracted `checkHealth` to `lib/api/health-check.ts` with configurable timeout and body validation. All 3 health routes now import from the shared module.
 
 ---
 
-### 15. Duplicate Solver error handling
+### ~~15. Duplicate Solver error handling~~ FIXED
 
-**File:** `lib/solver/server.ts` (lines 32-38 and 60-66)
-
-`solverGet` and `solverPost` have byte-for-byte identical error handling blocks.
-
-**Fix:** Extract to a private `handleSolverError` function.
+**Resolution:** Extracted `handleSolverError` private function in `lib/solver/server.ts`. Both `solverGet` and `solverPost` now delegate to it.
 
 ---
 
-### 16. Duplicate `bigintString` Zod schema (3+ routes)
+### ~~16. Duplicate `bigintString` Zod schema (3+ routes)~~ FIXED
 
-Repeated in multiple API routes:
-```typescript
-const bigintString = z.string().regex(/^\d+$/, 'Must be a non-negative integer');
-```
-
-**Fix:** Export from `lib/api/zod-schemas.ts`.
+**Resolution:** Exported `bigintString` and `byteArray` from `lib/api/zod-schemas.ts`. Updated `xswap/create-request`, `xbridge/bridge-mint`, and `xbridge/bridge-burn/create` routes to import from the shared module.
 
 ---
 
@@ -245,25 +190,15 @@ Identical balance computation and display logic.
 
 ---
 
-### 18. Duplicate `ValidationResult` interface
+### ~~18. Duplicate `ValidationResult` interface~~ FIXED
 
-**Files:**
-- `utils/gas-validation.ts` (lines 6-9)
-- `views/swap/components/bridge/bridge.types.ts` (lines 131-134)
-
-**Fix:** Centralize in `interface/index.ts`.
+**Resolution:** Centralized `ValidationResult` in `interface/index.ts`. Both `utils/gas-validation.ts` and `bridge.types.ts` now import from the shared location.
 
 ---
 
-### 19. Duplicate modal/panel overlay constants
+### ~~19. Duplicate modal/panel overlay constants~~ FIXED
 
-**Files:**
-- `components/providers/modal-provider/index.tsx` (lines 18-29)
-- `components/providers/side-panel-provider/index.tsx` (lines 15-27)
-
-Nearly identical `OVERLAY_ANIMATE`, `OVERLAY_TRANSITION` values.
-
-**Fix:** Extract to `constants/animations.ts` alongside spring configs.
+**Resolution:** Extracted `OVERLAY_ANIMATE`, `OVERLAY_EXIT`, `OVERLAY_TRANSITION`, `REDUCED_CONTAINER_ANIMATE`, `REDUCED_CONTAINER_TRANSITION`, `SPRING_MODAL_POP`, and `SPRING_PANEL_SLIDE` to `constants/animations.ts`. Both modal-provider and side-panel-provider now import from the shared module.
 
 ---
 
@@ -316,14 +251,9 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 
 ---
 
-### 24. Inconsistent disabled button opacity
+### ~~24. Inconsistent disabled button opacity~~ FIXED
 
-| File | Value |
-|------|-------|
-| `views/account/account-content.tsx:91` | `opacity: 0.6` |
-| `views/swap/.../swap-form-button/index.tsx:81` | `opacity: 0.4` |
-
-**Fix:** Standardize to one value (recommend `0.5`) and extract as a CSS variable or constant.
+**Resolution:** Standardized all disabled button opacities to `0.5` across `account-content.tsx`, `swap-form-button/index.tsx`, `bridge/index.tsx`, and `send-modal.tsx`.
 
 ---
 
@@ -359,28 +289,15 @@ if (!valid) throw new Error('Signature verification failed locally');
 
 ---
 
-### 28. `Percent.feeFrom` rounding edge case
+### ~~28. `Percent.feeFrom` rounding edge case~~ FIXED
 
-**File:** `lib/entities/percent.ts` (lines 24-36)
-
-With high fee percentages on tiny amounts, `feeRounded > rawValue` makes `afterFee` negative.
-
-**Fix:** Add a guard: `const afterFee = rawValue > feeRounded ? rawValue - feeRounded : 0n;`
+**Resolution:** Added guard `const afterFee = rawValue > feeRounded ? rawValue - feeRounded : 0n;` in `lib/entities/percent.ts`.
 
 ---
 
-### 29. `invariant()` misuse in API routes (5+ locations)
+### ~~29. `invariant()` misuse in API routes (5+ locations)~~ FIXED
 
-Bridge routes use `invariant()` which throws generic errors caught by catch-all handlers. Users see "Bridge failed" instead of specific validation errors.
-
-**Files:**
-- `app/api/xbridge/bridge-burn/create/route.ts:96-99`
-- `bridge-burn/sign/route.ts:39, 66`
-- `bridge-mint/route.ts:78-81`
-
-**Note:** `bridge-burn/wait-signature/route.ts` was deleted (no longer applicable).
-
-**Fix:** Replace with explicit checks that return `NextResponse.json({ error }, { status: 400 })`.
+**Resolution:** Replaced all `invariant()` calls in `bridge-burn/create`, `bridge-burn/sign`, and `bridge-mint` routes with explicit `if` checks returning `NextResponse.json({ error }, { status: 400|500 })`. Removed `tiny-invariant` imports from all three files.
 
 ---
 
@@ -433,27 +350,15 @@ const MESSAGE_OFFSET = SIG_2_OFFSET + SIG_SIZE;
 
 ---
 
-### 34. Missing `Cache-Control: no-store` on mutation endpoints
+### ~~34. Missing `Cache-Control: no-store` on mutation endpoints~~ FIXED
 
-**Files:** `send-solana`, `send-sui`, `create-nonce` routes don't set cache headers on POST responses.
-
-**Fix:** Add to all mutation responses:
-```typescript
-headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' }
-```
+**Resolution:** Added `headers: { 'Cache-Control': 'no-store' }` to success responses in `send-solana`, `send-sui`, and `create-nonce` routes.
 
 ---
 
-### 35. Solana message builder has no input validation
+### ~~35. Solana message builder has no input validation~~ FIXED
 
-**File:** `lib/solana/solana-message.ts` (lines 36-60)
-
-No checks that addresses are 32 bytes, amount is non-negative, or amount fits u64.
-
-**Fix:** Add assertions at function entry:
-```typescript
-if (dWallet.length !== 32) throw new Error('dWallet must be 32 bytes');
-```
+**Resolution:** Added validation checks in `buildNativeSolTransfer`: all address arrays must be 32 bytes, amount must be non-negative, and amount must fit in u64.
 
 ---
 
@@ -547,9 +452,9 @@ Doesn't export `GasGuardProvider`, `PresignGuardProvider`, `SidePanelProvider`, 
 
 ---
 
-### 47. Decorative `<hr>` elements missing `aria-hidden="true"`
+### ~~47. Decorative `<hr>` elements missing `aria-hidden="true"`~~ FIXED
 
-**File:** `components/composed/panel-content/index.tsx` (lines 40, 42, 49, 54, 59, 66)
+**Resolution:** Added `aria-hidden="true"` to all decorative `<hr>` elements in `components/composed/panel-content/index.tsx`.
 
 ---
 
@@ -650,17 +555,30 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#5** | Missing Zod array size validation | **FIXED** |
 | **#6** | Missing API param validation | **FIXED** |
 | **#7** | `Fraction.invert()` zero denominator | **FIXED** |
+| **#8** | Duplicate spring animation configs | **FIXED** |
+| **#9** | Duplicate number input filtering | **FIXED** |
 | **#13** | Duplicate retry loop pattern | **FIXED** (prior) |
+| **#14** | Duplicate health check pattern | **FIXED** |
+| **#15** | Duplicate Solver error handling | **FIXED** |
+| **#16** | Duplicate bigintString Zod schema | **FIXED** |
+| **#18** | Duplicate ValidationResult interface | **FIXED** |
+| **#19** | Duplicate modal/panel overlay constants | **FIXED** |
 | **#20** | Refs that never reset | **FIXED** |
+| **#24** | Inconsistent disabled button opacity | **FIXED** |
+| **#28** | Percent.feeFrom rounding edge case | **FIXED** |
+| **#29** | invariant() misuse in API routes | **FIXED** |
 | **#31** | Debug console.logs in use-bridge | **FIXED** |
 | **#32** | Hardcoded magic byte offsets | **FIXED** |
+| **#34** | Missing Cache-Control on mutations | **FIXED** |
+| **#35** | Solana message builder validation | **FIXED** |
 | **#38** | use-swap ref pattern | Acceptable (React Compiler) |
 | **#41** | Unused ZERO_BIG_INT export | **RESOLVED** |
 | **#46** | Trade.rate dead math | **FIXED** |
+| **#47** | Decorative hr missing aria-hidden | **FIXED** |
 | **#52** | use-safe-height double listeners | **FIXED** (prior) |
 | **#55** | Silent error swallowing in use-login-identity | **FIXED** |
 
-**Total: 14 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
+**Total: 26 items fully fixed, 2 partially mitigated, 1 resolved as acceptable**
 
 ---
 
@@ -668,17 +586,19 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 
 | Priority | Action | Impact | Effort |
 |----------|--------|--------|--------|
-| ~~**P0**~~ | ~~Fix RPC client cache leak (#4)~~ | ~~Memory~~ | **DONE** |
-| ~~**P0**~~ | ~~Fix IKA client init race (#3)~~ | ~~Reliability~~ | **DONE** |
-| **P1** | Create `constants/animations.ts` (#8) | DRY (6 files) | Small |
-| **P1** | Extract shared utils (decimal input, balance calc, explorer URLs, health) (#9-12,14) | DRY (14 files) | Medium |
+| ~~**P0**~~ | ~~All P0 items~~ | | **DONE** |
+| ~~**P1**~~ | ~~Create `constants/animations.ts` (#8, #19)~~ | ~~DRY (8 files)~~ | **DONE** |
+| ~~**P1**~~ | ~~Extract shared utils (#9, #14, #15, #16, #18)~~ | ~~DRY (10+ files)~~ | **DONE** |
+| **P1** | Extract shared balance calc hook (#10) | DRY (2 files) | Small |
+| **P1** | Consolidate explorer URL + constants (#11, #12) | DRY (4 files) | Medium |
+| **P1** | Extract gas display hook (#17) | DRY (2 files) | Small |
 | **P1** | Extract `withExponentialRetry` helper (#21) | DRY | Small |
 | **P1** | Type `useWatch` calls properly (#22) | Type safety (8 files) | Medium |
 | **P2** | Standardize API route error handling + logging (#23) | Consistency | Medium |
+| **P2** | Add CTA spring animations to all primary buttons (#25) | Consistency | Small |
 | **P2** | Add signature verification before on-chain exec (#26) | Security | Small |
-| **P2** | Replace `invariant()` in API routes with explicit responses (#29) | UX | Small |
+| **P2** | Validate Solver/Enclave response shapes (#27) | Safety | Small |
 | **P2** | Standardize hook return shapes (#33) | DX | Medium |
-| **P3** | Accessibility fixes (aria-hidden, labels) (#47-48) | A11y | Small |
 | **P3** | Clean up misplaced constants (#42) | Hygiene | Small |
 | **P3** | Add test coverage for critical paths (#57) | Reliability | Large |
 

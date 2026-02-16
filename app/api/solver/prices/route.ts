@@ -12,6 +12,7 @@ export async function GET() {
       },
     });
   } catch (caught: unknown) {
-    return errorResponse(caught, 'Failed to fetch prices');
+    const status = (caught as { status?: number })?.status ?? 500;
+    return errorResponse(caught, 'Failed to fetch prices', status);
   }
 }

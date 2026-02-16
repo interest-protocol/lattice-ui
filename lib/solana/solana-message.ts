@@ -28,6 +28,19 @@ export const buildNativeSolTransfer = ({
   destinationWallet,
   amount,
 }: BuildNativeSolTransferParams): Uint8Array => {
+  if (dWallet.length !== 32)
+    throw new Error(`dWallet must be 32 bytes, got ${dWallet.length}`);
+  if (nonce.length !== 32)
+    throw new Error(`nonce must be 32 bytes, got ${nonce.length}`);
+  if (nonceAccount.length !== 32)
+    throw new Error(`nonceAccount must be 32 bytes, got ${nonceAccount.length}`);
+  if (destinationWallet.length !== 32)
+    throw new Error(`destinationWallet must be 32 bytes, got ${destinationWallet.length}`);
+  if (amount < 0n)
+    throw new Error(`amount must be non-negative, got ${amount}`);
+  if (amount > 0xFFFF_FFFF_FFFF_FFFFn)
+    throw new Error('amount exceeds u64 max');
+
   return Buffer.concat([
     Buffer.from([2, 0, 2, 5]),
     destinationWallet,

@@ -3,14 +3,8 @@
 import { motion, useReducedMotion } from 'motion/react';
 import type { FC, ReactNode } from 'react';
 
+import { INSTANT_TRANSITION, SPRING_TABS } from '@/constants/animations';
 import type { TabsProps } from './tabs.types';
-
-const SPRING_TRANSITION = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 30,
-};
-const INSTANT_TRANSITION = { duration: 0 };
 
 const Tabs: FC<TabsProps> = ({ setTab, tab, tabs, id = 'tabs' }) => {
   const reducedMotion = useReducedMotion();
@@ -45,7 +39,7 @@ const Tabs: FC<TabsProps> = ({ setTab, tab, tabs, id = 'tabs' }) => {
                   boxShadow: '0 1px 0 0 rgba(255,255,255,0.06) inset',
                 }}
                 transition={
-                  reducedMotion ? INSTANT_TRANSITION : SPRING_TRANSITION
+                  reducedMotion ? INSTANT_TRANSITION : SPRING_TABS
                 }
               />
             )}

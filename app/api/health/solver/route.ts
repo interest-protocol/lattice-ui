@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { checkHealth } from '@/lib/api/health-check';
 import { SOLVER_API_URL } from '@/lib/config';
 
 export interface SolverHealthResponse {
@@ -9,18 +10,12 @@ export interface SolverHealthResponse {
 export async function GET() {
   if (!SOLVER_API_URL) return NextResponse.json({ healthy: false });
 
-  try {
-    const response = await fetch(`${SOLVER_API_URL}/api/health`, {
-      signal: AbortSignal.timeout(5_000),
-    });
+  const healthy = await checkHealth(`${SOLVER_API_URL}/api/health`, {
+    validateBody: (data) =>
+      typeof data === 'object' &&
+      data !== null &&
+      (data as Record<string, unknown>).status === 'healthy',
+  });
 
-    if (!response.ok) {
-      return NextResponse.json({ healthy: false });
-    }
-
-    const data = await response.json();
-    return NextResponse.json({ healthy: data.status === 'healthy' });
-  } catch {
-    return NextResponse.json({ healthy: false });
-  }
+  return NextResponse.json({ healthy });
 }

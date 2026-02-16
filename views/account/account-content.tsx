@@ -88,7 +88,7 @@ const BalancesView: FC<{
           color: 'var(--color-accent)',
           border: '1px solid var(--color-accent-border)',
           cursor: creatingSuiWallet ? 'wait' : 'pointer',
-          opacity: creatingSuiWallet ? 0.6 : 1,
+          opacity: creatingSuiWallet ? 0.5 : 1,
         }}
         onClick={createSuiWallet}
         disabled={creatingSuiWallet}

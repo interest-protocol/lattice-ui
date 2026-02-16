@@ -6,18 +6,12 @@ import { z } from 'zod';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { withTimeout } from '@/lib/api/with-timeout';
+import { bigintString, byteArray } from '@/lib/api/zod-schemas';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { findCreatedObject } from '@/lib/sui/object-changes';
 import { createXSwapSdk } from '@/lib/xswap';
-
-const bigintString = z
-  .string()
-  .regex(/^\d+$/, 'Must be a non-negative integer');
-
-const byteArray = (maxLen: number) =>
-  z.array(z.number().int().min(0).max(255)).max(maxLen);
 
 const proofSchema = z.object({
   signature: byteArray(128),

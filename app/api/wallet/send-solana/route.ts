@@ -132,7 +132,9 @@ export const POST = withAuthPost(
             )
             .send();
 
-          return NextResponse.json({ signature });
+          return NextResponse.json({ signature }, {
+            headers: { 'Cache-Control': 'no-store' },
+          });
         } catch (err) {
           lastError = err;
           if (

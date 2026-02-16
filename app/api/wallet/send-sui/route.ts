@@ -48,7 +48,9 @@ export const POST = withAuthPost(
         suiClient: client,
       });
 
-      return NextResponse.json({ digest: result.digest });
+      return NextResponse.json({ digest: result.digest }, {
+        headers: { 'Cache-Control': 'no-store' },
+      });
     } catch (caught: unknown) {
       if (caught instanceof WalletNotFoundError)
         return errorResponse(caught, caught.message, 404);

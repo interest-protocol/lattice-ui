@@ -2,29 +2,24 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import {
+  OVERLAY_ANIMATE,
+  OVERLAY_EXIT,
+  OVERLAY_TRANSITION,
+  REDUCED_CONTAINER_ANIMATE,
+  REDUCED_CONTAINER_TRANSITION,
+  SPRING_MODAL_POP,
+} from '@/constants/animations';
 import { Z_INDEX } from '@/constants/z-index';
 import { useModal } from '@/hooks/store/use-modal';
 import useEventListener from '@/hooks/ui/use-event-listener';
 import { useSafeHeight } from '@/hooks/ui/use-safe-height';
-
-const OVERLAY_EXIT = { opacity: 0 };
-const OVERLAY_ANIMATE = { opacity: [0, 1] };
-const OVERLAY_TRANSITION = { duration: 0.25 };
 
 const CONTAINER_ANIMATE = {
   y: ['2rem', '0rem'],
   opacity: [0, 1],
   scale: [0.96, 1],
 };
-const CONTAINER_TRANSITION = {
-  type: 'spring' as const,
-  stiffness: 500,
-  damping: 35,
-};
-
-const REDUCED_CONTAINER_ANIMATE = { opacity: [0, 1] };
-const REDUCED_CONTAINER_TRANSITION = { duration: 0.15 };
-
 const ModalProvider: FC = () => {
   const {
     title,
@@ -89,7 +84,7 @@ const ModalProvider: FC = () => {
             transition={
               reducedMotion
                 ? REDUCED_CONTAINER_TRANSITION
-                : CONTAINER_TRANSITION
+                : SPRING_MODAL_POP
             }
             animate={
               reducedMotion ? REDUCED_CONTAINER_ANIMATE : CONTAINER_ANIMATE

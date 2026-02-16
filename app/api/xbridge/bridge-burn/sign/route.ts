@@ -1,6 +1,5 @@
 import { ChainId, WalletKey } from '@interest-protocol/xbridge-sdk';
 import { NextResponse } from 'next/server';
-import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { createRouteLogger } from '@/lib/api/route-logger';
@@ -36,7 +35,12 @@ export const POST = withAuthPost(
       const owner = (capObj.data?.owner as any)?.AddressOwner as
         | string
         | undefined;
-      invariant(owner, 'Could not determine presign cap owner');
+      if (!owner) {
+        return NextResponse.json(
+          { error: 'Could not determine presign cap owner' },
+          { status: 400 }
+        );
+      }
 
       let pollAttempt = 0;
       const presignData = await pollUntil(
@@ -63,10 +67,12 @@ export const POST = withAuthPost(
       const burnRequestData = await xbridge.getBurnRequest({
         requestId: body.requestId,
       });
-      invariant(
-        burnRequestData.message.length === 224,
-        `Invalid native SOL message length: ${burnRequestData.message.length}`
-      );
+      if (burnRequestData.message.length !== 224) {
+        return NextResponse.json(
+          { error: `Invalid native SOL message length: ${burnRequestData.message.length}` },
+          { status: 400 }
+        );
+      }
       log.info('getBurnRequest ok');
 
       log.info('computing centralized signature');

@@ -12,6 +12,7 @@ import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
 import { extractErrorMessage, formatMoney, isNativeToken } from '@/utils';
+import { filterDecimalInput } from '@/utils/decimal-input';
 import WithdrawTokenModal from './withdraw-token-modal';
 
 interface WithdrawViewProps {
@@ -203,18 +204,7 @@ const WithdrawView: FC<WithdrawViewProps> = ({ network }) => {
             inputMode="decimal"
             autoComplete="off"
             value={amount}
-            onChange={(e) => {
-              const filtered = e.target.value.replace(/[^0-9.]/g, '');
-              const firstDot = filtered.indexOf('.');
-              if (firstDot !== -1) {
-                setAmount(
-                  filtered.slice(0, firstDot + 1) +
-                    filtered.slice(firstDot + 1).replace(/\./g, '')
-                );
-              } else {
-                setAmount(filtered);
-              }
-            }}
+            onChange={(e) => setAmount(filterDecimalInput(e.target.value))}
           />
           <button
             type="button"

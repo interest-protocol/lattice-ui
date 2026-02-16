@@ -1,14 +1,8 @@
 import { motion, useReducedMotion } from 'motion/react';
 import type { ChangeEventHandler, FC, PropsWithChildren } from 'react';
 
+import { SPRING_SNAPPY } from '@/constants/animations';
 import type { CheckedButtonProps } from './toggle.types';
-
-const SPRING_TRANSITION = {
-  type: 'spring' as const,
-  stiffness: 500,
-  damping: 30,
-  mass: 0.8,
-};
 
 export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
   onChange,
@@ -78,7 +72,7 @@ export const ToggleButton: FC<PropsWithChildren<CheckedButtonProps>> = ({
             }}
             animate={{ x: active ? '1.3rem' : '0.25rem' }}
             whileTap={reducedMotion ? undefined : { scale: 1.15 }}
-            transition={reducedMotion ? { duration: 0 } : SPRING_TRANSITION}
+            transition={reducedMotion ? { duration: 0 } : SPRING_SNAPPY}
           />
         </div>
       </label>

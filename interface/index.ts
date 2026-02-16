@@ -5,3 +5,8 @@ export interface AssetMetadata {
   iconUrl: string;
   decimals: number;
 }
+
+export interface ValidationResult {
+  isDisabled: boolean;
+  message: string | null;
+}

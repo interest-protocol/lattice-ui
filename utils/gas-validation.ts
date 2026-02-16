@@ -1,12 +1,8 @@
 import { CHAIN_REGISTRY } from '@/constants/chains';
+import type { ValidationResult } from '@/interface';
 import { parseUnits } from '@/lib/bigint-utils';
 import type { CurrencyAmount } from '@/lib/entities/currency-amount';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-
-interface ValidationResult {
-  isDisabled: true;
-  message: string;
-}
 
 const ALPHA_LIMITS: Record<string, { max: number; symbol: string }> = {
   SUI: { max: CHAIN_REGISTRY.sui.alphaMax, symbol: 'SUI' },
@@ -73,17 +69,12 @@ interface SwapInputParams {
   isGasToken?: boolean;
 }
 
-interface SwapValidationResult {
-  isDisabled: boolean;
-  message: string | null;
-}
-
 export const validateSwapInput = ({
   amount,
   token,
   gasBalance,
   isGasToken = true,
-}: SwapInputParams): SwapValidationResult => {
+}: SwapInputParams): ValidationResult => {
   const amountNum = Number.parseFloat(amount) || 0;
 
   if (!amount || amountNum <= 0) {
@@ -113,7 +104,7 @@ export const validateSwapInput = ({
 export const validateSwapAmount = (
   amount: CurrencyAmount,
   gasBalance: CurrencyAmount
-): SwapValidationResult => {
+): ValidationResult => {
   if (amount.isZero() || !amount.isPositive()) {
     return { isDisabled: true, message: 'Enter amount' };
   }

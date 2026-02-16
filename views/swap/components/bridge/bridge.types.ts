@@ -3,6 +3,7 @@ import { SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
 import type { ChainKey } from '@/constants/chains';
 import type { BridgeDirection, BridgeStatus } from '@/hooks/domain/use-bridge';
+import type { ValidationResult } from '@/interface';
 
 export interface BridgeRouteToken {
   symbol: string;
@@ -128,7 +129,4 @@ export interface BridgeProgressStepperProps {
   onRetry: () => void;
 }
 
-export interface ValidationResult {
-  isDisabled: boolean;
-  message: string | null;
-}
+export type { ValidationResult } from '@/interface';

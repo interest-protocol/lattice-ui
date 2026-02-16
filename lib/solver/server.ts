@@ -12,6 +12,18 @@ const authHeaders = (): Record<string, string> => ({
   'x-api-key': SOLVER_API_KEY,
 });
 
+const handleSolverError = async (
+  response: Response,
+  path: string
+): Promise<never> => {
+  const upstream = await response.json().catch(() => null);
+  const message =
+    upstream?.error ??
+    upstream?.message ??
+    `Solver API ${path} failed (${response.status})`;
+  throw Object.assign(new Error(message), { status: response.status });
+};
+
 const solverGet = async <T>(
   path: string,
   { timeoutMs = 10_000 }: SolverRequestOptions = {}
@@ -21,14 +33,7 @@ const solverGet = async <T>(
     signal: AbortSignal.timeout(timeoutMs),
   });
 
-  if (!response.ok) {
-    const upstream = await response.json().catch(() => null);
-    const message =
-      upstream?.error ??
-      upstream?.message ??
-      `Solver API ${path} failed (${response.status})`;
-    throw Object.assign(new Error(message), { status: response.status });
-  }
+  if (!response.ok) await handleSolverError(response, path);
 
   const json = await response.json();
   return json.data as T;
@@ -46,14 +51,7 @@ const solverPost = async <T>(
     body: JSON.stringify(body),
   });
 
-  if (!response.ok) {
-    const upstream = await response.json().catch(() => null);
-    const message =
-      upstream?.error ??
-      upstream?.message ??
-      `Solver API ${path} failed (${response.status})`;
-    throw Object.assign(new Error(message), { status: response.status });
-  }
+  if (!response.ok) await handleSolverError(response, path);
 
   const json = await response.json();
   return json.data as T;

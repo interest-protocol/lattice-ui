@@ -78,7 +78,7 @@ const SwapFormButton: FC = () => {
       className={`w-full py-[18px] px-6 text-white text-base font-semibold rounded-2xl border-none transition-colors duration-200 disabled:cursor-not-allowed focus-ring ${isReady ? 'cta-ready-pulse' : ''}`}
       style={{
         cursor: isDisabled ? 'not-allowed' : 'pointer',
-        opacity: isDisabled ? 0.4 : 1,
+        opacity: isDisabled ? 0.5 : 1,
         background: 'var(--btn-primary-bg)',
         boxShadow: isReady ? 'var(--cta-idle-glow)' : 'none',
       }}

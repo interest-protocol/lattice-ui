@@ -27,7 +27,7 @@ export class Percent extends Fraction {
     const feeRaw = feeTimesBase / this.denominator;
     const feeRounded =
       feeTimesBase % this.denominator > 0n ? feeRaw + 1n : feeRaw;
-    const afterFee = rawValue - feeRounded;
+    const afterFee = rawValue > feeRounded ? rawValue - feeRounded : 0n;
 
     return [
       CurrencyAmount.fromRawAmount(amount.token, afterFee),

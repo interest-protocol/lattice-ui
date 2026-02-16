@@ -2,16 +2,11 @@ import { motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import { WalletSVG } from '@/components/ui/icons';
+import { SPRING_CONTROLLED } from '@/constants/animations';
 
 interface ConnectWalletProps {
   onConnect: () => void;
 }
-
-const HOVER_SPRING = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 25,
-};
 
 const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => {
   const reducedMotion = useReducedMotion();
@@ -31,7 +26,7 @@ const ConnectWallet: FC<ConnectWalletProps> = ({ onConnect }) => {
           : { y: -2, boxShadow: 'var(--btn-primary-hover-shadow)' }
       }
       whileTap={reducedMotion ? undefined : { scale: 0.98 }}
-      transition={reducedMotion ? { duration: 0 } : HOVER_SPRING}
+      transition={reducedMotion ? { duration: 0 } : SPRING_CONTROLLED}
       onClick={onConnect}
     >
       <WalletSVG maxWidth="1rem" maxHeight="1rem" width="100%" />

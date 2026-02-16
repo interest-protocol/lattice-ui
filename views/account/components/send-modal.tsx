@@ -11,6 +11,7 @@ import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { sendTokens } from '@/lib/wallet/client';
 import { extractErrorMessage, formatMoney, isNativeToken } from '@/utils';
+import { filterDecimalInput } from '@/utils/decimal-input';
 
 const SendModal: FC = () => {
   const { authenticated, user } = usePrivy();
@@ -197,18 +198,7 @@ const SendModal: FC = () => {
             type="text"
             inputMode="decimal"
             value={amount}
-            onChange={(e) => {
-              const filtered = e.target.value.replace(/[^0-9.]/g, '');
-              const firstDot = filtered.indexOf('.');
-              if (firstDot !== -1) {
-                setAmount(
-                  filtered.slice(0, firstDot + 1) +
-                    filtered.slice(firstDot + 1).replace(/\./g, '')
-                );
-              } else {
-                setAmount(filtered);
-              }
-            }}
+            onChange={(e) => setAmount(filterDecimalInput(e.target.value))}
           />
           <button
             type="button"
@@ -238,7 +228,7 @@ const SendModal: FC = () => {
         className="w-full p-4 text-white rounded-xl font-semibold text-base text-center border-none transition-colors duration-200 disabled:cursor-wait disabled:opacity-60"
         style={{
           cursor: sending ? 'wait' : 'pointer',
-          opacity: sending ? 0.6 : 1,
+          opacity: sending ? 0.5 : 1,
           background: 'var(--btn-primary-bg)',
           boxShadow: 'var(--btn-primary-shadow)',
         }}

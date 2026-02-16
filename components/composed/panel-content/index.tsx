@@ -37,9 +37,9 @@ const PanelContent: FC<PanelContentProps> = ({ wallet, onLogout }) => {
               />
             ) : null}
           </div>
-          <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
+          <hr aria-hidden="true" className="border-b border-b-surface-border border-t-0 border-x-0" />
           <GasBalancesInline />
-          <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
+          <hr aria-hidden="true" className="border-b border-b-surface-border border-t-0 border-x-0" />
         </>
       ) : null}
       <ThemeSection
@@ -63,7 +63,7 @@ const PanelContent: FC<PanelContentProps> = ({ wallet, onLogout }) => {
       />
       {onLogout ? (
         <>
-          <hr className="border-b border-b-surface-border border-t-0 border-x-0" />
+          <hr aria-hidden="true" className="border-b border-b-surface-border border-t-0 border-x-0" />
           <button
             type="button"
             aria-label="Logout"

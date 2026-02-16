@@ -4,11 +4,11 @@ import { Transaction } from '@mysten/sui/transactions';
 import { fromHex, toHex } from '@mysten/sui/utils';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
-import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
+import { bigintString } from '@/lib/api/zod-schemas';
 import { voteMint } from '@/lib/enclave/server';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
@@ -25,7 +25,7 @@ const schema = z.object({
   sourceToken: z.array(z.number().int().min(0).max(255)).min(1).max(64),
   sourceDecimals: z.number(),
   sourceAddress: z.array(z.number().int().min(0).max(255)).length(32),
-  sourceAmount: z.string().regex(/^\d+$/, 'Must be a non-negative integer'),
+  sourceAmount: bigintString,
   coinType: z.string(),
   depositSignature: z.string(),
 });
@@ -75,10 +75,12 @@ export const POST = withAuthPost(
       requestId = findCreatedObjectId(tx1Result.objectChanges, 'MintRequest');
       mintCapId = findCreatedObjectId(tx1Result.objectChanges, 'MintCap');
 
-      invariant(
-        requestId && mintCapId,
-        'Failed to extract requestId or mintCapId from tx1'
-      );
+      if (!requestId || !mintCapId) {
+        return NextResponse.json(
+          { error: 'Failed to extract requestId or mintCapId from tx1' },
+          { status: 500 }
+        );
+      }
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
 

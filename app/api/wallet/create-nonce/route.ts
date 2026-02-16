@@ -147,6 +147,8 @@ export const POST = withAuthPost(
           return NextResponse.json({
             signature,
             nonceAddress: nonceAddress as string,
+          }, {
+            headers: { 'Cache-Control': 'no-store' },
           });
         } catch (err) {
           lastError = err;

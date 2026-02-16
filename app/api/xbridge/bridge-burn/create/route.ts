@@ -5,7 +5,6 @@ import { address } from '@solana/kit';
 import { fetchMaybeNonce } from '@solana-program/system';
 import bs58 from 'bs58';
 import { NextResponse } from 'next/server';
-import invariant from 'tiny-invariant';
 import { z } from 'zod';
 
 import { WSOL_SUI_TYPE } from '@/constants/bridged-tokens';
@@ -13,6 +12,7 @@ import { NATIVE_SOL_MINT, SOL_DECIMALS } from '@/constants/coins';
 import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
+import { bigintString } from '@/lib/api/zod-schemas';
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
@@ -27,7 +27,7 @@ import { createXBridgeSdk } from '@/lib/xbridge';
 
 const schema = z.object({
   userId: z.string(),
-  sourceAmount: z.string().regex(/^\d+$/, 'Must be a non-negative integer'),
+  sourceAmount: bigintString,
   destinationAddress: z.array(z.number().int().min(0).max(255)).length(32),
   nonceAddress: z
     .string()
@@ -64,7 +64,12 @@ export const POST = withAuthPost(
         rpc,
         address(body.nonceAddress)
       );
-      invariant(nonceResult.exists, 'Nonce account not found');
+      if (!nonceResult.exists) {
+        return NextResponse.json(
+          { error: 'Nonce account not found' },
+          { status: 400 }
+        );
+      }
       const nonceValue = nonceResult.data.blockhash;
       const nonceBytes = bs58.decode(nonceValue as string);
 
@@ -95,10 +100,12 @@ export const POST = withAuthPost(
         destinationWallet: destinationWalletBytes,
         amount: BigInt(body.sourceAmount),
       });
-      invariant(
-        messageBytes.length === 224,
-        `Invalid native SOL message length: ${messageBytes.length}`
-      );
+      if (messageBytes.length !== 224) {
+        return NextResponse.json(
+          { error: `Invalid native SOL message length: ${messageBytes.length}` },
+          { status: 400 }
+        );
+      }
 
       const wireTx = Buffer.concat([
         Buffer.from([2]),
@@ -191,10 +198,12 @@ export const POST = withAuthPost(
         'PresignCap'
       );
 
-      invariant(
-        requestId && burnCapId && presignCapId,
-        'Failed to extract requestId, burnCapId, or presignCapId from tx1'
-      );
+      if (!requestId || !burnCapId || !presignCapId) {
+        return NextResponse.json(
+          { error: 'Failed to extract requestId, burnCapId, or presignCapId from tx1' },
+          { status: 500 }
+        );
+      }
       log.info(
         `Phase 2 Tx1 done requestId=${requestId} burnCapId=${burnCapId} presignCapId=${presignCapId} digest=${tx1Result.digest}`
       );

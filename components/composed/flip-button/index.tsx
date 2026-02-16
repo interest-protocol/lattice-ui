@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import type { FC } from 'react';
 
 import { SwapSVG } from '@/components/ui/icons';
+import { SPRING_FLIP } from '@/constants/animations';
 
 const FLIP_BTN_STYLE = {
   background: 'var(--flip-btn-bg)',
@@ -14,12 +15,6 @@ const FLIP_BTN_HOVER = {
   rotate: 180,
   scale: 1.1,
   boxShadow: 'var(--flip-btn-hover-shadow)',
-};
-
-const FLIP_BTN_SPRING = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 22,
 };
 
 interface FlipButtonProps {
@@ -46,7 +41,7 @@ const FlipButton: FC<FlipButtonProps> = ({ onClick, ariaLabel }) => {
           style={FLIP_BTN_STYLE}
           whileHover={reducedMotion ? undefined : FLIP_BTN_HOVER}
           whileTap={reducedMotion ? undefined : { scale: 0.95 }}
-          transition={reducedMotion ? { duration: 0 } : FLIP_BTN_SPRING}
+          transition={reducedMotion ? { duration: 0 } : SPRING_FLIP}
         >
           <SwapSVG maxHeight="1rem" width="18" height="17" />
         </motion.div>

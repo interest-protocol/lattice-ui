@@ -3,14 +3,9 @@ import type { FC } from 'react';
 
 import PanelContent from '@/components/composed/panel-content';
 import { BarsSVG, CogSVG } from '@/components/ui/icons';
+import { SPRING_COG } from '@/constants/animations';
 import { useModal } from '@/hooks/store/use-modal';
 import { useSidePanel } from '@/hooks/store/use-side-panel';
-
-const COG_SPRING = {
-  type: 'spring' as const,
-  stiffness: 300,
-  damping: 20,
-};
 
 const Settings: FC = () => {
   const reducedMotion = useReducedMotion();
@@ -43,7 +38,7 @@ const Settings: FC = () => {
         <motion.span
           className="inline-block"
           whileHover={reducedMotion ? undefined : { rotate: 90, scale: 1.05 }}
-          transition={reducedMotion ? { duration: 0 } : COG_SPRING}
+          transition={reducedMotion ? { duration: 0 } : SPRING_COG}
         >
           <CogSVG maxWidth="1.5rem" maxHeight="1.5rem" width="100%" />
         </motion.span>

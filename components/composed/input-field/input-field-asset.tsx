@@ -4,16 +4,11 @@ import type { FC } from 'react';
 import { FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 import { ChevronDownSVG } from '@/components/ui/icons';
+import { SPRING_CONTROLLED } from '@/constants/animations';
 import useMetadata from '@/hooks/domain/use-metadata';
 import { useModal } from '@/hooks/store/use-modal';
 import type { InputFieldAssetProps } from './input-field.types';
 import InputFieldModal from './input-field-modal';
-
-const TOKEN_PILL_SPRING = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 25,
-};
 
 const InputFieldAsset: FC<InputFieldAssetProps> = ({
   name,
@@ -82,7 +77,7 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
       aria-label={`Select ${metadata?.[type]?.symbol ?? 'token'}`}
       whileHover={reducedMotion ? undefined : { scale: 1.03 }}
       whileTap={reducedMotion ? undefined : { scale: 0.97 }}
-      transition={reducedMotion ? { duration: 0 } : TOKEN_PILL_SPRING}
+      transition={reducedMotion ? { duration: 0 } : SPRING_CONTROLLED}
     >
       <span className="overflow-hidden rounded-full flex w-7 h-7 min-w-7 items-center justify-center">
         <Image

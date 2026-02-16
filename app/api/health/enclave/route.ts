@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { checkHealth } from '@/lib/api/health-check';
 import { ENCLAVE_URL } from '@/lib/config.server';
 
 export interface EnclaveHealthResponse {
@@ -7,18 +8,6 @@ export interface EnclaveHealthResponse {
 }
 
 export async function GET() {
-  try {
-    const response = await fetch(`${ENCLAVE_URL}/health_check`, {
-      signal: AbortSignal.timeout(5_000),
-    });
-
-    if (!response.ok) {
-      return NextResponse.json({ healthy: false });
-    }
-
-    await response.json();
-    return NextResponse.json({ healthy: true });
-  } catch {
-    return NextResponse.json({ healthy: false });
-  }
+  const healthy = await checkHealth(`${ENCLAVE_URL}/health_check`);
+  return NextResponse.json({ healthy });
 }
