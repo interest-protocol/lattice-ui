@@ -21,8 +21,8 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3(@mysten/sui@1.45.2(typescript@5.9.3))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@interest-protocol/xbridge-sdk':
-        specifier: ^1.2.0
-        version: 1.2.0(@mysten/sui@1.45.2(typescript@5.9.3))
+        specifier: ^1.2.1
+        version: 1.2.1(@mysten/sui@1.45.2(typescript@5.9.3))
       '@interest-protocol/xcore-sdk':
         specifier: ^1.0.4
         version: 1.0.4(@mysten/sui@1.45.2(typescript@5.9.3))
@@ -56,9 +56,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.90.20
         version: 5.90.20(react@19.2.4)
-      '@tanstack/react-query-devtools':
-        specifier: ^5.91.3
-        version: 5.91.3(@tanstack/react-query@5.90.20(react@19.2.4))(react@19.2.4)
       '@vercel/analytics':
         specifier: ^1.6.1
         version: 1.6.1(next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -120,6 +117,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
+      '@tanstack/react-query-devtools':
+        specifier: ^5.91.3
+        version: 5.91.3(@tanstack/react-query@5.90.20(react@19.2.4))(react@19.2.4)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -924,8 +924,8 @@ packages:
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
-  '@interest-protocol/xbridge-sdk@1.2.0':
-    resolution: {integrity: sha512-Mx2pVIkb7BPJnZTJLAz8Sn2EiCgY2DFl0gbFqY2sUv/UUcjNVFlYMY1h5jXKO1E27VmImaMIa5u/IP3qliPlcQ==}
+  '@interest-protocol/xbridge-sdk@1.2.1':
+    resolution: {integrity: sha512-5dZZWjrVw69SNPM3OMp4mchs+QG3ZoQpkOJoeYiWhJSaTiJRov1bDXVy13dr9yk3Bp08A4x8XGqkpLxG7nkYTw==}
     peerDependencies:
       '@mysten/sui': ^1.45.2
 
@@ -5925,7 +5925,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@interest-protocol/xbridge-sdk@1.2.0(@mysten/sui@1.45.2(typescript@5.9.3))':
+  '@interest-protocol/xbridge-sdk@1.2.1(@mysten/sui@1.45.2(typescript@5.9.3))':
     dependencies:
       '@mysten/sui': 1.45.2(typescript@5.9.3)
       tiny-invariant: 1.3.3
