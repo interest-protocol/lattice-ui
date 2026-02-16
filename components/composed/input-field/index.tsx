@@ -3,7 +3,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 
 import { CurrencyAmount, Token } from '@/lib/entities';
 import { parseInputEventToNumberString } from '@/utils';
-import type { InputFieldProps } from './input-field.types';
+import type { InputFieldProps, SwapFormValues } from './input-field.types';
 import InputFieldAsset from './input-field-asset';
 import InputFieldBalance from './input-field-balance';
 import InputFieldBalances from './input-field-balances';
@@ -19,8 +19,9 @@ const InputField: FC<InputFieldProps> = ({
   error,
   variant = 'from',
 }) => {
-  const { register, setValue, getValues, control } = useFormContext();
-  const watchedValue = useWatch({ control, name: `${name}.value` }) as string;
+  const { register, setValue, getValues, control } =
+    useFormContext<SwapFormValues>();
+  const watchedValue = useWatch({ control, name: `${name}.value` });
 
   const errorId = error ? `input-${name}-error` : undefined;
 
@@ -63,7 +64,7 @@ const InputField: FC<InputFieldProps> = ({
             {...register(`${name}.value`, {
               onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
                 const value = parseInputEventToNumberString(event);
-                const tokenType = getValues(`${name}.type`) as string;
+                const tokenType = getValues(`${name}.type`);
                 const token = Token.fromType(tokenType);
                 setValue(`${name}.value`, value);
                 setValue(

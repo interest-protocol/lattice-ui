@@ -6,13 +6,16 @@ import { WalletSVG } from '@/components/ui/icons';
 import useBalances from '@/hooks/domain/use-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 
-import type { InputFieldGenericProps } from './input-field.types';
+import type {
+  InputFieldGenericProps,
+  SwapFormValues,
+} from './input-field.types';
 
 const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
-  const { control, setValue } = useFormContext();
+  const { control, setValue } = useFormContext<SwapFormValues>();
   const { getBalance, isLoading } = useBalances();
 
-  const type = useWatch({ control, name: `${name}.type` }) as string;
+  const type = useWatch({ control, name: `${name}.type` });
   const balance = getBalance(type);
 
   return (
@@ -22,7 +25,7 @@ const InputFieldBalance: FC<InputFieldGenericProps> = ({ name }) => {
       className={`flex gap-1.5 items-center cursor-pointer bg-transparent border-none p-0 text-text-muted text-xs transition-colors duration-150 focus-ring rounded ${name === 'from' ? 'hover:text-accent' : ''}`}
       {...(name === 'from' && {
         onClick: () => {
-          setValue(`${name}.value`, FixedPointMath.toNumber(balance));
+          setValue(`${name}.value`, String(FixedPointMath.toNumber(balance)));
           setValue(`${name}.valueBN`, balance);
         },
       })}

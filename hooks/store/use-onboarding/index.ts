@@ -27,6 +27,7 @@ interface OnboardingState {
   userId: string | null;
   _isProcessing: boolean;
   _retryCount: number;
+  _retryTimerId: ReturnType<typeof setTimeout> | undefined;
 
   checkRegistration: (userId: string) => void;
   registerWallets: () => void;
@@ -45,10 +46,11 @@ const scheduleRetry = (
 ): boolean => {
   if (retryCount >= MAX_RETRY_ATTEMPTS) return false;
   useOnboarding.setState({ _isProcessing: false });
-  retryTimer = setTimeout(
+  const timerId = setTimeout(
     () => fn(retryCount + 1),
     RETRY_DELAYS_MS[retryCount]
   );
+  useOnboarding.setState({ _retryTimerId: timerId });
   return true;
 };
 
@@ -103,12 +105,11 @@ export const isUserCached = (userId: string): boolean => {
   return entry.linked;
 };
 
-let retryTimer: ReturnType<typeof setTimeout> | undefined;
-
 const clearRetryTimer = () => {
-  if (retryTimer !== undefined) {
-    clearTimeout(retryTimer);
-    retryTimer = undefined;
+  const { _retryTimerId } = useOnboarding.getState();
+  if (_retryTimerId !== undefined) {
+    clearTimeout(_retryTimerId);
+    useOnboarding.setState({ _retryTimerId: undefined });
   }
 };
 
@@ -144,15 +145,16 @@ const doCheckRegistration = async (userId: string) => {
           _isProcessing: false,
         });
       } else {
+        const timerId = setTimeout(
+          () => doCheckRegistration(userId),
+          RETRY_DELAYS_MS[0]
+        );
         useOnboarding.setState({
           step: 'checking',
           error: 'Connection lost. Retrying...',
           _isProcessing: false,
+          _retryTimerId: timerId,
         });
-        retryTimer = setTimeout(
-          () => doCheckRegistration(userId),
-          RETRY_DELAYS_MS[0]
-        );
       }
       return;
     }
@@ -217,15 +219,39 @@ const doRegisterWallets = async (retryCount = 0) => {
   });
 
   try {
-    const [suiResult, solanaResult] = await Promise.all([
-      createSuiWallet(userId),
-      createSolanaWallet(userId),
+    const { suiAddress: existingSui, solanaAddress: existingSol } =
+      useOnboarding.getState();
+
+    const [suiSettled, solanaSettled] = await Promise.allSettled([
+      existingSui ? { address: existingSui } : createSuiWallet(userId),
+      existingSol ? { address: existingSol } : createSolanaWallet(userId),
     ]);
 
+    const suiAddr =
+      suiSettled.status === 'fulfilled' ? suiSettled.value.address : null;
+    const solAddr =
+      solanaSettled.status === 'fulfilled' ? solanaSettled.value.address : null;
+
+    // Store whichever wallet(s) succeeded so retries skip them
+    if (suiAddr || solAddr) {
+      useOnboarding.setState({
+        suiAddress: suiAddr ?? existingSui,
+        solanaAddress: solAddr ?? existingSol,
+      });
+    }
+
+    if (suiAddr && solAddr) {
+      useOnboarding.setState({
+        step: 'funding',
+        _isProcessing: false,
+      });
+      return;
+    }
+
+    // At least one wallet failed — retry
+    if (scheduleRetry(retryCount, doRegisterWallets)) return;
     useOnboarding.setState({
-      step: 'funding',
-      suiAddress: suiResult.address,
-      solanaAddress: solanaResult.address,
+      error: 'Wallet setup failed. Please try again.',
       _isProcessing: false,
     });
   } catch {
@@ -303,6 +329,7 @@ const initialState = {
   userId: null as string | null,
   _isProcessing: false,
   _retryCount: 0,
+  _retryTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
 };
 
 export const useOnboarding = create<OnboardingState>((set, get) => ({

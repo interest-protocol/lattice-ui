@@ -4,13 +4,16 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
 import { formatDollars } from '@/utils';
 
-import type { InputFieldGenericProps } from './input-field.types';
+import type {
+  InputFieldGenericProps,
+  SwapFormValues,
+} from './input-field.types';
 
 const InputFieldPrice: FC<InputFieldGenericProps> = ({ name }) => {
-  const { control } = useFormContext();
+  const { control } = useFormContext<SwapFormValues>();
   const { getPrice } = useTokenPrices();
-  const value = useWatch({ control, name: `${name}.value` }) as string;
-  const type = useWatch({ control, name: `${name}.type` }) as string;
+  const value = useWatch({ control, name: `${name}.value` });
+  const type = useWatch({ control, name: `${name}.type` });
 
   const price = getPrice(type);
 

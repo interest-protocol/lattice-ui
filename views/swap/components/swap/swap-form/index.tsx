@@ -11,6 +11,7 @@ import {
 import { useLocalStorage } from 'usehooks-ts';
 import FlipButton from '@/components/composed/flip-button';
 import InputField from '@/components/composed/input-field';
+import type { SwapFormValues } from '@/components/composed/input-field/input-field.types';
 import { DEFAULT_SLIPPAGE_BPS, SLIPPAGE_STORAGE_KEY } from '@/constants';
 import { SOL_TYPE } from '@/constants/coins';
 import useTokenPrices from '@/hooks/blockchain/use-token-prices';
@@ -21,19 +22,6 @@ import { CARD_SPRING, CARD_STYLE } from '@/views/swap/constants';
 
 import SwapDetails from '../swap-details';
 import SwapFormButton from './swap-form-button';
-
-interface SwapFormValues {
-  from: {
-    type: string;
-    value: string;
-    valueBN: bigint;
-  };
-  to: {
-    type: string;
-    value: string;
-    valueBN: bigint;
-  };
-}
 
 const SwapQuoteSync: FC = () => {
   const { control, setValue } = useFormContext<SwapFormValues>();

@@ -2,15 +2,32 @@ import type { ReactNode } from 'react';
 
 import type { AssetMetadata } from '@/interface';
 
-export interface InputFieldGenericProps {
-  name: string;
-  oppositeName?: string;
+export interface SwapFieldGroup {
+  type: string;
+  value: string;
+  valueBN: bigint;
 }
 
-export interface InputFieldAssetProps extends InputFieldGenericProps {
+export interface SwapFormValues {
+  from: SwapFieldGroup;
+  to: SwapFieldGroup;
+}
+
+export type SwapFieldName = 'from' | 'to';
+
+export interface InputFieldGenericProps {
+  name: SwapFieldName;
+  oppositeName?: SwapFieldName;
+}
+
+export interface InputFieldAssetProps {
+  name: SwapFieldName;
+  oppositeName: SwapFieldName;
   types: readonly string[];
 }
-export interface InputFieldModalProps extends InputFieldGenericProps {
+export interface InputFieldModalProps {
+  name: SwapFieldName;
+  oppositeName: SwapFieldName;
   assetList: readonly AssetMetadata[];
 }
 

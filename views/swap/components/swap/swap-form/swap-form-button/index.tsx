@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { type FC, useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 
+import type { SwapFormValues } from '@/components/composed/input-field/input-field.types';
 import Spinner from '@/components/ui/spinner';
 import { SPRING_CONTROLLED } from '@/constants/animations';
 import { CHAIN_REGISTRY } from '@/constants/chains';
@@ -24,11 +25,11 @@ const STATUS_LABELS: Record<SwapStatus, string> = {
 };
 
 const SwapFormButton: FC = () => {
-  const { control } = useFormContext();
-  const fromValue = useWatch({ control, name: 'from.value' }) as string;
-  const fromType = useWatch({ control, name: 'from.type' }) as string;
-  const fromValueBN = useWatch({ control, name: 'from.valueBN' }) as bigint;
-  const toType = useWatch({ control, name: 'to.type' }) as string;
+  const { control } = useFormContext<SwapFormValues>();
+  const fromValue = useWatch({ control, name: 'from.value' });
+  const fromType = useWatch({ control, name: 'from.type' });
+  const fromValueBN = useWatch({ control, name: 'from.valueBN' });
+  const toType = useWatch({ control, name: 'to.type' });
 
   const reducedMotion = useReducedMotion();
   const { suiAmounts, solanaAmounts } = useBalances();

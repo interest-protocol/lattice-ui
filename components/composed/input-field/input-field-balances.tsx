@@ -4,13 +4,16 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import useBalances from '@/hooks/domain/use-balances';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { FACTOR_DIVISORS, PIZZA_ICONS } from './constants';
-import type { InputFieldGenericProps } from './input-field.types';
+import type {
+  InputFieldGenericProps,
+  SwapFormValues,
+} from './input-field.types';
 
 const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
   const { getBalance } = useBalances();
-  const { control, setValue } = useFormContext();
+  const { control, setValue } = useFormContext<SwapFormValues>();
 
-  const type = useWatch({ control, name: `${name}.type` }) as string;
+  const type = useWatch({ control, name: `${name}.type` });
   const balance = getBalance(type);
 
   return (
@@ -27,7 +30,10 @@ const InputFieldBalances: FC<InputFieldGenericProps> = ({ name }) => {
             aria-label={`Use ${factor * 100}% of balance`}
             className="flex gap-1.5 items-center cursor-pointer hover:text-accent hover:bg-accent-wash bg-transparent border-none rounded-md px-1.5 py-0.5 text-text-muted text-xs transition-colors duration-150 focus-ring"
             onClick={() => {
-              setValue(`${name}.value`, FixedPointMath.toNumber(scaled));
+              setValue(
+                `${name}.value`,
+                String(FixedPointMath.toNumber(scaled))
+              );
               setValue(`${name}.valueBN`, scaled);
             }}
           >

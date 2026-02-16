@@ -7,7 +7,7 @@ import { ChevronDownSVG } from '@/components/ui/icons';
 import { SPRING_CONTROLLED } from '@/constants/animations';
 import useMetadata from '@/hooks/domain/use-metadata';
 import { useModal } from '@/hooks/store/use-modal';
-import type { InputFieldAssetProps } from './input-field.types';
+import type { InputFieldAssetProps, SwapFormValues } from './input-field.types';
 import InputFieldModal from './input-field-modal';
 
 const InputFieldAsset: FC<InputFieldAssetProps> = ({
@@ -15,18 +15,15 @@ const InputFieldAsset: FC<InputFieldAssetProps> = ({
   types,
   oppositeName,
 }) => {
-  const form = useFormContext();
+  const form = useFormContext<SwapFormValues>();
   const setContent = useModal((s) => s.setContent);
   const { data: metadata, isLoading } = useMetadata(types);
 
   const reducedMotion = useReducedMotion();
   const { control } = form;
 
-  const type = useWatch({ control, name: `${name}.type` }) as string;
-  const oppositeType = useWatch({
-    control,
-    name: `${oppositeName}.type`,
-  }) as string;
+  const type = useWatch({ control, name: `${name}.type` });
+  const oppositeType = useWatch({ control, name: `${oppositeName}.type` });
 
   const availableTypes = types.filter((item) => item !== oppositeType);
 

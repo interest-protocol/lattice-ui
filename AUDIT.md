@@ -34,15 +34,11 @@ Tests import `bigintAbs`, `bigintDivDown`, and `toFixed` but these functions don
 
 ---
 
-### 2. Race condition in onboarding store
+### ~~2. Race condition in onboarding store~~ RESOLVED
 
-**File:** `hooks/store/use-onboarding/index.ts` (lines 102-108)
+**File:** `hooks/store/use-onboarding/index.ts`
 
-`doCheckRegistration` checks `_isProcessing` but doesn't prevent duplicate concurrent calls in the same tick. Two calls can both pass the guard before either sets `_isProcessing = true`.
-
-**Status:** Partially mitigated — `_isProcessing` is now set synchronously before the first `await` (line 108), but a true mutex would be safer.
-
-**Fix:** Use a synchronous lock pattern — set `_isProcessing` before the first `await`, or use a promise-based mutex.
+**Resolution:** No race condition exists. Zustand's `getState()` and `setState()` are synchronous, and JavaScript is single-threaded. The check-then-set pattern (`if (_isProcessing) return; setState({ _isProcessing: true })`) executes atomically within a single tick — no other code can interleave between the guard check and the state update.
 
 ---
 
@@ -221,18 +217,11 @@ Both `doRegisterWallets` and `doStartLinking` duplicate the retry pattern.
 
 ## P2 — Medium (Type Safety / Error Handling / Consistency)
 
-### 22. Widespread `as string` type assertions (8+ files)
+### ~~22. Widespread `as string` type assertions (8+ files)~~ FIXED
 
-Every `useWatch` call uses `as string` or `as bigint` instead of proper generic typing:
-- `components/composed/input-field/index.tsx:23`
-- `input-field-asset.tsx:30-34`
-- `input-field-balance.tsx:15`
-- `input-field-balances.tsx:13`
-- `input-field-modal.tsx:20-23`
-- `input-field-price.tsx:12-13`
-- `views/swap/components/swap/swap-form/swap-form-button/index.tsx:33-36`
+Every `useWatch` call used `as string` or `as bigint` instead of proper generic typing.
 
-**Fix:** Type the form schema properly with React Hook Form generics so `useWatch` infers types automatically.
+**Resolution:** Created `SwapFormValues` and `SwapFieldName` types in `input-field.types.ts`. All input-field components and `swap-form-button` now use `useFormContext<SwapFormValues>()`, eliminating all `as string` / `as bigint` casts. The `name` prop is typed as `'from' | 'to'` so template literal paths like `` `${name}.value` `` resolve to valid `FieldPath<SwapFormValues>` types. Also caught two latent bugs where `setValue` was passing `number` instead of `string` for the `value` field.
 
 ---
 
@@ -296,15 +285,11 @@ Every `useWatch` call uses `as string` or `as bigint` instead of proper generic 
 
 ---
 
-### 30. Stale onboarding cache logic
+### ~~30. Stale onboarding cache logic~~ RESOLVED
 
-**File:** `hooks/store/use-onboarding/index.ts` (lines 110-145)
+**File:** `hooks/store/use-onboarding/index.ts`
 
-Cache says "linked" but addresses may be `undefined`. The cache fast-path doesn't guarantee address presence, causing incorrect fallthrough to retry logic.
-
-**Status:** Partially improved — `readCachedUser()` helper validates cache entry shape, and fallback logic checks `cached?.suiAddress && cached?.solanaAddress` before trusting.
-
-**Fix:** Validate cached addresses before trusting cache state.
+**Resolution:** The cache is used as a hint, not a trust decision. The fast-path always calls `checkRegistrationApi()` to verify — the cache only avoids falling through to `doRegisterWallets` on first-visit. In the catch block (network failure), `readCachedUser()` validates shape and checks `cached?.suiAddress && cached?.solanaAddress` before trusting cached addresses. This is adequate validation for a client-side optimization cache.
 
 ---
 
@@ -357,23 +342,19 @@ const MESSAGE_OFFSET = SIG_2_OFFSET + SIG_SIZE;
 
 ---
 
-### 36. Duplicate state sources in `use-nonce-account`
+### ~~36. Duplicate state sources in `use-nonce-account`~~ RESOLVED
 
-**File:** `hooks/domain/use-nonce-account/index.ts` (lines 58-64)
+**File:** `hooks/domain/use-nonce-account/index.ts`
 
-Manually syncs both Zustand state and TanStack Query cache. If these drift, there's no single source of truth.
-
-**Fix:** Use TanStack Query as the sole source of truth and derive Zustand state from it, or vice versa.
+**Resolution:** The dual-write pattern (TanStack Query + Zustand) is intentional optimistic updating. TanStack Query is the source of truth for the nonce query, and the `useEffect` syncs to Zustand for the onboarding flow. The `setNonceExists` mutation callback writes both simultaneously for immediate consistency. Splitting to a single source would add render-cycle latency with no correctness benefit.
 
 ---
 
-### 37. Module-level mutable state in onboarding
+### ~~37. Module-level mutable state in onboarding~~ FIXED
 
-**File:** `hooks/store/use-onboarding/index.ts` (lines 93-100)
+**File:** `hooks/store/use-onboarding/index.ts`
 
-Global `retryTimer` variable outside Zustand creates potential memory leaks if cleanup doesn't happen properly.
-
-**Fix:** Store timer ID in Zustand state instead of a module-level variable.
+**Resolution:** Moved `retryTimer` from a module-level `let` variable into Zustand state as `_retryTimerId`. Both `clearRetryTimer()` and `scheduleRetry()` now read/write via `useOnboarding.getState()` / `setState()`. The timer ID is properly cleaned up on `reset()` and `cleanup()`, and is included in `initialState`.
 
 ---
 
@@ -387,23 +368,19 @@ Using `useRef` to cache `getPrice` and `slippageBps`, updated every render, used
 
 ---
 
-### 39. Partial wallet creation failure not handled
+### ~~39. Partial wallet creation failure not handled~~ FIXED
 
-**File:** `hooks/store/use-onboarding/index.ts` (lines 206-231)
+**File:** `hooks/store/use-onboarding/index.ts`
 
-`Promise.all` creates Sui + Solana wallets in parallel. If one succeeds and the other fails, the successful wallet is orphaned with no cleanup.
-
-**Fix:** Handle partial success by storing whichever wallet was created, and only retry the failed one.
+**Resolution:** Replaced `Promise.all` with `Promise.allSettled`. On partial failure, whichever wallet succeeded is stored in state (`suiAddress` / `solanaAddress`). On retry, existing addresses are detected and the corresponding `createWallet` call is skipped (short-circuited with `{ address: existingAddr }`), so only the failed wallet is re-created.
 
 ---
 
-### 40. `CurrencyAmount.multiply` has no overflow check
+### ~~40. `CurrencyAmount.multiply` has no overflow check~~ FIXED
 
-**File:** `lib/entities/currency-amount.ts` (lines 66-69)
+**File:** `lib/entities/currency-amount.ts`
 
-Multiplication by large factors can create unreasonably large amounts silently.
-
-**Fix:** Add a sanity check or document that callers must validate.
+**Resolution:** Added `invariant(factor >= 0n)` to reject negative factors, and `invariant(result <= MAX_SAFE_AMOUNT)` where `MAX_SAFE_AMOUNT = (1n << 128n) - 1n` (u128 max, well beyond any realistic token supply). Throws descriptive errors instead of silently producing oversized amounts.
 
 ---
 
@@ -475,9 +452,11 @@ Mix of `!= null`, optional chaining `?.`, and truthiness checks across component
 
 ---
 
-### 50. Redundant `ALPHA_LIMITS` in gas-validation
+### ~~50. Redundant `ALPHA_LIMITS` in gas-validation~~ FIXED
 
-**File:** `utils/gas-validation.ts` (lines 11-14) — Duplicates data already in `CHAIN_REGISTRY`.
+**File:** `lib/entities/gas-validation.ts`
+
+**Resolution:** Removed the `ALPHA_LIMITS` lookup object. `validateAlphaLimit` now reads `alphaMax` directly from `CHAIN_REGISTRY[chainKey]`, eliminating the redundant data duplication.
 
 ---
 
@@ -508,15 +487,11 @@ Mix of `!= null`, optional chaining `?.`, and truthiness checks across component
 
 ---
 
-### 54. Defensive nullish-coalescing on static data
+### ~~54. Defensive nullish-coalescing on static data~~ FIXED
 
-**File:** `constants/chains/chain-tokens.ts` (lines 28-30, 35-37)
+**File:** `constants/chains/chain-tokens.ts`
 
-```typescript
-name: ASSET_METADATA[SUI_TYPE_ARG]?.name ?? 'Sui',
-```
-
-If `ASSET_METADATA` is properly initialized (it is), these fallbacks mask programming errors instead of surfacing them.
+**Resolution:** Removed all `?.` optional chaining and `?? 'fallback'` null-coalescing from `ASSET_METADATA` and `BRIDGED_ASSET_METADATA` lookups. Since `noUncheckedIndexedAccess` is not enabled in tsconfig and all keys are compile-time constants that exist in the metadata objects, the defensive patterns were unnecessary and would mask programming errors.
 
 ---
 
@@ -574,7 +549,11 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#32** | Hardcoded magic byte offsets | **FIXED** |
 | **#34** | Missing Cache-Control on mutations | **FIXED** |
 | **#35** | Solana message builder validation | **FIXED** |
+| **#36** | Duplicate state in use-nonce-account | **RESOLVED** (intentional optimistic update) |
+| **#37** | Module-level retryTimer | **FIXED** |
 | **#38** | use-swap ref pattern | Acceptable (React Compiler) |
+| **#39** | Partial wallet creation failure | **FIXED** |
+| **#40** | CurrencyAmount.multiply overflow | **FIXED** |
 | **#41** | Unused ZERO_BIG_INT export | **RESOLVED** |
 | **#42** | Misplaced REQUEST_DEADLINE_MS | **FIXED** |
 | **#46** | Trade.rate dead math | **FIXED** |
@@ -596,9 +575,11 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | **#43** | Unnecessary Suspense wrapper | **FIXED** |
 | **#44** | Missing exports in constants/index.ts | **FIXED** |
 | **#45** | Missing provider exports | **FIXED** |
+| **#50** | Redundant ALPHA_LIMITS | **FIXED** |
 | **#51** | use-theme-colors layout thrashing | **FIXED** |
+| **#54** | Defensive nullish on static data | **FIXED** |
 
-**Total: 42 items fully fixed, 2 partially mitigated, 3 resolved (acceptable/intentional)**
+**Total: 50 items fully fixed, 7 resolved (acceptable/intentional)**
 
 ---
 
@@ -614,7 +595,7 @@ The `componentDidCatch` only logs to console. No error reporting service integra
 | ~~**P1**~~ | ~~Consolidate explorer constants (#12)~~ | ~~DRY (106 lines)~~ | **RESOLVED** (won't fix -- complexity exceeds benefit) |
 | ~~**P1**~~ | ~~Extract gas display hook (#17)~~ | ~~DRY (2 files)~~ | **DONE** |
 | ~~**P1**~~ | ~~Extract retry helper (#21)~~ | ~~DRY~~ | **DONE** |
-| **P1** | Type `useWatch` calls properly (#22) | Type safety (8 files) | Medium |
+| ~~**P1**~~ | ~~Type `useWatch` calls properly (#22)~~ | ~~Type safety (8 files)~~ | **DONE** |
 | ~~**P2**~~ | ~~Standardize API route error handling + logging (#23)~~ | ~~Consistency~~ | **DONE** |
 | ~~**P2**~~ | ~~Add CTA spring animations to all primary buttons (#25)~~ | ~~Consistency~~ | **DONE** |
 | ~~**P2**~~ | ~~Add signature verification before on-chain exec (#26)~~ | ~~Security~~ | **DONE** |

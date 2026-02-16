@@ -4,20 +4,16 @@ import type { CurrencyAmount } from '@/lib/entities/currency-amount';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
 import { parseUnits } from '@/utils/bigint';
 
-const ALPHA_LIMITS: Record<string, { max: number; symbol: string }> = {
-  SUI: { max: CHAIN_REGISTRY.sui.alphaMax, symbol: 'SUI' },
-  SOL: { max: CHAIN_REGISTRY.solana.alphaMax, symbol: 'SOL' },
-};
-
 export const validateAlphaLimit = (
   token: 'SUI' | 'SOL',
   amount: number
 ): ValidationResult | null => {
-  const limit = ALPHA_LIMITS[token];
-  if (amount > limit.max) {
+  const chainKey = token === 'SUI' ? 'sui' : 'solana';
+  const max = CHAIN_REGISTRY[chainKey].alphaMax;
+  if (amount > max) {
     return {
       isDisabled: true,
-      message: `Max ${limit.max} ${limit.symbol} (alpha limit)`,
+      message: `Max ${max} ${token} (alpha limit)`,
     };
   }
   return null;

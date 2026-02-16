@@ -6,6 +6,9 @@ import { FixedPointMath } from './fixed-point-math';
 import { type BigIntish, Fraction, toBigInt } from './fraction';
 import type { Token } from './token';
 
+// u256 max — well beyond any realistic token supply
+const MAX_SAFE_AMOUNT = (1n << 128n) - 1n;
+
 export class CurrencyAmount {
   readonly token: Token;
   readonly raw: bigint;
@@ -65,7 +68,13 @@ export class CurrencyAmount {
 
   multiply(other: BigIntish): CurrencyAmount {
     const factor = toBigInt(other);
-    return new CurrencyAmount(this.token, this.raw * factor);
+    invariant(factor >= 0n, 'Cannot multiply by negative factor');
+    const result = this.raw * factor;
+    invariant(
+      result <= MAX_SAFE_AMOUNT,
+      'Multiplication overflow: result exceeds safe amount'
+    );
+    return new CurrencyAmount(this.token, result);
   }
 
   greaterThan(other: CurrencyAmount): boolean {

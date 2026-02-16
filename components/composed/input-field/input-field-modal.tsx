@@ -5,7 +5,7 @@ import { SearchSVG } from '@/components/ui/icons';
 import useBalances from '@/hooks/domain/use-balances';
 import { useModal } from '@/hooks/store/use-modal';
 import { FixedPointMath } from '@/lib/entities/fixed-point-math';
-import type { InputFieldModalProps } from './input-field.types';
+import type { InputFieldModalProps, SwapFormValues } from './input-field.types';
 
 const InputFieldModal: FC<InputFieldModalProps> = ({
   assetList,
@@ -14,13 +14,13 @@ const InputFieldModal: FC<InputFieldModalProps> = ({
 }) => {
   const { getBalance } = useBalances();
   const handleClose = useModal((s) => s.handleClose);
-  const { control, setValue } = useFormContext();
+  const { control, setValue } = useFormContext<SwapFormValues>();
   const [search, setSearch] = useState('');
 
   const selectedTypes = useWatch({
     control,
-    name: [fieldName, oppositeName].map((name) => `${name}.type`),
-  }) as string[];
+    name: [`${fieldName}.type`, `${oppositeName}.type`],
+  });
 
   return (
     <>
