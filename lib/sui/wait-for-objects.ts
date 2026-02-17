@@ -1,23 +1,36 @@
-import type { SuiClient } from '@mysten/sui/client';
+import type { SuiClient, SuiObjectData, SuiObjectDataOptions } from '@mysten/sui/client';
+
+export interface WaitForObjectsOptions {
+  maxRetries?: number;
+  delayMs?: number;
+  objectDataOptions?: SuiObjectDataOptions;
+}
 
 export const waitForObjects = async (
   suiClient: SuiClient,
   objectIds: string[],
-  maxRetries = 8,
-  delayMs = 400,
-): Promise<void> => {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const allExist = objectIds.length === 1
-      ? !!(await suiClient.getObject({ id: objectIds[0], options: { showOwner: true } })).data
-      : (await suiClient.multiGetObjects({ ids: objectIds, options: { showOwner: true } }))
-          .every((obj) => obj.data);
+  options?: WaitForObjectsOptions,
+): Promise<SuiObjectData[]> => {
+  if (objectIds.length === 0) return [];
 
-    if (allExist) return;
+  const { maxRetries = 8, delayMs = 400, objectDataOptions } = options ?? {};
+  const mergedOptions: SuiObjectDataOptions = { showOwner: true, ...objectDataOptions };
+
+  let results: (SuiObjectData | null | undefined)[] = [];
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    results = objectIds.length === 1
+      ? [(await suiClient.getObject({ id: objectIds[0], options: mergedOptions })).data]
+      : (await suiClient.multiGetObjects({ ids: objectIds, options: mergedOptions }))
+          .map((obj) => obj.data);
+
+    if (results.every((d): d is SuiObjectData => !!d)) return results;
 
     if (attempt < maxRetries - 1) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 
-  throw new Error(`Objects not queryable after ${maxRetries} retries: ${objectIds.join(', ')}`);
+  const missing = objectIds.filter((_, i) => !results[i]);
+  throw new Error(`Objects not queryable after ${maxRetries} retries: ${missing.join(', ')}`);
 };
