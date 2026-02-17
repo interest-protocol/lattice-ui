@@ -2,7 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
 
@@ -15,20 +15,40 @@ import PrivyProviderWrapper from '@/components/providers/privy-provider';
 import SidePanelProvider from '@/components/providers/side-panel-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
+import Spinner from '@/components/ui/spinner';
 import { TOAST_DURATION } from '@/constants/toast';
 import { Z_INDEX } from '@/constants/z-index';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
 import useThemeColors from '@/hooks/ui/use-theme-colors';
 import OnboardingView from '@/views/onboarding';
 
+const SUCCESS_DELAY_MS = 1_500;
+
 const OnboardingGate = ({ children }: { children: ReactNode }) => {
   const { user, authenticated, ready } = usePrivy();
   const step = useOnboarding((s) => s.step);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (step !== 'complete') {
+      setShowSuccess(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowSuccess(true), SUCCESS_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [step]);
 
   if (!ready) return null;
   if (!authenticated || !user?.id) return <>{children}</>;
-  if (step === 'complete') return <>{children}</>;
-  if (step === 'checking') return null;
+  if (step === 'complete' && showSuccess) return <>{children}</>;
+
+  if (step === 'checking') {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <Spinner size="1.5rem" className="text-accent" />
+      </div>
+    );
+  }
 
   return <OnboardingView />;
 };

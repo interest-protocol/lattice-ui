@@ -330,7 +330,10 @@ const doStartLinking = async (retryCount = 0) => {
     if (isStale(gen)) return;
 
     if (error instanceof ApiRequestError && error.code === 'INSUFFICIENT_GAS') {
-      useOnboarding.setState({ step: 'funding' });
+      useOnboarding.setState({
+        step: 'funding',
+        error: 'Not enough SUI for gas fees. Please add more and try again.',
+      });
       return;
     }
 

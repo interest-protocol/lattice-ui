@@ -1,6 +1,7 @@
 import type { PrivyClient } from '@privy-io/node';
 
 import type { ChainKey } from '@/constants/chains';
+import { withTimeout } from '@/lib/api/with-timeout';
 
 export class WalletNotFoundError extends Error {
   constructor(chainType: string) {
@@ -84,10 +85,22 @@ export const getOrCreateWallet = async (
 
     // Post-write verification: re-read metadata to detect race condition
     // where another concurrent request stored a different wallet first.
-    const verifyUser = await privy.users()._get(userId);
-    const storedId = verifyUser.custom_metadata?.[walletIdKey(chainType)];
-    if (typeof storedId === 'string' && storedId !== wallet.id) {
-      return privy.wallets().get(storedId);
+    // Wrapped in a timeout so a slow Privy response doesn't hang indefinitely —
+    // the primary metadata write already succeeded, so we can safely return
+    // the wallet if verification times out.
+    try {
+      const verifyUser = await withTimeout(
+        privy.users()._get(userId),
+        10_000,
+        'Post-write verification'
+      );
+      const storedId = verifyUser.custom_metadata?.[walletIdKey(chainType)];
+      if (typeof storedId === 'string' && storedId !== wallet.id) {
+        return privy.wallets().get(storedId);
+      }
+    } catch {
+      // Timeout or transient failure — metadata was already written,
+      // so return the wallet we created.
     }
 
     return wallet;

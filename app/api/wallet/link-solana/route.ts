@@ -9,7 +9,6 @@ import { CHAIN_REGISTRY } from '@/constants/chains';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { withTimeout } from '@/lib/api/with-timeout';
-import { parseUnits } from '@/utils/bigint';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
   authorizationContext,
@@ -22,6 +21,8 @@ import {
   SolanaPubkey,
   SuiAddress,
 } from '@/lib/registry';
+import { parseUnits } from '@/utils/bigint';
+import { pollUntil } from '@/utils/poll-until';
 
 const MIN_GAS_BALANCE = parseUnits(
   String(CHAIN_REGISTRY.sui.minGas),
@@ -38,10 +39,15 @@ export const POST = withAuthPost(
     try {
       const privy = getPrivyClient();
 
-      const [suiWallet, solanaWallet] = await Promise.all([
-        getOrCreateWallet(privy, body.userId, 'sui'),
-        getOrCreateWallet(privy, body.userId, 'solana'),
-      ]);
+      // Sequential creation to prevent metadata clobbering if both wallets
+      // need to be created (each storeWalletMetadata read-merge-write must
+      // complete before the next starts).
+      const suiWallet = await getOrCreateWallet(privy, body.userId, 'sui');
+      const solanaWallet = await getOrCreateWallet(
+        privy,
+        body.userId,
+        'solana'
+      );
 
       const { suiClient, registry } = createRegistrySdk();
 
@@ -136,8 +142,16 @@ export const POST = withAuthPost(
         'Transaction confirmation'
       );
 
+      // Retry post-link verification to handle Sui RPC eventual consistency —
+      // the link may not be indexed immediately after tx confirmation.
       const verifyLinks = await withTimeout(
-        registry.getSolanaForSui({ suiAddress }),
+        pollUntil(
+          async () => {
+            const links = await registry.getSolanaForSui({ suiAddress });
+            return links.length > 0 ? links : null;
+          },
+          { maxPolls: 3, intervalMs: 2_000 }
+        ),
         15_000,
         'Post-link verification'
       );
