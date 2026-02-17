@@ -28,7 +28,7 @@ interface OnboardingState {
   _generation: number;
   _retryCount: number;
   _retryTimerId: ReturnType<typeof setTimeout> | undefined;
-  _fromCache: boolean;
+  _completedViaOnboarding: boolean;
 
   checkRegistration: (userId: string) => void;
   registerWallets: () => void;
@@ -139,7 +139,6 @@ const doCheckRegistration = async (userId: string, retryCount = 0) => {
         step: 'complete',
         suiAddress: cached.suiAddress,
         solanaAddress: cached.solanaAddress,
-        _fromCache: true,
       });
     }
 
@@ -155,7 +154,6 @@ const doCheckRegistration = async (userId: string, retryCount = 0) => {
         return;
       }
       // Cache was stale — need onboarding
-      useOnboarding.setState({ _fromCache: false });
       handleCheckResult(result, userId, gen);
     } catch {
       if (isStale(gen)) return;
@@ -323,6 +321,7 @@ const doStartLinking = async (retryCount = 0) => {
         step: 'complete',
         suiAddress: suiAddr,
         solanaAddress: solAddr,
+        _completedViaOnboarding: true,
       });
       return;
     }
@@ -335,6 +334,7 @@ const doStartLinking = async (retryCount = 0) => {
       step: 'complete',
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
+      _completedViaOnboarding: true,
     });
   } catch (error) {
     if (isStale(gen)) return;
@@ -364,7 +364,7 @@ const initialState = {
   _generation: 0,
   _retryCount: 0,
   _retryTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
-  _fromCache: false,
+  _completedViaOnboarding: false,
 };
 
 export const useOnboarding = create<OnboardingState>((set, get) => ({

@@ -89,6 +89,21 @@ describe('useOnboarding store', () => {
       expect(state.suiAddress).toBe('0xabc');
     });
 
+    it('does not set _completedViaOnboarding when returning registered', async () => {
+      mockCheckRegistration.mockResolvedValue({
+        registered: true,
+        suiAddress: '0xabc',
+        solanaAddress: 'sol123',
+        hasWallets: true,
+      });
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      await waitForState(() => useOnboarding.getState().step === 'complete');
+
+      expect(useOnboarding.getState()._completedViaOnboarding).toBe(false);
+    });
+
     it('transitions to funding when wallets exist but not linked', async () => {
       mockCheckRegistration.mockResolvedValue({
         registered: false,
@@ -308,6 +323,47 @@ describe('useOnboarding store', () => {
       await waitForState(() => useOnboarding.getState().step === 'complete');
 
       expect(useOnboarding.getState().step).toBe('complete');
+    });
+
+    it('sets _completedViaOnboarding on success', async () => {
+      useOnboarding.setState({
+        userId: 'user-1',
+        step: 'funding',
+      });
+
+      mockLinkSolanaWallet.mockResolvedValue({
+        digest: 'tx-123',
+        suiAddress: '0xabc',
+        solanaAddress: 'sol123',
+      });
+
+      expect(useOnboarding.getState()._completedViaOnboarding).toBe(false);
+
+      useOnboarding.getState().startLinking();
+
+      await waitForState(() => useOnboarding.getState().step === 'complete');
+
+      expect(useOnboarding.getState()._completedViaOnboarding).toBe(true);
+    });
+
+    it('sets _completedViaOnboarding on ALREADY_LINKED', async () => {
+      useOnboarding.setState({
+        userId: 'user-1',
+        step: 'funding',
+      });
+
+      mockLinkSolanaWallet.mockResolvedValue({
+        alreadyLinked: true,
+        digest: null,
+        suiAddress: '0xabc',
+        solanaAddress: 'sol123',
+      });
+
+      useOnboarding.getState().startLinking();
+
+      await waitForState(() => useOnboarding.getState().step === 'complete');
+
+      expect(useOnboarding.getState()._completedViaOnboarding).toBe(true);
     });
   });
 

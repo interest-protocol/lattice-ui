@@ -16,6 +16,7 @@ import SidePanelProvider from '@/components/providers/side-panel-provider';
 import ThemeProvider from '@/components/providers/theme-provider';
 import WalletRegistrationProvider from '@/components/providers/wallet-registration-provider';
 import Spinner from '@/components/ui/spinner';
+import { REGISTRATION_CACHE_KEY } from '@/constants/storage-keys';
 import { TOAST_DURATION } from '@/constants/toast';
 import { Z_INDEX } from '@/constants/z-index';
 import { useOnboarding } from '@/hooks/store/use-onboarding';
@@ -27,27 +28,55 @@ const SUCCESS_DELAY_MS = 1_500;
 const OnboardingGate = ({ children }: { children: ReactNode }) => {
   const { user, authenticated, ready } = usePrivy();
   const step = useOnboarding((s) => s.step);
-  const fromCache = useOnboarding((s) => s._fromCache);
+  const completedViaOnboarding = useOnboarding(
+    (s) => s._completedViaOnboarding
+  );
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Read localStorage once on mount to detect returning users
+  const [cachedUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem(REGISTRATION_CACHE_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return Object.values(parsed).some(
+        (v) =>
+          typeof v === 'object' &&
+          v !== null &&
+          'linked' in v &&
+          (v as { linked: boolean }).linked
+      );
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
-    if (step !== 'complete') {
+    if (step !== 'complete' || !completedViaOnboarding) {
       setShowSuccess(false);
       return;
     }
-    // Returning users from cache skip the success animation delay
-    if (fromCache) {
-      setShowSuccess(true);
-      return;
-    }
+    // Only new onboards get the success animation delay
     const timer = setTimeout(() => setShowSuccess(true), SUCCESS_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [step, fromCache]);
+  }, [step, completedViaOnboarding]);
 
-  if (!ready) return null;
+  // Privy loading — show children for cached users, nothing otherwise
+  if (!ready) return cachedUser ? children : null;
+
+  // Not logged in — show children (swap with login button)
   if (!authenticated || !user?.id) return <>{children}</>;
+
+  // Returning registered user — immediate pass-through (no delay, no onboarding UI)
+  if (step === 'complete' && !completedViaOnboarding) return <>{children}</>;
+
+  // New user who just finished onboarding — wait for success animation
   if (step === 'complete' && showSuccess) return <>{children}</>;
 
+  // Cached user still checking — show children (skip spinner, server validates in background)
+  if (step === 'checking' && cachedUser) return <>{children}</>;
+
+  // Non-cached user checking — show spinner
   if (step === 'checking') {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -56,6 +85,7 @@ const OnboardingGate = ({ children }: { children: ReactNode }) => {
     );
   }
 
+  // Active onboarding flow (creating-wallets, funding, linking, confirming, complete+showSuccess pending)
   return <OnboardingView />;
 };
 
