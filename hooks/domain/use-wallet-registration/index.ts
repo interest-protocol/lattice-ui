@@ -15,7 +15,7 @@ const useWalletRegistration = () => {
     if (authenticated && user?.id) {
       wasAuthenticated.current = true;
       useOnboarding.getState().checkRegistration(user.id);
-      return () => useOnboarding.getState().reset();
+      return () => useOnboarding.getState().cleanup();
     }
 
     // User just logged out — clear stale balance queries

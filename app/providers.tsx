@@ -2,9 +2,13 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { SkeletonTheme } from 'react-loading-skeleton';
+
+// useLayoutEffect on client (runs before paint), useEffect on server (avoids SSR warning)
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 import AuthInitializer from '@/components/providers/auth-initializer';
 import ErrorBoundary from '@/components/providers/error-boundary';
@@ -33,23 +37,30 @@ const OnboardingGate = ({ children }: { children: ReactNode }) => {
   );
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Read localStorage once on mount to detect returning users
-  const [cachedUser] = useState(() => {
+  // Read localStorage after hydration to detect returning users.
+  // Must be deferred (not in useState initializer) to avoid hydration mismatch:
+  // server has no localStorage → false, client reads cached value → true.
+  // useIsomorphicLayoutEffect runs before paint on the client, preventing a
+  // visible flash for returning users.
+  const [cachedUser, setCachedUser] = useState(false);
+
+  useIsomorphicLayoutEffect(() => {
     try {
       const raw = localStorage.getItem(REGISTRATION_CACHE_KEY);
-      if (!raw) return false;
+      if (!raw) return;
       const parsed = JSON.parse(raw);
-      return Object.values(parsed).some(
+      const hasCached = Object.values(parsed).some(
         (v) =>
           typeof v === 'object' &&
           v !== null &&
           'linked' in v &&
           (v as { linked: boolean }).linked
       );
+      if (hasCached) setCachedUser(true);
     } catch {
-      return false;
+      // no cached user
     }
-  });
+  }, []);
 
   useEffect(() => {
     if (step !== 'complete' || !completedViaOnboarding) {

@@ -14,7 +14,7 @@ import {
   authorizationContext,
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
-import { getOrCreateWallet } from '@/lib/privy/wallet';
+import { getFirstWallet } from '@/lib/privy/wallet';
 import {
   createRegistrySdk,
   Registry,
@@ -39,15 +39,10 @@ export const POST = withAuthPost(
     try {
       const privy = getPrivyClient();
 
-      // Sequential creation to prevent metadata clobbering if both wallets
-      // need to be created (each storeWalletMetadata read-merge-write must
-      // complete before the next starts).
-      const suiWallet = await getOrCreateWallet(privy, body.userId, 'sui');
-      const solanaWallet = await getOrCreateWallet(
-        privy,
-        body.userId,
-        'solana'
-      );
+      // Wallets must already exist by the time link-solana is called.
+      // Never create wallets here — that's the create-sui/create-solana routes' job.
+      const suiWallet = await getFirstWallet(privy, body.userId, 'sui');
+      const solanaWallet = await getFirstWallet(privy, body.userId, 'solana');
 
       const { suiClient, registry } = createRegistrySdk();
 

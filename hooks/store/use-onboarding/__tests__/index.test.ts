@@ -424,6 +424,31 @@ describe('useOnboarding store', () => {
 
       expect(mockLinkSolanaWallet).toHaveBeenCalledTimes(callsBefore);
     });
+
+    it('bumps generation so in-flight operations become stale', () => {
+      useOnboarding.setState({ _generation: 3 });
+
+      const genBefore = useOnboarding.getState()._generation;
+      useOnboarding.getState().cleanup();
+
+      expect(useOnboarding.getState()._generation).toBe(genBefore + 1);
+    });
+
+    it('preserves wallet addresses unlike reset', () => {
+      useOnboarding.setState({
+        step: 'funding',
+        suiAddress: '0xkeep',
+        solanaAddress: 'solKeep',
+        userId: 'user-1',
+      });
+
+      useOnboarding.getState().cleanup();
+
+      const state = useOnboarding.getState();
+      expect(state.suiAddress).toBe('0xkeep');
+      expect(state.solanaAddress).toBe('solKeep');
+      expect(state.userId).toBe('user-1');
+    });
   });
 
   describe('alreadyLinked with null addresses', () => {
@@ -454,8 +479,56 @@ describe('useOnboarding store', () => {
     });
   });
 
+  describe('double-mount (Strict Mode simulation)', () => {
+    it('only the second mount creates wallets', async () => {
+      let firstCheckResolve: ((v: unknown) => void) | undefined;
+      const firstCheckPromise = new Promise((resolve) => {
+        firstCheckResolve = resolve;
+      });
+
+      // First mount: checkRegistration starts but hasn't resolved yet
+      mockCheckRegistration.mockImplementationOnce(() => firstCheckPromise);
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      // Strict Mode unmount: cleanup() bumps generation
+      useOnboarding.getState().cleanup();
+
+      // Second mount: checkRegistration with fresh generation
+      mockCheckRegistration.mockResolvedValueOnce({
+        registered: false,
+        suiAddress: null,
+        solanaAddress: null,
+        hasWallets: false,
+      });
+
+      mockCreateSuiWallet.mockResolvedValue({ address: '0xsui-final' });
+      mockCreateSolanaWallet.mockResolvedValue({ address: 'sol-final' });
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      await waitForState(() => useOnboarding.getState().step === 'funding');
+
+      // Resolve first call — it should be stale and ignored
+      firstCheckResolve?.({
+        registered: false,
+        suiAddress: null,
+        solanaAddress: null,
+        hasWallets: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Only one set of wallet creations should have run
+      expect(mockCreateSuiWallet).toHaveBeenCalledTimes(1);
+      expect(mockCreateSolanaWallet).toHaveBeenCalledTimes(1);
+      expect(useOnboarding.getState().suiAddress).toBe('0xsui-final');
+      expect(useOnboarding.getState().solanaAddress).toBe('sol-final');
+    });
+  });
+
   describe('reset', () => {
-    it('clears all state', () => {
+    it('clears all state but increments generation', () => {
       useOnboarding.setState({
         step: 'funding',
         error: 'some error',
@@ -472,7 +545,7 @@ describe('useOnboarding store', () => {
       expect(state.error).toBeNull();
       expect(state.suiAddress).toBeNull();
       expect(state.userId).toBeNull();
-      expect(state._generation).toBe(0);
+      expect(state._generation).toBeGreaterThan(5);
       expect(state._retryCount).toBe(0);
     });
   });

@@ -400,10 +400,11 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
 
   reset: () => {
     clearRetryTimer();
-    set(initialState);
+    set({ ...initialState, _generation: get()._generation + 1 });
   },
 
   cleanup: () => {
     clearRetryTimer();
+    set({ _generation: get()._generation + 1 });
   },
 }));
