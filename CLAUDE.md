@@ -638,6 +638,7 @@ Developer-owned wallets don't appear in `user.linkedAccounts`. The hook reads fr
 - **Always test both themes** → dark mode is default but light theme has white/bright backgrounds that reveal contrast issues invisible in dark mode
 - **Always inspect icon/SVG components before using them** → read the source to check for `fillOpacity`, `opacity`, or other attributes that make icons faint. For prominent UI (modals, alerts), use full-opacity fills with accent coloring and a sized container (e.g. 48px circle with `accent-wash` background)
 - **Never put domain-dependent code in `utils/`** → if a file imports from `@/lib/entities`, `@/constants/chains`, or chain SDKs, it belongs in `lib/`. See the `lib/` vs `utils/` Boundary section
+- **Never use a chain-specific client with data from another chain** → Sui tx digests, addresses, and RPC clients are incompatible with Solana tx signatures, addresses, and connections (and vice versa). Always branch on `chainId` before calling chain-specific functions. Use chain adapters (`lib/chain-adapters/`) to abstract chain differences rather than mixing clients directly
 
 ---
 
