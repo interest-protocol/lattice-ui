@@ -28,6 +28,7 @@ interface OnboardingState {
   _generation: number;
   _retryCount: number;
   _retryTimerId: ReturnType<typeof setTimeout> | undefined;
+  _fromCache: boolean;
 
   checkRegistration: (userId: string) => void;
   registerWallets: () => void;
@@ -130,6 +131,18 @@ const doCheckRegistration = async (userId: string, retryCount = 0) => {
   useOnboarding.setState({ userId, error: null });
 
   if (isUserCached(userId)) {
+    const cached = readCachedUser(userId);
+
+    // Optimistic: immediately unblock the gate with cached addresses
+    if (cached?.suiAddress && cached?.solanaAddress) {
+      useOnboarding.setState({
+        step: 'complete',
+        suiAddress: cached.suiAddress,
+        solanaAddress: cached.solanaAddress,
+        _fromCache: true,
+      });
+    }
+
     try {
       const result = await checkRegistrationApi();
       if (isStale(gen)) return;
@@ -141,18 +154,15 @@ const doCheckRegistration = async (userId: string, retryCount = 0) => {
         });
         return;
       }
+      // Cache was stale — need onboarding
+      useOnboarding.setState({ _fromCache: false });
       handleCheckResult(result, userId, gen);
-      return;
     } catch {
       if (isStale(gen)) return;
-      const cached = readCachedUser(userId);
-      if (cached?.suiAddress && cached?.solanaAddress) {
-        useOnboarding.setState({
-          step: 'complete',
-          suiAddress: cached.suiAddress,
-          solanaAddress: cached.solanaAddress,
-        });
-      } else if (
+      // If we already set complete from cache, that's fine — keep using it
+      if (cached?.suiAddress && cached?.solanaAddress) return;
+
+      if (
         !scheduleRetry(retryCount, (n) => doCheckRegistration(userId, n))
       ) {
         useOnboarding.setState({
@@ -165,8 +175,8 @@ const doCheckRegistration = async (userId: string, retryCount = 0) => {
           error: 'Connection lost. Retrying...',
         });
       }
-      return;
     }
+    return;
   }
 
   useOnboarding.setState({ step: 'checking' });
@@ -354,6 +364,7 @@ const initialState = {
   _generation: 0,
   _retryCount: 0,
   _retryTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
+  _fromCache: false,
 };
 
 export const useOnboarding = create<OnboardingState>((set, get) => ({

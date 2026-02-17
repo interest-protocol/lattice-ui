@@ -27,6 +27,7 @@ const SUCCESS_DELAY_MS = 1_500;
 const OnboardingGate = ({ children }: { children: ReactNode }) => {
   const { user, authenticated, ready } = usePrivy();
   const step = useOnboarding((s) => s.step);
+  const fromCache = useOnboarding((s) => s._fromCache);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -34,9 +35,14 @@ const OnboardingGate = ({ children }: { children: ReactNode }) => {
       setShowSuccess(false);
       return;
     }
+    // Returning users from cache skip the success animation delay
+    if (fromCache) {
+      setShowSuccess(true);
+      return;
+    }
     const timer = setTimeout(() => setShowSuccess(true), SUCCESS_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [step]);
+  }, [step, fromCache]);
 
   if (!ready) return null;
   if (!authenticated || !user?.id) return <>{children}</>;
