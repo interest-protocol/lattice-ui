@@ -63,11 +63,24 @@ const solverPost = async <T>(
   return json.data as T;
 };
 
+export interface SolverChainInfo {
+  chainId: number;
+  name: string;
+  rpcUrl: string;
+  nativeToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+  };
+}
+
 export interface SolverMetadata {
   solver: {
     sui: string;
     solana: string;
   };
+  chains: SolverChainInfo[];
+  supportedPairs: { source: number; destination: number }[];
 }
 
 export interface SolverPriceData {

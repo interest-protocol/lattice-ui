@@ -14,6 +14,7 @@ import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { bigintString } from '@/lib/api/zod-schemas';
 import { PRIVY_AUTHORIZATION_KEY } from '@/lib/config.server';
+import { getEnclaveSuiClient } from '@/lib/enclave/sui-client';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
   getWalletPublicKey,
@@ -209,7 +210,8 @@ export const POST = withAuthPost(
         `Phase 2 Tx1 done requestId=${requestId} burnCapId=${burnCapId} presignCapId=${presignCapId} digest=${tx1Result.digest}`
       );
 
-      await suiClient.waitForTransaction({ digest: tx1Result.digest });
+      const enclaveSuiClient = await getEnclaveSuiClient();
+      await enclaveSuiClient.waitForTransaction({ digest: tx1Result.digest });
       await waitForObjects(suiClient, [requestId, burnCapId, presignCapId]);
       log.info('done');
 

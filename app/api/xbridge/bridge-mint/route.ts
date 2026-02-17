@@ -10,6 +10,7 @@ import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { bigintString } from '@/lib/api/zod-schemas';
 import { voteMint } from '@/lib/enclave/server';
+import { getEnclaveSuiClient } from '@/lib/enclave/sui-client';
 import { getPrivyClient } from '@/lib/privy/server';
 import {
   getWalletPublicKey,
@@ -83,7 +84,8 @@ export const POST = withAuthPost(
         );
       }
 
-      await suiClient.waitForTransaction({ digest: tx1Result.digest });
+      const enclaveSuiClient = await getEnclaveSuiClient();
+      await enclaveSuiClient.waitForTransaction({ digest: tx1Result.digest });
       await waitForObjects(suiClient, [requestId, mintCapId]);
 
       const sourceTokenHex = toHex(new Uint8Array(body.sourceToken));

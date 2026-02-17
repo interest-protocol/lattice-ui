@@ -10,6 +10,7 @@ import { bigintString, byteArray, byteArrayUnbounded } from '@/lib/api/zod-schem
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { getSolverSuiClient } from '@/lib/solver/sui-client';
 import { findCreatedObject } from '@/lib/sui/object-changes';
 import { createXSwapSdk } from '@/lib/xswap';
 
@@ -95,6 +96,13 @@ export const POST = withAuthPost(
         }),
         30_000,
         'Transaction sign & execute'
+      );
+
+      const solverSuiClient = await getSolverSuiClient();
+      await withTimeout(
+        solverSuiClient.waitForTransaction({ digest: txResult.digest }),
+        30_000,
+        'Solver RPC transaction confirmation'
       );
 
       const requestObject = findCreatedObject(

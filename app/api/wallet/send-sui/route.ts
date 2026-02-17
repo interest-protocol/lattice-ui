@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
+import { getEnclaveSuiClient } from '@/lib/enclave/sui-client';
 import { getPrivyClient } from '@/lib/privy/server';
 import { signAndExecuteSuiTransaction } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
@@ -47,6 +48,9 @@ export const POST = withAuthPost(
         rawBytes,
         suiClient: client,
       });
+
+      const enclaveSuiClient = await getEnclaveSuiClient();
+      await enclaveSuiClient.waitForTransaction({ digest: result.digest });
 
       return NextResponse.json({ digest: result.digest }, {
         headers: { 'Cache-Control': 'no-store' },

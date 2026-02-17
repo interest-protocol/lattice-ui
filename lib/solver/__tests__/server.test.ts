@@ -36,7 +36,14 @@ describe('solverGet', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('getMetadata unwraps json.data', async () => {
-    const mockData = { solver: { sui: 'addr1', solana: 'addr2' } };
+    const mockData = {
+      solver: { sui: 'addr1', solana: 'addr2' },
+      chains: [
+        { chainId: 3, name: 'Sui', rpcUrl: 'https://rpc.test/sui', nativeToken: { address: '0x2::sui::SUI', decimals: 9, symbol: 'SUI' } },
+        { chainId: 1, name: 'Solana', rpcUrl: 'https://rpc.test/sol', nativeToken: { address: 'So11111111111111111111111111111111111111112', decimals: 9, symbol: 'SOL' } },
+      ],
+      supportedPairs: [{ source: 3, destination: 1 }, { source: 1, destination: 3 }],
+    };
     mockFetch.mockResolvedValue(okJson(mockData));
 
     const result = await getMetadata();

@@ -117,12 +117,14 @@ export const POST = withAuthPost(
 
       const rawBytes = await tx.build({ client: suiClient });
 
-      await signAndExecuteSuiTransaction(privy, {
+      const txResult = await signAndExecuteSuiTransaction(privy, {
         walletId: suiWallet.id,
         rawBytes,
         suiClient,
         publicKey,
       });
+
+      await suiClient.waitForTransaction({ digest: txResult.digest });
 
       return NextResponse.json({
         taken: { xbridge: xbridgeTaken, xswap: xswapTaken },

@@ -1,11 +1,24 @@
 import { get, post } from '@/lib/api/client';
 import { pollUntil } from '@/utils/poll-until';
 
+export interface SolverChainInfo {
+  chainId: number;
+  name: string;
+  rpcUrl: string;
+  nativeToken: {
+    address: string;
+    decimals: number;
+    symbol: string;
+  };
+}
+
 export interface SolverMetadata {
   solver: {
     sui: string;
     solana: string;
   };
+  chains: SolverChainInfo[];
+  supportedPairs: { source: number; destination: number }[];
 }
 
 export interface PriceData {
