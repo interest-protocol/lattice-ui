@@ -1,6 +1,6 @@
 import { SuiAddress } from '@interest-protocol/registry-sdk';
 import type { SuiClient } from '@mysten/sui/client';
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { normalizeStructTag, SUI_TYPE_ARG } from '@mysten/sui/utils';
 
 import { sendSui } from '@/lib/wallet/client';
 
@@ -17,7 +17,7 @@ export const createSuiAdapter = (
   },
 
   encodeNativeToken(): Uint8Array {
-    return new TextEncoder().encode(SUI_TYPE_ARG);
+    return new TextEncoder().encode(normalizeStructTag(SUI_TYPE_ARG));
   },
 
   async deposit(params: DepositParams) {

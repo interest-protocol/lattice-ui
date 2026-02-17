@@ -26,7 +26,7 @@
     "@interest-protocol/registry-sdk": "^1.0.3",
     "@interest-protocol/xbridge-sdk": "^1.2.1",
     "@interest-protocol/xcore-sdk": "^1.0.4",
-    "@interest-protocol/xswap-sdk": "^1.0.5",
+    "@interest-protocol/xswap-sdk": "^1.0.6",
     "@mysten/sui": "^1.45.2",
     "@noble/curves": "^1.9.4",
     "@privy-io/node": "^0.8.0",

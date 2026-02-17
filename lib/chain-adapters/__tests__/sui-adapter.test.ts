@@ -1,4 +1,4 @@
-import { SUI_TYPE_ARG } from '@mysten/sui/utils';
+import { normalizeStructTag, SUI_TYPE_ARG } from '@mysten/sui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/wallet/client', () => ({
@@ -43,7 +43,7 @@ describe('createSuiAdapter', () => {
     it('encodes SUI_TYPE_ARG as UTF-8 bytes', () => {
       const bytes = adapter.encodeNativeToken();
       const decoded = new TextDecoder().decode(bytes);
-      expect(decoded).toBe(SUI_TYPE_ARG);
+      expect(decoded).toBe(normalizeStructTag(SUI_TYPE_ARG));
     });
   });
 
