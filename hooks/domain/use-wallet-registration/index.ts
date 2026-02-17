@@ -10,7 +10,7 @@ const useWalletRegistration = () => {
     if (!ready || !authenticated || !user?.id) return;
 
     useOnboarding.getState().checkRegistration(user.id);
-    return () => useOnboarding.getState().cleanup();
+    return () => useOnboarding.getState().reset();
   }, [ready, authenticated, user?.id]);
 };
 
