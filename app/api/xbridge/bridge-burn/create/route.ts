@@ -23,6 +23,7 @@ import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { getSolanaRpc } from '@/lib/solana/server';
 import { buildNativeSolTransfer } from '@/lib/solana/solana-message';
 import { findCreatedObjectId } from '@/lib/sui/object-changes';
+import { waitForObjects } from '@/lib/sui/wait-for-objects';
 import { createXBridgeSdk } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -209,6 +210,7 @@ export const POST = withAuthPost(
       );
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
+      await waitForObjects(suiClient, [requestId, burnCapId, presignCapId]);
       log.info('done');
 
       return NextResponse.json({

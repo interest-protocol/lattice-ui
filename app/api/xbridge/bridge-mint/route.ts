@@ -17,6 +17,7 @@ import {
 } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
 import { findCreatedObjectId } from '@/lib/sui/object-changes';
+import { waitForObjects } from '@/lib/sui/wait-for-objects';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -83,6 +84,7 @@ export const POST = withAuthPost(
       }
 
       await suiClient.waitForTransaction({ digest: tx1Result.digest });
+      await waitForObjects(suiClient, [requestId, mintCapId]);
 
       const sourceTokenHex = toHex(new Uint8Array(body.sourceToken));
       const sourceAddressHex = toHex(new Uint8Array(body.sourceAddress));

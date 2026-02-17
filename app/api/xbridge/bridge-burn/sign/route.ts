@@ -6,6 +6,7 @@ import { createRouteLogger } from '@/lib/api/route-logger';
 import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { pollUntil } from '@/utils/poll-until';
+import { withRetry } from '@/utils/with-retry';
 import { sign } from '@/lib/solver/server';
 import { createXBridgeSdk } from '@/lib/xbridge';
 
@@ -28,10 +29,11 @@ export const POST = withAuthPost(
     try {
       const { suiClient, xbridge } = createXBridgeSdk();
 
-      const capObj = await suiClient.getObject({
-        id: body.presignCapId,
-        options: { showOwner: true },
-      });
+      const capObj = await withRetry(
+        () => suiClient.getObject({ id: body.presignCapId, options: { showOwner: true } }),
+        3,
+        500,
+      );
       const owner = (capObj.data?.owner as any)?.AddressOwner as
         | string
         | undefined;
@@ -64,9 +66,11 @@ export const POST = withAuthPost(
         `presign resolved for cap ${body.presignCapId} after ${pollAttempt} attempts`
       );
 
-      const burnRequestData = await xbridge.getBurnRequest({
-        requestId: body.requestId,
-      });
+      const burnRequestData = await withRetry(
+        () => xbridge.getBurnRequest({ requestId: body.requestId }),
+        3,
+        500,
+      );
       if (burnRequestData.message.length !== 224) {
         return NextResponse.json(
           { error: `Invalid native SOL message length: ${burnRequestData.message.length}` },

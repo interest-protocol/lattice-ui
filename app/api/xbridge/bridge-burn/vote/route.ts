@@ -6,6 +6,7 @@ import { errorResponse } from '@/lib/api/validate-params';
 import { withAuthPost } from '@/lib/api/with-auth';
 import { voteBurn } from '@/lib/enclave/server';
 import { createXBridgeSdk } from '@/lib/xbridge';
+import { withRetry } from '@/utils/with-retry';
 
 const schema = z.object({
   userId: z.string(),
@@ -22,9 +23,11 @@ export const POST = withAuthPost(
     try {
       const { xbridge } = createXBridgeSdk();
 
-      const burnRequestData = await xbridge.getBurnRequest({
-        requestId: body.requestId,
-      });
+      const burnRequestData = await withRetry(
+        () => xbridge.getBurnRequest({ requestId: body.requestId }),
+        3,
+        500,
+      );
       log.info('getBurnRequest ok');
 
       const result = await voteBurn({

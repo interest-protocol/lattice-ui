@@ -13,6 +13,7 @@ import {
   signAndExecuteSuiTransaction,
 } from '@/lib/privy/signing';
 import { getFirstWallet, WalletNotFoundError } from '@/lib/privy/wallet';
+import { waitForObjects } from '@/lib/sui/wait-for-objects';
 import { createXBridgeSdk, ENCLAVE_OBJECT_ID } from '@/lib/xbridge';
 
 const schema = z.object({
@@ -64,6 +65,7 @@ export const POST = withAuthPost(
         coinType: body.coinType,
       });
 
+      await waitForObjects(suiClient, [body.requestId, body.burnCapId, body.presignCapId]);
       const rawBytes2 = await tx2.build({ client: suiClient });
 
       const tx2Result = await signAndExecuteSuiTransaction(privy, {
