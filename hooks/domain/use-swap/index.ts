@@ -43,6 +43,7 @@ export interface SwapResult {
   depositDigest: string;
   requestId: string;
   destinationTxDigest?: string;
+  destinationTxError?: string;
   toAmount: bigint;
   feeAmount: bigint;
   startedAt: number;
@@ -88,7 +89,13 @@ export const useSwap = () => {
   }, []);
 
   useEffect(() => {
-    if (status !== 'success' || !result || result.destinationTxDigest) return;
+    if (
+      status !== 'success' ||
+      !result ||
+      result.destinationTxDigest ||
+      result.destinationTxError
+    )
+      return;
 
     const controller = new AbortController();
 
@@ -116,17 +123,48 @@ export const useSwap = () => {
             );
             return;
           }
-        } catch {}
+
+          if (reqStatus.status === 'failed') {
+            const errorMsg =
+              reqStatus.errorMessage || 'Destination transfer failed';
+            setResult((prev) =>
+              prev ? { ...prev, destinationTxError: errorMsg } : prev
+            );
+            toasting.error({
+              action: 'Swap',
+              message: errorMsg,
+            });
+            return;
+          }
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') return;
+          console.warn('[swap-poll] status check failed, retrying…', err);
+        }
 
         await new Promise<void>((resolve) =>
           setTimeout(resolve, POLL_INTERVAL_MS)
         );
       }
+
+      // All polls exhausted — timeout
+      setResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              destinationTxError:
+                'Confirmation timed out. Your funds are safe — check the explorer later.',
+            }
+          : prev
+      );
+      toasting.error({
+        action: 'Swap',
+        message: 'Destination confirmation timed out',
+      });
     };
 
     poll().catch(() => {});
     return () => controller.abort();
-  }, [status, result?.requestId, result?.destinationTxDigest]);
+  }, [status, result?.requestId, result?.destinationTxDigest, result?.destinationTxError]);
 
   const getAdapter = (chainKey: ChainKey): ChainAdapter => {
     const adapterFactories: Record<ChainKey, () => ChainAdapter> = {

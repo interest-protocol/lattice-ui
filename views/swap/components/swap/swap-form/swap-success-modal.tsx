@@ -2,7 +2,7 @@
 
 import type { FC } from 'react';
 
-import { CheckSVG, ExternalLinkSVG } from '@/components/ui/icons';
+import { CheckSVG, ErrorSVG, ExternalLinkSVG } from '@/components/ui/icons';
 import Spinner from '@/components/ui/spinner';
 import { CHAIN_REGISTRY } from '@/constants/chains';
 import { useGetChainExplorerUrl } from '@/hooks/domain/use-get-chain-explorer-url';
@@ -56,9 +56,17 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
       <div className="flex justify-center">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--color-success)' }}
+          style={{
+            background: result.destinationTxError
+              ? 'var(--color-error)'
+              : 'var(--color-success)',
+          }}
         >
-          <CheckSVG maxWidth="1.25rem" maxHeight="1.25rem" fill="white" />
+          {result.destinationTxError ? (
+            <ErrorSVG maxWidth="1.25rem" maxHeight="1.25rem" fill="white" />
+          ) : (
+            <CheckSVG maxWidth="1.25rem" maxHeight="1.25rem" fill="white" />
+          )}
         </div>
       </div>
 
@@ -152,6 +160,11 @@ const SwapSuccessModal: FC<SwapSuccessModalProps> = ({ result, onReset }) => {
               {formatAddress(result.destinationTxDigest!, 8, 6)}
               <ExternalLinkSVG maxWidth="0.75rem" maxHeight="0.75rem" />
             </a>
+          ) : result.destinationTxError ? (
+            <span className="flex items-center gap-1.5 text-error text-sm">
+              <ErrorSVG maxWidth="0.75rem" maxHeight="0.75rem" />
+              {result.destinationTxError}
+            </span>
           ) : (
             <span className="flex items-center gap-2 text-text-muted text-sm">
               <Spinner size="0.75rem" />

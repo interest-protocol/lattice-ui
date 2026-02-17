@@ -41,7 +41,7 @@ const SwapFormButton: FC = () => {
     if (status === 'success' && result && shownResultRef.current !== result) {
       shownResultRef.current = result;
       setContent(<SwapSuccessModal result={result} onReset={reset} />, {
-        title: 'Swap Complete',
+        title: result.destinationTxError ? 'Swap Issue' : 'Swap Complete',
       });
     }
   }, [status, result, setContent, reset]);

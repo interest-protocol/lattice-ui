@@ -82,6 +82,14 @@ export const getOrCreateWallet = async (
     }
     if (lastErr) throw lastErr;
 
+    // Post-write verification: re-read metadata to detect race condition
+    // where another concurrent request stored a different wallet first.
+    const verifyUser = await privy.users()._get(userId);
+    const storedId = verifyUser.custom_metadata?.[walletIdKey(chainType)];
+    if (typeof storedId === 'string' && storedId !== wallet.id) {
+      return privy.wallets().get(storedId);
+    }
+
     return wallet;
   })();
 

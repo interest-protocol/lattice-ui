@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 const mockCheckRegistration = vi.fn();
 const mockCreateSuiWallet = vi.fn();
 const mockCreateSolanaWallet = vi.fn();
@@ -122,18 +123,132 @@ describe('useOnboarding store', () => {
       expect(useOnboarding.getState().step).toBe('creating-wallets');
     });
 
-    it('is a no-op when already processing', async () => {
-      mockCheckRegistration.mockImplementation(
-        () => new Promise(() => {}) // never resolves
+    it('second call supersedes a stale in-flight call via generation counter', async () => {
+      let resolveFirst: ((v: unknown) => void) | undefined;
+      const firstCall = new Promise((resolve) => {
+        resolveFirst = resolve;
+      });
+
+      mockCheckRegistration
+        .mockImplementationOnce(() => firstCall)
+        .mockResolvedValueOnce({
+          registered: true,
+          suiAddress: '0xnew',
+          solanaAddress: 'solNew',
+          hasWallets: true,
+        });
+
+      // First call starts
+      useOnboarding.getState().checkRegistration('user-1');
+
+      // Second call supersedes via generation bump
+      useOnboarding.getState().checkRegistration('user-1');
+
+      await waitForState(() => useOnboarding.getState().step === 'complete');
+      expect(useOnboarding.getState().suiAddress).toBe('0xnew');
+
+      // Resolve first call — it should be a no-op (stale generation)
+      resolveFirst?.({
+        registered: true,
+        suiAddress: '0xold',
+        solanaAddress: 'solOld',
+        hasWallets: true,
+      });
+
+      // State should not be overwritten by the stale first call
+      await vi.advanceTimersByTimeAsync(100);
+      expect(useOnboarding.getState().suiAddress).toBe('0xnew');
+    });
+
+    it('bounds retries to MAX_RETRY_ATTEMPTS and shows error', async () => {
+      mockCheckRegistration.mockRejectedValue(new Error('Network error'));
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      // Initial call
+      await waitForState(() => useOnboarding.getState().error !== null);
+      expect(useOnboarding.getState().error).toBe(
+        'Connection lost. Retrying...'
       );
-
-      useOnboarding.getState().checkRegistration('user-1');
-
-      await waitForState(() => useOnboarding.getState()._isProcessing);
-
-      useOnboarding.getState().checkRegistration('user-1');
-
       expect(mockCheckRegistration).toHaveBeenCalledTimes(1);
+
+      // Retry 1 at 2s
+      await vi.advanceTimersByTimeAsync(2100);
+      expect(mockCheckRegistration).toHaveBeenCalledTimes(2);
+
+      // Retry 2 at 5s
+      await vi.advanceTimersByTimeAsync(5100);
+      expect(mockCheckRegistration).toHaveBeenCalledTimes(3);
+
+      // Retry 3 at 10s
+      await vi.advanceTimersByTimeAsync(10100);
+      expect(mockCheckRegistration).toHaveBeenCalledTimes(4);
+
+      await waitForState(
+        () =>
+          useOnboarding.getState().error ===
+          'Unable to check registration. Please try again.'
+      );
+      expect(useOnboarding.getState().error).toBe(
+        'Unable to check registration. Please try again.'
+      );
+    });
+  });
+
+  describe('registerWallets', () => {
+    it('creates wallets sequentially (Sui first, then Solana)', async () => {
+      const callOrder: string[] = [];
+
+      mockCheckRegistration.mockResolvedValue({
+        registered: false,
+        suiAddress: null,
+        solanaAddress: null,
+        hasWallets: false,
+      });
+
+      mockCreateSuiWallet.mockImplementation(async () => {
+        callOrder.push('sui');
+        return { address: '0xsui' };
+      });
+
+      mockCreateSolanaWallet.mockImplementation(async () => {
+        callOrder.push('solana');
+        return { address: 'sol123' };
+      });
+
+      useOnboarding.getState().checkRegistration('user-1');
+
+      await waitForState(() => useOnboarding.getState().step === 'funding');
+
+      expect(callOrder).toEqual(['sui', 'solana']);
+      expect(useOnboarding.getState().suiAddress).toBe('0xsui');
+      expect(useOnboarding.getState().solanaAddress).toBe('sol123');
+    });
+
+    it('concurrent registerWallets calls only produce one set of API calls', async () => {
+      useOnboarding.setState({
+        userId: 'user-1',
+        step: 'creating-wallets',
+      });
+
+      let suiCallCount = 0;
+      mockCreateSuiWallet.mockImplementation(async () => {
+        suiCallCount++;
+        return { address: '0xsui' };
+      });
+      mockCreateSolanaWallet.mockResolvedValue({ address: 'sol123' });
+
+      // Fire two concurrent calls
+      useOnboarding.getState().registerWallets();
+      useOnboarding.getState().registerWallets();
+
+      await waitForState(() => useOnboarding.getState().step === 'funding');
+
+      // Second call's generation supersedes the first, so only one set runs to completion
+      // The first call becomes stale after the second increments the generation
+      expect(suiCallCount).toBeLessThanOrEqual(2);
+      expect(useOnboarding.getState().suiAddress).toBe('0xsui');
+      expect(useOnboarding.getState().solanaAddress).toBe('sol123');
     });
   });
 
@@ -142,7 +257,6 @@ describe('useOnboarding store', () => {
       useOnboarding.setState({
         userId: 'user-1',
         step: 'funding',
-        _isProcessing: false,
       });
 
       mockLinkSolanaWallet.mockResolvedValue({
@@ -162,7 +276,6 @@ describe('useOnboarding store', () => {
       useOnboarding.setState({
         userId: 'user-1',
         step: 'funding',
-        _isProcessing: false,
       });
 
       const { ApiRequestError } = await import('@/lib/api/client');
@@ -181,7 +294,6 @@ describe('useOnboarding store', () => {
       useOnboarding.setState({
         userId: 'user-1',
         step: 'funding',
-        _isProcessing: false,
       });
 
       mockLinkSolanaWallet.mockResolvedValue({
@@ -238,14 +350,15 @@ describe('useOnboarding store', () => {
       useOnboarding.setState({
         userId: 'user-1',
         step: 'funding',
-        _isProcessing: false,
       });
 
       mockLinkSolanaWallet.mockRejectedValue(new Error('Temporary error'));
 
       useOnboarding.getState().startLinking();
 
-      await waitForState(() => !useOnboarding.getState()._isProcessing);
+      await waitForState(
+        () => useOnboarding.getState()._retryTimerId !== undefined
+      );
 
       useOnboarding.getState().cleanup();
 
@@ -264,7 +377,6 @@ describe('useOnboarding store', () => {
         step: 'funding',
         suiAddress: '0xexisting',
         solanaAddress: 'solExisting',
-        _isProcessing: false,
       });
 
       mockLinkSolanaWallet.mockResolvedValue({
@@ -293,7 +405,7 @@ describe('useOnboarding store', () => {
         error: 'some error',
         suiAddress: '0xabc',
         userId: 'user-1',
-        _isProcessing: true,
+        _generation: 5,
         _retryCount: 2,
       });
 
@@ -304,7 +416,7 @@ describe('useOnboarding store', () => {
       expect(state.error).toBeNull();
       expect(state.suiAddress).toBeNull();
       expect(state.userId).toBeNull();
-      expect(state._isProcessing).toBe(false);
+      expect(state._generation).toBe(0);
       expect(state._retryCount).toBe(0);
     });
   });

@@ -25,7 +25,7 @@ interface OnboardingState {
   solanaAddress: string | null;
   nonceAddress: string | null;
   userId: string | null;
-  _isProcessing: boolean;
+  _generation: number;
   _retryCount: number;
   _retryTimerId: ReturnType<typeof setTimeout> | undefined;
 
@@ -45,7 +45,6 @@ const scheduleRetry = (
   fn: (nextCount: number) => void
 ): boolean => {
   if (retryCount >= MAX_RETRY_ATTEMPTS) return false;
-  useOnboarding.setState({ _isProcessing: false });
   const timerId = setTimeout(
     () => fn(retryCount + 1),
     RETRY_DELAYS_MS[retryCount]
@@ -113,47 +112,57 @@ const clearRetryTimer = () => {
   }
 };
 
-const doCheckRegistration = async (userId: string) => {
-  const state = useOnboarding.getState();
-  if (state._isProcessing) return;
+const nextGeneration = (): number => {
+  const next = useOnboarding.getState()._generation + 1;
+  useOnboarding.setState({ _generation: next });
+  return next;
+};
 
+const isStale = (gen: number): boolean =>
+  gen !== useOnboarding.getState()._generation;
+
+const doCheckRegistration = async (userId: string, retryCount = 0) => {
+  const gen = nextGeneration();
+
+  const state = useOnboarding.getState();
   if (state.step === 'complete' && state.userId === userId) return;
 
-  useOnboarding.setState({ _isProcessing: true, userId, error: null });
+  useOnboarding.setState({ userId, error: null });
 
   if (isUserCached(userId)) {
     try {
       const result = await checkRegistrationApi();
+      if (isStale(gen)) return;
       if (result.registered) {
         useOnboarding.setState({
           step: 'complete',
           suiAddress: result.suiAddress,
           solanaAddress: result.solanaAddress,
-          _isProcessing: false,
         });
         return;
       }
-      handleCheckResult(result, userId);
+      handleCheckResult(result, userId, gen);
       return;
     } catch {
+      if (isStale(gen)) return;
       const cached = readCachedUser(userId);
       if (cached?.suiAddress && cached?.solanaAddress) {
         useOnboarding.setState({
           step: 'complete',
           suiAddress: cached.suiAddress,
           solanaAddress: cached.solanaAddress,
-          _isProcessing: false,
+        });
+      } else if (
+        !scheduleRetry(retryCount, (n) => doCheckRegistration(userId, n))
+      ) {
+        useOnboarding.setState({
+          step: 'checking',
+          error: 'Unable to check registration. Please try again.',
         });
       } else {
-        const timerId = setTimeout(
-          () => doCheckRegistration(userId),
-          RETRY_DELAYS_MS[0]
-        );
         useOnboarding.setState({
           step: 'checking',
           error: 'Connection lost. Retrying...',
-          _isProcessing: false,
-          _retryTimerId: timerId,
         });
       }
       return;
@@ -164,22 +173,31 @@ const doCheckRegistration = async (userId: string) => {
 
   try {
     const result = await checkRegistrationApi();
-    handleCheckResult(result, userId);
+    if (isStale(gen)) return;
+    handleCheckResult(result, userId, gen);
   } catch {
-    const timerId = setTimeout(
-      () => doCheckRegistration(userId),
-      RETRY_DELAYS_MS[0]
-    );
-    useOnboarding.setState({
-      step: 'checking',
-      error: 'Connection lost. Retrying...',
-      _isProcessing: false,
-      _retryTimerId: timerId,
-    });
+    if (isStale(gen)) return;
+    if (!scheduleRetry(retryCount, (n) => doCheckRegistration(userId, n))) {
+      useOnboarding.setState({
+        step: 'checking',
+        error: 'Unable to check registration. Please try again.',
+      });
+    } else {
+      useOnboarding.setState({
+        step: 'checking',
+        error: 'Connection lost. Retrying...',
+      });
+    }
   }
 };
 
-const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
+const handleCheckResult = (
+  result: CheckRegistrationResult,
+  userId: string,
+  gen: number
+) => {
+  if (isStale(gen)) return;
+
   if (result.registered) {
     writeCache(userId, {
       suiAddress: result.suiAddress,
@@ -189,7 +207,6 @@ const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
       step: 'complete',
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
-      _isProcessing: false,
     });
     return;
   }
@@ -199,7 +216,6 @@ const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
       step: 'funding',
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
-      _isProcessing: false,
     });
     return;
   }
@@ -210,18 +226,18 @@ const handleCheckResult = (result: CheckRegistrationResult, userId: string) => {
     step: 'creating-wallets',
     suiAddress: result.suiAddress,
     solanaAddress: result.solanaAddress,
-    _isProcessing: false,
   });
 
   doRegisterWallets(0);
 };
 
 const doRegisterWallets = async (retryCount = 0) => {
-  const { userId, _isProcessing } = useOnboarding.getState();
-  if (!userId || _isProcessing) return;
+  const { userId } = useOnboarding.getState();
+  if (!userId) return;
+
+  const gen = nextGeneration();
 
   useOnboarding.setState({
-    _isProcessing: true,
     step: 'creating-wallets',
     error: null,
     _retryCount: retryCount,
@@ -231,31 +247,27 @@ const doRegisterWallets = async (retryCount = 0) => {
     const { suiAddress: stateSui, solanaAddress: stateSol } =
       useOnboarding.getState();
 
-    const [suiSettled, solanaSettled] = await Promise.allSettled([
-      stateSui ? { address: stateSui } : createSuiWallet(userId),
-      stateSol ? { address: stateSol } : createSolanaWallet(userId),
-    ]);
-
-    const suiAddr =
-      suiSettled.status === 'fulfilled' ? suiSettled.value.address : null;
-    const solAddr =
-      solanaSettled.status === 'fulfilled' ? solanaSettled.value.address : null;
-
-    const newSui = suiAddr ?? stateSui;
-    const newSol = solAddr ?? stateSol;
-
-    if (newSui || newSol) {
-      useOnboarding.setState({
-        suiAddress: newSui,
-        solanaAddress: newSol,
-      });
+    // Sequential creation: Sui first, then Solana (prevents metadata clobbering)
+    let newSui = stateSui;
+    if (!newSui) {
+      const result = await createSuiWallet(userId);
+      if (isStale(gen)) return;
+      newSui = result.address;
+      useOnboarding.setState({ suiAddress: newSui });
     }
 
+    let newSol = stateSol;
+    if (!newSol) {
+      const result = await createSolanaWallet(userId);
+      if (isStale(gen)) return;
+      newSol = result.address;
+      useOnboarding.setState({ solanaAddress: newSol });
+    }
+
+    if (isStale(gen)) return;
+
     if (newSui && newSol) {
-      useOnboarding.setState({
-        step: 'funding',
-        _isProcessing: false,
-      });
+      useOnboarding.setState({ step: 'funding' });
       return;
     }
 
@@ -263,23 +275,23 @@ const doRegisterWallets = async (retryCount = 0) => {
     if (scheduleRetry(retryCount, doRegisterWallets)) return;
     useOnboarding.setState({
       error: 'Wallet setup failed. Please try again.',
-      _isProcessing: false,
     });
   } catch {
+    if (isStale(gen)) return;
     if (scheduleRetry(retryCount, doRegisterWallets)) return;
     useOnboarding.setState({
       error: 'Wallet setup failed. Please try again.',
-      _isProcessing: false,
     });
   }
 };
 
 const doStartLinking = async (retryCount = 0) => {
-  const { userId, _isProcessing } = useOnboarding.getState();
-  if (!userId || _isProcessing) return;
+  const { userId } = useOnboarding.getState();
+  if (!userId) return;
+
+  const gen = nextGeneration();
 
   useOnboarding.setState({
-    _isProcessing: true,
     step: 'linking',
     error: null,
     _retryCount: retryCount,
@@ -287,6 +299,8 @@ const doStartLinking = async (retryCount = 0) => {
 
   try {
     const result = await linkSolanaWallet(userId);
+    if (isStale(gen)) return;
+
     useOnboarding.setState({ step: 'confirming' });
 
     if (result.alreadyLinked) {
@@ -299,7 +313,6 @@ const doStartLinking = async (retryCount = 0) => {
         step: 'complete',
         suiAddress: suiAddr,
         solanaAddress: solAddr,
-        _isProcessing: false,
       });
       return;
     }
@@ -312,21 +325,18 @@ const doStartLinking = async (retryCount = 0) => {
       step: 'complete',
       suiAddress: result.suiAddress,
       solanaAddress: result.solanaAddress,
-      _isProcessing: false,
     });
   } catch (error) {
+    if (isStale(gen)) return;
+
     if (error instanceof ApiRequestError && error.code === 'INSUFFICIENT_GAS') {
-      useOnboarding.setState({
-        step: 'funding',
-        _isProcessing: false,
-      });
+      useOnboarding.setState({ step: 'funding' });
       return;
     }
 
     if (scheduleRetry(retryCount, doStartLinking)) return;
     useOnboarding.setState({
       error: 'Wallet linking failed. Please try again.',
-      _isProcessing: false,
     });
   }
 };
@@ -338,7 +348,7 @@ const initialState = {
   solanaAddress: null as string | null,
   nonceAddress: null as string | null,
   userId: null as string | null,
-  _isProcessing: false,
+  _generation: 0,
   _retryCount: 0,
   _retryTimerId: undefined as ReturnType<typeof setTimeout> | undefined,
 };
@@ -347,25 +357,23 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
   ...initialState,
 
   checkRegistration: (userId) => {
+    clearRetryTimer();
     doCheckRegistration(userId);
   },
 
   registerWallets: () => {
     clearRetryTimer();
-    set({ _isProcessing: false });
     doRegisterWallets(0);
   },
 
   startLinking: () => {
     clearRetryTimer();
-    set({ _isProcessing: false });
     doStartLinking(0);
   },
 
   retry: () => {
     clearRetryTimer();
     const { step, userId } = get();
-    set({ _isProcessing: false });
 
     if (step === 'checking' && userId) {
       doCheckRegistration(userId);

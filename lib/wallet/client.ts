@@ -43,10 +43,18 @@ export type LinkSolanaResult =
   | LinkSolanaAlreadyLinkedFromError;
 
 export const createSuiWallet = (userId: string) =>
-  post<CreateWalletResult>('/api/wallet/create-sui', { userId });
+  post<CreateWalletResult>(
+    '/api/wallet/create-sui',
+    { userId },
+    { retries: 0, timeout: 30_000 }
+  );
 
 export const createSolanaWallet = (userId: string) =>
-  post<CreateWalletResult>('/api/wallet/create-solana', { userId });
+  post<CreateWalletResult>(
+    '/api/wallet/create-solana',
+    { userId },
+    { retries: 0, timeout: 30_000 }
+  );
 
 export const sendSui = (params: {
   userId: string;
@@ -63,7 +71,11 @@ export const sendSolana = (params: {
 }) => post<SendSolanaResult>('/api/wallet/send-solana', params);
 
 export const linkSolanaWallet = (userId: string) =>
-  post<LinkSolanaResult>('/api/wallet/link-solana', { userId });
+  post<LinkSolanaResult>(
+    '/api/wallet/link-solana',
+    { userId },
+    { retries: 0, timeout: 60_000 }
+  );
 
 export interface CheckRegistrationResult {
   registered: boolean;
